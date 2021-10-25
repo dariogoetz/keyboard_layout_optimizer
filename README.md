@@ -94,6 +94,11 @@ This file contains configuration parameters for all available evaluation metrics
 ### Layout Optimization Binary
 The `optimize` binary can run without any commandline parameter. In that case, it starts with a collection of random layouts and optimizes from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the Neo2 layout). Optional commandline parameters can be explored with the `-h` option.
 
+Example (starting from Bone layout, fixing "," and "."):
+``` sh
+optimize -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
+```
+
 #### Configuration
 The parameters of the optimization process can be configured in the file `optimization_parameters.yml`. This includes sizes of the population, number of generations to evaluate, mutation and insertion rates, and the selection ratio.
 
