@@ -40,7 +40,7 @@ struct Options {
     #[structopt(long)]
     tops: Option<f64>,
 
-    /// Do not optimize those keys
+    /// Do not optimize those keys (wrt. starting layout or Neo2 layout otherwise)
     #[structopt(short, long)]
     fix: Option<String>,
 
