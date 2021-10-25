@@ -1,0 +1,3 @@
+[submodule "genevo"]
+	path = genevo
+	url = https://github.com/dariogoetz/genevo.git

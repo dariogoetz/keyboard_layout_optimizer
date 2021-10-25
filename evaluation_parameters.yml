@@ -1,0 +1,225 @@
+metrics:
+  key_costs:
+    enabled: true
+    weight: 7.55
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  hand_disbalance:
+    enabled: true
+    weight: 40.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      null: null
+
+  finger_balance:
+    enabled: true
+    weight: 160.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      intended_loads:
+        [Left, Pinky]: 1.0
+        [Left, Ring]: 1.6
+        [Left, Middle]: 2.0
+        [Left, Pointer]: 2.0
+        [Left, Thumb]: 2.0
+        [Right, Thumb]: 2.0
+        [Right, Pointer]: 2.0
+        [Right, Middle]: 2.0
+        [Right, Ring]: 1.6
+        [Right, Pinky]: 1.0
+
+  shortcut_keys:
+    enabled: true
+    weight: 0.35
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      shortcut_chars: cvxz
+      cost: 1.0
+
+  asymmetric_keys:
+    enabled: true
+    weight: 11.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      similar_letters:
+        - ["auo", "äüö"]
+        - ["auo", "äüö"]
+        - ["gbdw", "kptf"]
+        - ["sfdn", "tpbm"]
+
+      null: null
+
+  finger_repeats:
+    enabled: true
+    weight: 750.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      index_finger_factor: 0.9
+      total_weight_threshold: 20
+      critical_fraction: 0.00025
+      factor: 5.0
+
+  finger_repeats_top_bottom:
+    enabled: true
+    weight: 1900.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      index_finger_factor: 0.9
+      total_weight_threshold: 20
+      critical_fraction: 0.00025
+      factor: 5.0
+
+  movement_pattern:
+    enabled: true
+    weight: 50.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      finger_switch_costs:
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 8 }
+        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
+
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 12 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 6 }
+        - { from: [Left, Ring],    to: [Left, Pointer], cost: 0.1 }
+
+        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 9 }
+        - { from: [Left, Middle],  to: [Left, Pointer], cost: 0.6 }
+
+        - { from: [Left, Pointer], to: [Left, Pinky],   cost: 0.1 }
+        - { from: [Left, Pointer], to: [Left, Ring],    cost: 0.3 }
+        - { from: [Left, Pointer], to: [Left, Middle],  cost: 0.9 }
+
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 8 }
+        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
+
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 12 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 6 }
+        - { from: [Right, Ring],    to: [Right, Pointer], cost: 0.1 }
+
+        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 9 }
+        - { from: [Right, Middle],  to: [Right, Pointer], cost: 0.6 }
+
+        - { from: [Right, Pointer], to: [Right, Pinky],   cost: 0.1 }
+        - { from: [Right, Pointer], to: [Right, Ring],    cost: 0.3 }
+        - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
+
+  no_handswitch_after_unbalancing_key:
+    enabled: true
+    weight: 18.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      unbalancing_after_unbalancing: 4
+
+  unbalancing_after_neighboring:
+    enabled: true
+    weight: 200.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  line_changes:
+    enabled: true
+    weight: 5.5
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"]]  # no left pinky!
+      long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
+      count_row_changes_between_hands: false
+
+  asymmetric_bigrams:
+    enabled: true
+    weight: 1.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  manual_bigram_penalty:
+    enabled: true
+    weight: 1000.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      positions:
+        # all combinations with pinky will be added automatically
+        #
+        # symmetric ones will be added automatically
+        [[1, 2], [3, 2]]: 1
+        [[2, 2], [3, 2]]: 0.3
+        [[2, 3], [3, 3]]: 0.2
+        [[1, 1], [3, 3]]: 0.2
+        [[1, 1], [3, 4]]: 0.1
+
+        [[3, 11], [1, 6]]: 0.1
+        [[3, 2], [1, 5]]: 0.1
+
+        [[3, 2], [3, 5]]: -0.01
+        [[3, 8], [3, 11]]: -0.01
+
+  irregularity:
+    enabled: true
+    weight: 8.4
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  no_handswitch_in_trigram:
+    enabled: true
+    weight: 170.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      factor_with_direction_change: 1.0
+      factor_without_direction_change: 0.0
+
+ngrams:
+  unigrams: 1-gramme.arne.txt
+  bigrams: 2-gramme.arne.txt
+  trigrams: 3-gramme.arne.txt
+
+ngram_mapper:
+  split_modifiers:
+    enabled: true
+    same_key_mod_factor: 0.03125
+
+  secondary_bigrams_from_trigrams:
+    enabled: true
+    factor_no_handswitch: 0.7
+    factor_handswitch: 0.8
+
+  increase_common_bigrams:
+    enabled: true
+    critical_fraction: 0.001
+    factor: 2.0
+    total_weight_threshold: 20.0

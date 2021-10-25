@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "keyboard_layout",
+    "layout_evaluation",
+    "layout_optimization",
+    "evolve_keyboard_layout",
+    "genevo",
+]
