@@ -33,13 +33,13 @@ The optimization is implemented using a fork of the [genevo](https://github.com/
 
 ## Installation
 1. Clone the repository including the genevo submodule
-``` sh
-git clone https://github.com/dariogoetz/keyboard_layout_optimizer.git --recurse-submodules
-```
+    ``` sh
+    git clone https://github.com/dariogoetz/keyboard_layout_optimizer.git --recurse-submodules
+    ```
 1. Build the binaries
-``` sh
-cargo build --release
-```
+    ``` sh
+    cargo build --release
+    ```
 
 ## Usage
 ### Specifying Layouts
