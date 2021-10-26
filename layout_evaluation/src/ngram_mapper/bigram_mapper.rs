@@ -1,6 +1,7 @@
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::ngrams::Bigrams;
 use super::BigramIndices;
+
+use crate::ngrams::Bigrams;
 
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 

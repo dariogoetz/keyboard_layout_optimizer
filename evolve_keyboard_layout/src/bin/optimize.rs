@@ -7,10 +7,8 @@ use keyboard_layout::{
 };
 use layout_evaluation::{
     evaluation::{Evaluator, MetricParameters},
-    ngrams::{
-        ngrams::{Bigrams, Trigrams, Unigrams},
-        on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
-    },
+    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    ngrams::{Bigrams, Trigrams, Unigrams},
 };
 use layout_optimization::optimization;
 

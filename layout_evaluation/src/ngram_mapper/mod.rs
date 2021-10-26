@@ -1,7 +1,6 @@
 use keyboard_layout::layout::{LayerKey, Layout};
 
 mod common;
-pub mod ngrams;
 
 pub mod bigram_mapper;
 pub mod trigram_mapper;

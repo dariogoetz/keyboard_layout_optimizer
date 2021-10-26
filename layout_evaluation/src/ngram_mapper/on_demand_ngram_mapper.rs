@@ -1,7 +1,11 @@
-use super::bigram_mapper::{self, SecondaryBigramsFromTrigramsConfig, IncreaseCommonBigramsConfig, OnDemandBigramMapper};
+use super::bigram_mapper::{
+    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper, SecondaryBigramsFromTrigramsConfig,
+};
 use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
-use super::{ngrams, MappedNgrams, NgramMapper};
+use super::{MappedNgrams, NgramMapper};
+
+use crate::ngrams::{Bigrams, Trigrams, Unigrams};
 
 use keyboard_layout::layout::Layout;
 
@@ -31,9 +35,9 @@ pub struct OnDemandNgramMapper {
 
 impl OnDemandNgramMapper {
     pub fn with_ngrams(
-        unigrams: &ngrams::Unigrams,
-        bigrams: &ngrams::Bigrams,
-        trigrams: &ngrams::Trigrams,
+        unigrams: &Unigrams,
+        bigrams: &Bigrams,
+        trigrams: &Trigrams,
         config: NgramMapperConfig,
     ) -> Self {
         Self {
@@ -44,16 +48,13 @@ impl OnDemandNgramMapper {
         }
     }
 
-    pub fn with_corpus(
-        text: &str,
-        config: NgramMapperConfig,
-    ) -> Self {
+    pub fn with_corpus(text: &str, config: NgramMapperConfig) -> Self {
         let unigrams =
-            ngrams::Unigrams::from_str(text).expect("Could not generate unigrams from text.");
+            Unigrams::from_str(text).expect("Could not generate unigrams from text.");
         let bigrams =
-            ngrams::Bigrams::from_str(text).expect("Could not generate bigrams from text.");
+            Bigrams::from_str(text).expect("Could not generate bigrams from text.");
         let trigrams =
-            ngrams::Trigrams::from_str(text).expect("Could not generate trigrams from text.");
+            Trigrams::from_str(text).expect("Could not generate trigrams from text.");
 
         Self {
             unigram_mapper: OnDemandUnigramMapper::new(&unigrams, config.split_modifiers.clone()),
@@ -96,8 +97,10 @@ impl NgramMapper for OnDemandNgramMapper {
             layout,
         );
 
-        bigram_key_indices =
-            bigram_mapper::increase_common_bigrams(&bigram_key_indices, &self.config.increase_common_bigrams);
+        bigram_key_indices = bigram_mapper::increase_common_bigrams(
+            &bigram_key_indices,
+            &self.config.increase_common_bigrams,
+        );
 
         // ensure that each bigram has the correct weight (no duplicates)
         let bigram_key_indices = groupby_sum(&bigram_key_indices);

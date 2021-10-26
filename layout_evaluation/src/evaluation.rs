@@ -1,4 +1,4 @@
-use crate::{metrics::*, ngrams::NgramMapper};
+use crate::{metrics::*, ngram_mapper::NgramMapper};
 use crate::results::{MetricType, MetricResult, MetricResults, NormalizationType};
 
 use keyboard_layout::layout::{LayerKey, Layout};
