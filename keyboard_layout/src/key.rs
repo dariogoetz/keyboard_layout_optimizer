@@ -17,6 +17,22 @@ impl Default for MatrixPosition {
     }
 }
 
+#[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
+pub struct Position(pub f64, pub f64);
+
+impl Position {
+    pub fn distance(&self, other: &Position) -> f64 {
+        (0.5 * (self.0 - other.0).powi(2) + (self.1 - other.1).powi(2))
+            .sqrt()
+    }
+}
+
+impl Default for Position {
+    fn default() -> Self {
+        Position(0.0, 0.0)
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 pub enum Finger {
     Pinky = 4,
@@ -190,6 +206,7 @@ pub struct Key {
     pub hand: Hand,
     pub finger: Finger,
     pub matrix_position: MatrixPosition,
+    pub position: Position,
     pub symmetry_key: usize,
     pub cost: f64,
     pub unbalancing: f64,
