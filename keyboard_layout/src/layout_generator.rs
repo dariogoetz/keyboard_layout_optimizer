@@ -137,7 +137,7 @@ impl NeoLayoutGenerator {
                     .map(|(layer_id, c)| {
                         let layerkey = LayerKey {
                             layer: layer_id,
-                            key: *key,
+                            key: key.clone(),
                             char: *c,
                             modifiers: Vec::new(),
                             is_fixed: *fixed,

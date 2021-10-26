@@ -58,8 +58,8 @@ impl LayoutMetric for AsymmetricKeys {
             let mut v_directions = Vec::new();
 
             for (c1, c2) in chars1.iter().zip(chars2.iter()) {
-                let key1 = layout.get_layerkey_for_char(c1).unwrap().key;
-                let key2 = layout.get_layerkey_for_char(c2).unwrap().key;
+                let key1 = &layout.get_layerkey_for_char(c1).unwrap().key;
+                let key2 = &layout.get_layerkey_for_char(c2).unwrap().key;
 
                 let hand_direction = match (&key1.hand, &key2.hand) {
                     (&Hand::Left, &Hand::Right) => 1,

@@ -1,7 +1,7 @@
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
-#[derive(Clone, Copy, Deserialize, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct Position(pub isize, pub isize);
 
 impl Position {
@@ -17,7 +17,7 @@ impl Default for Position {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 pub enum Finger {
     Pinky = 4,
     Ring = 3,
@@ -38,7 +38,7 @@ impl Finger {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 pub enum Hand {
     Left = 0,
     Right = 1,
@@ -59,7 +59,7 @@ impl Hand {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Debug)]
 pub struct HandMap<T: Copy>([T; 2]);
 
 impl<T: Copy> HandMap<T> {
@@ -184,7 +184,7 @@ impl<T: Copy> HandFingerMap<T> {
     }
 }
 
-#[derive(Default, Clone, Copy, PartialEq, Debug)]
+#[derive(Default, Clone, PartialEq, Debug)]
 pub struct Key {
     pub index: usize,
     pub hand: Hand,
