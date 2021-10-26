@@ -62,9 +62,9 @@ impl TrigramMetric for NoHandswitchInTrigram {
             return Some(0.0)
         }
 
-        let pos1 = k1.key.position;
-        let pos2 = k2.key.position;
-        let pos3 = k3.key.position;
+        let pos1 = k1.key.matrix_position;
+        let pos2 = k2.key.matrix_position;
+        let pos3 = k3.key.matrix_position;
 
         let factor = if (pos1.0 > pos2.0 && pos2.0 < pos3.0) || (pos1.0 < pos2.0 && pos2.0 > pos3.0)
         {

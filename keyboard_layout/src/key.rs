@@ -2,18 +2,18 @@ use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
-pub struct Position(pub isize, pub isize);
+pub struct MatrixPosition(pub isize, pub isize);
 
-impl Position {
-    pub fn distance(&self, other: &Position) -> f64 {
+impl MatrixPosition {
+    pub fn distance(&self, other: &MatrixPosition) -> f64 {
         (0.5 * (self.0 as f64 - other.0 as f64).powi(2) + (self.1 as f64 - other.1 as f64).powi(2))
             .sqrt()
     }
 }
 
-impl Default for Position {
+impl Default for MatrixPosition {
     fn default() -> Self {
-        Position(0, 0)
+        MatrixPosition(0, 0)
     }
 }
 
@@ -189,7 +189,7 @@ pub struct Key {
     pub index: usize,
     pub hand: Hand,
     pub finger: Finger,
-    pub position: Position,
+    pub matrix_position: MatrixPosition,
     pub symmetry_key: usize,
     pub cost: f64,
     pub unbalancing: f64,

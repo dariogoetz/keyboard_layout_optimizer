@@ -72,10 +72,10 @@ impl LayoutMetric for AsymmetricKeys {
                 let finger_direction = key1.finger as isize - key2.finger as isize;
                 finger_directions.push(finger_direction);
 
-                let column_distance = key2.position.0 - key1.position.0;
+                let column_distance = key2.matrix_position.0 - key1.matrix_position.0;
                 column_distances.push(column_distance);
 
-                let v_dist = key2.position.1 - key1.position.1;
+                let v_dist = key2.matrix_position.1 - key1.matrix_position.1;
                 let v_direction = if v_dist == 0 {
                     0
                 } else if v_dist < 0 {

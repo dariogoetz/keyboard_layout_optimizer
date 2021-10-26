@@ -168,7 +168,7 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      positions:
+      matrix_positions:
         # all combinations with pinky will be added automatically
         #
         # symmetric ones will be added automatically

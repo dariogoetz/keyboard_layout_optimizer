@@ -1,4 +1,4 @@
-use crate::key::{Finger, Hand, Key, Position};
+use crate::key::{Finger, Hand, Key, MatrixPosition};
 
 use anyhow::Result;
 use serde::Deserialize;
@@ -12,7 +12,7 @@ pub struct Keyboard {
 
 #[derive(Deserialize, Debug)]
 pub struct KeyboardYAML {
-    positions: Vec<Vec<Position>>,
+    matrix_positions: Vec<Vec<MatrixPosition>>,
     hands: Vec<Vec<Hand>>,
     fingers: Vec<Vec<Finger>>,
     key_costs: Vec<Vec<f64>>,
@@ -29,16 +29,16 @@ impl Keyboard {
             .into_iter()
             .flatten()
             .zip(k.fingers.into_iter().flatten())
-            .zip(k.positions.into_iter().flatten())
+            .zip(k.matrix_positions.into_iter().flatten())
             .zip(k.symmetries.into_iter().flatten())
             .zip(k.key_costs.into_iter().flatten())
             .zip(k.unbalancing_positions.into_iter().flatten())
             .enumerate()
-            .map(|(i, (((((hand, finger), position), symmetry_key), cost), unbalancing))| Key {
+            .map(|(i, (((((hand, finger), matrix_position), symmetry_key), cost), unbalancing))| Key {
                 index: i,
                 hand,
                 finger,
-                position,
+                matrix_position,
                 symmetry_key,
                 cost,
                 unbalancing,

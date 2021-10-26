@@ -7,26 +7,26 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
+    pub matrix_positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct ManualBigramPenalty {
-    positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
+    matrix_positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
 }
 
 impl ManualBigramPenalty {
     pub fn new(params: &Parameters) -> Self {
-        let mut positions = params.positions.clone();
+        let mut matrix_positions = params.matrix_positions.clone();
 
-        positions.extend(params.positions
+        matrix_positions.extend(params.matrix_positions
             .iter()
             .map(|(((x1, y1), (x2, y2)), w)| {
                 (((*x2, *y2), (*x1, *y1)), *w)
             }));
 
         Self {
-            positions,
+            matrix_positions,
         }
     }
 }
@@ -45,12 +45,12 @@ impl BigramMetric for ManualBigramPenalty {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        let x1 = k1.key.position.0 as u8;
-        let y1 = k1.key.position.1 as u8;
-        let x2 = k2.key.position.0 as u8;
-        let y2 = k2.key.position.1 as u8;
+        let x1 = k1.key.matrix_position.0 as u8;
+        let y1 = k1.key.matrix_position.1 as u8;
+        let x2 = k2.key.matrix_position.0 as u8;
+        let y2 = k2.key.matrix_position.1 as u8;
 
-        if let Some(val) = self.positions.get(&((x1, y1), (x2, y2))) {
+        if let Some(val) = self.matrix_positions.get(&((x1, y1), (x2, y2))) {
             return Some(weight * *val)
         }
 

@@ -37,14 +37,14 @@ impl LayoutMetric for ShortcutKeys {
             if let Some(k) = layout.get_layerkey_for_char(c) {
                 // NOTE: In ArneBab's solution, the top rows do not "skip a column" as we do.
                 // Therefore, a special case needs to be made for row 3, in contrast to here.
-                if k.key.position.0 > 5 {
+                if k.key.matrix_position.0 > 5 {
                     cost += self.cost;
                     bad_keys.push(*c);
                     log::trace!(
-                        "Shorcut: {}, Finger: {:>13}, Position: {:.0} (is > 5), Cost: {:>2.2}",
+                        "Shorcut: {}, Finger: {:>13}, Matrix Position: {:.0} (is > 5), Cost: {:>2.2}",
                         c.escape_debug().to_string(),
                         format!("{:?} {:?}", k.key.hand, k.key.finger),
-                        k.key.position.0,
+                        k.key.matrix_position.0,
                         self.cost
                     );
                 }

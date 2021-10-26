@@ -69,8 +69,8 @@ impl BigramMetric for LineChanges {
         let f2 = k2.key.finger;
         let h1 = k1.key.hand;
         let h2 = k2.key.hand;
-        let pos1 = k1.key.position;
-        let pos2 = k2.key.position;
+        let pos1 = k1.key.matrix_position;
+        let pos2 = k2.key.matrix_position;
         let unb1 = k1.key.unbalancing;
         let unb2 = k2.key.unbalancing;
 
