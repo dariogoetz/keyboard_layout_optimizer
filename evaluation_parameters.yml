@@ -19,7 +19,7 @@ metrics:
 
   finger_balance:
     enabled: true
-    weight: 160.0
+    weight: 69.0
     normalization:
       type: fixed
       value: 1.0
@@ -163,7 +163,7 @@ metrics:
 
   manual_bigram_penalty:
     enabled: true
-    weight: 1000.0
+    weight: 710.0
     normalization:
       type: weight_found
       value: 1.0
@@ -195,7 +195,7 @@ metrics:
 
   no_handswitch_in_trigram:
     enabled: true
-    weight: 170.0
+    weight: 465.0
     normalization:
       type: weight_found
       value: 1.0
