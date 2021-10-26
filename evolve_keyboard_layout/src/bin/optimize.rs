@@ -113,7 +113,7 @@ fn main() {
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
     let layout_generator =
-        NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard.clone());
+        NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
     let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
         "Could not read evaluation yaml file {}",
@@ -122,13 +122,10 @@ fn main() {
 
     let text = match options.text {
         Some(txt) => Some(txt),
-        None => match options.corpus {
-            Some(corpus_file) => Some(
-                std::fs::read_to_string(&corpus_file)
-                    .expect(&format!("Could not read corpus file from {}.", corpus_file,)),
-            ),
-            None => None,
-        },
+        None => options.corpus.map(|corpus_file| {
+            std::fs::read_to_string(&corpus_file)
+                .expect(&format!("Could not read corpus file from {}.", corpus_file,))
+        }),
     };
 
     let mut ngram_mapper_config = eval_params.ngram_mapper.clone();
@@ -182,18 +179,18 @@ fn main() {
     let layout = optimization::optimize(
         &optimization_params,
         &evaluator,
-        &options
+        options
             .start_layout_str
             .as_ref()
             .unwrap_or(&"xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j".to_string()),
         &layout_generator,
-        &options.fix.unwrap_or("".to_string()),
+        &options.fix.unwrap_or_else(|| "".to_string()),
         options.start_layout_str.is_some(),
     );
 
     let metric_costs = evaluator.evaluate_layout(&layout);
     let mut cost = 0.0;
-    for mc in metric_costs.iter().filter(|mc| mc.metric_costs.len() > 0) {
+    for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
         cost += mc.total_cost();
         mc.print();
     }
