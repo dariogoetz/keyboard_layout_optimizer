@@ -184,11 +184,13 @@ impl<T: Copy> HandFingerMap<T> {
     }
 }
 
-#[derive(Default, Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub struct Key {
     pub index: usize,
     pub hand: Hand,
     pub finger: Finger,
     pub position: Position,
     pub symmetry_key: usize,
+    pub cost: f64,
+    pub unbalancing: f64,
 }

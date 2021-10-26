@@ -6,8 +6,6 @@ use serde::Deserialize;
 #[derive(Clone, Debug)]
 pub struct Keyboard {
     pub keys: Vec<Key>,
-    pub key_costs: Vec<f64>,
-    pub unbalancing_positions: Vec<f64>,
     pub plot_template: String,
     pub plot_template_short: String,
 }
@@ -33,20 +31,22 @@ impl Keyboard {
             .zip(k.fingers.into_iter().flatten())
             .zip(k.positions.into_iter().flatten())
             .zip(k.symmetries.into_iter().flatten())
+            .zip(k.key_costs.into_iter().flatten())
+            .zip(k.unbalancing_positions.into_iter().flatten())
             .enumerate()
-            .map(|(i, (((hand, finger), position), symmetry_key))| Key {
+            .map(|(i, (((((hand, finger), position), symmetry_key), cost), unbalancing))| Key {
                 index: i,
                 hand,
                 finger,
                 position,
                 symmetry_key,
+                cost,
+                unbalancing,
             })
             .collect();
 
         Keyboard {
             keys,
-            key_costs: k.key_costs.into_iter().flatten().collect(),
-            unbalancing_positions: k.unbalancing_positions.into_iter().flatten().collect(),
             plot_template: k.plot_template,
             plot_template_short: k.plot_template_short,
         }

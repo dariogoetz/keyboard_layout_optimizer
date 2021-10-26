@@ -154,7 +154,7 @@ impl NeoLayoutGenerator {
             })
             .collect();
 
-        let key_map = Self::gen_key_map(&layerkeys, &self.layer_costs, &self.keyboard);
+        let key_map = Self::gen_key_map(&layerkeys, &self.layer_costs);
 
         self.modifiers
             .iter()
@@ -194,16 +194,16 @@ impl NeoLayoutGenerator {
         })
     }
 
-    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64], keyboard: &Keyboard) -> FxHashMap<char, LayerKeyIndex> {
+    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
         let mut m = FxHashMap::default();
         layerkeys.iter().for_each(|layerkey| {
             let entry = m.entry(layerkey.char).or_insert(layerkey.index);
             let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
-            let entry_cost = keyboard.key_costs[entry_layerkey.key.index]
+            let entry_cost = entry_layerkey.key.cost
                 + 3.0 * layer_costs[entry_layerkey.layer];
             let new_cost =
-                keyboard.key_costs[layerkey.key.index] + 3.0 * layer_costs[layerkey.layer];
+                layerkey.key.cost + 3.0 * layer_costs[layerkey.layer];
 
             // if key already exists use the representation with lowest key cost
             // if costs are identical, use lowest layer

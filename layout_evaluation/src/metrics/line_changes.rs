@@ -53,7 +53,7 @@ impl BigramMetric for LineChanges {
         k2: &LayerKey,
         weight: f64,
         _total_weight: f64,
-        layout: &Layout,
+        _layout: &Layout,
     ) -> Option<f64> {
 
         // NOTE: ArneBab's solution only excludes the spacebar. Here, all thumb keys are excluded, in particular one M4 modifier.
@@ -71,8 +71,8 @@ impl BigramMetric for LineChanges {
         let h2 = k2.key.hand;
         let pos1 = k1.key.position;
         let pos2 = k2.key.position;
-        let unb1 = layout.keyboard.unbalancing_positions[k1.key.index];
-        let unb2 = layout.keyboard.unbalancing_positions[k2.key.index];
+        let unb1 = k1.key.unbalancing;
+        let unb2 = k2.key.unbalancing;
 
         let mut num_rows = (pos1.1 - pos2.1).abs() as f64;
         let upwards: bool = pos2.1 < pos1.1;

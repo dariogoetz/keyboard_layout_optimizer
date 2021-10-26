@@ -29,10 +29,10 @@ impl BigramMetric for UnbalancingAfterNeighboring {
         k2: &LayerKey,
         weight: f64,
         _total_weight: f64,
-        layout: &Layout,
+        _layout: &Layout,
     ) -> Option<f64> {
-        let unb1 = layout.keyboard.unbalancing_positions[k1.key.index];
-        let unb2 = layout.keyboard.unbalancing_positions[k2.key.index];
+        let unb1 = k1.key.unbalancing;
+        let unb2 = k2.key.unbalancing;
 
         if (unb1 <= 0.0 && unb2 <= 0.0)
             || k1.key.hand != k2.key.hand

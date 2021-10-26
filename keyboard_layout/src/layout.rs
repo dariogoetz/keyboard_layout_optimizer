@@ -7,7 +7,7 @@ use string_template::Template;
 
 pub type LayerKeyIndex = u16;
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
     pub layer: usize,
     pub key: Key,

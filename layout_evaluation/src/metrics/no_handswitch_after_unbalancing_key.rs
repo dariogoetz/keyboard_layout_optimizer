@@ -35,9 +35,9 @@ impl BigramMetric for NoHandSwitchAfterUnbalancingKey {
         k2: &LayerKey,
         weight: f64,
         _total_weight: f64,
-        layout: &Layout,
+        _layout: &Layout,
     ) -> Option<f64> {
-        let unb1 = layout.keyboard.unbalancing_positions[k1.key.index];
+        let unb1 = k1.key.unbalancing;
 
         if unb1 <= 0.0  // first key is not unbalancing -> no cost
             || k1.key.hand != k2.key.hand  // or handswitch occurred -> no cost
@@ -51,7 +51,7 @@ impl BigramMetric for NoHandSwitchAfterUnbalancingKey {
         let mut cost = unb1;
 
         // if the other key is unbalancing too and on the other side of the hand, put extra cost on it depending on their distance
-        let unb2 = layout.keyboard.unbalancing_positions[k2.key.index];
+        let unb2 = k2.key.unbalancing;
         let dx = (k1.key.position.0 - k2.key.position.0).abs() as f64;
         let dy = (k1.key.position.1 - k2.key.position.1).abs() as f64;
         if unb2 > 0.0 && dx > 3.0 {
