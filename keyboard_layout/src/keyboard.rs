@@ -18,8 +18,9 @@ pub struct Keyboard {
     plot_template_short: String,
 }
 
-/// A collection of all relevant properties for the keys on a keyboard.
-/// Corresponds to a YAML configuration file.
+/// A collection of all relevant properties for the keys on a keyboard (configuration).
+///
+/// Corresponds to (parts of) a YAML configuration file.
 #[derive(Deserialize, Debug)]
 pub struct KeyboardYAML {
     matrix_positions: Vec<Vec<MatrixPosition>>,
@@ -34,7 +35,7 @@ pub struct KeyboardYAML {
 }
 
 impl Keyboard {
-    /// Generate a Keyboard from a `KeyboardYAML` object
+    /// Generate a `Keyboard` from a `KeyboardYAML` object
     pub fn from_yaml_object(k: KeyboardYAML) -> Self {
         let keys = k
             .hands
@@ -69,14 +70,14 @@ impl Keyboard {
         }
     }
 
-    /// Generate a Keyboard from a YAML file
+    /// Generate a `Keyboard` from a YAML file
     pub fn from_yaml_file(filename: &str) -> Result<Self> {
         let f = std::fs::File::open(filename)?;
         let k: KeyboardYAML = serde_yaml::from_reader(f)?;
         Ok(Keyboard::from_yaml_object(k))
     }
 
-    /// Generate a Keyboard from a YAML string
+    /// Generate a `Keyboard` from a YAML string
     pub fn from_yaml_str(data: &str) -> Result<Self> {
         let k: KeyboardYAML = serde_yaml::from_str(data)?;
         Ok(Keyboard::from_yaml_object(k))
