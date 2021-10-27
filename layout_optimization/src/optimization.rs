@@ -316,7 +316,7 @@ pub fn optimize(
                         println!(
                             "New best:\n{}\n\n{}\n{}",
                             pm.generate(&best_solution.solution.genome).as_text(),
-                            pm.generate(&best_solution.solution.genome).plot_short(),
+                            pm.generate(&best_solution.solution.genome).plot_compact(),
                             pm.generate(&best_solution.solution.genome).plot()
                         );
                         all_time_best = Some((
@@ -356,7 +356,8 @@ pub fn optimize(
                 );
                 println!(
                     "\n{}",
-                    pm.generate(&all_time_best.as_ref().unwrap().1).plot_short()
+                    pm.generate(&all_time_best.as_ref().unwrap().1)
+                        .plot_compact()
                 );
                 println!(
                     "\n{}",

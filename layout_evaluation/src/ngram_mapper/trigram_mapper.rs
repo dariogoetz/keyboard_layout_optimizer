@@ -1,5 +1,5 @@
-use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use super::TrigramIndices;
+use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Trigrams;
 

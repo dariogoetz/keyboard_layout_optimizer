@@ -1,6 +1,6 @@
 use crate::key::Hand;
-use crate::keyboard::Keyboard;
-use crate::layout::{KeyIndex, LayerKey, LayerKeyIndex, Layout};
+use crate::keyboard::{KeyIndex, Keyboard};
+use crate::layout::{LayerKey, LayerKeyIndex, Layout};
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
@@ -157,19 +157,13 @@ impl NeoLayoutGenerator {
 
         let key_map = Self::gen_key_map(&layerkeys, &self.layer_costs);
 
-        self.modifiers
-            .iter()
-            .for_each(|mods_per_hand| {
-                mods_per_hand
-                    .values()
-                    .for_each(|mods| {
-                        mods
-                            .iter()
-                            .for_each(|mc| {
-                                layerkeys[*key_map.get(mc).unwrap() as usize].is_modifier = true;
-                            });
-                    });
+        self.modifiers.iter().for_each(|mods_per_hand| {
+            mods_per_hand.values().for_each(|mods| {
+                mods.iter().for_each(|mc| {
+                    layerkeys[*key_map.get(mc).unwrap() as usize].is_modifier = true;
+                });
             });
+        });
 
         layerkeys.iter_mut().for_each(|k| {
             let mods = if k.layer > 0 && k.layer < self.modifiers.len() + 1 {
@@ -202,22 +196,21 @@ impl NeoLayoutGenerator {
             .enumerate()
             .for_each(|(layerkey_index, layerkey)| {
                 let new_layerkey_index = layerkey_index as LayerKeyIndex;
-            let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
-            let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
+                let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
+                let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
-            let entry_cost = entry_layerkey.key.cost
-                + 3.0 * layer_costs[entry_layerkey.layer];
-            let new_cost =
-                layerkey.key.cost + 3.0 * layer_costs[layerkey.layer];
+                let entry_cost = entry_layerkey.key.cost + 3.0 * layer_costs[entry_layerkey.layer];
+                let new_cost = layerkey.key.cost + 3.0 * layer_costs[layerkey.layer];
 
-            // if key already exists use the representation with lowest key cost
-            // if costs are identical, use lowest layer
-            if new_cost < entry_cost
-                || ((new_cost - entry_cost).abs() < 0.01 && layerkey.layer < entry_layerkey.layer)
-            {
-                m.insert(layerkey.symbol, new_layerkey_index);
-            }
-        });
+                // if key already exists use the representation with lowest key cost
+                // if costs are identical, use lowest layer
+                if new_cost < entry_cost
+                    || ((new_cost - entry_cost).abs() < 0.01
+                        && layerkey.layer < entry_layerkey.layer)
+                {
+                    m.insert(layerkey.symbol, new_layerkey_index);
+                }
+            });
 
         m
     }

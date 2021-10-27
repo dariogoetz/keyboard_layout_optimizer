@@ -10,10 +10,10 @@ pub mod finger_balance;
 pub mod finger_repeats;
 pub mod finger_repeats_top_bottom;
 pub mod line_changes;
+pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod unbalancing_after_neighboring;
-pub mod manual_bigram_penalty;
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;

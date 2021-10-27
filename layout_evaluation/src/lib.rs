@@ -1,8 +1,8 @@
 pub mod evaluation;
-pub mod results;
 pub mod metrics;
-pub mod ngrams;
 pub mod ngram_mapper;
+pub mod ngrams;
+pub mod results;
 
 #[cfg(test)]
 mod tests {

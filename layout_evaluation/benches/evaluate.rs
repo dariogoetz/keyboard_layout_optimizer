@@ -10,11 +10,10 @@ use layout_evaluation::{
     },
 };
 
-use criterion::{criterion_group, criterion_main, Criterion};
-use std::sync::Arc;
 use anyhow::Result;
+use criterion::{criterion_group, criterion_main, Criterion};
 use serde::Deserialize;
-
+use std::sync::Arc;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct NGramConfig {
@@ -52,9 +51,7 @@ impl LayoutConfig {
     }
 }
 
-
 pub fn evaluate_bench(c: &mut Criterion) {
-
     let layout_config = LayoutConfig::from_yaml(&"../standard_keyboard.yml").expect(&format!(
         "Could not load config file 'standard_keyboard.yml'",
     ));
@@ -63,32 +60,30 @@ pub fn evaluate_bench(c: &mut Criterion) {
 
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
-    let eval_params = EvaluationParameters::from_yaml(&"../evaluation_parameters.yml").expect(&format!(
-        "Could not read evaluation yaml file 'evaluation_parameters.yml'"
-    ));
+    let eval_params = EvaluationParameters::from_yaml(&"../evaluation_parameters.yml").expect(
+        &format!("Could not read evaluation yaml file 'evaluation_parameters.yml'"),
+    );
 
     log::info!("Reading unigram file: '{}'", &eval_params.corpus.unigrams);
-    let unigrams = Unigrams::from_file(&("../".to_string() + &eval_params.corpus.unigrams)).expect(&format!(
-        "Could not read 1-gramme file from '{}'.",
-        &eval_params.corpus.unigrams
-    ));
+    let unigrams =
+        Unigrams::from_file(&("../".to_string() + &eval_params.corpus.unigrams)).expect(&format!(
+            "Could not read 1-gramme file from '{}'.",
+            &eval_params.corpus.unigrams
+        ));
     log::info!("Reading bigram file: '{}'", &eval_params.corpus.bigrams);
-    let bigrams = Bigrams::from_file(&("../".to_string() + &eval_params.corpus.bigrams)).expect(&format!(
-        "Could not read 2-gramme file from '{}'.",
-        &eval_params.corpus.bigrams
-    ));
+    let bigrams =
+        Bigrams::from_file(&("../".to_string() + &eval_params.corpus.bigrams)).expect(&format!(
+            "Could not read 2-gramme file from '{}'.",
+            &eval_params.corpus.bigrams
+        ));
     log::info!("Reading trigram file: '{}'", &eval_params.corpus.trigrams);
-    let trigrams = Trigrams::from_file(&("../".to_string() + &eval_params.corpus.trigrams)).expect(&format!(
-        "Could not read 3-gramme file from '{}'.",
-        &eval_params.corpus.trigrams
-    ));
+    let trigrams =
+        Trigrams::from_file(&("../".to_string() + &eval_params.corpus.trigrams)).expect(&format!(
+            "Could not read 3-gramme file from '{}'.",
+            &eval_params.corpus.trigrams
+        ));
 
-    let ngram_provider = OnDemandNgramMapper::with_ngrams(
-        &unigrams,
-        &bigrams,
-        &trigrams,
-        true
-    );
+    let ngram_provider = OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, true);
 
     let evaluator =
         Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics);
@@ -101,7 +96,6 @@ pub fn evaluate_bench(c: &mut Criterion) {
         }
     };
     c.bench_function("evaluate", |b| {
-
         b.iter(|| evaluator.evaluate_layout(&layout));
     });
 }

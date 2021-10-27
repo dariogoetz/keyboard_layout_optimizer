@@ -1,6 +1,9 @@
 use super::BigramMetric;
 
-use keyboard_layout::{key::Finger, layout::{LayerKey, Layout}};
+use keyboard_layout::{
+    key::Finger,
+    layout::{LayerKey, Layout},
+};
 
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
@@ -19,15 +22,14 @@ impl ManualBigramPenalty {
     pub fn new(params: &Parameters) -> Self {
         let mut matrix_positions = params.matrix_positions.clone();
 
-        matrix_positions.extend(params.matrix_positions
-            .iter()
-            .map(|(((x1, y1), (x2, y2)), w)| {
-                (((*x2, *y2), (*x1, *y1)), *w)
-            }));
+        matrix_positions.extend(
+            params
+                .matrix_positions
+                .iter()
+                .map(|(((x1, y1), (x2, y2)), w)| (((*x2, *y2), (*x1, *y1)), *w)),
+        );
 
-        Self {
-            matrix_positions,
-        }
+        Self { matrix_positions }
     }
 }
 
@@ -51,14 +53,17 @@ impl BigramMetric for ManualBigramPenalty {
         let y2 = k2.key.matrix_position.1 as u8;
 
         if let Some(val) = self.matrix_positions.get(&((x1, y1), (x2, y2))) {
-            return Some(weight * *val)
+            return Some(weight * *val);
         }
 
         // add manual penalty for all pinky finger repeats
-        if k1.key.hand == k2.key.hand && k1.key.finger == Finger::Pinky && k2.key.finger == Finger::Pinky {
-            return Some(weight)
+        if k1.key.hand == k2.key.hand
+            && k1.key.finger == Finger::Pinky
+            && k2.key.finger == Finger::Pinky
+        {
+            return Some(weight);
         }
 
-        return Some(0.0)
+        return Some(0.0);
     }
 }

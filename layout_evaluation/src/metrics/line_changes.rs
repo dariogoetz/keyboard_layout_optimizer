@@ -55,7 +55,6 @@ impl BigramMetric for LineChanges {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-
         // NOTE: ArneBab's solution only excludes the spacebar. Here, all thumb keys are excluded, in particular one M4 modifier.
 
         if k1.key.finger == Finger::Thumb || k2.key.finger == Finger::Thumb {

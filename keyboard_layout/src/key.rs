@@ -1,7 +1,7 @@
 //! This module provides structs for representing physical properties of keys in a keyboard
 
-use std::collections::HashMap;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 /// Row and columnar location on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
@@ -28,8 +28,7 @@ pub struct Position(pub f64, pub f64);
 impl Position {
     /// Euclidean distance to another row/column position on the keyboard
     pub fn distance(&self, other: &Position) -> f64 {
-        (0.5 * (self.0 - other.0).powi(2) + (self.1 - other.1).powi(2))
-            .sqrt()
+        (0.5 * (self.0 - other.0).powi(2) + (self.1 - other.1).powi(2)).sqrt()
     }
 }
 

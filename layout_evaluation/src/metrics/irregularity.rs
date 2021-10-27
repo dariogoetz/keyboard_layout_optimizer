@@ -63,7 +63,6 @@ impl TrigramMetric for Irregularity {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());

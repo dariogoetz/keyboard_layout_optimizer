@@ -1,7 +1,7 @@
 use super::TrigramMetric;
 
-use keyboard_layout::layout::{LayerKey, Layout};
 use keyboard_layout::key::Finger;
+use keyboard_layout::layout::{LayerKey, Layout};
 
 use serde::Deserialize;
 
@@ -50,16 +50,19 @@ impl TrigramMetric for NoHandswitchInTrigram {
 
         // exclude modifiers (see ArneBab's explanation in comments for layout_cost.py:_trigram_key_tables)
         if k1.is_fixed || k2.is_fixed || k3.is_fixed {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         // should be already done with "not fixed"
-        if k1.key.finger == Finger::Thumb || k2.key.finger == Finger::Thumb || k3.key.finger == Finger::Thumb {
-            return Some(0.0)
+        if k1.key.finger == Finger::Thumb
+            || k2.key.finger == Finger::Thumb
+            || k3.key.finger == Finger::Thumb
+        {
+            return Some(0.0);
         }
 
         if hand1 != hand2 || hand2 != hand3 {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         let pos1 = k1.key.matrix_position;

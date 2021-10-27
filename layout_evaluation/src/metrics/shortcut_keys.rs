@@ -52,7 +52,10 @@ impl LayoutMetric for ShortcutKeys {
         });
 
         let message = if !bad_keys.is_empty() {
-            Some(format!("Bad shortcuts: {}", bad_keys.iter().collect::<String>()))
+            Some(format!(
+                "Bad shortcuts: {}",
+                bad_keys.iter().collect::<String>()
+            ))
         } else {
             None
         };

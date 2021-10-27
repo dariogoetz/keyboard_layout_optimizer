@@ -41,11 +41,12 @@ impl UnigramMetric for HandDisbalance {
         let left_fraction = hand_loads.get(&Hand::Left) / total_weight;
         let right_fraction = hand_loads.get(&Hand::Right) / total_weight;
 
-        let message = format!("Hand loads % (no thumb): {:.2} - {:.2}", 100.0 * left_fraction, 100.0 * right_fraction);
+        let message = format!(
+            "Hand loads % (no thumb): {:.2} - {:.2}",
+            100.0 * left_fraction,
+            100.0 * right_fraction
+        );
 
-        (
-            0.5 * (left_fraction - right_fraction).abs(),
-            Some(message)
-        )
+        (0.5 * (left_fraction - right_fraction).abs(), Some(message))
     }
 }

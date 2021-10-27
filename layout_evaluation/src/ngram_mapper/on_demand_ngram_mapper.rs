@@ -49,12 +49,9 @@ impl OnDemandNgramMapper {
     }
 
     pub fn with_corpus(text: &str, config: NgramMapperConfig) -> Self {
-        let unigrams =
-            Unigrams::from_str(text).expect("Could not generate unigrams from text.");
-        let bigrams =
-            Bigrams::from_str(text).expect("Could not generate bigrams from text.");
-        let trigrams =
-            Trigrams::from_str(text).expect("Could not generate trigrams from text.");
+        let unigrams = Unigrams::from_str(text).expect("Could not generate unigrams from text.");
+        let bigrams = Bigrams::from_str(text).expect("Could not generate bigrams from text.");
+        let trigrams = Trigrams::from_str(text).expect("Could not generate trigrams from text.");
 
         Self {
             unigram_mapper: OnDemandUnigramMapper::new(&unigrams, config.split_modifiers.clone()),
