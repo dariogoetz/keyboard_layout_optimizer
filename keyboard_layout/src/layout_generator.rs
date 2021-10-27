@@ -1,3 +1,6 @@
+//! This module provides a layout generator that can generate Neo variant layouts
+//! from given string representations of its base layer.
+
 use crate::key::Hand;
 use crate::keyboard::{KeyIndex, Keyboard};
 use crate::layout::{LayerKey, LayerKeyIndex, Layout};
@@ -16,6 +19,10 @@ pub enum LayoutError {
     InvalidLayout(String),
 }
 
+/// A collection of data (configuration) regarding the Neo layout (and its family)
+/// required to generate Neo layout variants.
+///
+/// Corresponds to (parts of) a YAML configuration file.
 #[derive(Deserialize, Debug)]
 pub struct BaseLayoutYAML {
     keys: Vec<Vec<Vec<String>>>,
@@ -25,6 +32,8 @@ pub struct BaseLayoutYAML {
     layer_costs: Vec<f64>,
 }
 
+/// Provides functionalities for generating Neo layout variants from given string representations
+/// of their base layer.
 #[derive(Clone, Debug)]
 pub struct NeoLayoutGenerator {
     keys: Vec<Vec<char>>,
@@ -37,6 +46,7 @@ pub struct NeoLayoutGenerator {
 }
 
 impl NeoLayoutGenerator {
+    /// Generate a `NeoLayoutGenerator` from a `BaseLayoutYAML` object
     pub fn from_object(base: BaseLayoutYAML, keyboard: Arc<Keyboard>) -> Self {
         let keys: Vec<Vec<char>> = base
             .keys
@@ -73,17 +83,20 @@ impl NeoLayoutGenerator {
         }
     }
 
+    /// Generate a `NeoLayoutGenerator` from a YAML file
     pub fn from_yaml_file(filename: &str, keyboard: Arc<Keyboard>) -> Result<Self> {
         let f = std::fs::File::open(filename)?;
         let base: BaseLayoutYAML = serde_yaml::from_reader(f)?;
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }
 
+    /// Generate a `NeoLayoutGenerator` from a YAML string
     pub fn from_yaml_str(data: &str, keyboard: Arc<Keyboard>) -> Result<Self> {
         let base: BaseLayoutYAML = serde_yaml::from_str(data)?;
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }
 
+    /// Generate a Neo variant `Layout` from a given string representation of its base layer (only non-fixed keys)
     pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
 
