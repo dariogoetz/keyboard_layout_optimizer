@@ -1,10 +1,14 @@
-use rustc_hash::FxHashMap;
+//! This module provides structs for representing physical properties of keys in a keyboard
+
+use std::collections::HashMap;
 use serde::Deserialize;
 
+/// Row and columnar location on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct MatrixPosition(pub isize, pub isize);
 
 impl MatrixPosition {
+    /// Euclidean distance to another row/column position on the keyboard
     pub fn distance(&self, other: &MatrixPosition) -> f64 {
         (0.5 * (self.0 as f64 - other.0 as f64).powi(2) + (self.1 as f64 - other.1 as f64).powi(2))
             .sqrt()
@@ -17,10 +21,12 @@ impl Default for MatrixPosition {
     }
 }
 
+/// 2D position on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct Position(pub f64, pub f64);
 
 impl Position {
+    /// Euclidean distance to another row/column position on the keyboard
     pub fn distance(&self, other: &Position) -> f64 {
         (0.5 * (self.0 - other.0).powi(2) + (self.1 - other.1).powi(2))
             .sqrt()
@@ -49,6 +55,7 @@ impl Default for Finger {
 }
 
 impl Finger {
+    /// Counting distance between fingers (neighboring fingers have a distance of one)
     pub fn distance(&self, other: &Finger) -> usize {
         (*self as isize - *other as isize).abs() as usize
     }
@@ -75,6 +82,7 @@ impl Hand {
     }
 }
 
+/// A map that associates each hand with a value
 #[derive(Clone, Debug)]
 pub struct HandMap<T: Copy>([T; 2]);
 
@@ -83,7 +91,7 @@ impl<T: Copy> HandMap<T> {
         Self([default; 2])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Hand, T>, default: T) -> Self {
+    pub fn with_hashmap(map: &HashMap<Hand, T>, default: T) -> Self {
         let mut data = [default; 2];
         for (hand, elem) in map {
             data[*hand as usize] = *elem;
@@ -114,6 +122,7 @@ impl<T: Copy + Default> Default for HandMap<T> {
     }
 }
 
+/// A map that associates each finger with a value
 #[derive(Clone, Debug)]
 pub struct FingerMap<T: Copy>([T; 5]);
 
@@ -122,7 +131,7 @@ impl<T: Copy> FingerMap<T> {
         Self([default; 5])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Finger, T>, default: T) -> Self {
+    pub fn with_hashmap(map: &HashMap<Finger, T>, default: T) -> Self {
         let mut data = [default; 5];
         for (finger, elem) in map {
             data[*finger as usize] = *elem;
@@ -143,6 +152,7 @@ impl<T: Copy> FingerMap<T> {
     }
 }
 
+/// A map that associates each finger of each hand with a value
 #[derive(Copy, Clone, Debug)]
 pub struct HandFingerMap<T: Copy>([T; 10]);
 
@@ -151,7 +161,7 @@ impl<T: Copy> HandFingerMap<T> {
         Self([default; 10])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Hand, FxHashMap<Finger, T>>, default: T) -> Self {
+    pub fn with_hashmap(map: &HashMap<Hand, HashMap<Finger, T>>, default: T) -> Self {
         let mut data = [default; 10];
         for (hand, hand_map) in map {
             for (finger, elem) in hand_map {
@@ -203,14 +213,26 @@ impl<T: Copy> HandFingerMap<T> {
 /// The `Key` struct represents a physical key on the keyboard. It provides various information about the location
 /// of the key it represents and how it is (supposed to be) used, e.g. which hand and finger shall press it, how
 /// "uncomfortable" it is to reach it (in terms of a cost valua), or if it forces the hand off the home row.
-///
 #[derive(Default, Clone, PartialEq, Debug)]
 pub struct Key {
+    /// Hand of the finger used to press the key
     pub hand: Hand,
+
+    /// Finger to press the key
     pub finger: Finger,
+
+    /// Row and column position of the key
     pub matrix_position: MatrixPosition,
+
+    /// 2D position of the key
     pub position: Position,
+
+    /// Symmetriy index: Two different keys with identical symmetry index are considered symmetrical
     pub symmetry_index: usize,
+
+    /// Cost value specifying how uncomfortable it is to reach/press the key
     pub cost: f64,
+
+    /// How strongly does the hand need to move away from the home row (start position)
     pub unbalancing: f64,
 }
