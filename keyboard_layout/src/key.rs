@@ -210,7 +210,7 @@ pub struct Key {
     pub finger: Finger,
     pub matrix_position: MatrixPosition,
     pub position: Position,
-    pub symmetry_key: usize,
+    pub symmetry_index: usize,
     pub cost: f64,
     pub unbalancing: f64,
 }

@@ -30,7 +30,7 @@ impl BigramMetric for AsymmetricBigrams {
         total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        match k1.key.symmetry_key != k2.key.symmetry_key {
+        match k1.key.symmetry_index != k2.key.symmetry_index {
             true => {
                 // log the top asymmetric bigram scorers (with weight > 1%)
                 if weight > 0.01 * total_weight {
