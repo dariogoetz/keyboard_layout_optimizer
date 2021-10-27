@@ -34,7 +34,7 @@ impl UnigramMetric for KeyCost {
         // log the top scorers (with weight > 1%)
         if weight > 0.01 * total_weight {
             log::trace!("Unigram: {:>3}, Finger: {:<13}, Weight: {:>12.2}, Cost per key: {:>8.4}, Cost: {:>14.4}",
-                        key.char.escape_debug().to_string(), format!("{:?} {:?}", key.key.hand, key.key.finger), weight, cost, weight * cost);
+                        key.symbol.escape_debug().to_string(), format!("{:?} {:?}", key.key.hand, key.key.finger), weight, cost, weight * cost);
         }
 
         Some(weight * cost)

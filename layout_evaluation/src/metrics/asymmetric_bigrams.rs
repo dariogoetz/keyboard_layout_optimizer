@@ -36,8 +36,8 @@ impl BigramMetric for AsymmetricBigrams {
                 if weight > 0.01 * total_weight {
                     log::trace!(
                         "Bigram: {:>3}{:<3}, cost: {:.4}",
-                        k1.char.escape_debug().to_string(),
-                        k2.char.escape_debug().to_string(),
+                        k1.symbol.escape_debug().to_string(),
+                        k2.symbol.escape_debug().to_string(),
                         weight,
                     );
                 }

@@ -15,7 +15,7 @@ pub type BigramIndices = Vec<((LayerKeyIndex, LayerKeyIndex), f64)>;
 pub type TrigramIndices = Vec<((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)>;
 
 pub struct MappedNgrams<'s> {
-    unigrams: Vec<(&'s LayerKey, f64)>,
+    pub unigrams: Vec<(&'s LayerKey, f64)>,
     pub unigrams_not_found: f64,
     pub unigrams_found: f64,
     pub bigrams: Vec<((&'s LayerKey, &'s LayerKey), f64)>,

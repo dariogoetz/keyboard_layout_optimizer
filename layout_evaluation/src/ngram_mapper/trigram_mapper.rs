@@ -16,7 +16,7 @@ fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndic
         //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
         //})
         .for_each(|((c1, c2, c3), weight)| {
-            let key1 = match layout.get_layerkey_index_for_char(c1) {
+            let key1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
@@ -24,7 +24,7 @@ fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndic
                 }
             };
 
-            let key2 = match layout.get_layerkey_index_for_char(c2) {
+            let key2 = match layout.get_layerkey_index_for_symbol(c2) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
@@ -32,7 +32,7 @@ fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndic
                 }
             };
 
-            let key3 = match layout.get_layerkey_index_for_char(c3) {
+            let key3 = match layout.get_layerkey_index_for_symbol(c3) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
@@ -114,9 +114,9 @@ impl OnDemandTrigramMapper {
                                     if (*e1 != *e2) && (*e2 != *e3) {
                                         // log::trace!(
                                         //     "one each:                    {}{}{}",
-                                        //     e1.char.escape_debug(),
-                                        //     e2.char.escape_debug(),
-                                        //     e3.char.escape_debug(),
+                                        //     e1.symbol.escape_debug(),
+                                        //     e2.symbol.escape_debug(),
+                                        //     e3.symbol.escape_debug(),
                                         // );
                                         trigram_keys.push(((*e1, *e2, *e3), *w));
                                     }
@@ -133,9 +133,9 @@ impl OnDemandTrigramMapper {
                             if (*e1 != *e2) && (*e2 != *e3) {
                                 // log::trace!(
                                 //     "two of first, one of second: {}{}{}",
-                                //     e1.char.escape_debug(),
-                                //     e2.char.escape_debug(),
-                                //     e3.char.escape_debug(),
+                                //     e1.symbol.escape_debug(),
+                                //     e2.symbol.escape_debug(),
+                                //     e3.symbol.escape_debug(),
                                 // );
                                 trigram_keys.push(((*e1, *e2, *e3), *w1));
                             }
@@ -151,9 +151,9 @@ impl OnDemandTrigramMapper {
                             if (*e1 != *e2) && (*e2 != *e3) {
                                 // log::trace!(
                                 //     "one of first, two of second: {}{}{}",
-                                //     e1.char.escape_debug(),
-                                //     e2.char.escape_debug(),
-                                //     e3.char.escape_debug(),
+                                //     e1.symbol.escape_debug(),
+                                //     e2.symbol.escape_debug(),
+                                //     e3.symbol.escape_debug(),
                                 // );
                                 trigram_keys.push(((*e1, *e2, *e3), *w1));
                             }
@@ -169,9 +169,9 @@ impl OnDemandTrigramMapper {
                             if (*e1 != *e2) && (*e2 != *e3) {
                                 // log::trace!(
                                 //     "two of second, one of third: {}{}{}",
-                                //     e1.char.escape_debug(),
-                                //     e2.char.escape_debug(),
-                                //     e3.char.escape_debug(),
+                                //     e1.symbol.escape_debug(),
+                                //     e2.symbol.escape_debug(),
+                                //     e3.symbol.escape_debug(),
                                 // );
                                 trigram_keys.push(((*e1, *e2, *e3), *w1));
                             }
@@ -187,9 +187,9 @@ impl OnDemandTrigramMapper {
                             if (*e1 != *e2) && (*e2 != *e3) {
                                 // log::trace!(
                                 //     "one of second, two of third: {}{}{}",
-                                //     e1.char.escape_debug(),
-                                //     e2.char.escape_debug(),
-                                //     e3.char.escape_debug(),
+                                //     e1.symbol.escape_debug(),
+                                //     e2.symbol.escape_debug(),
+                                //     e3.symbol.escape_debug(),
                                 // );
                                 trigram_keys.push(((*e1, *e2, *e3), *w1));
                             }
@@ -201,9 +201,9 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of first:              {}{}{}",
-                    //     e.0.char.escape_debug(),
-                    //     e.1.char.escape_debug(),
-                    //     e.2.char.escape_debug(),
+                    //     e.0.symbol.escape_debug(),
+                    //     e.1.symbol.escape_debug(),
+                    //     e.2.symbol.escape_debug(),
                     // );
                     trigram_keys.push((e, w));
                 });
@@ -213,9 +213,9 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of second:             {}{}{}",
-                    //     e.0.char.escape_debug(),
-                    //     e.1.char.escape_debug(),
-                    //     e.2.char.escape_debug(),
+                    //     e.0.symbol.escape_debug(),
+                    //     e.1.symbol.escape_debug(),
+                    //     e.2.symbol.escape_debug(),
                     // );
                     trigram_keys.push((e, w));
                 });
@@ -225,24 +225,24 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of third:              {}{}{}",
-                    //     e.0.char.escape_debug(),
-                    //     e.1.char.escape_debug(),
-                    //     e.2.char.escape_debug(),
+                    //     e.0.symbol.escape_debug(),
+                    //     e.1.symbol.escape_debug(),
+                    //     e.2.symbol.escape_debug(),
                     // );
                     trigram_keys.push((e, w));
                 });
 
             // log::debug!(
             //     "{:>3}{:^3}{:<3} -> {}",
-            //     k1.char.escape_debug().to_string(),
-            //     k2.char.escape_debug().to_string(),
-            //     k3.char.escape_debug().to_string(),
+            //     k1.symbol.escape_debug().to_string(),
+            //     k2.symbol.escape_debug().to_string(),
+            //     k3.symbol.escape_debug().to_string(),
             //     v.iter()
             //         .map(|((t1, t2, t3), w)| format!(
             //             "\n{}{}{} (weight: {:>12.2}) ",
-            //             t1.char.escape_debug(),
-            //             t2.char.escape_debug(),
-            //             t3.char.escape_debug(),
+            //             t1.symbol.escape_debug(),
+            //             t2.symbol.escape_debug(),
+            //             t3.symbol.escape_debug(),
             //             w
             //         ))
             //         .collect::<String>(),

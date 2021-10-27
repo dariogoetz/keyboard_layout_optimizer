@@ -13,7 +13,7 @@ fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64
         .iter()
         //.filter(|(c, _weight)| !c.is_whitespace())
         .for_each(|(c, weight)| {
-            let layerkey = match layout.get_layerkey_index_for_char(c) {
+            let layerkey = match layout.get_layerkey_index_for_symbol(c) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
@@ -74,14 +74,14 @@ impl OnDemandUnigramMapper {
 
                 take_one_layerkey(base, &mods, *w)
 
-                // if base.char == ' ' {
+                // if base.symbol == ' ' {
                 // println!(
                 //     "{:>3} -> {}",
-                //     k.char.escape_debug().to_string(),
+                //     k.symbol.escape_debug().to_string(),
                 //     v.iter()
                 //         .map(|(t1, w)| format!(
                 //             "{:>3} (weight: {:>12.2}) ",
-                //             t1.char.escape_debug().to_string(),
+                //             t1.symbol.escape_debug().to_string(),
                 //             w
                 //         ))
                 //         .collect::<String>(),

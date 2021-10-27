@@ -1,5 +1,5 @@
-use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use super::BigramIndices;
+use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
 
@@ -29,10 +29,10 @@ impl Default for IncreaseCommonBigramsConfig {
 
 pub fn increase_common_bigrams(
     bigram_keys: &[((LayerKeyIndex, LayerKeyIndex), f64)],
-    config: &IncreaseCommonBigramsConfig
+    config: &IncreaseCommonBigramsConfig,
 ) -> BigramIndices {
     if !config.enabled {
-        return bigram_keys.to_vec()
+        return bigram_keys.to_vec();
     }
 
     // here we need to collect all mapped trigrams per key in order to successfully increase weights in next step
@@ -78,7 +78,7 @@ pub fn add_secondary_bigrams_from_trigrams(
     layout: &Layout,
 ) {
     if !config.enabled {
-        return
+        return;
     }
 
     // there are many duplicates in the secondary bigrams -> using a hashmap is cheaper
@@ -88,22 +88,22 @@ pub fn add_secondary_bigrams_from_trigrams(
         .map(|((idx1, idx2, idx3), w)| {
             (
                 (
-                    layout.get_layerkey(idx1),
-                    layout.get_layerkey(idx2),
-                    layout.get_layerkey(idx3),
+                    (idx1, layout.get_layerkey(idx1)),
+                    (idx2, layout.get_layerkey(idx2)),
+                    (idx3, layout.get_layerkey(idx3)),
                 ),
                 w,
             )
         })
-        .filter(|((layerkey1, _, layerkey3), _)| layerkey1.key.hand == layerkey3.key.hand)
-        .for_each(|((layerkey1, layerkey2, layerkey3), weight)| {
+        .filter(|(((_, layerkey1), _, (_, layerkey3)), _)| layerkey1.key.hand == layerkey3.key.hand)
+        .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, _)), weight)| {
             let factor = if layerkey1.key.hand == layerkey2.key.hand {
                 config.factor_no_handswitch
             } else {
                 config.factor_handswitch
             };
 
-            *m.entry((layerkey1.index, layerkey3.index)).or_insert(0.0) += *weight * factor;
+            *m.entry((*idx1, *idx3)).or_insert(0.0) += *weight * factor;
         });
     bigram_keys.extend(m);
 }
@@ -117,14 +117,14 @@ fn layerkey_indices(bigrams: &Bigrams, layout: &Layout) -> (BigramIndices, f64) 
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
         .for_each(|((c1, c2), weight)| {
-            let layerkey1 = match layout.get_layerkey_index_for_char(c1) {
+            let layerkey1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
-            let layerkey2 = match layout.get_layerkey_index_for_char(c2) {
+            let layerkey2 = match layout.get_layerkey_index_for_symbol(c2) {
                 Some(k) => k,
                 None => {
                     not_found_weight += *weight;
@@ -163,7 +163,7 @@ impl OnDemandBigramMapper {
         let found_weight = bigram_keys.iter().map(|(_, w)| w).sum();
         // bigram_keys
         //     .iter()
-        //     .filter(|((c1, c2), _)| c1.char == 'l' && c2.char == 'r')
+        //     .filter(|((c1, c2), _)| c1.symbol == 'l' && c2.symbol == 'r')
         //     .for_each(|((_, _), w)| {
         //         println!("After split: {}", w);
         //     });
@@ -226,13 +226,13 @@ impl OnDemandBigramMapper {
 
             // log::debug!(
             //     "{:>3}{:<3} -> {}",
-            //     k1.char.escape_debug().to_string(),
-            //     k2.char.escape_debug().to_string(),
+            //     k1.symbol.escape_debug().to_string(),
+            //     k2.symbol.escape_debug().to_string(),
             //     v.iter()
             //         .map(|((t1, t2), w)| format!(
             //             "{}{} (weight: {:>12.3}) ",
-            //             t1.char.escape_debug(),
-            //             t2.char.escape_debug(),
+            //             t1.symbol.escape_debug(),
+            //             t2.symbol.escape_debug(),
             //             w
             //         ))
             //         .collect::<String>(),

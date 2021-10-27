@@ -5,16 +5,39 @@ use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 pub type LayerKeyIndex = u16;
+pub type KeyIndex = u16;
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
     pub layer: usize,
     pub key: Key,
-    pub char: char,
+    pub symbol: char,
     pub modifiers: Vec<LayerKeyIndex>,
     pub is_fixed: bool,
     pub is_modifier: bool,
-    pub index: LayerKeyIndex,
+    key_index: KeyIndex,  // is used for determining corresponding base layer key
+}
+
+impl LayerKey {
+    pub fn new(
+        layer: usize,
+        key: Key,
+        symbol: char,
+        modifiers: Vec<LayerKeyIndex>,
+        is_fixed: bool,
+        is_modifier: bool,
+        key_index: KeyIndex,
+    ) -> Self {
+        Self {
+            layer,
+            key,
+            key_index,
+            symbol,
+            modifiers,
+            is_fixed,
+            is_modifier,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -49,7 +72,7 @@ impl Layout {
     }
 
     #[inline(always)]
-    pub fn get_layerkey_for_char(&self, c: &char) -> Option<&LayerKey> {
+    pub fn get_layerkey_for_symbol(&self, c: &char) -> Option<&LayerKey> {
         self.key_map
             .get(c)
             .cloned()
@@ -57,14 +80,14 @@ impl Layout {
     }
 
     #[inline(always)]
-    pub fn get_layerkey_index_for_char(&self, c: &char) -> Option<LayerKeyIndex> {
+    pub fn get_layerkey_index_for_symbol(&self, c: &char) -> Option<LayerKeyIndex> {
         self.key_map.get(c).cloned()
     }
 
     #[inline(always)]
     pub fn get_base_layerkey_index(&self, layerkey_index: &LayerKeyIndex) -> LayerKeyIndex {
         let layerkey = self.get_layerkey(layerkey_index);
-        self.key_layers[layerkey.key.index][0]
+        self.key_layers[layerkey.key_index as usize][0]
     }
 
     #[inline(always)]
@@ -87,7 +110,7 @@ impl Layout {
             .map(|c| {
                 if c.len() > layer {
                     self.get_layerkey(&c[layer])
-                        .char
+                        .symbol
                         .to_string()
                         .replace("\n", "\u{23ce}")
                         .replace("\t", "\u{21e5}")
@@ -95,7 +118,7 @@ impl Layout {
                         .replace("␡", " ")
                 } else if !c.is_empty() {
                     self.get_layerkey(&c[c.len() - 1])
-                        .char
+                        .symbol
                         .to_string()
                         .replace("\n", "\u{23ce}")
                         .replace("\t", "\u{21e5}")
@@ -121,7 +144,7 @@ impl Layout {
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|c| !c.is_fixed)
-            .map(|k| k.char.to_string())
+            .map(|k| k.symbol.to_string())
             .collect();
         let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
         self.keyboard.plot_short(&keys_str)
@@ -132,7 +155,7 @@ impl Layout {
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|c| !c.is_fixed)
-            .map(|k| k.char)
+            .map(|k| k.symbol)
             .collect()
     }
 }

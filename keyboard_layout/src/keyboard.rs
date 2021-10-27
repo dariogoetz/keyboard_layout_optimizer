@@ -36,9 +36,7 @@ impl Keyboard {
             .zip(k.symmetries.into_iter().flatten())
             .zip(k.key_costs.into_iter().flatten())
             .zip(k.unbalancing_positions.into_iter().flatten())
-            .enumerate()
-            .map(|(i, ((((((hand, finger), matrix_position), position), symmetry_key), cost), unbalancing))| Key {
-                index: i,
+            .map(|((((((hand, finger), matrix_position), position), symmetry_key), cost), unbalancing)| Key {
                 hand,
                 finger,
                 matrix_position,

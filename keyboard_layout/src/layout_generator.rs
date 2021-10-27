@@ -1,6 +1,6 @@
 use crate::key::Hand;
 use crate::keyboard::Keyboard;
-use crate::layout::{LayerKey, LayerKeyIndex, Layout};
+use crate::layout::{KeyIndex, LayerKey, LayerKeyIndex, Layout};
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
@@ -130,20 +130,21 @@ impl NeoLayoutGenerator {
             .iter()
             .zip(self.keyboard.keys.iter())
             .zip(self.fixed_keys.iter())
-            .map(|((layer_chars, key), fixed)| {
+            .enumerate()
+            .map(|(key_index, ((layer_chars, key), fixed))| {
                 let indices: Vec<LayerKeyIndex> = layer_chars
                     .iter()
                     .enumerate()
                     .map(|(layer_id, c)| {
-                        let layerkey = LayerKey {
-                            layer: layer_id,
-                            key: key.clone(),
-                            char: *c,
-                            modifiers: Vec::new(),
-                            is_fixed: *fixed,
-                            is_modifier: false,
-                            index: layerkey_index,
-                        };
+                        let layerkey = LayerKey::new(
+                            layer_id,
+                            key.clone(),
+                            *c,
+                            Vec::new(),
+                            *fixed,
+                            false,
+                            key_index as KeyIndex,
+                        );
                         layerkey_index += 1;
                         layerkeys.push(layerkey);
 
@@ -196,8 +197,12 @@ impl NeoLayoutGenerator {
 
     fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
         let mut m = FxHashMap::default();
-        layerkeys.iter().for_each(|layerkey| {
-            let entry = m.entry(layerkey.char).or_insert(layerkey.index);
+        layerkeys
+            .iter()
+            .enumerate()
+            .for_each(|(layerkey_index, layerkey)| {
+                let new_layerkey_index = layerkey_index as LayerKeyIndex;
+            let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
             let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
             let entry_cost = entry_layerkey.key.cost
@@ -210,7 +215,7 @@ impl NeoLayoutGenerator {
             if new_cost < entry_cost
                 || ((new_cost - entry_cost).abs() < 0.01 && layerkey.layer < entry_layerkey.layer)
             {
-                m.insert(layerkey.char, layerkey.index);
+                m.insert(layerkey.symbol, new_layerkey_index);
             }
         });
 

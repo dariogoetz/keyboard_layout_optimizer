@@ -34,7 +34,7 @@ impl LayoutMetric for ShortcutKeys {
         let mut cost = 0.0;
         let mut bad_keys = Vec::new();
         self.shortcut_chars.iter().for_each(|c| {
-            if let Some(k) = layout.get_layerkey_for_char(c) {
+            if let Some(k) = layout.get_layerkey_for_symbol(c) {
                 // NOTE: In ArneBab's solution, the top rows do not "skip a column" as we do.
                 // Therefore, a special case needs to be made for row 3, in contrast to here.
                 if k.key.matrix_position.0 > 5 {
