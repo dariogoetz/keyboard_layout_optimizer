@@ -29,7 +29,7 @@ impl UnigramMetric for KeyCost {
         total_weight: f64,
         layout: &Layout,
     ) -> Option<f64> {
-        let cost = key.key.cost + layout.layer_costs[key.layer];
+        let cost = key.key.cost + layout.get_layer_cost(key.layer);
 
         // log the top scorers (with weight > 1%)
         if weight > 0.01 * total_weight {

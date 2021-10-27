@@ -3,7 +3,6 @@ use crate::keyboard::Keyboard;
 
 use rustc_hash::FxHashMap;
 use std::sync::Arc;
-use string_template::Template;
 
 pub type LayerKeyIndex = u16;
 
@@ -21,13 +20,29 @@ pub struct LayerKey {
 #[derive(Debug)]
 pub struct Layout {
     pub layerkeys: Vec<LayerKey>,
-    pub key_layers: Vec<Vec<LayerKeyIndex>>,
     pub keyboard: Arc<Keyboard>,
-    pub key_map: FxHashMap<char, LayerKeyIndex>,
-    pub layer_costs: Vec<f64>,
+    key_layers: Vec<Vec<LayerKeyIndex>>,
+    key_map: FxHashMap<char, LayerKeyIndex>,
+    layer_costs: Vec<f64>,
 }
 
 impl Layout {
+    pub fn new(
+        layerkeys: Vec<LayerKey>,
+        key_layers: Vec<Vec<LayerKeyIndex>>,
+        keyboard: Arc<Keyboard>,
+        key_map: FxHashMap<char, LayerKeyIndex>,
+        layer_costs: Vec<f64>,
+    ) -> Self {
+        Self {
+            layerkeys,
+            key_layers,
+            keyboard,
+            key_map,
+            layer_costs,
+        }
+    }
+
     #[inline(always)]
     pub fn get_layerkey(&self, layerkey_index: &LayerKeyIndex) -> &LayerKey {
         &self.layerkeys[*layerkey_index as usize]
@@ -48,7 +63,6 @@ impl Layout {
 
     #[inline(always)]
     pub fn get_base_layerkey_index(&self, layerkey_index: &LayerKeyIndex) -> LayerKeyIndex {
-        // log::debug!("{:?}", self.keys[k.key.index]);
         let layerkey = self.get_layerkey(layerkey_index);
         self.key_layers[layerkey.key.index][0]
     }
@@ -61,8 +75,12 @@ impl Layout {
         (base, mods)
     }
 
+    #[inline(always)]
+    pub fn get_layer_cost(&self, layer: usize) -> f64 {
+        *self.layer_costs.get(layer).unwrap_or(&0.0)
+    }
+
     pub fn plot_layer(&self, layer: usize) -> String {
-        let template = Template::new(&self.keyboard.plot_template);
         let keys_strings: Vec<String> = self
             .key_layers
             .iter()
@@ -90,7 +108,7 @@ impl Layout {
             .collect();
 
         let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        template.render_positional(&keys_str)
+        self.keyboard.plot(&keys_str)
     }
 
     pub fn plot(&self) -> String {
@@ -98,7 +116,6 @@ impl Layout {
     }
 
     pub fn plot_short(&self) -> String {
-        let template = Template::new(&self.keyboard.plot_template_short);
         let keys_strings: Vec<String> = self
             .key_layers
             .iter()
@@ -107,7 +124,7 @@ impl Layout {
             .map(|k| k.char.to_string())
             .collect();
         let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        template.render_positional(&keys_str)
+        self.keyboard.plot_short(&keys_str)
     }
 
     pub fn as_text(&self) -> String {

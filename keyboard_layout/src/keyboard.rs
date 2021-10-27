@@ -2,12 +2,13 @@ use crate::key::{Finger, Hand, Key, Position, MatrixPosition};
 
 use anyhow::Result;
 use serde::Deserialize;
+use string_template::Template;
 
 #[derive(Clone, Debug)]
 pub struct Keyboard {
     pub keys: Vec<Key>,
-    pub plot_template: String,
-    pub plot_template_short: String,
+    plot_template: String,
+    plot_template_short: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -64,5 +65,15 @@ impl Keyboard {
     pub fn from_yaml_str(data: &str) -> Result<Self> {
         let k: KeyboardYAML = serde_yaml::from_str(data)?;
         Ok(Keyboard::from_yaml_object(k))
+    }
+
+    pub fn plot(&self, key_labels: &[&str]) -> String {
+        let template = Template::new(&self.plot_template);
+        template.render_positional(key_labels)
+    }
+
+    pub fn plot_short(&self, key_labels: &[&str]) -> String {
+        let template = Template::new(&self.plot_template_short);
+        template.render_positional(key_labels)
     }
 }

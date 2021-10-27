@@ -27,12 +27,12 @@ pub struct BaseLayoutYAML {
 
 #[derive(Clone, Debug)]
 pub struct NeoLayoutGenerator {
-    pub keys: Vec<Vec<char>>,
-    pub fixed_keys: Vec<bool>,
-    pub permutable_key_map: FxHashMap<char, usize>,
-    pub fixed_layers: Vec<usize>,
-    pub modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
-    pub layer_costs: Vec<f64>,
+    keys: Vec<Vec<char>>,
+    fixed_keys: Vec<bool>,
+    permutable_key_map: FxHashMap<char, usize>,
+    fixed_layers: Vec<usize>,
+    modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
+    layer_costs: Vec<f64>,
     keyboard: Arc<Keyboard>,
 }
 
@@ -185,13 +185,13 @@ impl NeoLayoutGenerator {
             k.modifiers = mods;
         });
 
-        Ok(Layout {
+        Ok(Layout::new(
             layerkeys,
             key_layers,
-            keyboard: self.keyboard.clone(),
+            self.keyboard.clone(),
             key_map,
-            layer_costs: self.layer_costs.to_vec(),
-        })
+            self.layer_costs.to_vec(),
+        ))
     }
 
     fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
