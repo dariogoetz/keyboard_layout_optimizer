@@ -9,6 +9,10 @@ use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 /// The index of a `LayerKey` in the `layerkeys` vec of a `Layout`
+///
+/// This type ist used as key for hashmaps in unigrams, bigrams, and trigrams and
+/// thus directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
+/// Therefore, this is not a `usize` or larger.
 pub type LayerKeyIndex = u16;
 
 /// Representation of a symbol that can be generated with a layout.
