@@ -69,6 +69,10 @@ struct Options {
     /// Do not cache intermediate results
     #[structopt(long)]
     no_cache_results: bool,
+
+    /// Maximum number of generations
+    #[structopt(long)]
+    generation_limit: Option<u64>
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -177,11 +181,15 @@ fn main() {
     let evaluator =
         Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics);
 
-    let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
+    let mut optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
         .expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
+
+    if let Some(generation_limit) = options.generation_limit {
+        optimization_params.generation_limit = generation_limit
+    }
 
     let fix_from = options
         .start_layout

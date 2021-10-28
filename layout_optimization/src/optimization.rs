@@ -20,12 +20,12 @@ use genevo::types::fmt::Display;
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
-    population_size: usize,
-    generation_limit: u64,
-    num_individuals_per_parents: usize,
-    selection_ratio: f64,
-    mutation_rate: f64,
-    reinsertion_ratio: f64,
+    pub population_size: usize,
+    pub generation_limit: u64,
+    pub num_individuals_per_parents: usize,
+    pub selection_ratio: f64,
+    pub mutation_rate: f64,
+    pub reinsertion_ratio: f64,
 }
 
 impl Default for Parameters {
