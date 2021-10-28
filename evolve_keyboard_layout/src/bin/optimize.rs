@@ -38,13 +38,13 @@ struct Options {
     #[structopt(long)]
     tops: Option<f64>,
 
-    /// Do not optimize those keys (wrt. starting layout or Neo2 layout otherwise)
+    /// Do not optimize those keys (wrt. --start-layout or --fix-from)
     #[structopt(short, long)]
     fix: Option<String>,
 
     /// Fix the keys from this layout (will be overwritten by --start-layout)
-    #[structopt(long)]
-    fix_from: Option<String>,
+    #[structopt(long, default_value = "xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j")]
+    fix_from: String,
 
     /// Filename of optimization configuration file
     #[structopt(short, long, default_value = "optimization_parameters.yml")]
@@ -184,10 +184,7 @@ fn main() {
             &options.optimization_parameters,
         ));
 
-    let mut fix_from = options.fix_from.unwrap_or("xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j".to_string());
-    if let Some(s) = &options.start_layout{
-        fix_from = s.to_owned();
-    }
+    let fix_from = options.start_layout.as_ref().unwrap_or(&options.fix_from).to_string();
 
     let layout = optimization::optimize(
         &optimization_params,
