@@ -4,10 +4,8 @@ use keyboard_layout::{
 };
 use layout_evaluation::{
     evaluation::{Evaluator, MetricParameters},
-    ngrams::{
-        ngrams::{Bigrams, Trigrams, Unigrams},
-        on_demand_ngram_mapper::OnDemandNgramMapper,
-    },
+    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
 use anyhow::Result;
@@ -24,8 +22,9 @@ pub struct NGramConfig {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
-    pub corpus: NGramConfig,
+    pub ngrams: NGramConfig,
     pub metrics: MetricParameters,
+    pub ngram_mapper: NgramMapperConfig,
 }
 
 impl EvaluationParameters {
@@ -64,26 +63,28 @@ pub fn evaluate_bench(c: &mut Criterion) {
         &format!("Could not read evaluation yaml file 'evaluation_parameters.yml'"),
     );
 
-    log::info!("Reading unigram file: '{}'", &eval_params.corpus.unigrams);
+    log::info!("Reading unigram file: '{}'", &eval_params.ngrams.unigrams);
     let unigrams =
-        Unigrams::from_file(&("../".to_string() + &eval_params.corpus.unigrams)).expect(&format!(
+        Unigrams::from_file(&("../".to_string() + &eval_params.ngrams.unigrams)).expect(&format!(
             "Could not read 1-gramme file from '{}'.",
-            &eval_params.corpus.unigrams
+            &eval_params.ngrams.unigrams
         ));
-    log::info!("Reading bigram file: '{}'", &eval_params.corpus.bigrams);
+    log::info!("Reading bigram file: '{}'", &eval_params.ngrams.bigrams);
     let bigrams =
-        Bigrams::from_file(&("../".to_string() + &eval_params.corpus.bigrams)).expect(&format!(
+        Bigrams::from_file(&("../".to_string() + &eval_params.ngrams.bigrams)).expect(&format!(
             "Could not read 2-gramme file from '{}'.",
-            &eval_params.corpus.bigrams
+            &eval_params.ngrams.bigrams
         ));
-    log::info!("Reading trigram file: '{}'", &eval_params.corpus.trigrams);
+    log::info!("Reading trigram file: '{}'", &eval_params.ngrams.trigrams);
     let trigrams =
-        Trigrams::from_file(&("../".to_string() + &eval_params.corpus.trigrams)).expect(&format!(
+        Trigrams::from_file(&("../".to_string() + &eval_params.ngrams.trigrams)).expect(&format!(
             "Could not read 3-gramme file from '{}'.",
-            &eval_params.corpus.trigrams
+            &eval_params.ngrams.trigrams
         ));
 
-    let ngram_provider = OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, true);
+    let ngram_mapper_config = eval_params.ngram_mapper.clone();
+
+    let ngram_provider = OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config);
 
     let evaluator =
         Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics);
