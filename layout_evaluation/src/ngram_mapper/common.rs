@@ -1,11 +1,14 @@
 use keyboard_layout::layout::LayerKeyIndex;
 
+use tinyvec::{ArrayVec, array_vec};
+
 pub fn take_one_layerkey(
     base_key: LayerKeyIndex,
     modifiers: &[LayerKeyIndex],
     weight: f64,
-) -> Vec<(LayerKeyIndex, f64)> {
-    let mut res: Vec<(LayerKeyIndex, f64)> = vec![(base_key, weight)];
+) -> ArrayVec<[(LayerKeyIndex, f64); 4]> {
+    let mut res = array_vec!([(LayerKeyIndex, f64); 4]);
+    res.push((base_key, weight));
 
     modifiers.iter().for_each(|m| {
         res.push((*m, weight));
@@ -19,8 +22,8 @@ pub fn take_two_layerkey(
     modifiers: &[LayerKeyIndex],
     weight: f64,
     same_key_mod_adjustment: f64,
-) -> Vec<((LayerKeyIndex, LayerKeyIndex), f64)> {
-    let mut res: Vec<((LayerKeyIndex, LayerKeyIndex), f64)> = Vec::new();
+) -> ArrayVec<[((LayerKeyIndex, LayerKeyIndex), f64); 8]> {
+    let mut res = array_vec!([((LayerKeyIndex, LayerKeyIndex), f64); 8]);
 
     modifiers.iter().enumerate().for_each(|(i, m1)| {
         res.push(((*m1, base_key), weight));
@@ -41,8 +44,8 @@ pub fn take_three_layerkey(
     modifiers: &[LayerKeyIndex],
     weight: f64,
     same_key_mod_adjustment: f64,
-) -> Vec<((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)> {
-    let mut res: Vec<((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)> = Vec::new();
+) -> ArrayVec<[((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64); 16]> {
+    let mut res = array_vec!([((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64); 16]);
 
     modifiers.iter().enumerate().for_each(|(i, m1)| {
         modifiers.iter().skip(i + 1).for_each(|m2| {
