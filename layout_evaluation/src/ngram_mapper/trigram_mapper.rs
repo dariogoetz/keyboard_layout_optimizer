@@ -91,6 +91,7 @@ impl OnDemandTrigramMapper {
             .collect()
     }
 
+    // this is probably the most intensive function within the evaluation
     fn split_trigram_modifiers<'s>(
         &self,
         trigrams: &[((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)],
