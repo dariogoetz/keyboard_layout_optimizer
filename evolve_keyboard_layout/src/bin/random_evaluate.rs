@@ -112,13 +112,12 @@ fn main() {
         options.eval_parameters
     ));
 
-    let text = match options.text {
-        Some(txt) => Some(txt),
-        None => options.corpus.map(|corpus_file| {
+    let text = options.text.as_ref().cloned().or_else(|| {
+        options.corpus.as_ref().map(|corpus_file| {
             std::fs::read_to_string(&corpus_file)
                 .expect(&format!("Could not read corpus file from {}.", corpus_file,))
-        }),
-    };
+        })
+    });
 
     let mut ngram_mapper_config = eval_params.ngram_mapper.clone();
     if options.no_split_modifiers {
