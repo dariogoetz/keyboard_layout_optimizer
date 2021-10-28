@@ -42,13 +42,17 @@ struct Options {
     #[structopt(short, long)]
     fix: Option<String>,
 
+    /// Fix the keys from this layout (will be overwritten by --start-layout)
+    #[structopt(long)]
+    fix_from: Option<String>,
+
     /// Filename of optimization configuration file
     #[structopt(short, long, default_value = "optimization_parameters.yml")]
     optimization_parameters: String,
 
     /// Start optimization from this layout (keys from left to right, top to bottom)
     #[structopt(short, long)]
-    start_layout_str: Option<String>,
+    start_layout: Option<String>,
 
     /// Do not split modifiers
     #[structopt(long)]
@@ -175,16 +179,19 @@ fn main() {
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
+
+    let mut fix_from = options.fix_from.unwrap_or("xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j".to_string());
+    if let Some(s) = &options.start_layout{
+        fix_from = s.to_owned();
+    }
+
     let layout = optimization::optimize(
         &optimization_params,
         &evaluator,
-        options
-            .start_layout_str
-            .as_ref()
-            .unwrap_or(&"xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j".to_string()),
+        &fix_from,
         &layout_generator,
         &options.fix.unwrap_or_else(|| "".to_string()),
-        options.start_layout_str.is_some(),
+        options.start_layout.is_some(),
     );
 
     let metric_costs = evaluator.evaluate_layout(&layout);
