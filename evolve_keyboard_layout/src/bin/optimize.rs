@@ -65,6 +65,10 @@ struct Options {
     /// Do not increase weight of common bigrams
     #[structopt(long)]
     no_increase_common_bigrams: bool,
+
+    /// Do not cache intermediate results
+    #[structopt(long)]
+    no_cache_results: bool,
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -192,6 +196,7 @@ fn main() {
         &layout_generator,
         &options.fix.unwrap_or_else(|| "".to_string()),
         options.start_layout.is_some(),
+        !options.no_cache_results,
     );
 
     let metric_costs = evaluator.evaluate_layout(&layout);

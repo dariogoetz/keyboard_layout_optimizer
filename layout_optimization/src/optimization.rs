@@ -116,24 +116,24 @@ impl PermutationLayoutGenerator {
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
     layout_generator: PermutationLayoutGenerator,
-    result_cache: Arc<Mutex<FxHashMap<String, Vec<MetricResults>>>>,
+    result_cache: Option<Arc<Mutex<FxHashMap<String, Vec<MetricResults>>>>>,
 }
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
         let l = self.layout_generator.generate(genome);
         let layout_str = self.layout_generator.generate_string(genome);
-        let cache_val;
-        {
-            let cache = self.result_cache.lock().unwrap();
+        let mut cache_val = None;
+        if let Some(result_cache) = &self.result_cache {
+            let cache = result_cache.lock().unwrap();
             cache_val = cache.get(&layout_str).map(|v| v.to_vec());
         }
         let metric_costs = match cache_val {
             Some(res) => res,
             None => {
                 let res = self.evaluator.evaluate_layout(&l);
-                {
-                    let mut cache = self.result_cache.lock().unwrap();
+                if let Some(result_cache) = &self.result_cache {
+                    let mut cache = result_cache.lock().unwrap();
                     cache.insert(layout_str, res.clone());
                 }
 
@@ -245,6 +245,7 @@ pub fn init_optimization(
     layout_generator: &NeoLayoutGenerator,
     fixed_characters: &str,
     start_with_layout: bool,
+    cache_results: bool,
 ) -> (MySimulator, PermutationLayoutGenerator) {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     let initial_population: Population<Genotype> = if start_with_layout {
@@ -259,14 +260,18 @@ pub fn init_optimization(
             .uniform_at_random()
     };
 
-    let result_cache = Mutex::new(FxHashMap::default());
+    let result_cache = if cache_results {
+        Some(Arc::new(Mutex::new(FxHashMap::default())))
+    } else {
+        None
+    };
 
     let sim = simulate(
         genetic_algorithm()
             .with_evaluation(FitnessCalc {
                 evaluator: Arc::new(evaluator.clone()),
                 layout_generator: pm.clone(),
-                result_cache: Arc::new(result_cache),
+                result_cache,
             })
             .with_selection(MaximizeSelector::new(
                 params.selection_ratio,
@@ -292,6 +297,7 @@ pub fn optimize(
     layout_generator: &NeoLayoutGenerator,
     fixed_characters: &str,
     start_with_layout: bool,
+    cache_results: bool,
 ) -> Layout {
     let (mut sim, pm) = init_optimization(
         params,
@@ -300,6 +306,7 @@ pub fn optimize(
         layout_generator,
         fixed_characters,
         start_with_layout,
+        cache_results,
     );
 
     log::info!("Starting optimization with: {:?}", params);
