@@ -40,6 +40,7 @@ The optimization is implemented using a fork of the [genevo](https://github.com/
     ``` sh
     cargo build --release
     ```
+    The binaries are then located under `target/release`.
 
 ## Usage
 ### Specifying Layouts
@@ -54,7 +55,7 @@ The `plot` binary expects a layout representation as commandline argument.
 
 Example (Bone layout):
 ``` sh
-plot "jduax phlmwqß ctieo bnrsg fvüäö yz,.k"
+RUST_LOG=INFO ./target/release/plot "jduax phlmwqß ctieo bnrsg fvüäö yz,.k"
 ```
 
 As an optional parameter `--layout-config`, a different layout configuration file can be specified.
@@ -64,7 +65,7 @@ The `evaluate` binary expects a layout representation as commandline argument.
 
 Example (Bone layout):
 ``` sh
-evaluate "jduax phlmwqß ctieo bnrsg fvüäö yz,.k"
+RUST_LOG=INFO ./target/release/evaluate "jduax phlmwqß ctieo bnrsg fvüäö yz,.k"
 ```
 
 There are various optional parameters that can be explored using the `-h` option, e.g. provide a text or file to be used as corpus.
@@ -96,7 +97,7 @@ The `optimize` binary can run without any commandline parameter. In that case, i
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
-optimize -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
+RUST_LOG=INFO ./target/release/optimize -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
 #### Configuration
