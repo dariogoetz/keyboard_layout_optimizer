@@ -1,3 +1,13 @@
+//! The `evaluation` module provides an `Evaluator` struct that can evaluate
+//! layouts with respect to a list of metrics and ngram data.
+//!
+//! It can hold multiple metrics operating on the layout itself, unigrams, bigrams,
+//! or trigrams. These are required to implement the corresponding trait from the `metrics` module.
+//!
+//! The ngram mapper is responsible for mapping char-based ngrams (as read from input data)
+//! to singles, pairs, and triplets of `LayerKey`s that can then be analysed by the individual metrics.
+
+
 use crate::results::{MetricResult, MetricResults, MetricType, NormalizationType};
 use crate::{metrics::*, ngram_mapper::NgramMapper};
 
@@ -5,14 +15,23 @@ use keyboard_layout::layout::{LayerKey, Layout};
 
 use serde::Deserialize;
 
+/// A wrapper around individuals metric's parameters (`T`) specifying
+/// additional generic attributes. This mostly facilitates configuration of
+/// metrics in a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct WeightedParams<T> {
+    /// Wether the metric is to be evaluated.
     pub enabled: bool,
+    /// The weight to use when aggregating all metrics.
     pub weight: f64,
+    /// The normalization strategy to use.
     pub normalization: NormalizationType,
+    /// The metric's individual parameters.
     pub params: T,
 }
 
+/// Compiles configuration parameters for all "default" metrics available.
+/// This is usually read from a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
     pub shortcut_keys: WeightedParams<shortcut_keys::Parameters>,
@@ -33,6 +52,8 @@ pub struct MetricParameters {
     pub no_handswitch_in_trigram: WeightedParams<no_handswitch_in_trigram::Parameters>,
 }
 
+/// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
+/// The metrics are handled as dynamically dispatched trait objects for the metric traits in the `metrics` module.
 #[derive(Clone, Debug)]
 pub struct Evaluator {
     layout_metrics: Vec<(f64, NormalizationType, Box<dyn LayoutMetric>)>,
@@ -43,6 +64,7 @@ pub struct Evaluator {
 }
 
 impl Evaluator {
+    /// Generate an "empty" `Evaluator` object without any metric.
     pub fn default(ngram_mapper: Box<dyn NgramMapper>) -> Self {
         Evaluator {
             layout_metrics: Vec::new(),
@@ -53,6 +75,7 @@ impl Evaluator {
         }
     }
 
+    /// Add all "default" metrics to the evaluator.
     pub fn default_metrics(&mut self, params: &MetricParameters) -> Self {
         // layout metrics
         self.layout_metric(
@@ -190,6 +213,7 @@ impl Evaluator {
         self.to_owned()
     }
 
+    /// Add a metric that operates only on the layout itself ("layout metric").
     pub fn layout_metric(
         &mut self,
         metric: Box<dyn LayoutMetric>,
@@ -203,6 +227,7 @@ impl Evaluator {
         self.to_owned()
     }
 
+    /// Add a metric that operates on the unigram data ("unigram metric").
     pub fn unigram_metric(
         &mut self,
         metric: Box<dyn UnigramMetric>,
@@ -216,6 +241,7 @@ impl Evaluator {
         self.to_owned()
     }
 
+    /// Add a metric that operates on the bigram data ("bigram metric").
     pub fn bigram_metric(
         &mut self,
         metric: Box<dyn BigramMetric>,
@@ -229,6 +255,7 @@ impl Evaluator {
         self.to_owned()
     }
 
+    /// Add a metric that operates on the trigram data ("trigram metric").
     pub fn trigram_metric(
         &mut self,
         metric: Box<dyn TrigramMetric>,
@@ -242,6 +269,7 @@ impl Evaluator {
         self.to_owned()
     }
 
+    /// Evaluate all layout metrics for a layout.
     fn evaluate_layout_metrics(&self, layout: &Layout) -> Vec<MetricResult> {
         if self.layout_metrics.is_empty() {
             return Vec::new();
@@ -262,6 +290,7 @@ impl Evaluator {
         metric_costs
     }
 
+    /// Evaluate all unigram metrics for a layout.
     fn evaluate_unigram_metrics(
         &self,
         layout: &Layout,
@@ -287,6 +316,7 @@ impl Evaluator {
         metric_costs
     }
 
+    /// Evaluate all bigram metrics for a layout.
     fn evaluate_bigram_metrics(
         &self,
         layout: &Layout,
@@ -312,6 +342,7 @@ impl Evaluator {
         metric_costs
     }
 
+    /// Evaluate all trigram metrics for a layout.
     fn evaluate_trigram_metrics<'s>(
         &self,
         layout: &'s Layout,
@@ -337,6 +368,7 @@ impl Evaluator {
         metric_costs
     }
 
+    /// Evaluate all metrics for a layout.
     pub fn evaluate_layout(&self, layout: &Layout) -> Vec<MetricResults> {
         let mapped_ngrams = self.ngram_mapper.mapped_ngrams(layout);
 

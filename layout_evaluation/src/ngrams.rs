@@ -1,6 +1,11 @@
+//! The `ngrams` module provides structs for reading (and to some extent modifying)
+//! ngram (unigram, bigram, trigram) data that serve as the underlying data for layout
+//! evaluations.
+
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 
+/// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Unigrams {
     pub grams: FxHashMap<char, f64>,
@@ -12,6 +17,7 @@ fn process_special_characters(s: &str) -> String {
 }
 
 impl Unigrams {
+    /// Collect unigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -28,6 +34,7 @@ impl Unigrams {
         })
     }
 
+    /// Read unigrams and weights from a string containing lines with unigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -51,11 +58,14 @@ impl Unigrams {
         })
     }
 
+    /// Read unigrams and weights from a file containing lines with unigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
         let data = std::fs::read_to_string(filename)?;
         Unigrams::from_frequencies_str(&data)
     }
 
+    /// Return a reduced set of the unigrams containing only the most common unigrams up to a
+    /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
         let target_weight = fraction * self.total_weight;
         let mut total_weight = 0.0;
@@ -84,6 +94,7 @@ impl Unigrams {
     }
 }
 
+/// Holds a hashmap of bigrams (two chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Bigrams {
     pub grams: FxHashMap<(char, char), f64>,
@@ -91,6 +102,7 @@ pub struct Bigrams {
 }
 
 impl Bigrams {
+    /// Collect bigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -108,6 +120,7 @@ impl Bigrams {
         })
     }
 
+    /// Read bigrams and weights from a string containing lines with bigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -130,11 +143,14 @@ impl Bigrams {
         })
     }
 
+    /// Read bigrams and weights from a file containing lines with bigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
         let data = std::fs::read_to_string(filename)?;
         Bigrams::from_frequencies_str(&data)
     }
 
+    /// Return a reduced set of the bigrams containing only the most common bigrams up to a
+    /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
         let target_weight = fraction * self.total_weight;
         let mut total_weight = 0.0;
@@ -163,6 +179,7 @@ impl Bigrams {
     }
 }
 
+/// Holds a hashmap of trigrams (three chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Trigrams {
     pub grams: FxHashMap<(char, char, char), f64>,
@@ -170,6 +187,7 @@ pub struct Trigrams {
 }
 
 impl Trigrams {
+    /// Collect trigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -190,6 +208,7 @@ impl Trigrams {
         })
     }
 
+    /// Read trigrams and weights from a string containing lines with trigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let mut total_weight = 0.0;
@@ -212,11 +231,14 @@ impl Trigrams {
         })
     }
 
+    /// Read trigrams and weights from a file containing lines with trigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
         let data = std::fs::read_to_string(filename)?;
         Trigrams::from_frequencies_str(&data)
     }
 
+    /// Return a reduced set of the trigrams containing only the most common trigrams up to a
+    /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
         let target_weight = fraction * self.total_weight;
         let mut total_weight = 0.0;

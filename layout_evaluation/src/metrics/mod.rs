@@ -1,3 +1,5 @@
+//! The `metrics` module provides traits for layout, unigram, bigram, and trigram metrics.
+
 use keyboard_layout::layout::{LayerKey, Layout};
 
 pub mod hand_disbalance;
@@ -18,9 +20,11 @@ pub mod unbalancing_after_neighboring;
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
 
-// LayoutMetric is a trait for metrics that depends only on the layout
+/// LayoutMetric is a trait for metrics that depends only on the layout.
 pub trait LayoutMetric: Send + Sync + LayoutMetricClone + std::fmt::Debug {
+    /// Return the name of the metric
     fn name(&self) -> &str;
+    /// Compute the total cost for the metric
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>);
 }
 
@@ -34,6 +38,7 @@ impl Clone for Box<dyn LayoutMetric> {
     }
 }
 
+/// Helper trait for realizing clonability for `Box<dyn LayoutMetric>`.
 pub trait LayoutMetricClone {
     fn clone_box(&self) -> Box<dyn LayoutMetric>;
 }
@@ -47,10 +52,12 @@ where
     }
 }
 
-// UnigramMetric is a trait for metrics that iterates over weighted letters
+/// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
 pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
+    /// Return the name of the metric
     fn name(&self) -> &str;
 
+    /// Compute the cost of one unigram (if that is possible, otherwise, return `None`).
     #[inline(always)]
     fn individual_cost(
         &self,
@@ -62,10 +69,11 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         None
     }
 
-    // total_weight is optional for performance reasons (it can be computed from unigrams)
+    /// Compute the total cost for the metric.
     fn total_cost(
         &self,
         unigrams: &[(&LayerKey, f64)],
+        // total_weight is optional for performance reasons (it can be computed from unigrams)
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
@@ -87,6 +95,7 @@ impl Clone for Box<dyn UnigramMetric> {
     }
 }
 
+/// Helper trait for realizing clonability for `Box<dyn UnigramMetric>`.
 pub trait UnigramMetricClone {
     fn clone_box(&self) -> Box<dyn UnigramMetric>;
 }
@@ -100,11 +109,12 @@ where
     }
 }
 
-// BigramMetric is a trait for metrics that iterates over weighted bigrams
-
+/// BigramMetric is a trait for metrics that iterates over weighted bigrams.
 pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
+    /// Return the name of the metric.
     fn name(&self) -> &str;
 
+    /// Compute the cost of one bigram (if that is possible, otherwise, return `None`).
     #[inline(always)]
     fn individual_cost(
         &self,
@@ -117,10 +127,11 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         None
     }
 
-    // total_weight is optional for performance reasons (it can be computed from bigrams)
+    /// Compute the total cost for the metric.
     fn total_cost(
         &self,
         bigrams: &[((&LayerKey, &LayerKey), f64)],
+        // total_weight is optional for performance reasons (it can be computed from bigrams).
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
@@ -142,6 +153,7 @@ impl Clone for Box<dyn BigramMetric> {
     }
 }
 
+/// Helper trait for realizing clonability for `Box<dyn BigramMetric>`.
 pub trait BigramMetricClone {
     fn clone_box(&self) -> Box<dyn BigramMetric>;
 }
@@ -155,11 +167,12 @@ where
     }
 }
 
-// TrigramMetric is a trait for metrics that iterates over weighted trigrams
-
+/// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
+    /// Return the name of the metric.
     fn name(&self) -> &str;
 
+    /// Compute the cost of one trigram (if that is possible, otherwise, return `None`).
     #[inline(always)]
     fn individual_cost(
         &self,
@@ -173,10 +186,11 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         None
     }
 
-    // total_weight is optional for performance reasons (it can be computed from trigrams)
+    /// Compute the total cost for the metric.
     fn total_cost(
         &self,
         trigrams: &[((&LayerKey, &LayerKey, &LayerKey), f64)],
+        // total_weight is optional for performance reasons (it can be computed from trigrams)
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
@@ -205,6 +219,7 @@ impl Clone for Box<dyn TrigramMetric> {
     }
 }
 
+/// Helper trait for realizing clonability for `Box<dyn TrigramMetric>`.
 pub trait TrigramMetricClone {
     fn clone_box(&self) -> Box<dyn TrigramMetric>;
 }
