@@ -9,9 +9,9 @@ use serde::Deserialize;
 pub enum NormalizationType {
     /// Divide the metric result's cost value by a fixed value.
     Fixed(f64),
-    /// Divide the metric result's cost value by the sum of the ngram weights that could be mapped by the layout.
+    /// Divide the metric result's cost value by the sum of the ngram weights that could be mapped by the layout and a given fixed value.
     WeightFound(f64),
-    /// Divide the metric result's cost value by the sum of all ngram weights.
+    /// Divide the metric result's cost value by the sum of all ngram weights and a given fixed value.
     WeightAll(f64),
 }
 
