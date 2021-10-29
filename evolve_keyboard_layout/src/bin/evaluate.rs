@@ -167,6 +167,7 @@ fn main() {
             }
         };
         println!("Layout (layer 1):\n{}", layout.plot_layer(0));
+        println!("Layout compact (layer 1):\n{}", layout.plot_compact());
         let metric_costs = evaluator.evaluate_layout(&layout);
         let mut cost = 0.0;
         for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
