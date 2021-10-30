@@ -77,15 +77,38 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let mut worst: Option<(&LayerKey, f64)> = None;
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
         let total_cost = unigrams
             .iter()
             .filter_map(|(unigram, weight)| {
-                self.individual_cost(*unigram, *weight, total_weight, layout)
+                let res = self.individual_cost(*unigram, *weight, total_weight, layout);
+                if let Some(res) = res {
+                    match worst {
+                        Some((_, worst_cost)) => {
+                            if res > worst_cost {
+                                worst = Some((unigram.clone(), res));
+                            }
+                        },
+                        None => {
+                            worst = Some((unigram.clone(), res));
+                        },
+                    };
+                };
+
+                res
             })
             .sum();
 
-        (total_cost, None)
+        let msg = worst.map(|(unigram, cost)| {
+            format!(
+                "Worst unigram: {}, Cost: {:.2}% of total cost",
+                unigram.symbol.to_string().escape_debug(),
+                100.0 * cost / total_cost,
+            )
+        });
+
+        (total_cost, msg)
     }
 }
 
@@ -135,15 +158,39 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let mut worst: Option<((&LayerKey, &LayerKey), f64)> = None;
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let total_cost = bigrams
             .iter()
             .filter_map(|(bigram, weight)| {
-                self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout)
+                let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
+                if let Some(res) = res {
+                    match worst {
+                        Some((_, worst_cost)) => {
+                            if res > worst_cost {
+                                worst = Some((bigram.clone(), res));
+                            }
+                        },
+                        None => {
+                            worst = Some((bigram.clone(), res));
+                        },
+                    };
+                };
+
+                res
             })
             .sum();
 
-        (total_cost, None)
+        let msg = worst.map(|(bigram, cost)| {
+            format!(
+                "Worst bigram: {}{}, Cost: {:.2}% of total cost",
+                bigram.0.symbol.to_string().escape_debug(),
+                bigram.1.symbol.to_string().escape_debug(),
+                100.0 * cost / total_cost,
+            )
+        });
+
+        (total_cost, msg)
     }
 }
 
@@ -194,22 +241,47 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let mut worst: Option<((&LayerKey, &LayerKey, &LayerKey), f64)> = None;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost = trigrams
             .iter()
             .filter_map(|(trigram, weight)| {
-                self.individual_cost(
+                let res = self.individual_cost(
                     trigram.0,
                     trigram.1,
                     trigram.2,
                     *weight,
                     total_weight,
                     layout,
-                )
+                );
+                if let Some(res) = res {
+                    match worst {
+                        Some((_, worst_cost)) => {
+                            if res > worst_cost {
+                                worst = Some((trigram.clone(), res));
+                            }
+                        },
+                        None => {
+                            worst = Some((trigram.clone(), res));
+                        },
+                    };
+                };
+
+                res
             })
             .sum();
 
-        (total_cost, None)
+        let msg = worst.map(|(trigram, cost)| {
+            format!(
+                "Worst trigram: {}{}{}, Cost: {:.2}% of total cost",
+                trigram.0.symbol.to_string().escape_debug(),
+                trigram.1.symbol.to_string().escape_debug(),
+                trigram.2.symbol.to_string().escape_debug(),
+                100.0 * cost / total_cost,
+            )
+        });
+
+        (total_cost, msg)
     }
 }
 
