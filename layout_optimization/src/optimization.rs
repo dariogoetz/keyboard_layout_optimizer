@@ -320,12 +320,18 @@ pub fn optimize(
                 let best_solution = step.result.best_solution;
                 if let Some(king) = &all_time_best {
                     if best_solution.solution.fitness > king.0 {
+                        let layout = pm.generate(&best_solution.solution.genome);
+                        let metric_costs = evaluator.evaluate_layout(&layout);
                         println!(
                             "New best:\n{}\n\n{}\n{}",
-                            pm.generate(&best_solution.solution.genome).as_text(),
-                            pm.generate(&best_solution.solution.genome).plot_compact(),
-                            pm.generate(&best_solution.solution.genome).plot()
+                            layout.as_text(),
+                            layout.plot_compact(),
+                            layout.plot(),
+
                         );
+                        for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
+                            mc.print();
+                        }
                         all_time_best = Some((
                             best_solution.solution.fitness,
                             best_solution.solution.genome.clone(),
