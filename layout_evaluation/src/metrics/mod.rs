@@ -91,7 +91,9 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                             }
                         },
                         None => {
-                            worst = Some((unigram.clone(), res));
+                            if res > 0.0 {
+                                worst = Some((unigram.clone(), res));
+                            }
                         },
                     };
                 };
@@ -172,7 +174,9 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                             }
                         },
                         None => {
-                            worst = Some((bigram.clone(), res));
+                            if res > 0.0 {
+                                worst = Some((bigram.clone(), res));
+                            }
                         },
                     };
                 };
@@ -262,7 +266,9 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                             }
                         },
                         None => {
-                            worst = Some((trigram.clone(), res));
+                            if res > 0.0 {
+                                worst = Some((trigram.clone(), res));
+                            }
                         },
                     };
                 };
