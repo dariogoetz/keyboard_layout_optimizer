@@ -66,6 +66,7 @@ impl TrigramMetric for Irregularity {
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
         let mut worst: Option<((&LayerKey, &LayerKey, &LayerKey), f64)> = None;
+        let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost: f64 = trigrams
             .iter()
@@ -80,6 +81,9 @@ impl TrigramMetric for Irregularity {
                 );
 
                 if let Some(res) = res {
+                    if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
+                        cost_with_mod += res;
+                    };
                     match worst {
                         Some((_, worst_cost)) => {
                             if res > worst_cost {
@@ -98,11 +102,12 @@ impl TrigramMetric for Irregularity {
 
         let msg = worst.map(|(trigram, cost)| {
             format!(
-                "Worst trigram: {}{}{}, Cost: {:.2}% of total (quadratic) cost",
+                "Worst trigram: {}{}{} makes {:5.2}% of total (quadratic) cost;  {:>5.2} of cost involved a modifier",
                 trigram.0.symbol.to_string().escape_debug(),
                 trigram.1.symbol.to_string().escape_debug(),
                 trigram.2.symbol.to_string().escape_debug(),
                 100.0 * cost / total_cost,
+                100.0 * cost_with_mod / total_cost,
             )
         });
 

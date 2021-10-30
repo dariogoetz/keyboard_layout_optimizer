@@ -161,12 +161,16 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         layout: &Layout,
     ) -> (f64, Option<String>) {
         let mut worst: Option<((&LayerKey, &LayerKey), f64)> = None;
+        let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let total_cost = bigrams
             .iter()
             .filter_map(|(bigram, weight)| {
                 let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
                 if let Some(res) = res {
+                    if bigram.0.is_modifier || bigram.1.is_modifier {
+                        cost_with_mod += res;
+                    };
                     match worst {
                         Some((_, worst_cost)) => {
                             if res > worst_cost {
@@ -187,10 +191,11 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
 
         let msg = worst.map(|(bigram, cost)| {
             format!(
-                "Worst bigram: {}{}, Cost: {:.2}% of total cost",
+                "Worst bigram: {}{} makes {:>5.2}% of total cost;  {:>5.2}% of cost involved a modifier",
                 bigram.0.symbol.to_string().escape_debug(),
                 bigram.1.symbol.to_string().escape_debug(),
                 100.0 * cost / total_cost,
+                100.0 * cost_with_mod / total_cost,
             )
         });
 
@@ -246,6 +251,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         layout: &Layout,
     ) -> (f64, Option<String>) {
         let mut worst: Option<((&LayerKey, &LayerKey, &LayerKey), f64)> = None;
+        let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost = trigrams
             .iter()
@@ -259,6 +265,9 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                     layout,
                 );
                 if let Some(res) = res {
+                    if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
+                        cost_with_mod += res;
+                    };
                     match worst {
                         Some((_, worst_cost)) => {
                             if res > worst_cost {
@@ -279,11 +288,12 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
 
         let msg = worst.map(|(trigram, cost)| {
             format!(
-                "Worst trigram: {}{}{}, Cost: {:.2}% of total cost",
+                "Worst trigram: {}{}{} makes {:>5.2}% of total cost;  {:>5.2}% of cost involved a modifier",
                 trigram.0.symbol.to_string().escape_debug(),
                 trigram.1.symbol.to_string().escape_debug(),
                 trigram.2.symbol.to_string().escape_debug(),
                 100.0 * cost / total_cost,
+                100.0 * cost_with_mod / total_cost,
             )
         });
 
