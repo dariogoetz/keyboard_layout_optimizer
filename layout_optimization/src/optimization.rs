@@ -329,9 +329,17 @@ pub fn optimize(
                             layout.plot(),
 
                         );
+                        let mut cost = 0.0;
                         for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
+                            cost += mc.total_cost();
                             mc.print();
                         }
+                        println!(
+                            "Cost: {:.4} (optimization score: {})\n",
+                            cost,
+                            (1e8 / cost) as usize
+                        );
+
                         all_time_best = Some((
                             best_solution.solution.fitness,
                             best_solution.solution.genome.clone(),
