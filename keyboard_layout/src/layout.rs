@@ -79,6 +79,12 @@ pub struct Layout {
     layer_costs: Vec<f64>,
 }
 
+impl std::fmt::Display for Layout {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_text())
+    }
+}
+
 impl Layout {
     pub fn new(
         layerkeys: Vec<LayerKey>,

@@ -322,7 +322,7 @@ pub fn optimize(
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "New best:\n{}\n\n{}\n{}",
-                            layout.as_text(),
+                            layout,
                             layout.plot_compact(),
                             layout.plot(),
 
@@ -349,7 +349,7 @@ pub fn optimize(
                     all_time_best.as_ref().unwrap().0,
                     step.duration.fmt(),
                     step.processing_time.fmt(),
-                    pm.generate(&best_solution.solution.genome).as_text()
+                    pm.generate(&best_solution.solution.genome)
                 );
             }
             Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
@@ -362,7 +362,7 @@ pub fn optimize(
                 );
                 println!(
                     "\n{}",
-                    pm.generate(&all_time_best.as_ref().unwrap().1).as_text()
+                    pm.generate(&all_time_best.as_ref().unwrap().1)
                 );
                 println!(
                     "\n{}",

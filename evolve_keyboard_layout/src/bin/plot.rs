@@ -88,5 +88,5 @@ fn main() {
         layout.plot_layer(5)
     );
     println!("Layout compact: \n{}", layout.plot_compact());
-    println!("Layout as text: \n{}", layout.as_text());
+    println!("Layout as text: \n{}", layout);
 }
