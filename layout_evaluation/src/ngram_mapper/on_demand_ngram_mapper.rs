@@ -130,6 +130,11 @@ impl NgramMapper for OnDemandNgramMapper {
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, &layout);
 
+        // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
+        // unigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
+        // bigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
+        // trigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
+
         MappedNgrams {
             unigrams,
             unigrams_found,
