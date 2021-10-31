@@ -117,16 +117,14 @@ impl NgramMapper for OnDemandNgramMapper {
             layout,
         );
 
-        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
-        // this needs to be done before increasing common bigrams in the next step
-        let mut bigram_key_indices = groupby_sum(&bigram_key_indices);
-
         // (if enabled) increase the weight of bigrams with high weight even higher
         bigram_key_indices = bigram_mapper::increase_common_bigrams(
             &bigram_key_indices,
             &self.config.increase_common_bigrams,
         );
 
+        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
+        let bigram_key_indices = groupby_sum(&bigram_key_indices);
         // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
         let bigrams_found = bigram_key_indices.iter().map(|(_, w)| w).sum();
         // map LayerKeyIndex to &LayerKey
