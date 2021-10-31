@@ -94,13 +94,12 @@ impl NgramMapper for OnDemandNgramMapper {
             layout,
         );
 
+        let mut bigram_key_indices = groupby_sum(&bigram_key_indices);
         bigram_key_indices = bigram_mapper::increase_common_bigrams(
             &bigram_key_indices,
             &self.config.increase_common_bigrams,
         );
 
-        // ensure that each bigram has the correct weight (no duplicates)
-        let bigram_key_indices = groupby_sum(&bigram_key_indices);
         let bigrams_found = bigram_key_indices.iter().map(|(_, w)| w).sum();
         let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, &layout);
 
