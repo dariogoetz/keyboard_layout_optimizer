@@ -1,18 +1,29 @@
-use super::BigramIndices;
+//! This module provides an implementation of bigram mapping functionalities
+//! used by the `OnDemandNgramMapper`.
+
+use super::{BigramIndices, TrigramIndices};
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, Layout};
 
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
+/// Configuration parameters for process of increasing the weight of common bigrams.
 #[derive(Debug, Clone, Deserialize)]
 pub struct IncreaseCommonBigramsConfig {
+    /// Whether to increase the weight of common bigrams even further.
     pub enabled: bool,
+    /// The critical fraction above which a bigram's weight will be increased.
     pub critical_fraction: f64,
+    /// The slope with which the bigram's weight will be increased.
+    /// The increment is performed linearly starting from the critical fraction,
+    /// i.e. a bigram with weight equal the critical fraction is actually not affected.
     pub factor: f64,
+    /// A minimum total weight (of all bigrams) that needs to be achieved. Otherwise no
+    /// increment takes place.
     pub total_weight_threshold: f64,
 }
 
@@ -27,8 +38,9 @@ impl Default for IncreaseCommonBigramsConfig {
     }
 }
 
+/// Increase the weight of bigrams that already have a weight exceeding a threshold even further.
 pub fn increase_common_bigrams(
-    bigram_keys: &[((LayerKeyIndex, LayerKeyIndex), f64)],
+    bigram_keys: &BigramIndices,
     config: &IncreaseCommonBigramsConfig,
 ) -> BigramIndices {
     if !config.enabled {
@@ -54,10 +66,14 @@ pub fn increase_common_bigrams(
     m.into_iter().collect()
 }
 
+/// Configuration parameters for adding secondary bigrams from trigrams.
 #[derive(Debug, Clone, Deserialize)]
 pub struct SecondaryBigramsFromTrigramsConfig {
+    /// Whether to add secondary bigrams from trigrams.
     pub enabled: bool,
+    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves no handswitch.
     pub factor_no_handswitch: f64,
+    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
 }
 
@@ -71,9 +87,10 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
     }
 }
 
+/// Add secondary bigrams from the first and third symbol of a trigram (if they belong to the same hand).
 pub fn add_secondary_bigrams_from_trigrams(
     bigram_keys: &mut BigramIndices,
-    trigram_keys: &[((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)],
+    trigram_keys: &TrigramIndices,
     config: &SecondaryBigramsFromTrigramsConfig,
     layout: &Layout,
 ) {
@@ -138,6 +155,8 @@ fn layerkey_indices(bigrams: &Bigrams, layout: &Layout) -> (BigramIndices, f64) 
     (bigram_keys, not_found_weight)
 }
 
+/// Generates `LayerKey`-based bigrams from char-based unigrams. Optionally resolves modifiers
+/// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandBigramMapper {
     bigrams: Bigrams,
@@ -152,6 +171,7 @@ impl OnDemandBigramMapper {
         }
     }
 
+    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (BigramIndices, f64, f64) {
         // println!("Before split: {:?}", self.bigrams.grams.get(&('l', 'r')));
         let (mut bigram_keys, not_found_weight) = layerkey_indices(&self.bigrams, layout);
@@ -171,8 +191,9 @@ impl OnDemandBigramMapper {
         (bigram_keys, found_weight, not_found_weight)
     }
 
+    /// Resolve `&LayerKey` references for `LayerKeyIndex`
     pub fn layerkeys<'s>(
-        bigrams: &[((LayerKeyIndex, LayerKeyIndex), f64)],
+        bigrams: &BigramIndices,
         layout: &'s Layout,
     ) -> Vec<((&'s LayerKey, &'s LayerKey), f64)> {
         bigrams
@@ -181,9 +202,14 @@ impl OnDemandBigramMapper {
             .collect()
     }
 
+    /// Map all bigrams to base-layer bigrams, potentially generating multiple bigrams
+    /// with modifiers for those with higer-layer keys.
+    ///
+    /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
+    /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
     fn split_bigram_modifiers(
         &self,
-        bigrams: &[((LayerKeyIndex, LayerKeyIndex), f64)],
+        bigrams: &BigramIndices,
         layout: &Layout,
     ) -> BigramIndices {
         let mut bigram_keys = Vec::with_capacity(2 * bigrams.len());

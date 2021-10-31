@@ -1,9 +1,12 @@
+//! This module provides an implementation of unigram mapping functionalities
+//! used by the `OnDemandNgramMapper`.
+
 use super::on_demand_ngram_mapper::SplitModifiersConfig;
 use super::{common::*, UnigramIndices};
 
 use crate::ngrams::Unigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, Layout};
 
 fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
     let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
@@ -27,6 +30,8 @@ fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64
     (unigram_keys, not_found_weight)
 }
 
+/// Generates `LayerKey`-based unigrams from char-based unigrams. Optionally resolves modifiers
+/// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandUnigramMapper {
     unigrams: Unigrams,
@@ -41,6 +46,7 @@ impl OnDemandUnigramMapper {
         }
     }
 
+    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
         let (mut unigram_keys, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
 
@@ -53,8 +59,9 @@ impl OnDemandUnigramMapper {
         (unigram_keys, found_weight, not_found_weight)
     }
 
+    /// Resolve `&LayerKey` references for `LayerKeyIndex`
     pub fn layerkeys<'s>(
-        unigrams: &[(LayerKeyIndex, f64)],
+        unigrams: &UnigramIndices,
         layout: &'s Layout,
     ) -> Vec<(&'s LayerKey, f64)> {
         unigrams
@@ -63,8 +70,13 @@ impl OnDemandUnigramMapper {
             .collect()
     }
 
+    /// Map all unigrams to base-layer unigrams, potentially generating multiple unigrams
+    /// with modifiers for those with higer-layer keys.
+    ///
+    /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
+    /// for each modifier involved in accessing the higher layer.
     fn split_unigram_modifiers(
-        unigrams: &[(LayerKeyIndex, f64)],
+        unigrams: &UnigramIndices,
         layout: &Layout,
     ) -> UnigramIndices {
         unigrams

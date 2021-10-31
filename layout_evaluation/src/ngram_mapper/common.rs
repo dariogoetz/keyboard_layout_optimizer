@@ -1,6 +1,14 @@
+/// The `common` module provides utility functions for resolving modifiers in ngrams.
+
 use keyboard_layout::layout::LayerKeyIndex;
 
 use tinyvec::ArrayVec;
+
+/// Generate an `ArrayVec` unigrams of the base-layer key and each modifier.
+///
+/// For performance reasons, an `ArrayVec` of fixed size is chosen with a capacity only allowing two modifiers per layer.
+/// If more modifiers shall be supported, increase the capacity (for a smaller performance penalty) or use
+/// an overflowing implementation such as `SmallVec` or `TinyVec`.
 
 // use length 3 for up to 2 modifiers
 // use length 4 for up to 3 modifiers (may cost arount 10%-20% performance)
@@ -19,6 +27,13 @@ pub fn take_one_layerkey(
 
     res
 }
+
+/// Generate an `ArrayVec` of bigrams of combinations of the base-layer key with each modifier
+/// and the modifiers themselves. The number of resulting bigrams depends on the number of modifiers.
+///
+/// For performance reasons, an `ArrayVec` of fixed size is chosen with a capacity only allowing two modifiers per layer.
+/// If more modifiers shall be supported, increase the capacity (for a smaller performance penalty) or use
+/// an overflowing implementation such as `SmallVec` or `TinyVec`.
 
 // use length 4 for up to 2 modifiers
 // use length 9 for up to 3 modifiers
@@ -43,6 +58,15 @@ pub fn take_two_layerkey(
 
     res
 }
+
+/// Generate an `ArrayVec` of trigrams of combinations of the base-layer key and with two modifiers.
+/// If there is no or only one modifier, the result is empty. If there are two modifiers, the result
+/// has length two. If there were three modifiers (disabled at the moment, would crash due to ArrayVec capacity),
+/// the length would be 18.
+///
+/// For performance reasons, an `ArrayVec` of fixed size is chosen with a capacity only allowing two modifiers per layer.
+/// If more modifiers shall be supported, increase the capacity (for a smaller performance penalty) or use
+/// an overflowing implementation such as `SmallVec` or `TinyVec`.
 
 // use length 2 for up to 2 modifiers
 // use length 18 for up to 3 modifiers

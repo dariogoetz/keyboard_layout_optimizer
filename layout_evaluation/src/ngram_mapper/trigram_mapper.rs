@@ -1,9 +1,12 @@
+//! This module provides an implementation of trigram mapping functionalities
+//! used by the `OnDemandNgramMapper`.
+
 use super::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Trigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, Layout};
 
 fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndices, f64) {
     let mut not_found_weight = 0.0;
@@ -46,6 +49,8 @@ fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndic
     (trigram_keys, not_found_weight)
 }
 
+/// Generates `LayerKey`-based trigrams from char-based unigrams. Optionally resolves modifiers
+/// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandTrigramMapper {
     trigrams: Trigrams,
@@ -60,6 +65,7 @@ impl OnDemandTrigramMapper {
         }
     }
 
+    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (TrigramIndices, f64, f64) {
         let (mut trigram_keys, not_found_weight) = mapped_trigrams(&self.trigrams, layout);
 
@@ -72,8 +78,9 @@ impl OnDemandTrigramMapper {
         (trigram_keys, found_weight, not_found_weight)
     }
 
+    /// Resolve `&LayerKey` references for `LayerKeyIndex`
     pub fn layerkeys<'s>(
-        trigrams: &[((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)],
+        trigrams: &TrigramIndices,
         layout: &'s Layout,
     ) -> Vec<((&'s LayerKey, &'s LayerKey, &'s LayerKey), f64)> {
         trigrams
@@ -91,10 +98,18 @@ impl OnDemandTrigramMapper {
             .collect()
     }
 
-    // this is probably the most intensive function within the evaluation
+    /// Map all trigrams to base-layer trigrams, potentially generating multiple trigrams
+    /// with modifiers for those with higer-layer keys.
+    ///
+    /// Each trigram of higher-layer symbols will transform into a series of various trigrams with permutations
+    /// of the involved base-keys and modifiers. Keys from the latter parts of the trigram will always be after
+    /// former ones and modifers always come before their base key. The number of generated trigrams from a single
+    /// trigram can be large (tens of trigrams) if multiple symbols of the trigram are accessed using multiple modifiers.
+
+    // this is one of the most intensive functions of the layout evaluation
     fn split_trigram_modifiers<'s>(
         &self,
-        trigrams: &[((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)],
+        trigrams: &TrigramIndices,
         layout: &'s Layout,
     ) -> TrigramIndices {
         let mut trigram_keys = Vec::with_capacity(2 * trigrams.len());
