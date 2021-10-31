@@ -1,7 +1,7 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::MetricResults;
+use layout_evaluation::results::EvaluationResult;
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
@@ -116,7 +116,7 @@ impl PermutationLayoutGenerator {
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
     layout_generator: PermutationLayoutGenerator,
-    result_cache: Option<Arc<Mutex<FxHashMap<String, Vec<MetricResults>>>>>,
+    result_cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
 }
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
@@ -126,9 +126,9 @@ impl FitnessFunction<Genotype, usize> for FitnessCalc {
         let mut cache_val = None;
         if let Some(result_cache) = &self.result_cache {
             let cache = result_cache.lock().unwrap();
-            cache_val = cache.get(&layout_str).map(|v| v.to_vec());
+            cache_val = cache.get(&layout_str).map(|v| v.clone());
         }
-        let metric_costs = match cache_val {
+        let evaluation_result = match cache_val {
             Some(res) => res,
             None => {
                 let res = self.evaluator.evaluate_layout(&l);
@@ -140,10 +140,8 @@ impl FitnessFunction<Genotype, usize> for FitnessCalc {
                 res
             }
         };
-        let cost = metric_costs
-            .iter()
-            .fold(0.0, |acc, metric_cost| acc + metric_cost.total_cost());
-        (1e8 / cost) as usize
+
+        evaluation_result.optimization_score()
     }
 
     fn average(&self, fitness_values: &[usize]) -> usize {
@@ -321,7 +319,7 @@ pub fn optimize(
                 if let Some(king) = &all_time_best {
                     if best_solution.solution.fitness > king.0 {
                         let layout = pm.generate(&best_solution.solution.genome);
-                        let metric_costs = evaluator.evaluate_layout(&layout);
+                        let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "New best:\n{}\n\n{}\n{}",
                             layout.as_text(),
@@ -329,16 +327,7 @@ pub fn optimize(
                             layout.plot(),
 
                         );
-                        let mut cost = 0.0;
-                        for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
-                            cost += mc.total_cost();
-                            mc.print();
-                        }
-                        println!(
-                            "Cost: {:.4} (optimization score: {})\n",
-                            cost,
-                            (1e8 / cost) as usize
-                        );
+                        println!("{}", evaluation_result);
 
                         all_time_best = Some((
                             best_solution.solution.fitness,

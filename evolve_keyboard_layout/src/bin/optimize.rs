@@ -207,16 +207,6 @@ fn main() {
         !options.no_cache_results,
     );
 
-    let metric_costs = evaluator.evaluate_layout(&layout);
-    let mut cost = 0.0;
-    for mc in metric_costs.iter().filter(|mc| !mc.metric_costs.is_empty()) {
-        cost += mc.total_cost();
-        mc.print();
-    }
-
-    println!(
-        "Cost: {:.4} (optmization score: {})",
-        cost,
-        (1e8 / cost) as usize
-    );
+    let evaluation_result = evaluator.evaluate_layout(&layout);
+    println!("{}", evaluation_result);
 }

@@ -8,7 +8,7 @@
 //! to singles, pairs, and triplets of `LayerKey`s that can then be analysed by the individual metrics.
 
 
-use crate::results::{MetricResult, MetricResults, MetricType, NormalizationType};
+use crate::results::{EvaluationResult, MetricResult, MetricResults, MetricType, NormalizationType};
 use crate::{metrics::*, ngram_mapper::NgramMapper};
 
 use keyboard_layout::layout::{LayerKey, Layout};
@@ -369,7 +369,7 @@ impl Evaluator {
     }
 
     /// Evaluate all metrics for a layout.
-    pub fn evaluate_layout(&self, layout: &Layout) -> Vec<MetricResults> {
+    pub fn evaluate_layout(&self, layout: &Layout) -> EvaluationResult {
         let mapped_ngrams = self.ngram_mapper.mapped_ngrams(layout);
 
         // Layout metrics
@@ -408,6 +408,6 @@ impl Evaluator {
             metric_costs,
         };
 
-        vec![layout_costs, unigram_costs, bigram_costs, trigram_costs]
+        EvaluationResult::new(vec![layout_costs, unigram_costs, bigram_costs, trigram_costs])
     }
 }

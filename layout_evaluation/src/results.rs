@@ -52,29 +52,31 @@ pub struct MetricResults {
     pub metric_costs: Vec<MetricResult>,
 }
 
-impl MetricResults {
-    /// Print a summary of the metric results to stdout.
-    pub fn print(&self) {
-        println!("{:?} metrics:", self.metric_type);
+impl std::fmt::Display for MetricResults {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{:?} metrics:", self.metric_type)?;
 
         if self.metric_type != MetricType::Layout {
-            println!(
+            writeln!(f,
                 "  Not found: {:.4}% of {:.4}",
                 100.0 * self.not_found_weight / (self.not_found_weight + self.found_weight),
                 self.not_found_weight + self.found_weight
-            );
+            )?;
         }
         for metric_cost in self.metric_costs.iter() {
-            println!(
+            writeln!(f,
                 "  {:>9.4} (weighted: {:>9.4}) {:<35} | {}",
                 self.compute_metric_cost(metric_cost, true, false),
                 self.compute_metric_cost(metric_cost, true, true),
                 metric_cost.name,
                 metric_cost.message.as_ref().unwrap_or(&"".to_string()),
-            );
+            )?;
         }
+        Ok(())
     }
+}
 
+impl MetricResults {
     /// Normalize a metric's cost value with given normalization strategy.
     fn normalize_value(&self, val: f64, normalization_type: &NormalizationType) -> f64 {
         match normalization_type {
@@ -119,5 +121,51 @@ impl MetricResults {
     /// Compute the weighted but not normalized total cost of all metrics.
     pub fn unnormalized_total_cost(&self) -> f64 {
         self.aggregate_metric_costs(false, true)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct EvaluationResult {
+    individual_results: Vec<MetricResults>,
+}
+
+impl std::fmt::Display for EvaluationResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.individual_results
+            .iter()
+            .fold(Ok(()), |acc, results| acc.and_then(|_| writeln!(f, "{}", results)))?;
+
+        writeln!(f,
+            "Cost: {:.4} (optimization score: {})",
+                 self.total_cost(),
+                 self.optimization_score()
+        )?;
+
+        Ok(())
+    }
+}
+
+impl EvaluationResult {
+    pub fn new(individual_results: Vec<MetricResults>) -> Self {
+        Self {
+            individual_results,
+        }
+    }
+
+    pub fn total_cost(&self) -> f64 {
+        let mut cost = 0.0;
+        for mc in self.individual_results.iter().filter(|mc| !mc.metric_costs.is_empty()) {
+            cost += mc.total_cost();
+        }
+
+        cost
+    }
+
+    pub fn optimization_score(&self) -> usize {
+        (1e8 / self.total_cost()) as usize
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, MetricResults> {
+        self.individual_results.iter()
     }
 }
