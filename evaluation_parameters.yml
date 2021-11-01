@@ -63,7 +63,7 @@ metrics:
 
   finger_repeats:
     enabled: true
-    weight: 750.0
+    weight: 780.0
     normalization:
       type: weight_found
       value: 1.0
@@ -75,7 +75,7 @@ metrics:
 
   finger_repeats_top_bottom:
     enabled: true
-    weight: 1900.0
+    weight: 1850.0
     normalization:
       type: weight_found
       value: 1.0
@@ -165,7 +165,7 @@ metrics:
 
   manual_bigram_penalty:
     enabled: true
-    weight: 710.0
+    weight: 1050.0
     normalization:
       type: weight_found
       value: 1.0
@@ -189,7 +189,7 @@ metrics:
 
   irregularity:
     enabled: true
-    weight: 8.4
+    weight: 8.25
     normalization:
       type: weight_found
       value: 1.0
