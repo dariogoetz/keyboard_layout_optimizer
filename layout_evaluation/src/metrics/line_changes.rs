@@ -70,17 +70,18 @@ impl BigramMetric for LineChanges {
     ) -> Option<f64> {
         // NOTE: ArneBab's solution only excludes the spacebar. Here, all thumb keys are excluded, in particular one M4 modifier.
 
-        if k1.key.finger == Finger::Thumb || k2.key.finger == Finger::Thumb {
-            return Some(0.0);
-        }
-        if !(self.count_row_changes_between_hands || k1.key.hand == k2.key.hand) {
-            return Some(0.0);
-        }
-
         let f1 = k1.key.finger;
         let f2 = k2.key.finger;
         let h1 = k1.key.hand;
         let h2 = k2.key.hand;
+
+        if f1 == Finger::Thumb || f2 == Finger::Thumb {
+            return Some(0.0);
+        }
+        if !(self.count_row_changes_between_hands || h1 == h2) {
+            return Some(0.0);
+        }
+
         let pos1 = k1.key.matrix_position;
         let pos2 = k2.key.matrix_position;
         let unb1 = k1.key.unbalancing;
