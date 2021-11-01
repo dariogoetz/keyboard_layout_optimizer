@@ -61,7 +61,7 @@ impl TrigramMetric for Irregularity {
             })
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
 
-        Some(costs.0 * costs.1)
+        Some((1.0 + costs.0) * (1.0 + costs.1))
     }
 
     fn total_cost(
