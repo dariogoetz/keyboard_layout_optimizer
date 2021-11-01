@@ -16,6 +16,8 @@ use serde::Deserialize;
 pub struct Parameters {
     short_fingers: Vec<(Hand, Finger)>,
     long_fingers: Vec<(Hand, Finger)>,
+    short_up_to_long_or_long_down_to_short_reduction: f64,
+    short_down_to_long_or_long_up_to_short_increase: f64,
     count_row_changes_between_hands: bool,
 }
 
@@ -23,6 +25,8 @@ pub struct Parameters {
 pub struct LineChanges {
     finger_is_short: HandFingerMap<bool>,
     finger_is_long: HandFingerMap<bool>,
+    short_up_to_long_or_long_down_to_short_reduction: f64,
+    short_down_to_long_or_long_up_to_short_increase: f64,
     count_row_changes_between_hands: bool,
 }
 
@@ -43,6 +47,8 @@ impl LineChanges {
         Self {
             finger_is_short,
             finger_is_long,
+            short_up_to_long_or_long_down_to_short_reduction: params.short_up_to_long_or_long_down_to_short_reduction,
+            short_down_to_long_or_long_up_to_short_increase: params.short_down_to_long_or_long_up_to_short_increase,
             count_row_changes_between_hands: params.count_row_changes_between_hands,
         }
     }
@@ -89,7 +95,7 @@ impl BigramMetric for LineChanges {
                 && *self.finger_is_long.get(&h1, &f1)
                 && *self.finger_is_short.get(&h2, &f2))
         {
-            num_rows -= 0.25;
+            num_rows -= self.short_up_to_long_or_long_down_to_short_reduction;
         }
 
         if (downwards && *self.finger_is_short.get(&h1, &f1) && *self.finger_is_long.get(&h2, &f2))
@@ -97,7 +103,7 @@ impl BigramMetric for LineChanges {
                 && *self.finger_is_long.get(&h1, &f1)
                 && *self.finger_is_short.get(&h2, &f2))
         {
-            num_rows += 0.5;
+            num_rows += self.short_down_to_long_or_long_up_to_short_increase;
         }
 
         // NOTE: In ArneBab's solution, there may be keys that do not belong to a finger.

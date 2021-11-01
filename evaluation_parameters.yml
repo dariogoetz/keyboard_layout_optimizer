@@ -150,6 +150,8 @@ metrics:
     params:
       short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"]]  # no left pinky!
       long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
+      short_up_to_long_or_long_down_to_short_reduction: 0.25
+      short_down_to_long_or_long_up_to_short_increase: 0.5
       count_row_changes_between_hands: false
 
   asymmetric_bigrams:
