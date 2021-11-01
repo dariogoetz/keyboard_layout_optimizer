@@ -1,3 +1,12 @@
+//! The layout metric `AsymmetricKeys` matches the relative locations of configurable pairs of
+//! groups of keys against each other, e.g. "aou" and "äöü". If each key has the same relative
+//! location to its counterpart as the others the costs are zero.
+//! Otherwise, a cost is given for each inconsistency in
+//! - hand directon (left to right or right to left)
+//! - finger distance with direction
+//! - column distance
+//! - vertical direction (top to bottom or bottom to top)
+
 use super::LayoutMetric;
 
 use keyboard_layout::{key::Hand, layout::Layout};

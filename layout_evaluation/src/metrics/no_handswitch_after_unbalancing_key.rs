@@ -1,3 +1,8 @@
+//! The bigram metric `NoHandSwitchAfterUnbalancingKey` assigns a cost to each bigram
+//! that starts with an unbalancing key and ends on the same hand (no thumbs). The cost increases
+//! with the square of the vertical distance. If the second key is unbalancing as well
+//! and horizontally far away (more than three keys), the cost is increased even further.
+
 use super::BigramMetric;
 
 use keyboard_layout::key::Finger;

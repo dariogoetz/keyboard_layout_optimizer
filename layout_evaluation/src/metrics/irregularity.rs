@@ -1,3 +1,10 @@
+//! The trigram metric `Irregularity` splits each trigram into two bigrams
+//! and evaluates each bigram with all configured bigram metrics that can assign costs to
+//! individual bigrams (`individual_cost` does not return `None`). The two bigram costs are multiplied and finally, the
+//! square root of their sum is the resulting irregularity cost.
+//!
+//! *Note:* ArneBab's irregularity does not include all bigram metrics (asymmetric bigrams is missing).
+
 use super::{BigramMetric, TrigramMetric};
 
 use crate::results::NormalizationType;

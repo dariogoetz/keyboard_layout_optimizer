@@ -1,3 +1,6 @@
+//! The bigram metric `AsymmetricBigram` metric assigns a cost to each bigram
+//! for which the two keys are not symmetrical (thumbs are excluded).
+
 use super::BigramMetric;
 
 use keyboard_layout::layout::{LayerKey, Layout};

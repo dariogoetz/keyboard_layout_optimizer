@@ -1,3 +1,9 @@
+//! The bigram metric `FingerRepeatsTopBottom` incurrs a cost for bigram that uses the same finger
+//! for different keys (thumb excluded) passing over one row (vertical distance at least two rows).
+//! If the finger is the pointer, the cost may be multiplied with a configurable factor (usually
+//! lessening the cost). If the bigram is very common, its cost is increased even further with a
+//! configurable slope.
+
 use super::BigramMetric;
 
 use keyboard_layout::key::Finger;
@@ -7,9 +13,13 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    /// If the finger repetition is done by the index finger, the cost is multiplied with this factor.
     pub index_finger_factor: f64,
+    /// If the bigram weight exceeds this fraction of the total weight, the additional factor is multiplied with the cost.
     pub critical_fraction: f64,
+    /// The slope for increasing the cost if the bigram weight exceeds the threshold.
     pub factor: f64,
+    /// The minimum total weight required for increasing the cost behind the threshold.
     pub total_weight_threshold: f64,
 }
 

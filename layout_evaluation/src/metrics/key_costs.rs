@@ -1,3 +1,7 @@
+//! The unigram metric `KeyCost` multiplies each unigram's weight with the key cost
+//! of the corresponding key (as configured for the `Keyboard`) and the associated
+//! layer cost (as configured for the `Layout`).
+
 use super::UnigramMetric;
 
 use keyboard_layout::layout::{LayerKey, Layout};

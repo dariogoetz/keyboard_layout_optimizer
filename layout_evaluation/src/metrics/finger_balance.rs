@@ -1,3 +1,10 @@
+//! The unigram metric `FingerBalance` compares the aggregated unigram frequencies
+//! per finger with configurable intended finger loads. The metric costs come from
+//! discrepancies which are computed based on a standard deviation computation.
+//!
+//! *Note:* In contrast to ArneBab's version of the metric, thumb keys are excluded
+//! from the discrepancy computation.
+
 use super::UnigramMetric;
 
 use keyboard_layout::key::{Finger, Hand, HandFingerMap};

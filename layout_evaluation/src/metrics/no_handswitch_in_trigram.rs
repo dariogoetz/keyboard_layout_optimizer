@@ -1,3 +1,12 @@
+//! The trigram metric `NoHandSwithInTrigram` counts the weights of trigrams
+//! that do not involve a handswitch (thumbs are excluded). The cost may differ depending on whether
+//! there is a direction change from the first to the second bigram within the
+//! trigram.
+//!
+//! *Note:* In ArneBab's version of the metric, a precomputed table is used that only involves
+//! letters, period, and comma. Here, this is modelled by only including keys that are configured
+//! as "fixed" in the `Keyboard`.
+
 use super::TrigramMetric;
 
 use keyboard_layout::key::Finger;
@@ -45,7 +54,7 @@ impl TrigramMetric for NoHandswitchInTrigram {
         let hand2 = k2.key.hand;
         let hand3 = k3.key.hand;
 
-        // NOTE: In ArneBab's solution, a precomputed table is used, that only contains letters, period and comma
+        // NOTE: In ArneBab's solution, a precomputed table is used, that only contains letters, period, and comma
         // Here, we use "non-fixed" keys, which should (but need not, depending on configuration), amount to the same
 
         // exclude modifiers (see ArneBab's explanation in comments for layout_cost.py:_trigram_key_tables)

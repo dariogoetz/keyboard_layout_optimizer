@@ -1,3 +1,10 @@
+//! The bigram metric `LineChanges` is a measure for the vertical distance
+//! to travel for a bigram (excluding thumbs). The vertical distance is normalized by the "horizontal" distance
+//! of the fingers. More precisely, the number of rows to travel is squared and divided by the
+//! finger distance. Additional adjustments are applied if the movement is upwards/downwards from/to
+//! short/long fingers and if the involved keys are unbalancing (as configured for the keyboard).
+//! The resulting value is squared (after being multiplied to the bigram's weight).
+
 use super::BigramMetric;
 
 use keyboard_layout::key::{Finger, Hand, HandFingerMap};

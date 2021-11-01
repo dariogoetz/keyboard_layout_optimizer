@@ -1,3 +1,8 @@
+//! The bigram metric `ManualBigramPenalty` incurrs costs if the bigram is mapped
+//! to one of a list of configurable "bad" key pairs (in terms of key locations).
+//! In addition to the configurable key pairs, all key pairs from pinky to pinky
+//! of the same hand are considered bad with a factor of one.
+
 use super::BigramMetric;
 
 use keyboard_layout::{
