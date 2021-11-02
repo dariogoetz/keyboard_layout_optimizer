@@ -3,7 +3,7 @@ use structopt::StructOpt;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-mod common;
+use evolve_keyboard_layout::common;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Random keyboard layout evaluation")]

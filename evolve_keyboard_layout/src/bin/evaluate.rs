@@ -1,6 +1,6 @@
 use structopt::StructOpt;
 
-mod common;
+use evolve_keyboard_layout::common;
 
 fn main() {
     dotenv::dotenv().ok();

@@ -1,8 +1,7 @@
 use structopt::StructOpt;
 
 use layout_optimization::optimization;
-
-mod common;
+use evolve_keyboard_layout::common;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
