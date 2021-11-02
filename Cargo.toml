@@ -4,6 +4,10 @@ members = [
     "layout_evaluation",
     "layout_optimization",
     "evolve_keyboard_layout",
-    "layouts_webservice",
+    # "layouts_webservice",
     "genevo",
+]
+
+exclude = [
+    "layouts_webservice",  # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
 ]
