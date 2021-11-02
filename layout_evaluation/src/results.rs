@@ -1,9 +1,9 @@
 //! The `results` module contains structs representing the results of metric evaluations.
 
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
 /// The `NormalizationType` specifies how the total cost of a metric evaluation shall be normalized.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(tag = "type", content = "value")]
 #[serde(rename_all = "snake_case")]
 pub enum NormalizationType {
@@ -16,7 +16,7 @@ pub enum NormalizationType {
 }
 
 /// Specify which data a metric operates on.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum MetricType {
     Layout,
     Unigram,
@@ -25,7 +25,7 @@ pub enum MetricType {
 }
 
 /// Describes the result of an individual metric evaluation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MetricResult {
     /// Name of the metric.
     pub name: String,
@@ -40,7 +40,7 @@ pub struct MetricResult {
 }
 
 /// Describes a list of metric evaluation results of the same `MetricType`.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MetricResults {
     /// Type of the metric, i.e. which data the metrics operated on.
     pub metric_type: MetricType,
@@ -124,7 +124,7 @@ impl MetricResults {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct EvaluationResult {
     individual_results: Vec<MetricResults>,
 }

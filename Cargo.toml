@@ -4,5 +4,6 @@ members = [
     "layout_evaluation",
     "layout_optimization",
     "evolve_keyboard_layout",
+    "layouts_webservice",
     "genevo",
 ]

@@ -1,0 +1,23 @@
+[package]
+name = "layouts_webservice"
+version = "0.1.0"
+workspace = "../"
+edition = "2018"
+publish = false
+
+[dependencies]
+rocket = { path = "../../Rocket/core/lib", features = ["json"] }
+rocket_db_pools = { path = "../../Rocket/contrib/db_pools/lib/", features = ["sqlx_sqlite"] }
+
+sqlx = { version = "0.5.1", default-features = false, features = ["macros", "offline", "migrate"] }
+
+dotenv = "*"
+serde = { version="^1.0", features=[ "derive" ] }
+serde_yaml = "*"
+serde_json = "*"
+anyhow = "*"
+env_logger = "*"
+log = "*"
+
+keyboard_layout = { path = "../keyboard_layout" }
+layout_evaluation = { path = "../layout_evaluation" }
