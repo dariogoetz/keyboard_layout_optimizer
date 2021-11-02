@@ -1,13 +1,6 @@
-use std::sync::Arc;
 use structopt::StructOpt;
 
-use keyboard_layout::{
-    keyboard::{Keyboard, KeyboardYAML},
-    layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
-};
-
-use anyhow::Result;
-use serde::Deserialize;
+mod common;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout ptimization")]
@@ -20,35 +13,12 @@ struct Options {
     layout_config: String,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct LayoutConfig {
-    pub keyboard: KeyboardYAML,
-    pub base_layout: BaseLayoutYAML,
-}
-
-impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
-
-        Ok(cfg)
-    }
-}
-
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
     let options = Options::from_args();
 
-    let layout_config = LayoutConfig::from_yaml(&options.layout_config).expect(&format!(
-        "Could not load config file {}",
-        &options.layout_config
-    ));
-
-    let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
-
-    let layout_generator =
-        NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard.clone());
+    let layout_generator = common::init_layout_generator(&options.layout_config);
 
     let layout = match layout_generator.generate(&options.layout_str) {
         Ok(layout) => layout,
