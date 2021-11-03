@@ -32,7 +32,11 @@ struct Options {
 
     /// Maximum number of generations
     #[structopt(long)]
-    generation_limit: Option<u64>
+    generation_limit: Option<u64>,
+
+    /// Repeat optimizations indefinitely
+    #[structopt(long)]
+    run_forever: bool,
 }
 
 fn main() {
@@ -58,16 +62,22 @@ fn main() {
         .unwrap_or(&options.fix_from)
         .to_string();
 
-    let layout = optimization::optimize(
-        &optimization_params,
-        &evaluator,
-        &fix_from,
-        &layout_generator,
-        &options.fix.unwrap_or_else(|| "".to_string()),
-        options.start_layout.is_some(),
-        !options.no_cache_results,
-    );
+    loop {
+        let layout = optimization::optimize(
+            &optimization_params,
+            &evaluator,
+            &fix_from,
+            &layout_generator,
+            &options.fix.clone().unwrap_or_else(|| "".to_string()),
+            options.start_layout.is_some(),
+            !options.no_cache_results,
+        );
 
-    let evaluation_result = evaluator.evaluate_layout(&layout);
-    println!("{}", evaluation_result);
+        let evaluation_result = evaluator.evaluate_layout(&layout);
+        println!("{}", evaluation_result);
+
+        if !options.run_forever {
+            break
+        }
+    }
 }
