@@ -23,7 +23,7 @@ log = "*"
 dotenv = "*"
 structopt = "*"
 rand = "*"
-
+reqwest = { version = "0.11", features = ["blocking", "json"] }
 rustc-hash = "*"
 
 [profile.release]

@@ -1,9 +1,12 @@
+use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use structopt::StructOpt;
 
 use layout_optimization::optimization;
 use evolve_keyboard_layout::common;
+
+const PUBLISH_URL: &str = "http://localhost:8000/";
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -39,6 +42,10 @@ struct Options {
     /// Append found layout to file
     #[structopt(long)]
     append_solution_to: Option<String>,
+
+    /// Publish found layout to webservice under this name
+    #[structopt(long)]
+    publish_as: Option<String>,
 
     /// Repeat optimizations indefinitely
     #[structopt(long)]
@@ -90,7 +97,31 @@ fn main() {
                 .unwrap();
 
             if let Err(e) = writeln!(file, "{}", layout.as_text()) {
-                eprintln!("Couldn't write to file: {}", e);
+                log::error!("Couldn't write to file: {}", e);
+            }
+        }
+
+        if let Some(publish_name) = &options.publish_as {
+
+            let client = reqwest::blocking::Client::new();
+            let mut body = HashMap::new();
+            body.insert("published_by", publish_name.to_string());
+            body.insert("layout", layout.as_text());
+
+            let resp = client
+                .post(PUBLISH_URL)
+                .json(&body)
+                .send()
+                .ok();
+
+            if let Some(resp) = resp {
+                if resp.status().as_str() == "200" {
+                    log::info!("Published layout '{}' to {}", layout.as_text(), PUBLISH_URL);
+                } else {
+                    log::error!("Could not publish result to webservice: {:?}", &resp.text());
+                }
+            } else {
+                log::error!("Could not publish result to webservice");
             }
         }
 
