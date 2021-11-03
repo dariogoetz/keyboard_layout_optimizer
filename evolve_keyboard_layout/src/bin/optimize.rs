@@ -1,3 +1,5 @@
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 use structopt::StructOpt;
 
 use layout_optimization::optimization;
@@ -33,6 +35,10 @@ struct Options {
     /// Maximum number of generations
     #[structopt(long)]
     generation_limit: Option<u64>,
+
+    /// Append found layout to file
+    #[structopt(long)]
+    append_solution_to: Option<String>,
 
     /// Repeat optimizations indefinitely
     #[structopt(long)]
@@ -75,6 +81,18 @@ fn main() {
 
         let evaluation_result = evaluator.evaluate_layout(&layout);
         println!("{}", evaluation_result);
+
+        if let Some(filename) = &options.append_solution_to {
+            let mut file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(filename)
+                .unwrap();
+
+            if let Err(e) = writeln!(file, "{}", layout.as_text()) {
+                eprintln!("Couldn't write to file: {}", e);
+            }
+        }
 
         if !options.run_forever {
             break
