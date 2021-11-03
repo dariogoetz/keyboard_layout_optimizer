@@ -59,9 +59,6 @@ impl LayoutConfig {
 
 #[launch]
 fn rocket() -> _ {
-    dotenv::dotenv().ok();
-    env_logger::init();
-
     let layout_config = LayoutConfig::from_yaml("../standard_keyboard.yml").expect(&format!(
         "Could not load config file 'standard_keyboard.yml'"
     ));
@@ -71,19 +68,16 @@ fn rocket() -> _ {
         "Could not read evaluation yaml file 'evaluation_parameters.yml'"
     ));
     let p = "../".to_string() + &eval_params.ngrams.unigrams;
-    log::info!("Reading unigram file: '{}'", &p);
     let unigrams = Unigrams::from_file(&p).expect(&format!(
         "Could not read 1-gramme file from '{}'.",
         &p
     ));
     let p = "../".to_string() + &eval_params.ngrams.bigrams;
-    log::info!("Reading bigram file: '{}'", &p);
     let bigrams = Bigrams::from_file(&p).expect(&format!(
         "Could not read 2-gramme file from '{}'.",
         &p
     ));
     let p = "../".to_string() + &eval_params.ngrams.trigrams;
-    log::info!("Reading trigram file: '{}'", &p);
     let trigrams = Trigrams::from_file(&p).expect(&format!(
         "Could not read 3-gramme file from '{}'.",
         &p

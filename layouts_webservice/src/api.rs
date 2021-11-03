@@ -68,7 +68,7 @@ async fn post(
 
     let result = match result {
         None => {
-            log::info!("Evaluating new layout: {}", layout.layout);
+            println!("Evaluating new layout: {}", layout.layout);
             let l = layout_generator
                 .generate(&layout.layout)
                 .map_err(|_| Status::BadRequest)?;

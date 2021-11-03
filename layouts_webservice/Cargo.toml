@@ -14,13 +14,10 @@ rocket_db_pools = { path = "../../Rocket/contrib/db_pools/lib/", features = ["sq
 
 sqlx = { version = "0.5.1", default-features = false, features = ["macros", "offline", "migrate"] }
 
-dotenv = "*"
 serde = { version="^1.0", features=[ "derive" ] }
 serde_yaml = "*"
 serde_json = "*"
 anyhow = "*"
-env_logger = "*"
-log = "*"
 
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }
