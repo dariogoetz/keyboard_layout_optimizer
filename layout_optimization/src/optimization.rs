@@ -231,7 +231,7 @@ pub type MySimulator = Simulator<
         //PartiallyMappedCrossover,
         NoOpCrossover,
         SwapOrderMutator,
-        UniformReinserter,
+        UniformReinserter, // we do not use an elitist reinserter due to performance reasons (non-parallelized evaluation)
     >,
     GenerationLimit,
 >;
