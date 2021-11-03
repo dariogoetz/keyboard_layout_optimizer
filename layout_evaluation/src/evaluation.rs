@@ -7,8 +7,9 @@
 //! The ngram mapper is responsible for mapping char-based ngrams (as read from input data)
 //! to singles, pairs, and triplets of `LayerKey`s that can then be analysed by the individual metrics.
 
-
-use crate::results::{EvaluationResult, MetricResult, MetricResults, MetricType, NormalizationType};
+use crate::results::{
+    EvaluationResult, MetricResult, MetricResults, MetricType, NormalizationType,
+};
 use crate::{metrics::*, ngram_mapper::NgramMapper};
 
 use keyboard_layout::layout::{LayerKey, Layout};
@@ -374,40 +375,49 @@ impl Evaluator {
 
         // Layout metrics
         let metric_costs = self.evaluate_layout_metrics(layout);
-        let layout_costs = MetricResults {
-            metric_type: MetricType::Layout,
-            found_weight: 1.0,
-            not_found_weight: 0.0,
-            metric_costs,
-        };
+        let mut layout_costs = MetricResults::new(MetricType::Layout, 1.0, 0.0);
+        metric_costs
+            .into_iter()
+            .for_each(|mc| layout_costs.add_result(mc));
 
         // Unigram metrics
         let metric_costs = self.evaluate_unigram_metrics(layout, &mapped_ngrams.unigrams);
-        let unigram_costs = MetricResults {
-            metric_type: MetricType::Unigram,
-            found_weight: mapped_ngrams.unigrams_found,
-            not_found_weight: mapped_ngrams.unigrams_not_found,
-            metric_costs,
-        };
+        let mut unigram_costs = MetricResults::new(
+            MetricType::Unigram,
+            mapped_ngrams.unigrams_found,
+            mapped_ngrams.unigrams_not_found,
+        );
+        metric_costs
+            .into_iter()
+            .for_each(|mc| unigram_costs.add_result(mc));
 
         // Bigram metrics
         let metric_costs = self.evaluate_bigram_metrics(layout, &mapped_ngrams.bigrams);
-        let bigram_costs = MetricResults {
-            metric_type: MetricType::Bigram,
-            found_weight: mapped_ngrams.bigrams_found,
-            not_found_weight: mapped_ngrams.bigrams_not_found,
-            metric_costs,
-        };
+        let mut bigram_costs = MetricResults::new(
+            MetricType::Bigram,
+            mapped_ngrams.bigrams_found,
+            mapped_ngrams.bigrams_not_found,
+        );
+        metric_costs
+            .into_iter()
+            .for_each(|mc| bigram_costs.add_result(mc));
 
         // Trigram metrics
         let metric_costs = self.evaluate_trigram_metrics(layout, &mapped_ngrams.trigrams);
-        let trigram_costs = MetricResults {
-            metric_type: MetricType::Trigram,
-            found_weight: mapped_ngrams.trigrams_found,
-            not_found_weight: mapped_ngrams.trigrams_not_found,
-            metric_costs,
-        };
+        let mut trigram_costs = MetricResults::new(
+            MetricType::Trigram,
+            mapped_ngrams.trigrams_found,
+            mapped_ngrams.trigrams_not_found,
+        );
+        metric_costs
+            .into_iter()
+            .for_each(|mc| trigram_costs.add_result(mc));
 
-        EvaluationResult::new(vec![layout_costs, unigram_costs, bigram_costs, trigram_costs])
+        EvaluationResult::new(vec![
+            layout_costs,
+            unigram_costs,
+            bigram_costs,
+            trigram_costs,
+        ])
     }
 }

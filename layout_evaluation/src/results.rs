@@ -1,6 +1,6 @@
 //! The `results` module contains structs representing the results of metric evaluations.
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// The `NormalizationType` specifies how the total cost of a metric evaluation shall be normalized.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -39,6 +39,15 @@ pub struct MetricResult {
     pub normalization: NormalizationType,
 }
 
+/// Describes the normalized results of an individual metric evaluation
+/// taking into account the total found/not found ngram weights.
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct NormalizedMetricResult {
+    pub core: MetricResult,
+    pub weighted_cost: f64,
+    pub unweighted_cost: f64,
+}
+
 /// Describes a list of metric evaluation results of the same `MetricType`.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MetricResults {
@@ -49,7 +58,7 @@ pub struct MetricResults {
     /// The total amount of weight (ngram frequencies) from ngrams that contained symbols that coult not be mapped by the layout.
     pub not_found_weight: f64,
     /// A list of the individual metric results.
-    pub metric_costs: Vec<MetricResult>,
+    pub metric_costs: Vec<NormalizedMetricResult>,
 }
 
 impl std::fmt::Display for MetricResults {
@@ -57,19 +66,21 @@ impl std::fmt::Display for MetricResults {
         writeln!(f, "{:?} metrics:", self.metric_type)?;
 
         if self.metric_type != MetricType::Layout {
-            writeln!(f,
+            writeln!(
+                f,
                 "  Not found: {:.4}% of {:.4}",
                 100.0 * self.not_found_weight / (self.not_found_weight + self.found_weight),
                 self.not_found_weight + self.found_weight
             )?;
         }
         for metric_cost in self.metric_costs.iter() {
-            writeln!(f,
+            writeln!(
+                f,
                 "  {:>9.4} (weighted: {:>9.4}) {:<35} | {}",
-                self.compute_metric_cost(metric_cost, true, false),
-                self.compute_metric_cost(metric_cost, true, true),
-                metric_cost.name,
-                metric_cost.message.as_ref().unwrap_or(&"".to_string()),
+                metric_cost.unweighted_cost,
+                metric_cost.weighted_cost,
+                metric_cost.core.name,
+                metric_cost.core.message.as_ref().unwrap_or(&"".to_string()),
             )?;
         }
         Ok(())
@@ -77,6 +88,25 @@ impl std::fmt::Display for MetricResults {
 }
 
 impl MetricResults {
+    pub fn new(metric_type: MetricType, found_weight: f64, not_found_weight: f64) -> Self {
+        Self {
+            metric_type,
+            found_weight,
+            not_found_weight,
+            metric_costs: Vec::new(),
+        }
+    }
+
+    pub fn add_result(&mut self, metric_cost: MetricResult) {
+        let weighted_cost = self.compute_metric_cost(&metric_cost, true, true);
+        let unweighted_cost = self.compute_metric_cost(&metric_cost, true, false);
+        self.metric_costs.push(NormalizedMetricResult {
+            core: metric_cost,
+            weighted_cost,
+            unweighted_cost,
+        })
+    }
+
     /// Normalize a metric's cost value with given normalization strategy.
     fn normalize_value(&self, val: f64, normalization_type: &NormalizationType) -> f64 {
         match normalization_type {
@@ -109,7 +139,7 @@ impl MetricResults {
     /// Helper function for aggregating all individual metrics' results to a total value.
     fn aggregate_metric_costs(&self, normalize: bool, weight: bool) -> f64 {
         self.metric_costs.iter().fold(0.0, |acc, metric_cost| {
-            acc + self.compute_metric_cost(metric_cost, normalize, weight)
+            acc + self.compute_metric_cost(&metric_cost.core, normalize, weight)
         })
     }
 
@@ -133,12 +163,15 @@ impl std::fmt::Display for EvaluationResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         self.individual_results
             .iter()
-            .fold(Ok(()), |acc, results| acc.and_then(|_| writeln!(f, "{}", results)))?;
+            .fold(Ok(()), |acc, results| {
+                acc.and_then(|_| writeln!(f, "{}", results))
+            })?;
 
-        writeln!(f,
+        writeln!(
+            f,
             "Cost: {:.4} (optimization score: {})",
-                 self.total_cost(),
-                 self.optimization_score()
+            self.total_cost(),
+            self.optimization_score()
         )?;
 
         Ok(())
@@ -147,14 +180,16 @@ impl std::fmt::Display for EvaluationResult {
 
 impl EvaluationResult {
     pub fn new(individual_results: Vec<MetricResults>) -> Self {
-        Self {
-            individual_results,
-        }
+        Self { individual_results }
     }
 
     pub fn total_cost(&self) -> f64 {
         let mut cost = 0.0;
-        for mc in self.individual_results.iter().filter(|mc| !mc.metric_costs.is_empty()) {
+        for mc in self
+            .individual_results
+            .iter()
+            .filter(|mc| !mc.metric_costs.is_empty())
+        {
             cost += mc.total_cost();
         }
 

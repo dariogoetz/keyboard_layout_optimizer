@@ -25,12 +25,14 @@ struct LayoutEvaluationDB {
     layout: String,
     total_cost: f64,
     details_json: Option<String>,
+    published_by: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 struct LayoutEvaluation {
     layout: String,
     total_cost: f64,
+    published_by: Option<String>,
     details: Option<EvaluationResult>,
 }
 
@@ -39,45 +41,54 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
         Self {
             layout: item.layout,
             total_cost: item.total_cost,
+            published_by: item.published_by,
             details: item.details_json.map(|d| serde_json::from_str(&d).unwrap()),
         }
     }
 }
 
+#[derive(Debug, Deserialize)]
+struct PostLayout {
+    layout: String,
+    published_by: Option<String>,
+}
+
 #[post("/", data = "<layout>")]
 async fn post(
     mut db: Connection<Db>,
-    layout: &str,
+    layout: Json<PostLayout>,
     layout_generator: &State<NeoLayoutGenerator>,
     evaluator: &State<Evaluator>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
     let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = ?")
-        .bind(layout)
+        .bind(&layout.layout)
         .fetch_one(&mut *db)
         .await
         .ok();
 
     let result = match result {
         None => {
-            log::info!("Evaluating new layout: {}", layout);
+            log::info!("Evaluating new layout: {}", layout.layout);
             let l = layout_generator
-                .generate(layout)
+                .generate(&layout.layout)
                 .map_err(|_| Status::BadRequest)?;
             let evaluation_result = evaluator.evaluate_layout(&l);
 
             let result = LayoutEvaluationDB {
                 id: None,
-                layout: layout.to_string(),
+                layout: l.to_string(),
                 total_cost: evaluation_result.total_cost(),
+                published_by: layout.published_by.clone(),
                 details_json: Some(
                     serde_json::to_string(&evaluation_result)
                         .map_err(|_| Status::InternalServerError)?,
                 ),
             };
 
-            sqlx::query("INSERT INTO layouts (layout, total_cost, details_json) VALUES (?, ?, ?)")
+            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json) VALUES (?, ?, ?, ?)")
                 .bind(&result.layout)
                 .bind(&result.total_cost)
+                .bind(&result.published_by)
                 .bind(&result.details_json)
                 .execute(&mut *db)
                 .await
@@ -94,7 +105,7 @@ async fn post(
 #[get("/")]
 async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
     let layouts = sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, NULL AS details_json FROM layouts",
+        "SELECT NULL AS id, layout, total_cost, published_by, NULL AS details_json FROM layouts",
     )
     .fetch_all(&mut *db)
     .await
@@ -109,7 +120,7 @@ async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
 #[get("/<layout>")]
 async fn get(mut db: Connection<Db>, layout: &str) -> Option<Json<LayoutEvaluation>> {
     sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, details_json FROM layouts WHERE layout = ?",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json FROM layouts WHERE layout = ?",
     )
     .bind(layout)
     .fetch_one(&mut *db)
