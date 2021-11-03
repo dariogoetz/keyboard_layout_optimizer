@@ -34,6 +34,7 @@ struct LayoutEvaluation {
     total_cost: f64,
     published_by: Option<String>,
     details: Option<EvaluationResult>,
+    plot: Option<String>,
 }
 
 impl From<LayoutEvaluationDB> for LayoutEvaluation {
@@ -43,6 +44,7 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
             total_cost: item.total_cost,
             published_by: item.published_by,
             details: item.details_json.map(|d| serde_json::from_str(&d).unwrap()),
+            plot: None,
         }
     }
 }
@@ -118,14 +120,19 @@ async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
 }
 
 #[get("/<layout>")]
-async fn get(mut db: Connection<Db>, layout: &str) -> Option<Json<LayoutEvaluation>> {
+async fn get(mut db: Connection<Db>, layout: &str, layout_generator: &State<NeoLayoutGenerator>) -> Option<Json<LayoutEvaluation>> {
     sqlx::query_as::<_, LayoutEvaluationDB>(
         "SELECT NULL AS id, layout, total_cost, published_by, details_json FROM layouts WHERE layout = ?",
     )
     .bind(layout)
     .fetch_one(&mut *db)
     .await
-    .map(|e| Json(e.into()))
+    .map(|e| {
+        let mut e: LayoutEvaluation = e.into();
+        let l = layout_generator.generate(&e.layout).unwrap();
+        e.plot = Some(l.plot());
+        Json(e)
+    })
     .ok()
 }
 
