@@ -15,8 +15,10 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LayoutError {
-    #[error("Invalid keyboard layout: {0}")]
-    InvalidLayout(String),
+    #[error("Invalid keyboard layout: Duplicate characters in layout {0}")]
+    DuplicateKeys(String),
+    #[error("Invalid keyboard layout: Wrong number of (unique) keys: {0} instead of {1}")]
+    WrongNumberOfKeys(usize, usize)
 }
 
 /// A collection of data (configuration) regarding the Neo layout (and its family)
@@ -100,12 +102,13 @@ impl NeoLayoutGenerator {
     pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
 
-        // TODO: assert that keys are unique (HashSet)
         let s: HashSet<char> = HashSet::from_iter(chars.clone());
         if s.len() != self.permutable_key_map.len() {
-            return Err(LayoutError::InvalidLayout(layout_keys.to_string()).into());
+            return Err(LayoutError::WrongNumberOfKeys(s.len(), self.permutable_key_map.len()).into());
         };
-        // TODO: assert that number of provided keys equals number of permutable keys in generator
+        if s.len() != chars.len() {
+            return Err(LayoutError::DuplicateKeys(layout_keys.to_string()).into());
+        }
 
         // assemble a Vec<Vec<char>> representation of the layer for the given layout string
         let mut given_chars = chars.iter();
