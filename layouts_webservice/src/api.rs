@@ -62,23 +62,25 @@ async fn post(
     layout_generator: &State<NeoLayoutGenerator>,
     evaluator: &State<Evaluator>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
+    let l = layout_generator
+        .generate(&layout.layout)
+        .map_err(|_| Status::BadRequest)?;
+    let layout_str = l.as_text();
+
     let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = ?")
-        .bind(&layout.layout)
+        .bind(&layout_str)
         .fetch_one(&mut *db)
         .await
         .ok();
 
     let result = match result {
         None => {
-            println!("Evaluating new layout: {}", layout.layout);
-            let l = layout_generator
-                .generate(&layout.layout)
-                .map_err(|_| Status::BadRequest)?;
+            println!("Evaluating new layout: {}", layout_str);
             let evaluation_result = evaluator.evaluate_layout(&l);
 
             let result = LayoutEvaluationDB {
                 id: None,
-                layout: l.to_string(),
+                layout: layout_str,
                 total_cost: evaluation_result.total_cost(),
                 published_by: layout.published_by.clone(),
                 details_json: Some(
