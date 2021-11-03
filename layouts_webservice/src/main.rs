@@ -15,7 +15,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
 
-mod sqlx;
+mod api;
 
 
 #[derive(Clone, Deserialize, Debug)]
@@ -98,5 +98,5 @@ fn rocket() -> _ {
     rocket::build()
         .manage(evaluator)
         .manage(layout_generator)
-        .attach(sqlx::stage())
+        .attach(api::stage())
 }
