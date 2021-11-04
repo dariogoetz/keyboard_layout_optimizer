@@ -11,7 +11,7 @@ rocket = { path = "../../Rocket/core/lib", features = ["json"] }
 
 # the rocket_db_pools crate is not yet available on crates.io
 rocket_db_pools = { path = "../../Rocket/contrib/db_pools/lib/", features = ["sqlx_postgres"] }
-# rocket_db_pools = { version = "0.1.0-rc", features = ["sqlx_sqlite"] }
+# rocket_db_pools = { version = "0.1.0-rc", features = ["sqlx_postgres"] }
 
 sqlx = { version = "0.5.1", default-features = false, features = ["macros", "offline", "migrate", "postgres"] }
 
