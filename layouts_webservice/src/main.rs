@@ -1,5 +1,6 @@
 #[macro_use] extern crate rocket;
-//#[macro_use] extern crate rocket_sync_db_pools;
+
+use structopt::StructOpt;
 
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
@@ -17,6 +18,22 @@ use std::sync::Arc;
 
 mod api;
 
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "Keyboard layout optimization")]
+struct Options {
+    /// Filename of evaluation configuration file to use
+    #[structopt(short, long, default_value = "../evaluation_parameters.yml")]
+    pub eval_parameters: String,
+
+    /// Filename of layout configuration file to use
+    #[structopt(short, long, default_value = "../standard_keyboard.yml")]
+    pub layout_config: String,
+
+    /// Should all layouts in the database be re-evaluated on startup
+    #[structopt(long)]
+    pub reeval_layouts: bool,
+}
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct NGramConfig {
@@ -55,17 +72,19 @@ impl LayoutConfig {
     }
 }
 
-
-
 #[launch]
 fn rocket() -> _ {
-    let layout_config = LayoutConfig::from_yaml("../standard_keyboard.yml").expect(&format!(
-        "Could not load config file 'standard_keyboard.yml'"
+    let options = Options::from_args();
+
+    let layout_config = LayoutConfig::from_yaml(&options.layout_config).expect(&format!(
+        "Could not load config file '{}'",
+        &options.layout_config
     ));
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
-    let eval_params = EvaluationParameters::from_yaml("../evaluation_parameters.yml").expect(&format!(
-        "Could not read evaluation yaml file 'evaluation_parameters.yml'"
+    let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
+        "Could not read evaluation yaml file '{}'",
+        &options.eval_parameters
     ));
     let p = "../".to_string() + &eval_params.ngrams.unigrams;
     let unigrams = Unigrams::from_file(&p).expect(&format!(
@@ -92,5 +111,6 @@ fn rocket() -> _ {
     rocket::build()
         .manage(evaluator)
         .manage(layout_generator)
+        .manage(options)
         .attach(api::stage())
 }
