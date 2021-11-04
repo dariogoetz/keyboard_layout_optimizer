@@ -3,16 +3,16 @@
 Neo variant layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
 It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permutations of the base layer, where layers 2, 5, and 6 follow the permutation and layers 3 and 4 remain unchanged.
 
-At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of monogrammes, bigrammes, and trigrammes. 
+At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams. 
 
 The optimization is implemented using a fork of the [genevo](https://github.com/innoave/genevo) crate. The fork include bugfixes and simplifications for the usage of rayon.
 
 ## Features
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
-- evaluation based on prepared monogrammes, bigrammes, and trigrammes or a text
+- evaluation based on prepared unigrams, bigrams, and trigrams or a text
 - fast evaluation (~100ms per layout for standard corpus)
 - layout optimization using a genetic algorithm
-- accounting for higher layer characters (e.g. uppercase letters) by expanding ngrammes with modifier keys
+- accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
 - **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
