@@ -188,7 +188,7 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                 println!("Reevaluating results");
                 let mut connection = db.0.get().await.unwrap();
                 let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
-                    "SELECT id, layout, total_cost, published_by, NULL AS details_json FROM layouts",
+                    "SELECT id, layout, total_cost, published_by, NULL AS details_json, highlight FROM layouts",
                 )
                 .fetch_all(&mut connection)
                 .await
@@ -207,7 +207,7 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                         result.total_cost,
                         total_cost
                     );
-                    sqlx::query("UPDATE layouts SET total_cost = ?, details_json = ? WHERE id = ?")
+                    sqlx::query("UPDATE layouts SET total_cost = $1, details_json = $2 WHERE id = $3")
                         .bind(&total_cost)
                         .bind(&details_json)
                         .bind(&result.id)
