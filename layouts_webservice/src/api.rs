@@ -23,7 +23,7 @@ type Result<T, E = Status> = std::result::Result<T, E>;
 #[serde(crate = "rocket::serde")]
 struct LayoutEvaluationDB {
     #[serde(skip_deserializing, skip_serializing_if = "Option::is_none")]
-    id: Option<i64>,
+    id: Option<i32>,
     layout: String,
     total_cost: f64,
     details_json: Option<String>,
