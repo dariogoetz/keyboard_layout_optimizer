@@ -28,6 +28,7 @@ struct LayoutEvaluationDB {
     total_cost: f64,
     details_json: Option<String>,
     published_by: Option<String>,
+    highlight: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -37,6 +38,7 @@ struct LayoutEvaluation {
     published_by: Option<String>,
     details: Option<EvaluationResult>,
     plot: Option<String>,
+    highlight: bool,
 }
 
 impl From<LayoutEvaluationDB> for LayoutEvaluation {
@@ -47,6 +49,7 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
             published_by: item.published_by,
             details: item.details_json.map(|d| serde_json::from_str(&d).unwrap()),
             plot: None,
+            highlight: item.highlight,
         }
     }
 }
@@ -89,13 +92,15 @@ async fn post(
                     serde_json::to_string(&evaluation_result)
                         .map_err(|_| Status::InternalServerError)?,
                 ),
+                highlight: false,
             };
 
-            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json) VALUES ($1, $2, $3, $4)")
+            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, highlight, created) VALUES ($1, $2, $3, $4, $5, NOW())")
                 .bind(&result.layout)
                 .bind(&result.total_cost)
                 .bind(&result.published_by)
                 .bind(&result.details_json)
+                .bind(&result.highlight)
                 .execute(&mut *db)
                 .await
                 .map_err(|_| Status::InternalServerError)?;
@@ -111,7 +116,7 @@ async fn post(
 #[get("/")]
 async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
     let layouts = sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, NULL AS details_json FROM layouts",
+        "SELECT NULL AS id, layout, total_cost, published_by, NULL AS details_json, highlight FROM layouts",
     )
     .fetch_all(&mut *db)
     .await
@@ -133,7 +138,7 @@ async fn get(
     layout_generator: &State<NeoLayoutGenerator>,
 ) -> Option<Json<LayoutEvaluation>> {
     sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, details_json FROM layouts WHERE layout = $1",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json, highlight FROM layouts WHERE layout = $1",
     )
     .bind(layout)
     .fetch_one(&mut *db)
@@ -172,7 +177,6 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
 }
 
 async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
-
     match (
         &rocket.state::<NeoLayoutGenerator>(),
         &rocket.state::<Evaluator>(),

@@ -3,5 +3,7 @@ CREATE TABLE layouts (
     layout VARCHAR NOT NULL,
     total_cost DOUBLE PRECISION NOT NULL,
     details_json VARCHAR,
-    published_by VARCHAR
+    published_by VARCHAR,
+    created TIMESTAMP,
+    highlight BOOL
 );
