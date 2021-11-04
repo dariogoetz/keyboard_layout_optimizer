@@ -1,6 +1,6 @@
 #[macro_use] extern crate rocket;
 
-use structopt::StructOpt;
+use rocket::fairing::AdHoc;
 
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
@@ -19,19 +19,15 @@ use std::sync::Arc;
 mod api;
 
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout optimization")]
+#[derive(Deserialize, Debug)]
 struct Options {
     /// Filename of evaluation configuration file to use
-    #[structopt(short, long, default_value = "../evaluation_parameters.yml")]
     pub eval_parameters: String,
 
     /// Filename of layout configuration file to use
-    #[structopt(short, long, default_value = "../standard_keyboard.yml")]
     pub layout_config: String,
 
     /// Should all layouts in the database be re-evaluated on startup
-    #[structopt(long)]
     pub reeval_layouts: bool,
 }
 
@@ -74,7 +70,10 @@ impl LayoutConfig {
 
 #[launch]
 fn rocket() -> _ {
-    let options = Options::from_args();
+    let rocket = rocket::build();
+    let figment = rocket.figment();
+
+    let options: Options = figment.extract().expect("config");
 
     let layout_config = LayoutConfig::from_yaml(&options.layout_config).expect(&format!(
         "Could not load config file '{}'",
@@ -108,9 +107,9 @@ fn rocket() -> _ {
         Evaluator::default(Box::new(ngram_mapper)).default_metrics(&eval_params.metrics);
 
 
-    rocket::build()
+    rocket
         .manage(evaluator)
         .manage(layout_generator)
-        .manage(options)
+        .attach(AdHoc::config::<Options>())
         .attach(api::stage())
 }
