@@ -2,12 +2,23 @@ use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
 
+#[derive(StructOpt, Debug)]
+#[structopt(name = "Keyboard layout optimization")]
+struct Options {
+    /// List of Layout keys from left to right, top to bottom
+    layout_str: Vec<String>,
+
+    /// Evaluation parameters
+    #[structopt(flatten)]
+    evaluation_parameters: common::Options,
+}
+
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
-    let options = common::Options::from_args();
+    let options = Options::from_args();
 
-    let (layout_generator, evaluator) = common::init(&options);
+    let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     for layout_str in options.layout_str.iter() {
         let layout = match layout_generator.generate(layout_str) {

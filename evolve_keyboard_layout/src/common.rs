@@ -56,9 +56,6 @@ impl LayoutConfig {
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
-    /// List of Layout keys from left to right, top to bottom
-    pub layout_str: Vec<String>,
-
     /// Filename of evaluation configuration file to use
     #[structopt(short, long, default_value = "evaluation_parameters.yml")]
     pub eval_parameters: String,
