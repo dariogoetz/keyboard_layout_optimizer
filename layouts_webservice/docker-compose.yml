@@ -1,8 +1,5 @@
 version: "3.4"
 
-x-common-variables: &common-variables
-  DATABASE__URL: postgresql://postgres:super_secret@postgres:5432/postgres
-
 services:
   postgres:
     image: postgres
