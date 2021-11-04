@@ -2,6 +2,7 @@
 eval_parameters = "../evaluation_parameters.yml"
 layout_config = "../standard_keyboard.yml"
 reeval_layouts = false
+secret = "super_duper_secret"
 
 [default.databases.sqlx]
 url = "postgres://postgres:super_secret@localhost:15432/postgres"

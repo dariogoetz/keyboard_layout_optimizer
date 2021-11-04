@@ -58,6 +58,8 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
 struct PostLayout {
     layout: String,
     published_by: Option<String>,
+    highlight: Option<bool>,
+    secret: Option<String>,
 }
 
 #[post("/", data = "<layout>")]
@@ -66,12 +68,22 @@ async fn post(
     layout: Json<PostLayout>,
     layout_generator: &State<NeoLayoutGenerator>,
     evaluator: &State<Evaluator>,
+    config: &State<Options>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
+    // check if highlight wants to be set without permission
+    let is_admin = config.secret == layout.secret.clone().unwrap_or("".to_string());
+    let highlight = layout.highlight.unwrap_or(false);
+    if highlight && !is_admin {
+        return Err(Status::Forbidden);
+    };
+
+    // generate layout
     let l = layout_generator
         .generate(&layout.layout)
         .map_err(|_| Status::BadRequest)?;
     let layout_str = l.as_text();
 
+    // check if layout is in database already
     let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = $1")
         .bind(&layout_str)
         .fetch_one(&mut *db)
@@ -92,7 +104,7 @@ async fn post(
                     serde_json::to_string(&evaluation_result)
                         .map_err(|_| Status::InternalServerError)?,
                 ),
-                highlight: false,
+                highlight,
             };
 
             sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, highlight, created) VALUES ($1, $2, $3, $4, $5, NOW())")
@@ -207,13 +219,15 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                         result.total_cost,
                         total_cost
                     );
-                    sqlx::query("UPDATE layouts SET total_cost = $1, details_json = $2 WHERE id = $3")
-                        .bind(&total_cost)
-                        .bind(&details_json)
-                        .bind(&result.id)
-                        .execute(&mut connection)
-                        .await
-                        .unwrap();
+                    sqlx::query(
+                        "UPDATE layouts SET total_cost = $1, details_json = $2 WHERE id = $3",
+                    )
+                    .bind(&total_cost)
+                    .bind(&details_json)
+                    .bind(&result.id)
+                    .execute(&mut connection)
+                    .await
+                    .unwrap();
                 }
             }
         }

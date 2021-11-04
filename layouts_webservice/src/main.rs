@@ -29,6 +29,9 @@ struct Options {
 
     /// Should all layouts in the database be re-evaluated on startup
     pub reeval_layouts: bool,
+
+    /// Secret for performing admin actions
+    pub secret: String
 }
 
 #[derive(Clone, Deserialize, Debug)]
