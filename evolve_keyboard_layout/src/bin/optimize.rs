@@ -98,6 +98,8 @@ fn main() {
 
             if let Err(e) = writeln!(file, "{}", layout.as_text()) {
                 log::error!("Couldn't write to file: {}", e);
+            } else {
+                log::info!("Appended layout to '{}'", filename);
             }
         }
 
