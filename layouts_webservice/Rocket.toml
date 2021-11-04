@@ -1,2 +1,2 @@
 [default.databases.sqlx]
-url = "db/db.sqlite"
+url = "postgres://postgres:super_secret@localhost:15432/postgres"

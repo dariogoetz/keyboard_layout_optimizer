@@ -14,7 +14,7 @@ use layout_evaluation::results::EvaluationResult;
 
 #[derive(Database)]
 #[database("sqlx")]
-struct Db(sqlx::SqlitePool);
+struct Db(sqlx::PgPool);
 
 // type Result<T, E = rocket::response::Debug<sqlx::Error>> = std::result::Result<T, E>;
 type Result<T, E = Status> = std::result::Result<T, E>;
@@ -69,7 +69,7 @@ async fn post(
         .map_err(|_| Status::BadRequest)?;
     let layout_str = l.as_text();
 
-    let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = ?")
+    let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = $1")
         .bind(&layout_str)
         .fetch_one(&mut *db)
         .await
@@ -91,7 +91,7 @@ async fn post(
                 ),
             };
 
-            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json) VALUES (?, ?, ?, ?)")
+            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json) VALUES ($1, $2, $3, $4)")
                 .bind(&result.layout)
                 .bind(&result.total_cost)
                 .bind(&result.published_by)
@@ -115,7 +115,10 @@ async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
     )
     .fetch_all(&mut *db)
     .await
-    .map_err(|_| Status::InternalServerError)?
+    .map_err(|e| {
+        eprintln!("Error while fetching all layouts from db: {:?}", e);
+        Status::InternalServerError
+    })?
     .into_iter()
     .map(|e| e.into())
     .collect();
@@ -130,7 +133,7 @@ async fn get(
     layout_generator: &State<NeoLayoutGenerator>,
 ) -> Option<Json<LayoutEvaluation>> {
     sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, details_json FROM layouts WHERE layout = ?",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json FROM layouts WHERE layout = $1",
     )
     .bind(layout)
     .fetch_one(&mut *db)
@@ -146,7 +149,7 @@ async fn get(
 
 #[delete("/<layout>")]
 async fn delete(mut db: Connection<Db>, layout: &str) -> Result<Option<()>> {
-    let result = sqlx::query("DELETE FROM layouts WHERE layout = ?")
+    let result = sqlx::query("DELETE FROM layouts WHERE layout = $1")
         .bind(layout)
         .execute(&mut *db)
         .await

@@ -1,7 +1,7 @@
 CREATE TABLE layouts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     layout VARCHAR NOT NULL,
-    total_cost REAL NOT NULL,
+    total_cost DOUBLE PRECISION NOT NULL,
     details_json VARCHAR,
     published_by VARCHAR
 );

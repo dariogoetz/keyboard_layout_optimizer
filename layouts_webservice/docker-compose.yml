@@ -1,0 +1,21 @@
+version: "3.4"
+
+x-common-variables: &common-variables
+  DATABASE__URL: postgresql://postgres:super_secret@postgres:5432/postgres
+
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - 15432:5432
+    command: postgres -c 'max_connections=100'
+    environment:
+      POSTGRES_PASSWORD: super_secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - default
+
+volumes:
+  pgdata:
