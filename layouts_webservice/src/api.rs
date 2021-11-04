@@ -164,16 +164,16 @@ async fn get(
     .ok()
 }
 
-#[delete("/<layout>")]
-async fn delete(mut db: Connection<Db>, layout: &str) -> Result<Option<()>> {
-    let result = sqlx::query("DELETE FROM layouts WHERE layout = $1")
-        .bind(layout)
-        .execute(&mut *db)
-        .await
-        .map_err(|_| Status::InternalServerError)?;
+// #[delete("/<layout>")]
+// async fn delete(mut db: Connection<Db>, layout: &str) -> Result<Option<()>> {
+//     let result = sqlx::query("DELETE FROM layouts WHERE layout = $1")
+//         .bind(layout)
+//         .execute(&mut *db)
+//         .await
+//         .map_err(|_| Status::InternalServerError)?;
 
-    Ok((result.rows_affected() == 1).then(|| ()))
-}
+//     Ok((result.rows_affected() == 1).then(|| ()))
+// }
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     match Db::fetch(&rocket) {
@@ -243,6 +243,7 @@ pub fn stage() -> AdHoc {
             .attach(Db::init())
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
             .attach(AdHoc::try_on_ignite("Reeval Layouts", reeval_layouts))
-            .mount("/", routes![list, post, get, delete])
+            // .mount("/", routes![list, post, get, delete])
+            .mount("/", routes![list, post, get])
     })
 }
