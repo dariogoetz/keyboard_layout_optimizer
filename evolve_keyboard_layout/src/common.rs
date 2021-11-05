@@ -57,11 +57,11 @@ impl LayoutConfig {
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Filename of evaluation configuration file to use
-    #[structopt(short, long, default_value = "evaluation_parameters.yml")]
+    #[structopt(short, long, default_value = "config/evaluation_parameters.yml")]
     pub eval_parameters: String,
 
     /// Filename of layout configuration file to use
-    #[structopt(short, long, default_value = "standard_keyboard.yml")]
+    #[structopt(short, long, default_value = "config/standard_keyboard.yml")]
     pub layout_config: String,
 
     /// Filename of corpus file to use instead of ngram files

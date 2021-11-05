@@ -10,7 +10,7 @@ struct Options {
     layout_str: String,
 
     /// Filename of layout configuration file to use
-    #[structopt(short, long, default_value = "standard_keyboard.yml")]
+    #[structopt(short, long, default_value = "config/standard_keyboard.yml")]
     layout_config: String,
 }
 
