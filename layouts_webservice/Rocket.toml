@@ -1,6 +1,7 @@
 [default]
 eval_parameters = "../config/evaluation_parameters.yml"
 layout_config = "../config/standard_keyboard.yml"
+static_dir = "static"
 unigrams = "../1-gramme.arne.txt"
 bigrams = "../2-gramme.arne.txt"
 trigrams = "../3-gramme.arne.txt"
