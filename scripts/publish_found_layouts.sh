@@ -14,7 +14,7 @@ fi
 
 if [ -z "$3" ]
   then
-    URL="http://localhost:8000/api"
+    URL="http://keyboard-layout-optimizer.herokuapp.com/api"
 else
     URL="$3"
 fi
