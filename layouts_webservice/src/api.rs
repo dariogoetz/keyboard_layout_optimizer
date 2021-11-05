@@ -249,6 +249,6 @@ pub fn stage() -> AdHoc {
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
             .attach(AdHoc::try_on_ignite("Reeval Layouts", reeval_layouts))
             // .mount("/", routes![list, post, get, delete])
-            .mount("/", routes![list, post, get])
+            .mount("/api", routes![list, post, get])
     })
 }

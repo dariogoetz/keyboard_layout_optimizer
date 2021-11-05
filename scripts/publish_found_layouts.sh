@@ -14,7 +14,7 @@ fi
 
 if [ -z "$3" ]
   then
-    URL="http://localhost:8000"
+    URL="http://localhost:8000/api"
 else
     URL="$3"
 fi

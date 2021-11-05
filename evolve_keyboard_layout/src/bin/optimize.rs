@@ -6,7 +6,7 @@ use structopt::StructOpt;
 use layout_optimization::optimization;
 use evolve_keyboard_layout::common;
 
-const PUBLISH_URL: &str = "http://localhost:8000/";
+const PUBLISH_URL: &str = "http://localhost:8000/api";
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
