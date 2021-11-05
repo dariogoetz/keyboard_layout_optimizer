@@ -28,6 +28,9 @@ struct Options {
     /// Filename of layout configuration file to use
     pub layout_config: String,
 
+    /// Directory with static content to serve
+    pub static_dir: String,
+
     /// Should all layouts in the database be re-evaluated on startup
     pub reeval_layouts: bool,
 
@@ -125,5 +128,5 @@ fn rocket() -> _ {
         .manage(layout_generator)
         .attach(AdHoc::config::<Options>())
         .attach(api::stage())
-        .mount("/", FileServer::from("static"))
+        .mount("/", FileServer::from(&options.static_dir))
 }
