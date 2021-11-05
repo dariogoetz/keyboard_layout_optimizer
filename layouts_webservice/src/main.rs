@@ -31,6 +31,15 @@ struct Options {
     /// Should all layouts in the database be re-evaluated on startup
     pub reeval_layouts: bool,
 
+    /// Unigram file
+    pub unigrams: String,
+
+    /// Bigram file
+    pub bigrams: String,
+
+    /// Trigram file
+    pub trigrams: String,
+
     /// Secret for performing admin actions
     pub secret: String
 }
@@ -89,17 +98,17 @@ fn rocket() -> _ {
         "Could not read evaluation yaml file '{}'",
         &options.eval_parameters
     ));
-    let p = "../".to_string() + &eval_params.ngrams.unigrams;
+    let p = &options.unigrams;
     let unigrams = Unigrams::from_file(&p).expect(&format!(
         "Could not read 1-gramme file from '{}'.",
         &p
     ));
-    let p = "../".to_string() + &eval_params.ngrams.bigrams;
+    let p = &options.bigrams;
     let bigrams = Bigrams::from_file(&p).expect(&format!(
         "Could not read 2-gramme file from '{}'.",
         &p
     ));
-    let p = "../".to_string() + &eval_params.ngrams.trigrams;
+    let p = &options.trigrams;
     let trigrams = Trigrams::from_file(&p).expect(&format!(
         "Could not read 3-gramme file from '{}'.",
         &p

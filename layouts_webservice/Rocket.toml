@@ -1,6 +1,9 @@
 [default]
 eval_parameters = "../config/evaluation_parameters.yml"
 layout_config = "../config/standard_keyboard.yml"
+unigrams = "../1-gramme.arne.txt"
+bigrams = "../2-gramme.arne.txt"
+trigrams = "../3-gramme.arne.txt"
 reeval_layouts = false
 secret = "super_duper_secret"
 
