@@ -17,7 +17,7 @@ Vue.component('layouts-app', {
 </b-container-fluid>
 `,
     props: {
-        url: { type: String, default: "http://localhost:8000/api" }
+        url: { type: String, default: "/api" }
     },
     data () {
         return {
