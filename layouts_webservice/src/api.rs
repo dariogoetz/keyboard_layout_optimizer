@@ -26,7 +26,8 @@ struct LayoutEvaluationDB {
     id: Option<i32>,
     layout: String,
     total_cost: f64,
-    details_json: Option<String>,
+    details_json: String,
+    printed: String,
     published_by: Option<String>,
     highlight: bool,
 }
@@ -37,6 +38,7 @@ struct LayoutEvaluation {
     total_cost: f64,
     published_by: Option<String>,
     details: Option<EvaluationResult>,
+    printed: Option<String>,
     plot: Option<String>,
     highlight: bool,
 }
@@ -47,7 +49,8 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
             layout: item.layout,
             total_cost: item.total_cost,
             published_by: item.published_by,
-            details: item.details_json.map(|d| serde_json::from_str(&d).unwrap()),
+            details: None, //Some(serde_json::from_str(&item.details_json).unwrap()),
+            printed: None, //Some(item.printed),
             plot: None,
             highlight: item.highlight,
         }
@@ -100,18 +103,18 @@ async fn post(
                 layout: layout_str,
                 total_cost: evaluation_result.total_cost(),
                 published_by: layout.published_by.clone(),
-                details_json: Some(
-                    serde_json::to_string(&evaluation_result)
+                details_json: serde_json::to_string(&evaluation_result)
                         .map_err(|_| Status::InternalServerError)?,
-                ),
+                printed: format!("{}", evaluation_result),
                 highlight,
             };
 
-            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, highlight, created) VALUES ($1, $2, $3, $4, $5, NOW())")
+            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, printed, highlight, created) VALUES ($1, $2, $3, $4, $5, $6, NOW())")
                 .bind(&result.layout)
                 .bind(&result.total_cost)
                 .bind(&result.published_by)
                 .bind(&result.details_json)
+                .bind(&result.printed)
                 .bind(&result.highlight)
                 .execute(&mut *db)
                 .await
@@ -128,7 +131,7 @@ async fn post(
 #[get("/")]
 async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
     let layouts = sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, NULL AS details_json, highlight FROM layouts",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight FROM layouts",
     )
     .fetch_all(&mut *db)
     .await
@@ -150,16 +153,18 @@ async fn get(
     layout_generator: &State<NeoLayoutGenerator>,
 ) -> Option<Json<LayoutEvaluation>> {
     sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, details_json, highlight FROM layouts WHERE layout = $1",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight FROM layouts WHERE layout = $1",
     )
     .bind(layout)
     .fetch_one(&mut *db)
     .await
     .map(|e| {
-        let mut e: LayoutEvaluation = e.into();
+        let mut res: LayoutEvaluation = e.clone().into();
         let l = layout_generator.generate(&e.layout).unwrap();
-        e.plot = Some(l.plot());
-        Json(e)
+        res.plot = Some(l.plot());
+        res.details = Some(serde_json::from_str(&e.details_json).unwrap());
+        res.printed = Some(e.printed);
+        Json(res)
     })
     .ok()
 }
