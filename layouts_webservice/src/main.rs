@@ -1,6 +1,7 @@
 #[macro_use] extern crate rocket;
 
 use rocket::fairing::AdHoc;
+use rocket::fs::FileServer;
 
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
@@ -115,4 +116,5 @@ fn rocket() -> _ {
         .manage(layout_generator)
         .attach(AdHoc::config::<Options>())
         .attach(api::stage())
+        .mount("/", FileServer::from("static"))
 }
