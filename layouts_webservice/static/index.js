@@ -153,6 +153,11 @@ Vue.component('layouts-table', {
                     sortable: true
                 },
                 {
+                    key: 'highlight',
+                    label: 'Bekannt',
+                    sortable: true
+                },
+                {
                     key: 'to_details',
                     label: 'Ansehen'
                 }
