@@ -108,12 +108,12 @@ Vue.component('layout-details', {
 
 Vue.component('layouts-table', {
     template: `
-<b-table small head-variant="light" sort-by="total_cost" :items="rows" :fields="fields" :tbody-tr-class="rowClass">
+<b-table sticky-header="400px" small head-variant="light" sort-by="total_cost" :items="rows" :fields="fields" :tbody-tr-class="rowClass">
   <template #cell(to_details)="data">
-<b-button-group>
-    <b-button size="sm" variant="light" @click="onClick(1, data.item.layout)">1</b-button>
-    <b-button size="sm" variant="light "@click="onClick(2, data.item.layout)">2</b-button>
-</b-button-groub>
+    <b-button-group>
+      <b-button size="sm" variant="light" @click="onClick(1, data.item.layout)">1</b-button>
+      <b-button size="sm" variant="light "@click="onClick(2, data.item.layout)">2</b-button>
+    </b-button-groub>
   </template>
 </b-table>`,
     props: {
