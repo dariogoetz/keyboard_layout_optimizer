@@ -1,6 +1,6 @@
 Vue.component('layouts-app', {
     template: `
-<b-container-fluid>
+<b-container fluid>
   <b-row>
     <b-col xl>
       <layouts-table :url="url" @details="setDetails"></layouts-table>
