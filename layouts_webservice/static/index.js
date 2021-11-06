@@ -2,10 +2,10 @@ Vue.component('layouts-app', {
     template: `
 <b-container-fluid>
   <b-row>
-    <b-col cols-md="4" cols-xs="12">
+    <b-col xl>
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
-    <b-col cols-md="8" cols-xs="12">
+    <b-col xl>
       <b-row>
         <b-col cols="6">
           <layout-details title="Details 1" :base-url="url" :layout="layout_1">
