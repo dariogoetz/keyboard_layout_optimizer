@@ -16,9 +16,11 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum LayoutError {
     #[error("Invalid keyboard layout: Duplicate characters in layout {0}")]
-    DuplicateKeys(String),
-    #[error("Invalid keyboard layout: Wrong number of (unique) keys: {0} instead of {1}")]
-    WrongNumberOfKeys(usize, usize)
+    DuplicateChars(String),
+    #[error("Invalid keyboard layout: Missing characters: {0}")]
+    MissingChars(String),
+    #[error("Invalid keyboard layout: Unsupported characters: {0}")]
+    UnsupportedChars(String),
 }
 
 /// A collection of data (configuration) regarding the Neo layout (and its family)
@@ -102,12 +104,25 @@ impl NeoLayoutGenerator {
     pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
 
-        let s: HashSet<char> = HashSet::from_iter(chars.clone());
-        if s.len() != self.permutable_key_map.len() {
-            return Err(LayoutError::WrongNumberOfKeys(s.len(), self.permutable_key_map.len()).into());
-        };
-        if s.len() != chars.len() {
-            return Err(LayoutError::DuplicateKeys(layout_keys.to_string()).into());
+        let char_set: HashSet<char> = HashSet::from_iter(chars.clone());
+        let layout_set: HashSet<char> = HashSet::from_iter(self.permutable_key_map.keys().cloned());
+
+        // Check for duplicate chars
+        if char_set.len() != chars.len() {
+            return Err(LayoutError::DuplicateChars(layout_keys.to_string()).into());
+        }
+
+        let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();
+        let mut missing_chars: Vec<char> = layout_set.difference(&char_set).cloned().collect();
+
+        unsupported_chars.sort();
+        missing_chars.sort();
+
+        if !unsupported_chars.is_empty() {
+            return Err(LayoutError::UnsupportedChars(unsupported_chars.iter().collect()).into());
+        }
+        if !missing_chars.is_empty() {
+            return Err(LayoutError::MissingChars(missing_chars.iter().collect()).into());
         }
 
         // assemble a Vec<Vec<char>> representation of the layer for the given layout string
