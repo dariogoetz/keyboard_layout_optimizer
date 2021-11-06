@@ -6,8 +6,6 @@ use structopt::StructOpt;
 use layout_optimization::optimization;
 use evolve_keyboard_layout::common;
 
-const PUBLISH_URL: &str = "http://keyboard-layout-optimizer.herokuapp.com/api";
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
 struct Options {
@@ -46,6 +44,11 @@ struct Options {
     /// Publish found layout to webservice under this name
     #[structopt(long)]
     publish_as: Option<String>,
+
+
+    /// Publish found layout to webservice at this url
+    #[structopt(long, default_value = "http://keyboard-layout-optimizer.herokuapp.com/api")]
+    publish_to: String,
 
     /// Repeat optimizations indefinitely
     #[structopt(long)]
@@ -111,14 +114,14 @@ fn main() {
             body.insert("layout", layout.as_text());
 
             let resp = client
-                .post(PUBLISH_URL)
+                .post(&options.publish_to)
                 .json(&body)
                 .send()
                 .ok();
 
             if let Some(resp) = resp {
-                if resp.status().as_str() == "200" {
-                    log::info!("Published layout '{}' to {}", layout.as_text(), PUBLISH_URL);
+                if resp.status().is_success() {
+                    log::info!("Published layout '{}' to {}", layout.as_text(), &options.publish_to);
                 } else {
                     log::error!("Could not publish result to webservice: {:?}", &resp.text());
                 }
