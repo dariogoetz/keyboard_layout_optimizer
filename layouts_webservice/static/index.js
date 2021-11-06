@@ -2,15 +2,18 @@ Vue.component('layouts-app', {
     template: `
 <b-container-fluid>
   <b-row>
-    <b-col cols="4">
+    <b-col cols-md="4" cols-xs="12">
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
-
-    <b-col cols="4">
-        <layout-details title="Details 1" :base-url="url" :layout="layout_1">
-    </b-col>
-    <b-col cols="4">
-        <layout-details title="Details 2" :base-url="url" :layout="layout_2">
+    <b-col cols-md="8" cols-xs="12">
+      <b-row>
+        <b-col cols="6">
+          <layout-details title="Details 1" :base-url="url" :layout="layout_1">
+        </b-col>
+        <b-col cols="6">
+          <layout-details title="Details 2" :base-url="url" :layout="layout_2">
+        </b-col>
+      </b-row>
     </b-col>
   </b-row>
 
