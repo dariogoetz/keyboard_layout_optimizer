@@ -19,5 +19,4 @@ log = "*"
 
 rustc-hash = "*"
 
-#genevo = "*"
-genevo = { path="../genevo" }
+genevo = "*"
