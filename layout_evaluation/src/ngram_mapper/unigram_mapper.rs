@@ -6,7 +6,7 @@ use super::{common::*, UnigramIndices};
 
 use crate::ngrams::Unigrams;
 
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::layout::{LayerKeyIndex, LayerKey, Layout};
 
 fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
     let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
@@ -84,7 +84,7 @@ impl OnDemandUnigramMapper {
             .map(|(k, w)| {
                 let (base, mods) = layout.resolve_modifiers(k);
 
-                take_one_layerkey(base, &mods, *w)
+                TakeOneLayerKey::new(base, &mods, *w).collect::<Vec<(LayerKeyIndex, f64)>>()
 
                 // if base.symbol == ' ' {
                 // println!(

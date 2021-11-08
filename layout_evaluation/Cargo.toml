@@ -15,8 +15,6 @@ serde_yaml = "*"
 anyhow = "*"
 env_logger = "*"
 log = "*"
-tinyvec = { version = "*", features=[ "alloc" ] }
-
 rustc-hash = "*"
 circular-queue = "*"
 

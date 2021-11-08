@@ -238,14 +238,12 @@ impl OnDemandBigramMapper {
             });
 
             // same key mods
-            take_two_layerkey(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor)
-                .into_iter()
+            TakeTwoLayerKey::new(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor)
                 .for_each(|(e, w)| {
                     bigram_keys.push((e, w));
                 });
 
-            take_two_layerkey(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor)
-                .into_iter()
+            TakeTwoLayerKey::new(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor)
                 .for_each(|(e, w)| {
                     bigram_keys.push((e, w));
                 });

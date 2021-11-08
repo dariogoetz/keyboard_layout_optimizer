@@ -146,8 +146,6 @@ base_layout:
 
   fixed_layers: [2, 3]
 
-  # only up to two modifiers per layer are supported for performance reasons
-  # if more modifiers are required, increase tinyvec sizes in ngram_mapper::common.rs
   modifiers:
     - Left: ["⇧"]
       Right: ["⇗"]
