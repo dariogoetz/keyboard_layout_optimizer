@@ -104,6 +104,12 @@ Example (starting from Bone layout, fixing "," and "."):
 RUST_LOG=INFO ./target/release/optimize -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
+Example for a never ending search for good layouts (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
+
+``` sh
+RUST_LOG=INFO ./target/release/optimize -f ",." --run-forever --append-solution-to "found_solutions.txt" --publish-as "<your name>"
+```
+
 #### Configuration
 The parameters of the optimization process can be configured in the file `optimization_parameters.yml`. This includes sizes of the population, number of generations to evaluate, mutation and insertion rates, and the selection ratio.
 
