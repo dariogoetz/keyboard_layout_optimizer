@@ -141,8 +141,9 @@ Vue.component('layouts-table', {
         fields () {
             return [
                 {
-                    key: 'layout',
-                    label: 'Layout',
+                    key: 'published_by',
+                    label: 'Veröffentlicht von',
+                    sortable: true
                 },
                 {
                     key: 'total_cost',
@@ -151,9 +152,8 @@ Vue.component('layouts-table', {
                     formatter: (c) => c.toFixed(2)
                 },
                 {
-                    key: 'published_by',
-                    label: 'Veröffentlicht von',
-                    sortable: true
+                    key: 'layout',
+                    label: 'Layout',
                 },
                 {
                     key: 'highlight',
