@@ -51,7 +51,7 @@ impl LayoutConfig {
 }
 
 pub fn evaluate_bench(c: &mut Criterion) {
-    let layout_config = LayoutConfig::from_yaml(&"../standard_keyboard.yml").expect(&format!(
+    let layout_config = LayoutConfig::from_yaml(&"../config/standard_keyboard.yml").expect(&format!(
         "Could not load config file 'standard_keyboard.yml'",
     ));
 
@@ -59,7 +59,7 @@ pub fn evaluate_bench(c: &mut Criterion) {
 
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
-    let eval_params = EvaluationParameters::from_yaml(&"../evaluation_parameters.yml").expect(
+    let eval_params = EvaluationParameters::from_yaml(&"../config/evaluation_parameters.yml").expect(
         &format!("Could not read evaluation yaml file 'evaluation_parameters.yml'"),
     );
 
