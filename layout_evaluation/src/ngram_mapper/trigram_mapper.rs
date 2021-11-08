@@ -125,9 +125,9 @@ impl OnDemandTrigramMapper {
             let k1_take_two =
                 take_two_layerkey(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor);
             let k2_take_two =
-                take_two_layerkey(base2, &mods3, *w, self.split_modifiers.same_key_mod_factor);
+                take_two_layerkey(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor);
             let k3_take_two =
-                take_two_layerkey(base3, &mods2, *w, self.split_modifiers.same_key_mod_factor);
+                take_two_layerkey(base3, &mods3, *w, self.split_modifiers.same_key_mod_factor);
 
             k1_take_one.iter().for_each(|(e1, _)| {
                 k2_take_one.iter().for_each(|(e2, _)| {
