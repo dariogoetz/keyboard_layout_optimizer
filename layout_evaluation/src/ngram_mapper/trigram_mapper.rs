@@ -119,8 +119,8 @@ impl OnDemandTrigramMapper {
             let (base3, mods3) = layout.resolve_modifiers(k3);
 
             let k1_take_one = take_one_layerkey(base1, &mods1, *w);
-            let k2_take_one = take_one_layerkey(base2, &mods3, *w);
-            let k3_take_one = take_one_layerkey(base3, &mods2, *w);
+            let k2_take_one = take_one_layerkey(base2, &mods2, *w);
+            let k3_take_one = take_one_layerkey(base3, &mods3, *w);
 
             let k1_take_two =
                 take_two_layerkey(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor);
