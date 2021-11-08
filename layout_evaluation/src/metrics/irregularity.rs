@@ -109,7 +109,7 @@ impl TrigramMetric for Irregularity {
 
         let msg = worst.map(|(trigram, cost)| {
             format!(
-                "Worst trigram: {}{}{} makes {:5.2}% of total (quadratic) cost;  {:>5.2} of cost involved a modifier",
+                "Worst trigram: {}{}{} makes {:5.2}% of total (quadratic) cost;  {:>5.2}% of cost involved a modifier",
                 trigram.0.symbol.to_string().escape_debug(),
                 trigram.1.symbol.to_string().escape_debug(),
                 trigram.2.symbol.to_string().escape_debug(),
