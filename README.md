@@ -5,7 +5,7 @@ It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permuta
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams. 
 
-The optimization is implemented using a fork of the [genevo](https://github.com/innoave/genevo) crate. The fork include bugfixes and simplifications for the usage of rayon.
+The optimization is implemented using the [genevo](https://github.com/innoave/genevo) crate. 
 
 ## Features
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
