@@ -16,7 +16,6 @@ anyhow = "*"
 env_logger = "*"
 log = "*"
 rustc-hash = "*"
-circular-queue = "*"
 
 
 [dev-dependencies]
