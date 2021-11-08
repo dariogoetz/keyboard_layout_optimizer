@@ -32,11 +32,11 @@ The optimization is implemented using the [genevo](https://github.com/innoave/ge
 - **irregularity** - How often are the first and the second bigram in a trigram "bad" (wrt. to all bigram metrics)?
 
 ## Installation
-1. Clone the repository including the genevo submodule
+1. Clone the repository
     ``` sh
     git clone https://github.com/dariogoetz/keyboard_layout_optimizer.git --recurse-submodules
     ```
-1. Build the binaries
+1. Build the binaries (add `CC=gcc` in the beginning if `cc` is not installed, but `gcc` is)
     ``` sh
     cargo build --release
     ```
