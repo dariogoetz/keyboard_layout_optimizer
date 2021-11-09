@@ -205,7 +205,7 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                 println!("Reevaluating results");
                 let mut connection = db.0.get().await.unwrap();
                 let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
-                    "SELECT id, layout, total_cost, published_by, NULL AS details_json, highlight FROM layouts",
+                    "SELECT id, layout, total_cost, details_json, printed, published_by, highlight FROM layouts",
                 )
                 .fetch_all(&mut connection)
                 .await
