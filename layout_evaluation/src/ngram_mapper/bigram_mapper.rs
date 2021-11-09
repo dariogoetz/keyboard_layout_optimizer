@@ -1,5 +1,8 @@
 //! This module provides an implementation of bigram mapping functionalities
 //! used by the `OnDemandNgramMapper`.
+//!
+//! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
+//! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
 use super::{BigramIndices, TrigramIndices};
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
@@ -112,9 +115,8 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
-        .filter(|(((_, layerkey1), _, (_, layerkey3)), _)| layerkey1.key.hand == layerkey3.key.hand)
-        .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, _)), weight)| {
-            let factor = if layerkey1.key.hand == layerkey2.key.hand {
+        .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
+            let factor = if layerkey1.key.hand == layerkey2.key.hand && layerkey2.key.hand == layerkey3.key.hand {
                 config.factor_no_handswitch
             } else {
                 config.factor_handswitch
