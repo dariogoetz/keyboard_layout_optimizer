@@ -47,7 +47,7 @@ struct Options {
 
 
     /// Publish found layout to webservice at this url
-    #[structopt(long, default_value = "http://keyboard-layout-optimizer.herokuapp.com/api")]
+    #[structopt(long, default_value = "https://keyboard-layout-optimizer.herokuapp.com/api")]
     publish_to: String,
 
     /// Repeat optimizations indefinitely
