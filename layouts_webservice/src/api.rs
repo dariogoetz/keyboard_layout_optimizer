@@ -216,6 +216,7 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                     let evaluation_result = evaluator.evaluate_layout(&layout);
                     let total_cost = evaluation_result.total_cost();
                     let details_json = Some(serde_json::to_string(&evaluation_result).unwrap());
+                    let printed = format!("{}", evaluation_result);
 
                     println!(
                         "Re-evaluated {} (id: {}) from {:>.2} to {:>.2}",
@@ -225,10 +226,11 @@ async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
                         total_cost
                     );
                     sqlx::query(
-                        "UPDATE layouts SET total_cost = $1, details_json = $2 WHERE id = $3",
+                        "UPDATE layouts SET total_cost = $1, details_json = $2 , printed = $3 WHERE id = $4",
                     )
                     .bind(&total_cost)
                     .bind(&details_json)
+                    .bind(&printed)
                     .bind(&result.id)
                     .execute(&mut connection)
                     .await
