@@ -16,6 +16,9 @@ serde_yaml = "*"
 anyhow = "*"
 env_logger = "*"
 log = "*"
+rand = "*"
+abc = "*"
+num_cpus = "*"
 
 rustc-hash = "*"
 
