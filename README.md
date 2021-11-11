@@ -107,7 +107,7 @@ RUST_LOG=INFO ./target/release/optimize -s "jduax phlmwqß ctieo bnrsg fvüäö 
 Example for a never ending search for good layouts (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
 
 ``` sh
-RUST_LOG=INFO ./target/release/optimize -f ",." --run-forever --append-solution-to "found_solutions.txt" --publish-as "<your name>"
+RUST_LOG=INFO ./target/release/optimize -f ",." --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
 ```
 
 #### Configuration

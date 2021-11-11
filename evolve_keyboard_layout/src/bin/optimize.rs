@@ -37,9 +37,9 @@ struct Options {
     #[structopt(long)]
     generation_limit: Option<u64>,
 
-    /// Append found layout to file
+    /// Append found layouts to file
     #[structopt(long)]
-    append_solution_to: Option<String>,
+    append_solutions_to: Option<String>,
 
     /// Publish found layout to webservice under this name
     #[structopt(long)]
@@ -92,7 +92,7 @@ fn main() {
         let evaluation_result = evaluator.evaluate_layout(&layout);
         println!("{}", evaluation_result);
 
-        if let Some(filename) = &options.append_solution_to {
+        if let Some(filename) = &options.append_solutions_to {
             let mut file = OpenOptions::new()
                 .create(true)
                 .append(true)
@@ -102,7 +102,7 @@ fn main() {
             if let Err(e) = writeln!(file, "{}", layout.as_text()) {
                 log::error!("Couldn't write to file: {}", e);
             } else {
-                log::info!("Appended layout to '{}'", filename);
+                log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
             }
         }
 

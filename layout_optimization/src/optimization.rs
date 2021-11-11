@@ -63,7 +63,7 @@ pub struct FitnessCalc {
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
-        let l = self.layout_generator.generate(genome);
+        let l = self.layout_generator.generate_layout(genome);
         let layout_str = self.layout_generator.generate_string(genome);
         let mut cache_val = None;
         if let Some(result_cache) = &self.result_cache {
@@ -260,7 +260,7 @@ pub fn optimize(
                 let best_solution = step.result.best_solution;
                 if let Some(king) = &all_time_best {
                     if best_solution.solution.fitness > king.0 {
-                        let layout = pm.generate(&best_solution.solution.genome);
+                        let layout = pm.generate_layout(&best_solution.solution.genome);
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "New best:\n{}\n\n{}\n{}",
@@ -291,7 +291,7 @@ pub fn optimize(
                     all_time_best.as_ref().unwrap().0,
                     step.duration.fmt(),
                     step.processing_time.fmt(),
-                    pm.generate(&best_solution.solution.genome)
+                    pm.generate_layout(&best_solution.solution.genome)
                 );
             }
             Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
@@ -304,16 +304,16 @@ pub fn optimize(
                 );
                 println!(
                     "\n{}",
-                    pm.generate(&all_time_best.as_ref().unwrap().1)
+                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
                 );
                 println!(
                     "\n{}",
-                    pm.generate(&all_time_best.as_ref().unwrap().1)
+                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
                         .plot_compact()
                 );
                 println!(
                     "\n{}",
-                    pm.generate(&all_time_best.as_ref().unwrap().1).plot()
+                    pm.generate_layout(&all_time_best.as_ref().unwrap().1).plot()
                 );
                 break;
             }
@@ -324,5 +324,5 @@ pub fn optimize(
         }
     }
 
-    pm.generate(&all_time_best.as_ref().unwrap().1)
+    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
 }
