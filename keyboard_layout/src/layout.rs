@@ -68,7 +68,7 @@ impl LayerKey {
 /// A major task of the `Layout` object is to map given symbols (e.g. from a text) to corresponding
 /// `LayerKey` objects that describe which key(s) is (are) required to generate it (and then analyse
 /// corresponding efforts).
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Layout {
     /// Vec of `LayerKey` objects representing all symbols that can be generated with the layout
     pub layerkeys: Vec<LayerKey>,

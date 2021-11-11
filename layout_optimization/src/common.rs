@@ -9,7 +9,7 @@ pub struct PermutationLayoutGenerator {
     perm_indices: Vec<usize>,
     fixed_keys: Vec<char>,
     fixed_indices: Vec<usize>,
-    layout_generator: NeoLayoutGenerator,
+    pub layout_generator: NeoLayoutGenerator,
 }
 
 impl PermutationLayoutGenerator {
@@ -60,7 +60,7 @@ impl PermutationLayoutGenerator {
         indices
     }
 
-    pub fn generate(&self, permutation: &[usize]) -> Layout {
+    pub fn generate_layout(&self, permutation: &[usize]) -> Layout {
         let s = self.generate_string(permutation);
         self.layout_generator.generate(&s).unwrap()
     }

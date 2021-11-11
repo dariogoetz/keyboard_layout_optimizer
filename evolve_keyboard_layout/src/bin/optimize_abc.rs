@@ -29,9 +29,9 @@ struct Options {
     #[structopt(long)]
     no_cache_results: bool,
 
-    /// Append found layout to file
+    /// Append found layouts to file
     #[structopt(long)]
-    append_solution_to: Option<String>,
+    append_solutions_to: Option<String>,
 
     /// Publish found layout to webservice under this name
     #[structopt(long)]
@@ -40,10 +40,6 @@ struct Options {
     /// Publish found layout to webservice at this url
     #[structopt(long, default_value = "https://keyboard-layout-optimizer.herokuapp.com/api")]
     publish_to: String,
-
-    /// Repeat optimizations indefinitely
-    #[structopt(long)]
-    run_forever: bool,
 }
 
 fn main() {
@@ -64,22 +60,22 @@ fn main() {
         .fix_from
         .to_string();
 
-    loop {
-        let layout = optimization_abc::optimize(
-            &optimization_params,
-            &evaluator,
-            &fix_from,
-            &layout_generator,
-            &options.fix.clone().unwrap_or_else(|| "".to_string()),
-            !options.no_cache_results,
-        );
-
-        // TODO: currently, the optimize function blocks forever; the following is unreachable
+    for new_best in optimization_abc::optimize(
+        &optimization_params,
+        &evaluator,
+        &fix_from,
+        &layout_generator,
+        &options.fix.clone().unwrap_or_else(|| "".to_string()),
+        !options.no_cache_results,
+    ) {
+        let layout = new_best.solution;
+        println!("{}", layout.plot());
+        println!("{}", layout.plot_compact());
 
         let evaluation_result = evaluator.evaluate_layout(&layout);
         println!("{}", evaluation_result);
 
-        if let Some(filename) = &options.append_solution_to {
+        if let Some(filename) = &options.append_solutions_to {
             let mut file = OpenOptions::new()
                 .create(true)
                 .append(true)
@@ -89,12 +85,11 @@ fn main() {
             if let Err(e) = writeln!(file, "{}", layout.as_text()) {
                 log::error!("Couldn't write to file: {}", e);
             } else {
-                log::info!("Appended layout to '{}'", filename);
+                log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
             }
         }
 
         if let Some(publish_name) = &options.publish_as {
-
             let client = reqwest::blocking::Client::new();
             let mut body = HashMap::new();
             body.insert("published_by", publish_name.to_string());
@@ -117,8 +112,5 @@ fn main() {
             }
         }
 
-        if !options.run_forever {
-            break
-        }
     }
 }

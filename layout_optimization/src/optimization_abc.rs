@@ -8,7 +8,7 @@ use super::common::PermutationLayoutGenerator;
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, mpsc::Receiver};
 use std::usize;
 
 use abc::{scaling, Candidate, Context, HiveBuilder};
@@ -46,15 +46,15 @@ pub struct FitnessCalc {
 }
 
 impl Context for FitnessCalc {
-    type Solution = Vec<usize>;
+    type Solution = Layout;
 
     fn make(&self) -> Self::Solution {
-        self.layout_generator.generate_random()
+        let indices = self.layout_generator.generate_random();
+        self.layout_generator.generate_layout(&indices)
     }
 
     fn evaluate_fitness(&self, solution: &Self::Solution) -> f64 {
-        let l = self.layout_generator.generate(solution);
-        let layout_str = self.layout_generator.generate_string(solution);
+        let layout_str = solution.as_text();
         let mut cache_val = None;
         if let Some(result_cache) = &self.result_cache {
             let cache = result_cache.lock().unwrap();
@@ -63,7 +63,7 @@ impl Context for FitnessCalc {
         let evaluation_result = match cache_val {
             Some(res) => res,
             None => {
-                let res = self.evaluator.evaluate_layout(&l);
+                let res = self.evaluator.evaluate_layout(&solution);
                 if let Some(result_cache) = &self.result_cache {
                     let mut cache = result_cache.lock().unwrap();
                     cache.insert(layout_str, res.clone());
@@ -77,11 +77,27 @@ impl Context for FitnessCalc {
     }
 
     fn explore(&self, field: &[Candidate<Self::Solution>], n: usize) -> Self::Solution {
-        let mut core = field[n].solution.clone();
+        let layout_str = field[n].solution.as_text();
+        let chars_orig: Vec<char> = layout_str.chars().collect();
+        let mut chars: Vec<char> = layout_str.chars().collect();
 
-        core.partial_shuffle(&mut thread_rng(), self.n_switches);
+        // only permutate indices of chars that are not fixed
+        let indices = self.layout_generator.get_permutable_indices();
+        let mut permutated_indices = indices.to_vec();
 
-        core
+        // shuffle some (self.n_switches) permutable chars
+        permutated_indices.partial_shuffle(&mut thread_rng(), self.n_switches);
+
+        indices
+            .iter()
+            .zip(permutated_indices.iter())
+            .filter(|(i, pi)| i != pi)
+            .for_each(|(i, pi)| {
+                chars[*i] = chars_orig[*pi];
+            });
+
+        let permutated_layout_str: String = chars.iter().collect();
+        self.layout_generator.layout_generator.generate(&permutated_layout_str).unwrap()
     }
 }
 
@@ -92,7 +108,7 @@ pub fn optimize(
     layout_generator: &NeoLayoutGenerator,
     fixed_characters: &str,
     cache_results: bool,
-) -> Layout {
+) -> Receiver<Candidate<Layout>> {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
 
     let result_cache = if cache_results {
@@ -115,14 +131,5 @@ pub fn optimize(
         .set_scaling(scaling::proportionate());
     // .set_scaling(scaling::power_rank(10_f64));
 
-    let mut best_layout = pm.generate_random();
-    for candidate in hive.build().unwrap().stream().iter() {
-        let layout = pm.generate(&candidate.solution);
-        println!("{}", layout.plot());
-        println!("{}", layout.plot_compact());
-        println!("{}", evaluator.evaluate_layout(&layout));
-        best_layout = candidate.solution;
-    }
-
-    pm.generate(&best_layout)
+    hive.build().unwrap().stream()
 }
