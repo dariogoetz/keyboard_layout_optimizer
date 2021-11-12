@@ -199,8 +199,6 @@ impl OnDemandTrigramMapper {
             });
 
             TakeThreeLayerKey::new(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor)
-            // take_three_layerkey(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor)
-            //     .into_iter()
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of first:              {}{}{}",
@@ -212,8 +210,6 @@ impl OnDemandTrigramMapper {
                 });
 
             TakeThreeLayerKey::new(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor)
-            // take_three_layerkey(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor)
-            //     .into_iter()
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of second:             {}{}{}",
@@ -225,8 +221,6 @@ impl OnDemandTrigramMapper {
                 });
 
             TakeThreeLayerKey::new(base3, &mods3, *w, self.split_modifiers.same_key_mod_factor)
-            // take_three_layerkey(base3, &mods3, *w, self.split_modifiers.same_key_mod_factor)
-            //     .into_iter()
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of third:              {}{}{}",

@@ -60,8 +60,6 @@ metrics:
         # - ["gbdw", "kptf"]
         # - ["sfdn", "tpbm"]
 
-      null: null
-
   finger_repeats:
     enabled: true
     weight: 780.0
