@@ -1,19 +1,19 @@
 Vue.component('layouts-app', {
     template: `
 <b-container fluid>
+
   <b-row>
-    <b-col xl>
+    <b-col cols="6">
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
-    <b-col xl>
-      <b-row>
-        <b-col cols="6">
-          <layout-details title="Details 1" :base-url="url" :layout="layout_1">
-        </b-col>
-        <b-col cols="6">
-          <layout-details title="Details 2" :base-url="url" :layout="layout_2">
-        </b-col>
-      </b-row>
+    <b-col cols="6">
+      <layout-barplot :base-url="url" :layout-data="details" :styles="chartStyles"></layout-barplot>
+    </b-col>
+  </b-row>
+
+  <b-row>
+    <b-col cols="6" v-for="detail in details">
+      <layout-details title="Details" :base-url="url" :layout="detail.layout"></layout-details>
     </b-col>
   </b-row>
 
@@ -24,19 +24,120 @@ Vue.component('layouts-app', {
     },
     data () {
         return {
-            layout_1: null,
-            layout_2: null
+            details: [],
         }
     },
     computed: {
+        chartStyles () {
+            return {
+                height: "600px",
+                position: "relative"
+            }
+        },
     },
     created () {
     },
+    mounted () {
+    },
     methods: {
-        setDetails (target, layout) {
-            if (target == 1) this.layout_1 = layout;
-            if (target == 2) this.layout_2 = layout;
+        setDetails (items) {
+            this.details = items
+        },
+    }
+})
+
+const COLORS = [
+  '#4dc9f6',
+  '#f67019',
+  '#f53794',
+  '#537bc4',
+  '#acc236',
+  '#166a8f',
+  '#00a950',
+  '#58595b',
+  '#8549ba'
+];
+
+Vue.component('layout-barplot', {
+    extends: VueChartJs.Bar,
+    props: {
+        layoutData: { type: Array, default: [] },
+        baseUrl: { type: String, default: null },
+    },
+    data () {
+        return {
+            layoutDetails: [],
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 90
+                        }
+                    }]
+                }
+            }
         }
+    },
+    computed: {
+        chartData () {
+            const datasets = []
+            const labels = ["Total / 10"]
+            this.layoutDetails.forEach((details, i) => {
+                const values = [details.total_cost / 10]
+                details.details.individual_results.forEach(metricTypeResults => {
+                    metricTypeResults.metric_costs.forEach(mc => {
+                        if (i === 0) {
+                            labels.push(mc.core.name)
+                        }
+                        values.push(mc.weighted_cost)
+                    })
+                })
+                datasets.push({
+                    label: details.layout,
+                    backgroundColor: COLORS[datasets.length],
+                    data: values
+                })
+            })
+            return {
+                labels: labels,
+                datasets: datasets
+            }
+        },
+    },
+    mounted () {
+        this.renderChart(this.chartData, this.options)
+    },
+    watch: {
+        layoutData () {
+            this.fetch()
+        },
+        chartData () {
+            this.renderChart(this.chartData, this.options)
+        },
+    },
+    methods: {
+        fetch () {
+            const res = this.layoutData.map(layoutData => {
+                const url = this.url(layoutData.layout)
+                if (url === null) return null
+                return fetch(url)
+                    .then(response => response.json())
+            })
+
+            Promise.all(res)
+                .then(data => {
+                    this.layoutDetails = data
+                })
+
+        },
+        url (layout) {
+            if (this.baseUrl === null || layout === null) return null
+            return `${this.baseUrl}/${layout}`
+        },
     }
 })
 
@@ -66,6 +167,9 @@ Vue.component('layout-details', {
         layout () {
             this.fetch()
         }
+    },
+    created () {
+        this.fetch()
     },
     computed: {
         url () {
@@ -108,13 +212,17 @@ Vue.component('layout-details', {
 
 Vue.component('layouts-table', {
     template: `
-<b-table sticky-header="400px" small head-variant="light" sort-by="total_cost" :items="rows" :fields="fields" :tbody-tr-class="rowClass">
-  <template #cell(to_details)="data">
-    <b-button-group>
-      <b-button size="sm" variant="light" @click="onClick(1, data.item.layout)">1</b-button>
-      <b-button size="sm" variant="light "@click="onClick(2, data.item.layout)">2</b-button>
-    </b-button-groub>
-  </template>
+<b-table
+  selectable
+  sticky-header="600px"
+  small
+  head-variant="light"
+  sort-by="total_cost"
+  :items="rows"
+  :fields="fields"
+  :tbody-tr-class="rowClass"
+  @row-selected="onRowSelected"
+>
 </b-table>`,
     props: {
         'url': {type: String, default: null},
@@ -160,10 +268,6 @@ Vue.component('layouts-table', {
                     label: 'Bekannt',
                     sortable: true
                 },
-                {
-                    key: 'to_details',
-                    label: 'Ansehen'
-                }
             ]
         },
     },
@@ -181,8 +285,8 @@ Vue.component('layouts-table', {
             if (!item || type !== 'row') return
             if (item.highlight) return 'table-primary'
         },
-        onClick (target, layout) {
-            this.$emit("details", target, layout)
+        onRowSelected(items) {
+            this.$emit("details", items)
         }
     }
 })
