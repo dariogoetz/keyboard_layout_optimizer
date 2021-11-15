@@ -88,7 +88,7 @@ Vue.component('layout-barplot', {
             const datasets = []
             const n_datasets = this.layoutDetails.length
             let labels = ["Total"]
-            if (!this.relative && n_datasets > 1) {
+            if (!this.relative || n_datasets === 1) {
                 labels[0] = [`Total / 10`]
             }
             // totals is used for relative values
@@ -96,7 +96,7 @@ Vue.component('layout-barplot', {
             this.layoutDetails.forEach((details, i) => {
                 // divide total cost by 10 for scaling reasons
                 let total = details.total_cost
-                if (!this.relative && n_datasets > 1) {
+                if (!this.relative || n_datasets === 1) {
                     total = total / 10
                 }
 
