@@ -3,10 +3,10 @@ Vue.component('layouts-app', {
 <b-container fluid>
 
   <b-row>
-    <b-col cols="6">
+    <b-col xl="6">
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
-    <b-col cols="6">
+    <b-col xl="6">
       <layout-barplot :base-url="url" :layout-data="details" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
