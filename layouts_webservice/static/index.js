@@ -21,12 +21,12 @@ Vue.component('layouts-app', {
 </b-container-fluid>
 `,
     props: {
-        url: { type: String, default: "/api" }
+        url: { type: String, default: "/api" },
+        relative: { type: Boolean, default: false }
     },
     data () {
         return {
             details: [],
-            relative: true,
         }
     },
     computed: {
