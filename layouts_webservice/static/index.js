@@ -63,6 +63,7 @@ Vue.component('layout-barplot', {
     props: {
         layoutData: { type: Array, default: [] },
         baseUrl: { type: String, default: null },
+        relative: { type: Boolean, default: true },
     },
     data () {
         return {
@@ -85,13 +86,38 @@ Vue.component('layout-barplot', {
     computed: {
         chartData () {
             const datasets = []
-            const labels = ["Total / 10"]
+            const n_datasets = this.layoutDetails.length
+            let labels = ["Total"]
+            if (!this.relative && n_datasets > 1) {
+                labels[0] = [`Total / 10`]
+            }
+            // totals is used for relative values
+            const totals = []
             this.layoutDetails.forEach((details, i) => {
-                const values = [details.total_cost / 10]
+                // divide total cost by 10 for scaling reasons
+                let total = details.total_cost
+                if (!this.relative && n_datasets > 1) {
+                    total = total / 10
+                }
+
+                // the first metric shown will be the total cost
+                let values = [total]
+                if (i === 0) {
+                    totals.push(total)
+                } else {
+                    totals[0] += total
+                }
+
+                // collect weighted metric costs from metric results datastructure
+                let j = 1
                 details.details.individual_results.forEach(metricTypeResults => {
                     metricTypeResults.metric_costs.forEach(mc => {
                         if (i === 0) {
                             labels.push(mc.core.name)
+                            totals.push(mc.weighted_cost)
+                        } else {
+                            totals[j] += mc.weighted_cost
+                            j += 1
                         }
                         values.push(mc.weighted_cost)
                     })
@@ -102,6 +128,15 @@ Vue.component('layout-barplot', {
                     data: values
                 })
             })
+
+            // if relative numbers are to be shown (and more than one dataset is to be compared), subtract means
+            if (this.relative && n_datasets > 1) {
+                for (dataset of datasets) {
+                    dataset.data = dataset.data.map((v, j) => {
+                        return v - (totals[j] / n_datasets)
+                    })
+                }
+            }
             return {
                 labels: labels,
                 datasets: datasets
