@@ -7,7 +7,8 @@ Vue.component('layouts-app', {
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
     <b-col xl="6">
-      <layout-barplot :base-url="url" :layout-data="details" :styles="chartStyles"></layout-barplot>
+      <b-form-checkbox v-model="relative">relative barplot</b-form-checkbox>
+      <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
 
@@ -25,6 +26,7 @@ Vue.component('layouts-app', {
     data () {
         return {
             details: [],
+            relative: true,
         }
     },
     computed: {
