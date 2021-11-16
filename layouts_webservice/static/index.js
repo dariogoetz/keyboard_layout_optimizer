@@ -255,6 +255,8 @@ Vue.component('layouts-table', {
   small
   head-variant="light"
   sort-by="total_cost"
+  sort-icon-left
+  no-sort-reset
   :items="rows"
   :fields="fields"
   :tbody-tr-class="rowClass"
