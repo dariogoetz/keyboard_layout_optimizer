@@ -125,7 +125,7 @@ Vue.component('layout-barplot', {
                     })
                 })
                 datasets.push({
-                    label: details.layout,
+                    label: `${details.layout} (${details.published_by})`,
                     backgroundColor: COLORS[datasets.length],
                     data: values
                 })
