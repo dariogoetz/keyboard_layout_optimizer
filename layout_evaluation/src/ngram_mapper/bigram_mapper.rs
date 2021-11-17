@@ -11,7 +11,7 @@ use crate::ngrams::Bigrams;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use serde::Deserialize;
 
 /// Configuration parameters for process of increasing the weight of common bigrams.
@@ -78,6 +78,8 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
+    /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
+    pub exclude_containing:  FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -86,6 +88,7 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             enabled: true,
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
+            exclude_containing: FxHashSet::default(),
         }
     }
 }
@@ -115,6 +118,11 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
+        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)|
+                !config.exclude_containing.contains(&layerkey1.symbol)
+                && !config.exclude_containing.contains(&layerkey2.symbol)
+                && !config.exclude_containing.contains(&layerkey3.symbol)
+        )
         .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
             let factor = if layerkey1.key.hand == layerkey2.key.hand && layerkey2.key.hand == layerkey3.key.hand {
                 config.factor_no_handswitch

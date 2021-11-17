@@ -219,6 +219,7 @@ ngram_mapper:
     enabled: true
     factor_no_handswitch: 0.7
     factor_handswitch: 0.8
+    exclude_containing: [",", "."]
 
   increase_common_bigrams:
     enabled: true
