@@ -9,7 +9,7 @@ Vue.component('layouts-app', {
     <b-col xl="6">
 <b-form-group>
       <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
-      <b-form-checkbox v-model="logscale" :disabled="relative" inline>logarithmic scale</b-form-checkbox>
+      <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
 </b-form-group>
       <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
