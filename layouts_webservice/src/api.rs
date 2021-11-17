@@ -6,7 +6,7 @@ use rocket::response::status::Created;
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::State;
 use rocket::{Build, Rocket};
-use rocket_db_pools::{sqlx, Connection, Database, Pool};
+use rocket_db_pools::{sqlx, Connection, Database};
 
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
@@ -104,7 +104,7 @@ async fn post(
                 total_cost: evaluation_result.total_cost(),
                 published_by: layout.published_by.clone(),
                 details_json: serde_json::to_string(&evaluation_result)
-                        .map_err(|_| Status::InternalServerError)?,
+                    .map_err(|_| Status::InternalServerError)?,
                 printed: format!("{}", evaluation_result),
                 highlight,
             };
@@ -169,6 +169,57 @@ async fn get(
     .ok()
 }
 
+#[post("/reeval", data = "<secret>")]
+async fn reeval(
+    mut db: Connection<Db>,
+    secret: &str,
+    layout_generator: &State<NeoLayoutGenerator>,
+    evaluator: &State<Evaluator>,
+    config: &State<Options>,
+) -> Result<()> {
+    let is_admin = config.secret == secret.to_string();
+    if !is_admin {
+        println!("Wrong password provided for re-evaluation.");
+        return Err(Status::Unauthorized);
+    }
+
+    println!("Reevaluating results");
+    let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
+        "SELECT id, layout, total_cost, details_json, printed, published_by, highlight FROM layouts",
+    )
+    .fetch_all(&mut *db)
+    .await
+    .map_err(|_| Status::InternalServerError)?;
+
+    for result in results {
+        let layout = layout_generator.generate(&result.layout).unwrap();
+        let evaluation_result = evaluator.evaluate_layout(&layout);
+        let total_cost = evaluation_result.total_cost();
+        let details_json = Some(serde_json::to_string(&evaluation_result).unwrap());
+        let printed = format!("{}", evaluation_result);
+
+        println!(
+            "Re-evaluated {} (id: {}) from {:>.2} to {:>.2}",
+            result.layout,
+            result.id.unwrap(),
+            result.total_cost,
+            total_cost
+        );
+        sqlx::query(
+            "UPDATE layouts SET total_cost = $1, details_json = $2 , printed = $3 WHERE id = $4",
+        )
+        .bind(&total_cost)
+        .bind(&details_json)
+        .bind(&printed)
+        .bind(&result.id)
+        .execute(&mut *db)
+        .await
+        .map_err(|_| Status::InternalServerError)?;
+    }
+
+    Ok(())
+}
+
 // #[delete("/<layout>")]
 // async fn delete(mut db: Connection<Db>, layout: &str) -> Result<Option<()>> {
 //     let result = sqlx::query("DELETE FROM layouts WHERE layout = $1")
@@ -193,64 +244,12 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     }
 }
 
-async fn reeval_layouts(rocket: Rocket<Build>) -> fairing::Result {
-    match (
-        &rocket.state::<NeoLayoutGenerator>(),
-        &rocket.state::<Evaluator>(),
-        &rocket.state::<Options>(),
-        Db::fetch(&rocket),
-    ) {
-        (Some(layout_generator), Some(evaluator), Some(options), Some(db)) => {
-            if options.reeval_layouts {
-                println!("Reevaluating results");
-                let mut connection = db.0.get().await.unwrap();
-                let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
-                    "SELECT id, layout, total_cost, details_json, printed, published_by, highlight FROM layouts",
-                )
-                .fetch_all(&mut connection)
-                .await
-                .unwrap();
-
-                for result in results {
-                    let layout = layout_generator.generate(&result.layout).unwrap();
-                    let evaluation_result = evaluator.evaluate_layout(&layout);
-                    let total_cost = evaluation_result.total_cost();
-                    let details_json = Some(serde_json::to_string(&evaluation_result).unwrap());
-                    let printed = format!("{}", evaluation_result);
-
-                    println!(
-                        "Re-evaluated {} (id: {}) from {:>.2} to {:>.2}",
-                        result.layout,
-                        result.id.unwrap(),
-                        result.total_cost,
-                        total_cost
-                    );
-                    sqlx::query(
-                        "UPDATE layouts SET total_cost = $1, details_json = $2 , printed = $3 WHERE id = $4",
-                    )
-                    .bind(&total_cost)
-                    .bind(&details_json)
-                    .bind(&printed)
-                    .bind(&result.id)
-                    .execute(&mut connection)
-                    .await
-                    .unwrap();
-                }
-            }
-        }
-        _ => {}
-    };
-
-    Ok(rocket)
-}
-
 pub fn stage() -> AdHoc {
     AdHoc::on_ignite("SQLx Stage", |rocket| async {
         rocket
             .attach(Db::init())
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
-            .attach(AdHoc::try_on_ignite("Reeval Layouts", reeval_layouts))
-            // .mount("/", routes![list, post, get, delete])
-            .mount("/api", routes![list, post, get])
+            // .mount("/", routes![list, post, get, delete, reeval])
+            .mount("/api", routes![list, post, get, reeval])
     })
 }

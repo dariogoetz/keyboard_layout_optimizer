@@ -5,7 +5,6 @@ static_dir = "static"
 unigrams = "../1-gramme.arne.no-special.txt"
 bigrams = "../2-gramme.arne.no-special.txt"
 trigrams = "../3-gramme.arne.no-special.txt"
-reeval_layouts = false
 secret = "super_duper_secret"
 
 [default.databases.sqlx]

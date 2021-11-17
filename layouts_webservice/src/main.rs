@@ -31,9 +31,6 @@ struct Options {
     /// Directory with static content to serve
     pub static_dir: String,
 
-    /// Should all layouts in the database be re-evaluated on startup
-    pub reeval_layouts: bool,
-
     /// Unigram file
     pub unigrams: String,
 
