@@ -1,25 +1,24 @@
 [package]
-name = "layout_optimization"
-version = "0.1.0"
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
+name = "layout_optimization"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-keyboard_layout = { path="../keyboard_layout" }
-layout_evaluation = { path="../layout_evaluation" }
+keyboard_layout = { path = "../keyboard_layout" }
+layout_evaluation = { path = "../layout_evaluation" }
 
-serde = { version="^1.0", features=[ "derive" ]}
-serde_yaml = "*"
-anyhow = "*"
+abc = "0.2.3"
+anyhow = "1.0.45"
+argmin = "0.2.4"
 env_logger = "*"
+genevo = "0.7.0"
 log = "*"
-rand = "*"
-abc = "*"
 num_cpus = "*"
-
-rustc-hash = "*"
-
-genevo = "*"
+rand = "*"
+rustc-hash = "1.1.0"
+serde = { version = "^1.0", features = ["derive"] }
+serde_yaml = "0.8.21"
