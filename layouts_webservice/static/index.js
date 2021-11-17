@@ -7,8 +7,11 @@ Vue.component('layouts-app', {
       <layouts-table :url="url" @details="setDetails"></layouts-table>
     </b-col>
     <b-col xl="6">
-      <b-form-checkbox v-model="relative">relative barplot</b-form-checkbox>
-      <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :styles="chartStyles"></layout-barplot>
+<b-form-group>
+      <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
+      <b-form-checkbox v-model="logscale" :disabled="relative" inline>logarithmic scale</b-form-checkbox>
+</b-form-group>
+      <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
 
@@ -22,7 +25,8 @@ Vue.component('layouts-app', {
 `,
     props: {
         url: { type: String, default: "/api" },
-        relative: { type: Boolean, default: false }
+        relative: { type: Boolean, default: false },
+        logscale: { type: Boolean, default: false },
     },
     data () {
         return {
@@ -66,23 +70,11 @@ Vue.component('layout-barplot', {
         layoutData: { type: Array, default: [] },
         baseUrl: { type: String, default: null },
         relative: { type: Boolean, default: true },
+        logscale: { type: Boolean, default: false }
     },
     data () {
         return {
             layoutDetails: [],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    xAxes: [{
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 90,
-                            minRotation: 90
-                        }
-                    }]
-                }
-            }
         }
     },
     computed: {
@@ -144,17 +136,43 @@ Vue.component('layout-barplot', {
                 datasets: datasets
             }
         },
+        options () {
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 90
+                        }
+                    }],
+                    yAxes: [{
+                        type: this.logscale ? "logarithmic" : "linear",
+                    }]
+                }
+            }
+
+            return options
+        },
     },
     mounted () {
         this.renderChart(this.chartData, this.options)
     },
     watch: {
+        relative () {
+            this.render()
+        },
+        logscale () {
+            this.render()
+        },
         layoutData () {
             this.fetch()
         },
         chartData () {
-            this.renderChart(this.chartData, this.options)
-        },
+            this.render()
+        }
     },
     methods: {
         fetch () {
@@ -175,6 +193,9 @@ Vue.component('layout-barplot', {
             if (this.baseUrl === null || layout === null) return null
             return `${this.baseUrl}/${layout}`
         },
+        render () {
+            this.renderChart(this.chartData, this.options)
+        }
     }
 })
 
