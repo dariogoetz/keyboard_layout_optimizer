@@ -50,6 +50,7 @@ pub struct MetricParameters {
     pub asymmetric_bigrams: WeightedParams<asymmetric_bigrams::Parameters>,
     pub manual_bigram_penalty: WeightedParams<manual_bigram_penalty::Parameters>,
     pub irregularity: WeightedParams<irregularity::Parameters>,
+    pub secondary_bigrams: WeightedParams<secondary_bigrams::Parameters>,
     pub no_handswitch_in_trigram: WeightedParams<no_handswitch_in_trigram::Parameters>,
 }
 
@@ -200,6 +201,16 @@ impl Evaluator {
             params.irregularity.weight,
             params.irregularity.normalization.clone(),
             params.irregularity.enabled,
+        );
+
+        self.trigram_metric(
+            Box::new(secondary_bigrams::SecondaryBigrams::new(
+                self.bigram_metrics.clone(),
+                &params.secondary_bigrams.params,
+            )),
+            params.secondary_bigrams.weight,
+            params.secondary_bigrams.normalization.clone(),
+            params.secondary_bigrams.enabled,
         );
 
         self.trigram_metric(

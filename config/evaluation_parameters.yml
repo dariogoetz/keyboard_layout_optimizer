@@ -195,6 +195,17 @@ metrics:
     params:
       null: null
 
+  secondary_bigrams:
+    enabled: true
+    weight: 0.2
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      factor_no_handswitch: 0.7
+      factor_handswitch: 0.8
+      exclude_containing: [",", "."]
+
   no_handswitch_in_trigram:
     enabled: true
     weight: 465.0

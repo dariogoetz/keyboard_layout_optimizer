@@ -18,6 +18,7 @@ pub mod no_handswitch_after_unbalancing_key;
 pub mod unbalancing_after_neighboring;
 
 pub mod irregularity;
+pub mod secondary_bigrams;
 pub mod no_handswitch_in_trigram;
 
 /// LayoutMetric is a trait for metrics that depends only on the layout.
