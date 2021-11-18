@@ -4,14 +4,14 @@
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
-use super::{BigramIndices, TrigramIndices};
+use super::BigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
 /// Configuration parameters for process of increasing the weight of common bigrams.
@@ -67,72 +67,6 @@ pub fn increase_common_bigrams(
         *weight = new_weight;
     });
     m.into_iter().collect()
-}
-
-/// Configuration parameters for adding secondary bigrams from trigrams.
-#[derive(Debug, Clone, Deserialize)]
-pub struct SecondaryBigramsFromTrigramsConfig {
-    /// Whether to add secondary bigrams from trigrams.
-    pub enabled: bool,
-    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves no handswitch.
-    pub factor_no_handswitch: f64,
-    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
-    pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
-    pub exclude_containing:  FxHashSet<char>,
-}
-
-impl Default for SecondaryBigramsFromTrigramsConfig {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            factor_no_handswitch: 0.7,
-            factor_handswitch: 0.8,
-            exclude_containing: FxHashSet::default(),
-        }
-    }
-}
-
-/// Add secondary bigrams from the first and third symbol of a trigram (if they belong to the same hand).
-pub fn add_secondary_bigrams_from_trigrams(
-    bigram_keys: &mut BigramIndices,
-    trigram_keys: &TrigramIndices,
-    config: &SecondaryBigramsFromTrigramsConfig,
-    layout: &Layout,
-) {
-    if !config.enabled {
-        return;
-    }
-
-    // there are many duplicates in the secondary bigrams -> using a hashmap is cheaper
-    let mut m = FxHashMap::with_capacity_and_hasher(trigram_keys.len(), Default::default());
-    trigram_keys
-        .iter()
-        .map(|((idx1, idx2, idx3), w)| {
-            (
-                (
-                    (idx1, layout.get_layerkey(idx1)),
-                    (idx2, layout.get_layerkey(idx2)),
-                    (idx3, layout.get_layerkey(idx3)),
-                ),
-                w,
-            )
-        })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)|
-                !config.exclude_containing.contains(&layerkey1.symbol)
-                && !config.exclude_containing.contains(&layerkey2.symbol)
-                && !config.exclude_containing.contains(&layerkey3.symbol)
-        )
-        .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
-            let factor = if layerkey1.key.hand == layerkey2.key.hand && layerkey2.key.hand == layerkey3.key.hand {
-                config.factor_no_handswitch
-            } else {
-                config.factor_handswitch
-            };
-
-            *m.entry((*idx1, *idx3)).or_insert(0.0) += *weight * factor;
-        });
-    bigram_keys.extend(m);
 }
 
 fn layerkey_indices(bigrams: &Bigrams, layout: &Layout) -> (BigramIndices, f64) {

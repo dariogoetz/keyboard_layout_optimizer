@@ -1,7 +1,7 @@
 //! This module provides an implementation of the `NgramMapper` trait.
 
 use super::bigram_mapper::{
-    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper, SecondaryBigramsFromTrigramsConfig,
+    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper,
 };
 use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
@@ -28,8 +28,6 @@ pub struct SplitModifiersConfig {
 pub struct NgramMapperConfig {
     /// Parameters for the modifiers splitting process.
     pub split_modifiers: SplitModifiersConfig,
-    /// Parameters for adding secondary bigrams from trigrams.
-    pub secondary_bigrams_from_trigrams: SecondaryBigramsFromTrigramsConfig,
     /// Parameters for the increase in weight of common bigrams (with already high frequency).
     pub increase_common_bigrams: IncreaseCommonBigramsConfig,
 }
@@ -94,35 +92,9 @@ impl NgramMapper for OnDemandNgramMapper {
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, &layout);
 
-        // map trigrams before bigrams because secondary bigrams from trigrams map be added
-        // map char-based trigrams to LayerKeyIndex
-        let (trigram_key_indices, trigrams_found, trigrams_not_found) =
-            self.trigram_mapper.layerkey_indices(layout);
-        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
-        let trigram_key_indices = groupby_sum(&trigram_key_indices);
-        // map LayerKeyIndex to &LayerKey
-        let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, &layout);
-
-        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-        // --> remove
-        let trigrams = trigrams
-            .into_iter()
-            .filter(|((k1, k2, k3), _)| {
-                !((k1 == k2 && k1.is_modifier) || (k2 == k3 && k2.is_modifier))
-            })
-            .collect();
-
         // map char-based bigrams to LayerKeyIndex
         let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) =
             self.bigram_mapper.layerkey_indices(layout);
-
-        // (if enabled) add bigrams consisting of first and third trigram symbols to vec of bigrams
-        bigram_mapper::add_secondary_bigrams_from_trigrams(
-            &mut bigram_key_indices,
-            &trigram_key_indices,
-            &self.config.secondary_bigrams_from_trigrams,
-            layout,
-        );
 
         // (if enabled) increase the weight of bigrams with high weight even higher
         bigram_key_indices = bigram_mapper::increase_common_bigrams(
@@ -141,6 +113,23 @@ impl NgramMapper for OnDemandNgramMapper {
         let bigrams = bigrams
             .into_iter()
             .filter(|((k1, k2), _)| !(k1 == k2 && k1.is_modifier))
+            .collect();
+
+        // map char-based trigrams to LayerKeyIndex
+        let (trigram_key_indices, trigrams_found, trigrams_not_found) =
+            self.trigram_mapper.layerkey_indices(layout);
+        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
+        let trigram_key_indices = groupby_sum(&trigram_key_indices);
+        // map LayerKeyIndex to &LayerKey
+        let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, &layout);
+
+        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+        // --> remove
+        let trigrams = trigrams
+            .into_iter()
+            .filter(|((k1, k2, k3), _)| {
+                !((k1 == k2 && k1.is_modifier) || (k2 == k3 && k2.is_modifier))
+            })
             .collect();
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging

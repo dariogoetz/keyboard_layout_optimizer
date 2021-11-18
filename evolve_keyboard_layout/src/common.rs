@@ -80,10 +80,6 @@ pub struct Options {
     #[structopt(long)]
     pub no_split_modifiers: bool,
 
-    /// Do not add secondary bigrams from trigrams
-    #[structopt(long)]
-    pub no_add_secondary_bigrams: bool,
-
     /// Do not increase weight of common bigrams
     #[structopt(long)]
     pub no_increase_common_bigrams: bool,
@@ -123,9 +119,6 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     let mut ngram_mapper_config = eval_params.ngram_mapper.clone();
     if options.no_split_modifiers {
         ngram_mapper_config.split_modifiers.enabled = false;
-    }
-    if options.no_add_secondary_bigrams {
-        ngram_mapper_config.secondary_bigrams_from_trigrams.enabled = false;
     }
     if options.no_increase_common_bigrams {
         ngram_mapper_config.increase_common_bigrams.enabled = false;
