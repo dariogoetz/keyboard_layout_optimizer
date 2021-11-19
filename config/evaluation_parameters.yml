@@ -68,6 +68,7 @@ metrics:
       value: 1.0
     params:
       index_finger_factor: 0.9
+      pinky_finger_factor: 1.2
       total_weight_threshold: 20
       critical_fraction: 0.00025
       factor: 5.0
