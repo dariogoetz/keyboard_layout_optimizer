@@ -1,4 +1,5 @@
 metrics:
+  # layour metrics
   shortcut_keys:
     enabled: true
     weight: 0.35
@@ -23,6 +24,7 @@ metrics:
         # - ["gbdw", "kptf"]
         # - ["sfdn", "tpbm"]
 
+  # unigram metrics
   finger_balance:
     enabled: true
     weight: 69.0
@@ -60,6 +62,7 @@ metrics:
     params:
       null: null
 
+  # bigram metrics
   asymmetric_bigrams:
     enabled: true
     weight: 1.0
