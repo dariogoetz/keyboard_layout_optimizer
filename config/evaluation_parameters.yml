@@ -82,7 +82,7 @@ metrics:
       index_finger_factor: 0.9
       pinky_finger_factor: 1.2
       total_weight_threshold: 20
-      critical_fraction: 0.00025
+      critical_fraction: 1.00025 # >1 -> do not use
       factor: 5.0
 
   finger_repeats_top_bottom:
@@ -95,7 +95,7 @@ metrics:
       index_finger_factor: 0.9
       pinky_finger_factor: 1.2
       total_weight_threshold: 20
-      critical_fraction: 0.00025
+      critical_fraction: 1.00025 # >1 -> do not use
       factor: 5.0
 
   line_changes:
