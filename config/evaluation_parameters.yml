@@ -11,7 +11,7 @@ metrics:
 
   asymmetric_keys:
     enabled: true
-    weight: 11.0
+    weight: 5.0
     normalization:
       type: fixed
       value: 1.0
