@@ -1,9 +1,9 @@
-//! The trigram metric `SecondaryBigrams` takes the first and last element of a trigram as a bigrams
-//! and evaluates it with all configured bigram metrics that can assign costs to
-//! individual bigrams (`individual_cost` does not return `None`).
+//! The trigram metric `SecondaryBigrams` splits each trigram into two bigrams
+//! and evaluates each bigram with all configured bigram metrics that can assign costs to
+//! individual bigrams (`individual_cost` does not return `None`). The two bigram costs are multiplied and finally, the
+//! square root of their sum is the resulting irregularity cost.
 //!
-//! Note: This metric does not exist in ArneBab's version. Instead, secondary bigrams are there added
-//! to the general pool of bigrams.
+//! *Note:* ArneBab's irregularity does not include all bigram metrics (asymmetric bigrams is missing).
 
 use super::{BigramMetric, TrigramMetric};
 
