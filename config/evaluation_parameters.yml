@@ -229,13 +229,13 @@ ngram_mapper:
     same_key_mod_factor: 0.03125
 
   secondary_bigrams_from_trigrams:
-    enabled: true
+    enabled: false
     factor_no_handswitch: 0.7
     factor_handswitch: 0.8
     exclude_containing: [",", "."]
 
   increase_common_bigrams:
-    enabled: true
+    enabled: false
     critical_fraction: 0.001
     factor: 2.0
     total_weight_threshold: 20.0
