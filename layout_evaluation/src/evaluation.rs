@@ -44,6 +44,7 @@ pub struct MetricParameters {
 
     pub asymmetric_bigrams: WeightedParams<bigram_metrics::asymmetric_bigrams::Parameters>,
     pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
+    pub finger_repeats_lateral: WeightedParams<bigram_metrics::finger_repeats_lateral::Parameters>,
     pub finger_repeats_top_bottom: WeightedParams<bigram_metrics::finger_repeats_top_bottom::Parameters>,
     pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
     pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
@@ -141,6 +142,14 @@ impl Evaluator {
             params.finger_repeats.weight,
             params.finger_repeats.normalization.clone(),
             params.finger_repeats.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::finger_repeats_lateral::FingerRepeatsLateral::new(
+                &params.finger_repeats_lateral.params,
+            )),
+            params.finger_repeats_lateral.weight,
+            params.finger_repeats_lateral.normalization.clone(),
+            params.finger_repeats_lateral.enabled,
         );
         self.bigram_metric(
             Box::new(bigram_metrics::finger_repeats_top_bottom::FingerRepeatsTopBottom::new(

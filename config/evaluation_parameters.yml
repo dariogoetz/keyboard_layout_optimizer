@@ -98,6 +98,15 @@ metrics:
       critical_fraction: 1.00025 # >1 -> do not use
       factor: 5.0
 
+  finger_repeats_lateral:
+    enabled: true
+    weight: 780.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
   line_changes:
     enabled: true
     weight: 5.5

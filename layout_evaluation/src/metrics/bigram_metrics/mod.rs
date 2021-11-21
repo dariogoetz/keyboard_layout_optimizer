@@ -3,6 +3,7 @@ use keyboard_layout::layout::{LayerKey, Layout};
 
 pub mod asymmetric_bigrams;
 pub mod finger_repeats;
+pub mod finger_repeats_lateral;
 pub mod finger_repeats_top_bottom;
 pub mod line_changes;
 pub mod manual_bigram_penalty;
