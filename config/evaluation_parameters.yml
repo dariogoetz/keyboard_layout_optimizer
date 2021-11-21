@@ -1,41 +1,4 @@
 metrics:
-  key_costs:
-    enabled: true
-    weight: 7.55
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
-  hand_disbalance:
-    enabled: true
-    weight: 40.0
-    normalization:
-      type: fixed
-      value: 1.0
-    params:
-      null: null
-
-  finger_balance:
-    enabled: true
-    weight: 69.0
-    normalization:
-      type: fixed
-      value: 1.0
-    params:
-      intended_loads:
-        [Left, Pinky]: 1.0
-        [Left, Ring]: 1.6
-        [Left, Middle]: 2.0
-        [Left, Pointer]: 2.0
-        [Left, Thumb]: 2.0
-        [Right, Thumb]: 2.0
-        [Right, Pointer]: 2.0
-        [Right, Middle]: 2.0
-        [Right, Ring]: 1.6
-        [Right, Pinky]: 1.0
-
   shortcut_keys:
     enabled: true
     weight: 0.35
@@ -59,6 +22,52 @@ metrics:
         - ["gbd", "kpt"]
         # - ["gbdw", "kptf"]
         # - ["sfdn", "tpbm"]
+
+  finger_balance:
+    enabled: true
+    weight: 69.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      intended_loads:
+        [Left, Pinky]: 1.0
+        [Left, Ring]: 1.6
+        [Left, Middle]: 2.0
+        [Left, Pointer]: 2.0
+        [Left, Thumb]: 2.0
+        [Right, Thumb]: 2.0
+        [Right, Pointer]: 2.0
+        [Right, Middle]: 2.0
+        [Right, Ring]: 1.6
+        [Right, Pinky]: 1.0
+
+  hand_disbalance:
+    enabled: true
+    weight: 40.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      null: null
+
+  key_costs:
+    enabled: true
+    weight: 7.55
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  asymmetric_bigrams:
+    enabled: true
+    weight: 1.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
 
   finger_repeats:
     enabled: true
@@ -85,6 +94,43 @@ metrics:
       total_weight_threshold: 20
       critical_fraction: 0.00025
       factor: 5.0
+
+  line_changes:
+    enabled: true
+    weight: 5.5
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"]]  # no left pinky!
+      long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
+      short_up_to_long_or_long_down_to_short_reduction: 0.25
+      short_down_to_long_or_long_up_to_short_increase: 0.5
+      count_row_changes_between_hands: false
+
+  manual_bigram_penalty:
+    enabled: true
+    weight: 1050.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      matrix_positions:
+        # all combinations with pinky will be added automatically
+        #
+        # symmetric ones will be added automatically
+        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2
+        [[1, 3], [3, 2]]: 1
+        [[2, 3], [3, 2]]: 0.3
+        [[2, 4], [3, 3]]: 0.2
+        [[1, 2], [3, 3]]: 0.2
+        [[1, 2], [3, 4]]: 0.1
+
+        [[3, 11], [1, 7]]: 0.1
+        [[3, 2], [1, 6]]: 0.1
+
+        [[3, 2], [3, 5]]: -0.01
+        [[3, 8], [3, 11]]: -0.01
 
   movement_pattern:
     enabled: true
@@ -142,52 +188,7 @@ metrics:
     params:
       null: null
 
-  line_changes:
-    enabled: true
-    weight: 5.5
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"]]  # no left pinky!
-      long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
-      short_up_to_long_or_long_down_to_short_reduction: 0.25
-      short_down_to_long_or_long_up_to_short_increase: 0.5
-      count_row_changes_between_hands: false
-
-  asymmetric_bigrams:
-    enabled: true
-    weight: 1.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
-  manual_bigram_penalty:
-    enabled: true
-    weight: 1050.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      matrix_positions:
-        # all combinations with pinky will be added automatically
-        #
-        # symmetric ones will be added automatically
-        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2
-        [[1, 3], [3, 2]]: 1
-        [[2, 3], [3, 2]]: 0.3
-        [[2, 4], [3, 3]]: 0.2
-        [[1, 2], [3, 3]]: 0.2
-        [[1, 2], [3, 4]]: 0.1
-
-        [[3, 11], [1, 7]]: 0.1
-        [[3, 2], [1, 6]]: 0.1
-
-        [[3, 2], [3, 5]]: -0.01
-        [[3, 8], [3, 11]]: -0.01
-
+  # trigram metrics
   irregularity:
     enabled: true
     weight: 8.25
@@ -196,6 +197,16 @@ metrics:
       value: 1.0
     params:
       null: null
+
+  no_handswitch_in_trigram:
+    enabled: true
+    weight: 465.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      factor_with_direction_change: 1.0
+      factor_without_direction_change: 0.0
 
   secondary_bigrams:
     enabled: true
@@ -208,15 +219,14 @@ metrics:
       factor_handswitch: 0.8
       exclude_containing: [",", "."]
 
-  no_handswitch_in_trigram:
+  trigram_finger_repeats:
     enabled: true
-    weight: 465.0
+    weight: 10000.0
     normalization:
       type: weight_found
       value: 1.0
     params:
-      factor_with_direction_change: 1.0
-      factor_without_direction_change: 0.0
+      factor_lateral_movement: 1.2
 
 ngrams:
   unigrams: 1-gramme.arne.no-special.txt

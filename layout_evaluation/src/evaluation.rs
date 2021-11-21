@@ -55,6 +55,7 @@ pub struct MetricParameters {
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
     pub no_handswitch_in_trigram: WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
     pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
+    pub trigram_finger_repeats: WeightedParams<trigram_metrics::trigram_finger_repeats::Parameters>,
 }
 
 /// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -206,6 +207,14 @@ impl Evaluator {
             params.irregularity.enabled,
         );
         self.trigram_metric(
+            Box::new(trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
+                &params.no_handswitch_in_trigram.params,
+            )),
+            params.no_handswitch_in_trigram.weight,
+            params.no_handswitch_in_trigram.normalization.clone(),
+            params.no_handswitch_in_trigram.enabled,
+        );
+        self.trigram_metric(
             Box::new(trigram_metrics::secondary_bigrams::SecondaryBigrams::new(
                 self.bigram_metrics.clone(),
                 &params.secondary_bigrams.params,
@@ -215,12 +224,12 @@ impl Evaluator {
             params.secondary_bigrams.enabled,
         );
         self.trigram_metric(
-            Box::new(trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
-                &params.no_handswitch_in_trigram.params,
+            Box::new(trigram_metrics::trigram_finger_repeats::TrigramFingerRepeats::new(
+                &params.trigram_finger_repeats.params,
             )),
-            params.no_handswitch_in_trigram.weight,
-            params.no_handswitch_in_trigram.normalization.clone(),
-            params.no_handswitch_in_trigram.enabled,
+            params.trigram_finger_repeats.weight,
+            params.trigram_finger_repeats.normalization.clone(),
+            params.trigram_finger_repeats.enabled,
         );
 
         self.to_owned()

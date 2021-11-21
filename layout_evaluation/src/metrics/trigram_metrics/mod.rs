@@ -2,8 +2,9 @@
 use keyboard_layout::layout::{LayerKey, Layout};
 
 pub mod irregularity;
-pub mod secondary_bigrams;
 pub mod no_handswitch_in_trigram;
+pub mod secondary_bigrams;
+pub mod trigram_finger_repeats;
 
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
