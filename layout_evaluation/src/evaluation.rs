@@ -35,33 +35,36 @@ pub struct WeightedParams<T> {
 /// This is usually read from a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
-    pub shortcut_keys: WeightedParams<shortcut_keys::Parameters>,
-    pub asymmetric_keys: WeightedParams<asymmetric_keys::Parameters>,
-    pub key_costs: WeightedParams<key_costs::Parameters>,
-    pub hand_disbalance: WeightedParams<hand_disbalance::Parameters>,
-    pub finger_repeats: WeightedParams<finger_repeats::Parameters>,
-    pub finger_repeats_top_bottom: WeightedParams<finger_repeats_top_bottom::Parameters>,
-    pub movement_pattern: WeightedParams<movement_pattern::Parameters>,
+    pub asymmetric_keys: WeightedParams<layout_metrics::asymmetric_keys::Parameters>,
+    pub shortcut_keys: WeightedParams<layout_metrics::shortcut_keys::Parameters>,
+
+    pub finger_balance: WeightedParams<unigram_metrics::finger_balance::Parameters>,
+    pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
+    pub key_costs: WeightedParams<unigram_metrics::key_costs::Parameters>,
+
+    pub asymmetric_bigrams: WeightedParams<bigram_metrics::asymmetric_bigrams::Parameters>,
+    pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
+    pub finger_repeats_top_bottom: WeightedParams<bigram_metrics::finger_repeats_top_bottom::Parameters>,
+    pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
+    pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
+    pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
     pub no_handswitch_after_unbalancing_key:
-        WeightedParams<no_handswitch_after_unbalancing_key::Parameters>,
-    pub unbalancing_after_neighboring: WeightedParams<unbalancing_after_neighboring::Parameters>,
-    pub finger_balance: WeightedParams<finger_balance::Parameters>,
-    pub line_changes: WeightedParams<line_changes::Parameters>,
-    pub asymmetric_bigrams: WeightedParams<asymmetric_bigrams::Parameters>,
-    pub manual_bigram_penalty: WeightedParams<manual_bigram_penalty::Parameters>,
-    pub irregularity: WeightedParams<irregularity::Parameters>,
-    pub secondary_bigrams: WeightedParams<secondary_bigrams::Parameters>,
-    pub no_handswitch_in_trigram: WeightedParams<no_handswitch_in_trigram::Parameters>,
+        WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
+    pub unbalancing_after_neighboring: WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
+
+    pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
+    pub no_handswitch_in_trigram: WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
+    pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
 }
 
 /// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
 /// The metrics are handled as dynamically dispatched trait objects for the metric traits in the `metrics` module.
 #[derive(Clone, Debug)]
 pub struct Evaluator {
-    layout_metrics: Vec<(f64, NormalizationType, Box<dyn LayoutMetric>)>,
-    unigram_metrics: Vec<(f64, NormalizationType, Box<dyn UnigramMetric>)>,
-    bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
-    trigram_metrics: Vec<(f64, NormalizationType, Box<dyn TrigramMetric>)>,
+    layout_metrics: Vec<(f64, NormalizationType, Box<dyn layout_metrics::LayoutMetric>)>,
+    unigram_metrics: Vec<(f64, NormalizationType, Box<dyn unigram_metrics::UnigramMetric>)>,
+    bigram_metrics: Vec<(f64, NormalizationType, Box<dyn bigram_metrics::BigramMetric>)>,
+    trigram_metrics: Vec<(f64, NormalizationType, Box<dyn trigram_metrics::TrigramMetric>)>,
     ngram_mapper: Box<dyn NgramMapper>,
 }
 
@@ -81,31 +84,33 @@ impl Evaluator {
     pub fn default_metrics(&mut self, params: &MetricParameters) -> Self {
         // layout metrics
         self.layout_metric(
-            Box::new(shortcut_keys::ShortcutKeys::new(
-                &params.shortcut_keys.params,
-            )),
-            params.shortcut_keys.weight,
-            params.shortcut_keys.normalization.clone(),
-            params.shortcut_keys.enabled,
-        );
-        self.layout_metric(
-            Box::new(asymmetric_keys::AsymmetricKeys::new(
+            Box::new(layout_metrics::asymmetric_keys::AsymmetricKeys::new(
                 &params.asymmetric_keys.params,
             )),
             params.asymmetric_keys.weight,
             params.asymmetric_keys.normalization.clone(),
             params.asymmetric_keys.enabled,
         );
+        self.layout_metric(
+            Box::new(layout_metrics::shortcut_keys::ShortcutKeys::new(
+                &params.shortcut_keys.params,
+            )),
+            params.shortcut_keys.weight,
+            params.shortcut_keys.normalization.clone(),
+            params.shortcut_keys.enabled,
+        );
 
         // unigram metrics
         self.unigram_metric(
-            Box::new(key_costs::KeyCost::new(&params.key_costs.params)),
-            params.key_costs.weight,
-            params.key_costs.normalization.clone(),
-            params.key_costs.enabled,
+            Box::new(unigram_metrics::finger_balance::FingerBalance::new(
+                &params.finger_balance.params,
+            )),
+            params.finger_balance.weight,
+            params.finger_balance.normalization.clone(),
+            params.finger_balance.enabled,
         );
         self.unigram_metric(
-            Box::new(hand_disbalance::HandDisbalance::new(
+            Box::new(unigram_metrics::hand_disbalance::HandDisbalance::new(
                 &params.hand_disbalance.params,
             )),
             params.hand_disbalance.weight,
@@ -113,17 +118,23 @@ impl Evaluator {
             params.hand_disbalance.enabled,
         );
         self.unigram_metric(
-            Box::new(finger_balance::FingerBalance::new(
-                &params.finger_balance.params,
-            )),
-            params.finger_balance.weight,
-            params.finger_balance.normalization.clone(),
-            params.finger_balance.enabled,
+            Box::new(unigram_metrics::key_costs::KeyCost::new(&params.key_costs.params)),
+            params.key_costs.weight,
+            params.key_costs.normalization.clone(),
+            params.key_costs.enabled,
         );
 
         // bigram metrics
         self.bigram_metric(
-            Box::new(finger_repeats::FingerRepeats::new(
+            Box::new(bigram_metrics::asymmetric_bigrams::AsymmetricBigrams::new(
+                &params.asymmetric_bigrams.params,
+            )),
+            params.asymmetric_bigrams.weight,
+            params.asymmetric_bigrams.normalization.clone(),
+            params.asymmetric_bigrams.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::finger_repeats::FingerRepeats::new(
                 &params.finger_repeats.params,
             )),
             params.finger_repeats.weight,
@@ -131,7 +142,7 @@ impl Evaluator {
             params.finger_repeats.enabled,
         );
         self.bigram_metric(
-            Box::new(finger_repeats_top_bottom::FingerRepeatsTopBottom::new(
+            Box::new(bigram_metrics::finger_repeats_top_bottom::FingerRepeatsTopBottom::new(
                 &params.finger_repeats_top_bottom.params,
             )),
             params.finger_repeats_top_bottom.weight,
@@ -139,7 +150,21 @@ impl Evaluator {
             params.finger_repeats_top_bottom.enabled,
         );
         self.bigram_metric(
-            Box::new(movement_pattern::MovementPattern::new(
+            Box::new(bigram_metrics::line_changes::LineChanges::new(&params.line_changes.params)),
+            params.line_changes.weight,
+            params.line_changes.normalization.clone(),
+            params.line_changes.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::manual_bigram_penalty::ManualBigramPenalty::new(
+                &params.manual_bigram_penalty.params,
+            )),
+            params.manual_bigram_penalty.weight,
+            params.manual_bigram_penalty.normalization.clone(),
+            params.manual_bigram_penalty.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::movement_pattern::MovementPattern::new(
                 &params.movement_pattern.params,
             )),
             params.movement_pattern.weight,
@@ -148,7 +173,7 @@ impl Evaluator {
         );
         self.bigram_metric(
             Box::new(
-                no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey::new(
+                bigram_metrics::no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey::new(
                     &params.no_handswitch_after_unbalancing_key.params,
                 ),
             ),
@@ -161,7 +186,7 @@ impl Evaluator {
         );
         self.bigram_metric(
             Box::new(
-                unbalancing_after_neighboring::UnbalancingAfterNeighboring::new(
+                bigram_metrics::unbalancing_after_neighboring::UnbalancingAfterNeighboring::new(
                     &params.unbalancing_after_neighboring.params,
                 ),
             ),
@@ -169,32 +194,10 @@ impl Evaluator {
             params.unbalancing_after_neighboring.normalization.clone(),
             params.unbalancing_after_neighboring.enabled,
         );
-        self.bigram_metric(
-            Box::new(line_changes::LineChanges::new(&params.line_changes.params)),
-            params.line_changes.weight,
-            params.line_changes.normalization.clone(),
-            params.line_changes.enabled,
-        );
-        self.bigram_metric(
-            Box::new(asymmetric_bigrams::AsymmetricBigrams::new(
-                &params.asymmetric_bigrams.params,
-            )),
-            params.asymmetric_bigrams.weight,
-            params.asymmetric_bigrams.normalization.clone(),
-            params.asymmetric_bigrams.enabled,
-        );
-        self.bigram_metric(
-            Box::new(manual_bigram_penalty::ManualBigramPenalty::new(
-                &params.manual_bigram_penalty.params,
-            )),
-            params.manual_bigram_penalty.weight,
-            params.manual_bigram_penalty.normalization.clone(),
-            params.manual_bigram_penalty.enabled,
-        );
 
         // trigram_metrics
         self.trigram_metric(
-            Box::new(irregularity::Irregularity::new(
+            Box::new(trigram_metrics::irregularity::Irregularity::new(
                 self.bigram_metrics.clone(),
                 &params.irregularity.params,
             )),
@@ -202,9 +205,8 @@ impl Evaluator {
             params.irregularity.normalization.clone(),
             params.irregularity.enabled,
         );
-
         self.trigram_metric(
-            Box::new(secondary_bigrams::SecondaryBigrams::new(
+            Box::new(trigram_metrics::secondary_bigrams::SecondaryBigrams::new(
                 self.bigram_metrics.clone(),
                 &params.secondary_bigrams.params,
             )),
@@ -212,9 +214,8 @@ impl Evaluator {
             params.secondary_bigrams.normalization.clone(),
             params.secondary_bigrams.enabled,
         );
-
         self.trigram_metric(
-            Box::new(no_handswitch_in_trigram::NoHandswitchInTrigram::new(
+            Box::new(trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
                 &params.no_handswitch_in_trigram.params,
             )),
             params.no_handswitch_in_trigram.weight,
@@ -228,7 +229,7 @@ impl Evaluator {
     /// Add a metric that operates only on the layout itself ("layout metric").
     pub fn layout_metric(
         &mut self,
-        metric: Box<dyn LayoutMetric>,
+        metric: Box<dyn layout_metrics::LayoutMetric>,
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
@@ -242,7 +243,7 @@ impl Evaluator {
     /// Add a metric that operates on the unigram data ("unigram metric").
     pub fn unigram_metric(
         &mut self,
-        metric: Box<dyn UnigramMetric>,
+        metric: Box<dyn unigram_metrics::UnigramMetric>,
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
@@ -256,7 +257,7 @@ impl Evaluator {
     /// Add a metric that operates on the bigram data ("bigram metric").
     pub fn bigram_metric(
         &mut self,
-        metric: Box<dyn BigramMetric>,
+        metric: Box<dyn bigram_metrics::BigramMetric>,
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
@@ -270,7 +271,7 @@ impl Evaluator {
     /// Add a metric that operates on the trigram data ("trigram metric").
     pub fn trigram_metric(
         &mut self,
-        metric: Box<dyn TrigramMetric>,
+        metric: Box<dyn trigram_metrics::TrigramMetric>,
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,

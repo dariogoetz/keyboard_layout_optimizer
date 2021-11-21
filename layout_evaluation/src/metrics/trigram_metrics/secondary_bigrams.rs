@@ -5,7 +5,8 @@
 //!
 //! *Note:* ArneBab's irregularity does not include all bigram metrics (asymmetric bigrams is missing).
 
-use super::{BigramMetric, TrigramMetric};
+use super::TrigramMetric;
+use crate::metrics::bigram_metrics::BigramMetric;
 
 use crate::results::NormalizationType;
 
