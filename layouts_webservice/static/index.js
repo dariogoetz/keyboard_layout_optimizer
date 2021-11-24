@@ -4,16 +4,18 @@ Vue.component('layouts-app', {
 
   <b-row>
     <b-col xl="6">
-      <b-form-group>
-        <b-form-checkbox v-model="bestInFamily" inline>only show best in family</b-form-checkbox>
-      </b-form-group>
-      <layouts-table :url="url" :bestInFamily="bestInFamily" @details="setDetails"></layouts-table>
+      <b-form inline>
+        <b-form-input v-model="filter" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family</b-form-checkbox>
+      </b-form>
+      <layouts-table :url="url" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
     </b-col>
+
     <b-col xl="6">
-      <b-form-group>
-        <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
+      <b-form inline>
+        <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
         <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
-      </b-form-group>
+      </b-form>
       <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
@@ -35,6 +37,7 @@ Vue.component('layouts-app', {
     data () {
         return {
             details: [],
+            filter: null,
         }
     },
     computed: {
@@ -284,13 +287,15 @@ Vue.component('layouts-table', {
   no-sort-reset
   :items="rows"
   :fields="fields"
+  :filter="filter"
   :tbody-tr-class="rowClass"
   @row-selected="onRowSelected"
 >
 </b-table>`,
     props: {
         url: { type: String, default: null },
-        bestInFamily: { type: Boolean, default: true }
+        bestInFamily: { type: Boolean, default: true },
+        filter: { type: String, default: null }
     },
     data () {
         return {
@@ -346,6 +351,10 @@ Vue.component('layouts-table', {
                     key: 'family',
                     label: 'Familie',
                     sortable: true
+                },
+                {
+                    key: 'standardPeriodComma',
+                    label: 'Standard ./,'
                 },
                 {
                     key: 'highlight',
