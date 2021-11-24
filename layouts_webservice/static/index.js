@@ -300,7 +300,8 @@ Vue.component('layouts-table', {
                     layout: layout.layout,
                     total_cost: layout.total_cost,
                     published_by: layout.published_by,
-                    highlight: layout.highlight
+                    highlight: layout.highlight,
+                    family: layout.layout.slice(12, 22)
                 }
                 return row
             })
@@ -322,6 +323,11 @@ Vue.component('layouts-table', {
                 {
                     key: 'layout',
                     label: 'Layout',
+                },
+                {
+                    key: 'family',
+                    label: 'Familie',
+                    sortable: true
                 },
                 {
                     key: 'highlight',
