@@ -324,7 +324,8 @@ Vue.component('layouts-table', {
                     total_cost: layout.total_cost,
                     published_by: layout.published_by,
                     highlight: layout.highlight,
-                    family: layout.layout.slice(12, 22)
+                    family: layout.layout.slice(12, 22),
+                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual'
                 }
                 return row
             })
@@ -353,8 +354,9 @@ Vue.component('layouts-table', {
                     sortable: true
                 },
                 {
-                    key: 'standardPeriodComma',
-                    label: 'Standard ./,'
+                    key: 'periodComma',
+                    label: 'Punkt/Komma',
+                    sortable: true,
                 },
                 {
                     key: 'highlight',
