@@ -4,13 +4,16 @@ Vue.component('layouts-app', {
 
   <b-row>
     <b-col xl="6">
-      <layouts-table :url="url" @details="setDetails"></layouts-table>
+      <b-form-group>
+        <b-form-checkbox v-model="bestInFamily" inline>only show best in family</b-form-checkbox>
+      </b-form-group>
+      <layouts-table :url="url" :bestInFamily="bestInFamily" @details="setDetails"></layouts-table>
     </b-col>
     <b-col xl="6">
-<b-form-group>
-      <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
-      <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
-</b-form-group>
+      <b-form-group>
+        <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
+        <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
+      </b-form-group>
       <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
@@ -27,6 +30,7 @@ Vue.component('layouts-app', {
         url: { type: String, default: "/api" },
         relative: { type: Boolean, default: false },
         logscale: { type: Boolean, default: false },
+        bestInFamily: { type: Boolean, default: false }
     },
     data () {
         return {
@@ -285,7 +289,8 @@ Vue.component('layouts-table', {
 >
 </b-table>`,
     props: {
-        'url': {type: String, default: null},
+        url: { type: String, default: null },
+        bestInFamily: { type: Boolean, default: true }
     },
     data () {
         return {
@@ -295,7 +300,20 @@ Vue.component('layouts-table', {
     },
     computed: {
         rows () {
-            const res = this.layouts.map((layout, i) => {
+            let layouts = this.layouts
+            if (this.bestInFamily) {
+                let familyMap = new Map()
+                this.layouts.forEach(layout => {
+                    let family = layout.layout.slice(12, 22)
+                    let familyBest = familyMap.get(family)
+                    if (familyBest === undefined || layout.total_cost < familyBest.total_cost) {
+                        familyMap.set(family, layout)
+                    }
+                })
+                layouts = Array.from(familyMap, ([k, v]) => v)
+            }
+
+            const res = layouts.map((layout, i) => {
                 const row = {
                     layout: layout.layout,
                     total_cost: layout.total_cost,
