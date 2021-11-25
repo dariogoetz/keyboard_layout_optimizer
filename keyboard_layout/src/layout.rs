@@ -170,8 +170,9 @@ impl Layout {
                 let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
                 let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
-                let entry_cost = entry_layerkey.key.cost + 3.0 * layer_costs[entry_layerkey.layer];
-                let new_cost = layerkey.key.cost + 3.0 * layer_costs[layerkey.layer];
+                // NOTE: In contrast to ArneBab's version, here the layer costs are not multiplied by 3
+                let entry_cost = entry_layerkey.key.cost + layer_costs[entry_layerkey.layer];
+                let new_cost = layerkey.key.cost + layer_costs[layerkey.layer];
 
                 // if key already exists use the representation with lowest key cost
                 // if costs are identical, use lowest layer
