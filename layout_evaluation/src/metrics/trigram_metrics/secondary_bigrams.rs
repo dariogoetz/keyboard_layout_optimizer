@@ -68,6 +68,10 @@ impl TrigramMetric for SecondaryBigrams {
                 return Some(0.0)
         };
 
+        if k1 == k3 && k1.is_modifier {
+            return Some(0.0)
+        }
+
         let factor = if k1.key.hand == k2.key.hand && k2.key.hand == k3.key.hand {
             self.factor_no_handswitch
         } else {
