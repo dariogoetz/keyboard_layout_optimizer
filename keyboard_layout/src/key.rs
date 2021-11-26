@@ -1,10 +1,10 @@
 //! This module provides structs for representing physical properties of keys in a keyboard
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashMap;
 
 /// Row and columnar location on the keyboard
-#[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct MatrixPosition(pub isize, pub isize);
 
 impl MatrixPosition {
@@ -22,7 +22,7 @@ impl Default for MatrixPosition {
 }
 
 /// 2D position on the keyboard
-#[derive(Clone, Copy, Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct Position(pub f64, pub f64);
 
 impl Position {
@@ -38,7 +38,7 @@ impl Default for Position {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 pub enum Finger {
     Pinky = 4,
     Ring = 3,
@@ -60,7 +60,7 @@ impl Finger {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 pub enum Hand {
     Left = 0,
     Right = 1,
@@ -212,7 +212,7 @@ impl<T: Copy> HandFingerMap<T> {
 /// The `Key` struct represents a physical key on the keyboard. It provides various information about the location
 /// of the key it represents and how it is (supposed to be) used, e.g. which hand and finger shall press it, how
 /// "uncomfortable" it is to reach it (in terms of a cost valua), or if it forces the hand off the home row.
-#[derive(Default, Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, PartialEq, Debug)]
 pub struct Key {
     /// Hand of the finger used to press the key
     pub hand: Hand,

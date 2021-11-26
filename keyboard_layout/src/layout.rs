@@ -6,7 +6,6 @@ use crate::key::Key;
 use crate::keyboard::{KeyIndex, Keyboard};
 
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 /// The index of a `LayerKey` in the `layerkeys` vec of a `Layout`
@@ -21,7 +20,7 @@ pub type LayerKeyIndex = u16;
 /// and contains various other useful properties, e.g. a list of modifiers required to reach given layer.
 ///
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
     /// Layer of the layout which the symbol belongs to
     pub layer: usize,
@@ -69,7 +68,7 @@ impl LayerKey {
 /// A major task of the `Layout` object is to map given symbols (e.g. from a text) to corresponding
 /// `LayerKey` objects that describe which key(s) is (are) required to generate it (and then analyse
 /// corresponding efforts).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Layout {
     /// Vec of `LayerKey` objects representing all symbols that can be generated with the layout
     pub layerkeys: Vec<LayerKey>,

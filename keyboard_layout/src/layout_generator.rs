@@ -7,7 +7,7 @@ use crate::layout::{LayerKey, LayerKeyIndex, Layout};
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::sync::Arc;
@@ -38,7 +38,7 @@ pub struct BaseLayoutYAML {
 
 /// Provides functionalities for generating Neo layout variants from given string representations
 /// of their base layer.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct NeoLayoutGenerator {
     keys: Vec<Vec<char>>,
     fixed_keys: Vec<bool>,
