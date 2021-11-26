@@ -3,14 +3,14 @@
 use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 
 use anyhow::Result;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use string_template::Template;
 
 /// The index of a `Key` in the `keys` vec of a `Keyboard
 pub type KeyIndex = u16;
 
 /// A struct representing a keyboard as a list of keys
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Keyboard {
     /// The keys of the keyboard
     pub keys: Vec<Key>,

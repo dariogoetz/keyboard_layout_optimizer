@@ -1,8 +1,9 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use rand::{seq::SliceRandom, thread_rng};
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PermutationLayoutGenerator {
     perm_keys: Vec<char>,
     perm_indices: Vec<usize>,
