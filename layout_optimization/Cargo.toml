@@ -13,7 +13,7 @@ layout_evaluation = { path = "../layout_evaluation" }
 
 abc = "0.2.3"
 anyhow = "1.0.45"
-argmin = "0.2.4"
+argmin = "0.4.6"
 env_logger = "*"
 genevo = "0.7.0"
 log = "*"
