@@ -60,30 +60,13 @@ impl PermutationLayoutGenerator {
     }
 
     /// Takes in a Layout, switches [nr_switches] keys in that layout, then returns it.
-    pub fn switch_n_keys(&self, layout: &Layout, nr_switches: usize) -> Layout {
-        let layout_str = layout.as_text();
-        let chars_orig: Vec<char> = layout_str.chars().collect();
-        let mut chars: Vec<char> = layout_str.chars().collect();
+    /// Layout, in this case, is a [Vec<usize>].
+    pub fn switch_n_keys(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
+        let mut indices: Vec<usize> = permutation.to_vec();
 
-        // only permutate indices of chars that are not fixed
-        let indices = self.get_permutable_indices();
-        let mut permutated_indices = indices.to_vec();
-
-        // shuffle some (self.n_switches) permutable chars
-        permutated_indices.partial_shuffle(&mut thread_rng(), nr_switches);
-
+        // Shuffle some (self.n_switches) permutable chars
+        indices.partial_shuffle(&mut thread_rng(), nr_switches);
         indices
-            .iter()
-            .zip(permutated_indices.iter())
-            .filter(|(i, pi)| i != pi)
-            .for_each(|(i, pi)| {
-                chars[*i] = chars_orig[*pi];
-            });
-
-        let permutated_layout_str: String = chars.iter().collect();
-        self.layout_generator
-            .generate(&permutated_layout_str)
-            .unwrap()
     }
 
     pub fn generate_layout(&self, permutation: &[usize]) -> Layout {

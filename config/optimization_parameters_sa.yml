@@ -1,0 +1,9 @@
+# Parameters for the solver.
+stall_best: 1000
+stall_accepted: 1000
+reannealing_fixed: 1000
+reannealing_accepted: 500
+reannealing_best: 800
+# Parameters for the [Executor].
+max_iters: 10000
+target_cost: 0.0
