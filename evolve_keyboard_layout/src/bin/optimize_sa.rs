@@ -25,9 +25,9 @@ struct Options {
     #[structopt(short, long, default_value = "config/optimization_parameters_sa.yml")]
     optimization_parameters: String,
 
-    /* /// Start optimization from this layout (keys from left to right, top to bottom)
+    /// Start optimization from this layout (keys from left to right, top to bottom)
     #[structopt(short, long)]
-    start_layout: Option<String>,*/
+    start_layout: Option<String>,
     //
     /// Do not cache intermediate results
     #[structopt(long)]
@@ -70,12 +70,20 @@ fn main() {
             &options.optimization_parameters,
         ));
 
+    // If it was provided, use the [start_layout] as [fix_from].
+    let fix_from = options
+        .start_layout
+        .as_ref()
+        .unwrap_or(&options.fix_from)
+        .to_string();
+
     loop {
         let layout = optimization_sa::optimize(
             &optimization_params,
-            &options.fix_from.to_string(),
+            &fix_from,
             &options.fix.clone().unwrap_or_else(|| "".to_string()),
             &layout_generator,
+            options.start_layout.is_some(),
             &evaluator,
             options.greedy,
             !options.no_cache_results,

@@ -32,7 +32,6 @@ impl Default for Parameters {
 
             // Parameters for the [Executor].
             max_iters: 10_000,
-            //target_cost: 0.0,
         }
     }
 }
@@ -112,14 +111,19 @@ pub fn optimize(
     layout_str: &str,
     fixed_characters: &str,
     layout_generator: &NeoLayoutGenerator,
+    start_with_layout: bool,
     evaluator: &Evaluator,
     greedy: bool,
     cache_results: bool,
 ) -> Layout {
     log::info!("Starting optimization with: {:?}", params);
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
+
     // Get initial Layout.
-    let init_layout = pm.generate_random();
+    let init_layout = match start_with_layout {
+        true => pm.get_permutable_indices(),
+        false => pm.generate_random(),
+    };
 
     /* for _ in 0..10 {
         let init_temp = get_cost_sd(Arc::new(evaluator.clone()), &pm);
@@ -159,7 +163,6 @@ pub fn optimize(
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         // Optional: Set target cost function value (defaults to `std::f64::NEG_INFINITY`)
-        //.target_cost(params.target_cost)
         .run()
         .unwrap();
 
