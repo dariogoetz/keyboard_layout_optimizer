@@ -14,14 +14,14 @@ use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
     // Parameters for the solver.
+    /// Optional: stop if there was no new best solution after 1000 iterations
     pub stall_best: u64,
-    pub stall_accepted: u64,
-    pub reannealing_fixed: u64,
-    pub reannealing_accepted: u64,
-    pub reannealing_best: u64,
+
     // Parameters for the [Executor].
+    /// Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
     pub max_iters: u64,
-    pub target_cost: f64,
+    // /// Optional: Set target cost function value (defaults to `std::f64::NEG_INFINITY`)
+    // pub target_cost: f64,
 }
 
 impl Default for Parameters {
@@ -29,13 +29,10 @@ impl Default for Parameters {
         Parameters {
             // Parameters for the solver.
             stall_best: 1000,
-            stall_accepted: 1000,
-            reannealing_fixed: 1000,
-            reannealing_accepted: 500,
-            reannealing_best: 800,
+
             // Parameters for the [Executor].
             max_iters: 10_000,
-            target_cost: 0.0,
+            //target_cost: 0.0,
         }
     }
 }
@@ -98,41 +95,21 @@ pub fn optimize(
         // Stopping criteria   //
         /////////////////////////
         // Optional: stop if there was no new best solution after 1000 iterations
-        .stall_best(params.stall_best)
-        // Optional: stop if there was no accepted solution after 1000 iterations
-        .stall_accepted(params.stall_accepted);
-    /////////////////////////
-    // Reannealing         //
-    /////////////////////////
-    // Optional: Reanneal after 1000 iterations (resets temperature to initial temperature)
-    //.reannealing_fixed(params.reannealing_fixed)
-    // Optional: Reanneal after no accepted solution has been found for `iter` iterations
-    //.reannealing_accepted(params.reannealing_accepted)
-    // Optional: Start reannealing after no new best solution has been found for 800 iterations
-    //.reannealing_best(params.reannealing_best);
+        .stall_best(params.stall_best);
 
     let init_param = pm.generate_random();
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_param)
         // Optional: Attach a observer
-        .add_observer(ArgminSlogLogger::term(), ObserverMode::NewBest)
+        .add_observer(ArgminSlogLogger::term(), ObserverMode::Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         // Optional: Set target cost function value (defaults to `std::f64::NEG_INFINITY`)
-        .target_cost(params.target_cost)
+        //.target_cost(params.target_cost)
         .run()
         .unwrap();
 
-    // Wait a second (lets the logger flush everything before printing again)
-    //std::thread::sleep(std::time::Duration::from_secs(1));
-
-    //println!("\n\n\n\n{}", res);
-    //println!("\n\n\n\n{:?}", res.operator());
-    //println!("\n\n\n\n{:?}", res.state());
-    //let lay = res.param;
-
-    //Ok(())
     let best_layout_vec = res.state().get_best_param();
     pm.generate_layout(&best_layout_vec)
 }
