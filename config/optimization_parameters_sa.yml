@@ -1,6 +1,5 @@
 # Parameters for the solver.
-stall_best: 1000
+stall_accepted: 1000
 
 # Parameters for the [Executor].
 max_iters: 10000
-#target_cost: 0.0  ## Useless?
