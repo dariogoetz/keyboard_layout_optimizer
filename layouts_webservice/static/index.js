@@ -278,7 +278,6 @@ Vue.component('layout-details', {
 Vue.component('layouts-table', {
     template: `
 <b-table
-  selectable
   sticky-header="600px"
   small
   head-variant="light"
@@ -289,7 +288,7 @@ Vue.component('layouts-table', {
   :fields="fields"
   :filter="filter"
   :tbody-tr-class="rowClass"
-  @row-selected="onRowSelected"
+  @row-clicked="onRowClicked"
 >
 </b-table>`,
     props: {
@@ -325,7 +324,8 @@ Vue.component('layouts-table', {
                     published_by: layout.published_by,
                     highlight: layout.highlight,
                     family: layout.layout.slice(12, 22),
-                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual'
+                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
+                    selected: false,
                 }
                 return row
             })
@@ -362,9 +362,9 @@ Vue.component('layouts-table', {
                     key: 'highlight',
                     label: 'Bekannt',
                     sortable: true
-                },
+                }
             ]
-        },
+        }
     },
     created () {
         this.fetchLayouts()
@@ -378,10 +378,19 @@ Vue.component('layouts-table', {
         },
         rowClass (item, type) {
             if (!item || type !== 'row') return
+            if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowSelected(items) {
-            this.$emit("details", items)
+        onRowClicked(item) {
+            if(item.selected){
+                this.$set(item, 'selected', false)
+            } else {
+                this.$set(item, 'selected', true)
+            }
+            this.$emit("details", this.selectedRows())
+        },
+        selectedRows() {
+            return this.rows.filter(item => item.selected)
         }
     }
 })
