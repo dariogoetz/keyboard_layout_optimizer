@@ -33,6 +33,10 @@ struct Options {
     #[structopt(long)]
     no_cache_results: bool,
 
+    /// Set the init_temp to 0.0, turning the Simulated Annealing algorithm into a greedy one.
+    #[structopt(short, long)]
+    greedy: bool,
+
     /// Append found layouts to file
     #[structopt(long)]
     append_solutions_to: Option<String>,
@@ -73,6 +77,7 @@ fn main() {
             &options.fix.clone().unwrap_or_else(|| "".to_string()),
             &layout_generator,
             &evaluator,
+            options.greedy,
             !options.no_cache_results,
         );
 

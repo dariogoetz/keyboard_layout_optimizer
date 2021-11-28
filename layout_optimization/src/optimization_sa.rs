@@ -113,6 +113,7 @@ pub fn optimize(
     fixed_characters: &str,
     layout_generator: &NeoLayoutGenerator,
     evaluator: &Evaluator,
+    greedy: bool,
     cache_results: bool,
 ) -> Layout {
     log::info!("Starting optimization with: {:?}", params);
@@ -120,13 +121,19 @@ pub fn optimize(
     // Get initial Layout.
     let init_layout = pm.generate_random();
 
-    println!("\nCalculating initial temperature.");
     /* for _ in 0..10 {
         let init_temp = get_cost_sd(Arc::new(evaluator.clone()), &pm);
         println!("Standart Deviation: {}\n", init_temp);
     } */
-    let init_temp = get_cost_sd(&init_layout, Arc::new(evaluator.clone()), &pm);
-    println!("Initial temperature = {}\n", init_temp);
+    let init_temp = match greedy {
+        true => f64::MIN_POSITIVE,
+        false => {
+            println!("\nCalculating initial temperature.");
+            let init_temp = get_cost_sd(&init_layout, Arc::new(evaluator.clone()), &pm);
+            println!("Initial temperature = {}\n", init_temp);
+            init_temp
+        }
+    };
 
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
