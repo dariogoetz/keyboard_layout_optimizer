@@ -390,7 +390,9 @@ Vue.component('layouts-table', {
             this.$emit("details", this.selectedRows())
         },
         selectedRows() {
-            return this.rows.filter(item => item.selected)
+            const res = this.rows.filter(item => item.selected)
+            res.sort((a, b) => a.total_cost - b.total_cost)
+            return res
         }
     }
 })
