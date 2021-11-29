@@ -4,13 +4,18 @@ Vue.component('layouts-app', {
 
   <b-row>
     <b-col xl="6">
-      <layouts-table :url="url" @details="setDetails"></layouts-table>
+      <b-form inline>
+        <b-form-input v-model="filter" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family</b-form-checkbox>
+      </b-form>
+      <layouts-table :url="url" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
     </b-col>
+
     <b-col xl="6">
-<b-form-group>
-      <b-form-checkbox v-model="relative" inline>relative barplot</b-form-checkbox>
-      <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
-</b-form-group>
+      <b-form inline>
+        <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
+        <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
+      </b-form>
       <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
@@ -27,10 +32,12 @@ Vue.component('layouts-app', {
         url: { type: String, default: "/api" },
         relative: { type: Boolean, default: false },
         logscale: { type: Boolean, default: false },
+        bestInFamily: { type: Boolean, default: false }
     },
     data () {
         return {
             details: [],
+            filter: null,
         }
     },
     computed: {
@@ -204,10 +211,10 @@ Vue.component('layout-details', {
     template: `
 <b-jumbotron :header="headline" :lead="leadline" header-level="5">
     <div v-if="layoutDetails !== null">
-        <pre v-html="plot"></pre>
+        <pre><code v-html="plot"></code></pre>
         <h2>Gesamtkosten: {{ totalCost }}</h2>
         <hr>
-        <pre v-html="printed"></pre>
+        <pre><code v-html="printed"></code></pre>
     </div>
 </b-jumbotron>
 `,
@@ -271,7 +278,6 @@ Vue.component('layout-details', {
 Vue.component('layouts-table', {
     template: `
 <b-table
-  selectable
   sticky-header="600px"
   small
   head-variant="light"
@@ -280,12 +286,15 @@ Vue.component('layouts-table', {
   no-sort-reset
   :items="rows"
   :fields="fields"
+  :filter="filter"
   :tbody-tr-class="rowClass"
-  @row-selected="onRowSelected"
+  @row-clicked="onRowClicked"
 >
 </b-table>`,
     props: {
-        'url': {type: String, default: null},
+        url: { type: String, default: null },
+        bestInFamily: { type: Boolean, default: true },
+        filter: { type: String, default: null }
     },
     data () {
         return {
@@ -295,12 +304,28 @@ Vue.component('layouts-table', {
     },
     computed: {
         rows () {
-            const res = this.layouts.map((layout, i) => {
+            let layouts = this.layouts
+            if (this.bestInFamily) {
+                let familyMap = new Map()
+                this.layouts.forEach(layout => {
+                    let family = layout.layout.slice(12, 22)
+                    let familyBest = familyMap.get(family)
+                    if (familyBest === undefined || layout.total_cost < familyBest.total_cost) {
+                        familyMap.set(family, layout)
+                    }
+                })
+                layouts = Array.from(familyMap, ([k, v]) => v)
+            }
+
+            const res = layouts.map((layout, i) => {
                 const row = {
                     layout: layout.layout,
                     total_cost: layout.total_cost,
                     published_by: layout.published_by,
-                    highlight: layout.highlight
+                    highlight: layout.highlight,
+                    family: layout.layout.slice(12, 22),
+                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
+                    selected: false,
                 }
                 return row
             })
@@ -324,12 +349,22 @@ Vue.component('layouts-table', {
                     label: 'Layout',
                 },
                 {
+                    key: 'family',
+                    label: 'Familie',
+                    sortable: true
+                },
+                {
+                    key: 'periodComma',
+                    label: 'Punkt/Komma',
+                    sortable: true,
+                },
+                {
                     key: 'highlight',
                     label: 'Bekannt',
                     sortable: true
-                },
+                }
             ]
-        },
+        }
     },
     created () {
         this.fetchLayouts()
@@ -343,10 +378,21 @@ Vue.component('layouts-table', {
         },
         rowClass (item, type) {
             if (!item || type !== 'row') return
+            if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowSelected(items) {
-            this.$emit("details", items)
+        onRowClicked(item) {
+            if(item.selected){
+                this.$set(item, 'selected', false)
+            } else {
+                this.$set(item, 'selected', true)
+            }
+            this.$emit("details", this.selectedRows())
+        },
+        selectedRows() {
+            const res = this.rows.filter(item => item.selected)
+            res.sort((a, b) => a.total_cost - b.total_cost)
+            return res
         }
     }
 })

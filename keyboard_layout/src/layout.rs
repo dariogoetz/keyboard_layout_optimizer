@@ -2,7 +2,7 @@
 //! its relation to the individual keys required to generate the layout's symbols.
 //! These provide the core objects that are evaluated in the `layout_evaluation` crate.
 
-use crate::key::Key;
+use crate::key::{Hand, Key};
 use crate::keyboard::{KeyIndex, Keyboard};
 
 use rustc_hash::FxHashMap;
@@ -87,12 +87,70 @@ impl std::fmt::Display for Layout {
 
 impl Layout {
     pub fn new(
-        layerkeys: Vec<LayerKey>,
-        key_layers: Vec<Vec<LayerKeyIndex>>,
+        key_chars: Vec<Vec<char>>,
+        fixed_keys: Vec<bool>,
         keyboard: Arc<Keyboard>,
-        key_map: FxHashMap<char, LayerKeyIndex>,
+        modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
         layer_costs: Vec<f64>,
     ) -> Self {
+
+        // generate layer keys
+        let mut layerkeys = Vec::new();
+        let mut layerkey_index = 0;
+        let key_layers: Vec<Vec<LayerKeyIndex>> = key_chars
+            .iter()
+            .zip(keyboard.keys.iter())
+            .zip(fixed_keys.iter())
+            .enumerate()
+            .map(|(key_index, ((layer_chars, key), fixed))| {
+                let indices: Vec<LayerKeyIndex> = layer_chars
+                    .iter()
+                    .enumerate()
+                    .map(|(layer_id, c)| {
+                        let layerkey = LayerKey::new(
+                            layer_id,
+                            key.clone(),
+                            *c,
+                            Vec::new(),
+                            *fixed,
+                            false,
+                            key_index as KeyIndex,
+                        );
+                        layerkey_index += 1;
+                        layerkeys.push(layerkey);
+
+                        layerkey_index - 1
+                    })
+                    .collect();
+                indices
+            })
+            .collect();
+
+        let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
+
+        modifiers.iter().for_each(|mods_per_hand| {
+            mods_per_hand.values().for_each(|mods| {
+                mods.iter().for_each(|mc| {
+                    layerkeys[*key_map.get(mc).unwrap() as usize].is_modifier = true;
+                });
+            });
+        });
+
+        layerkeys.iter_mut().for_each(|k| {
+            let mods = if k.layer > 0 && k.layer < modifiers.len() + 1 {
+                modifiers
+                    .get(k.layer - 1)
+                    .unwrap()
+                    .get(&k.key.hand.other())
+                    .map(|mods| mods.iter().map(|mc| *key_map.get(mc).unwrap()).collect())
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+
+            k.modifiers = mods;
+        });
+
         Self {
             layerkeys,
             key_layers,
@@ -100,6 +158,33 @@ impl Layout {
             key_map,
             layer_costs,
         }
+    }
+
+    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
+        let mut m = FxHashMap::default();
+        layerkeys
+            .iter()
+            .enumerate()
+            .for_each(|(layerkey_index, layerkey)| {
+                let new_layerkey_index = layerkey_index as LayerKeyIndex;
+                let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
+                let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
+
+                // NOTE: In contrast to ArneBab's version, here the layer costs are not multiplied by 3
+                let entry_cost = entry_layerkey.key.cost + layer_costs[entry_layerkey.layer];
+                let new_cost = layerkey.key.cost + layer_costs[layerkey.layer];
+
+                // if key already exists use the representation with lowest key cost
+                // if costs are identical, use lowest layer
+                if new_cost < entry_cost
+                    || ((new_cost - entry_cost).abs() < 0.01
+                        && layerkey.layer < entry_layerkey.layer)
+                {
+                    m.insert(layerkey.symbol, new_layerkey_index);
+                }
+            });
+
+        m
     }
 
     /// Get a `LayerKey` for a given index
