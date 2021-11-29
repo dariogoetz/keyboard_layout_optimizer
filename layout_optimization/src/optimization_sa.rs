@@ -17,14 +17,14 @@ pub struct Parameters {
     pub key_switches: usize,
 
     // Parameters for the solver.
-    /// Optional: stop if there was no new best solution after 1000 iterations
+    /// Stop if there was no new best solution after this many iterations
     pub stall_accepted: u64,
+    /// Start reannealing after no new best solution has been found for this many iterations
+    pub reannealing_best: u64,
 
     // Parameters for the [Executor].
-    /// Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
+    /// Set maximum number of iterations (defaults to `std::u64::MAX`)
     pub max_iters: u64,
-    // /// Optional: Set target cost function value (defaults to `std::f64::NEG_INFINITY`)
-    // pub target_cost: f64,
 }
 
 impl Default for Parameters {
@@ -33,6 +33,7 @@ impl Default for Parameters {
             key_switches: 1,
             // Parameters for the solver.
             stall_accepted: 1000,
+            reannealing_best: 4000,
             // Parameters for the [Executor].
             max_iters: 10_000,
         }
@@ -166,13 +167,13 @@ pub fn optimize(
         /////////////////////////
         // Stopping criteria   //
         /////////////////////////
-        // Optional: stop if there was no accepted solution after 1000 iterations
+        // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
         .stall_accepted(params.stall_accepted)
-        /* /////////////////////////
+        /////////////////////////
         // Reannealing         //
         /////////////////////////
-        // Optional: Start reannealing after no new best solution has been found for 800 iterations
-        .reannealing_best(1500) */;
+        // Optional: Start reannealing after no new best solution has been found for [params.reannealing_best] iterations
+        .reannealing_best(params.reannealing_best);
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
