@@ -130,7 +130,10 @@ pub fn optimize(
         println!("Standart Deviation: {}\n", init_temp);
     } */
     let init_temp = match greedy {
-        true => f64::MIN_POSITIVE,
+        true => {
+            println!("\nWARNING: Currently, this option is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
+            f64::MIN_POSITIVE
+        }
         false => {
             println!("\nCalculating initial temperature.");
             let init_temp = get_cost_sd(&init_layout, Arc::new(evaluator.clone()), &pm);
@@ -162,7 +165,6 @@ pub fn optimize(
         .add_observer(ArgminSlogLogger::term(), ObserverMode::Always) //Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
-        // Optional: Set target cost function value (defaults to `std::f64::NEG_INFINITY`)
         .run()
         .unwrap();
 
