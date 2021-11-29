@@ -125,13 +125,10 @@ pub fn optimize(
         false => pm.generate_random(),
     };
 
-    /* for _ in 0..10 {
-        let init_temp = get_cost_sd(Arc::new(evaluator.clone()), &pm);
-        println!("Standart Deviation: {}\n", init_temp);
-    } */
     let init_temp = match greedy {
         true => {
-            println!("\nWARNING: Currently, this option is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
+            println!("\nWARNING: Currently, the option `--greedy` is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
+            std::thread::sleep(std::time::Duration::from_secs(7));
             f64::MIN_POSITIVE
         }
         false => {
@@ -157,7 +154,12 @@ pub fn optimize(
         // Stopping criteria   //
         /////////////////////////
         // Optional: stop if there was no accepted solution after 1000 iterations
-        .stall_accepted(params.stall_accepted);
+        .stall_accepted(params.stall_accepted)
+        /* /////////////////////////
+        // Reannealing         //
+        /////////////////////////
+        // Optional: Start reannealing after no new best solution has been found for 800 iterations
+        .reannealing_best(1500) */;
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
