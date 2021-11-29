@@ -28,7 +28,7 @@ struct Options {
     /// Start optimization from this layout (keys from left to right, top to bottom)
     #[structopt(short, long)]
     start_layout: Option<String>,
-    //
+
     /// Do not cache intermediate results
     #[structopt(long)]
     no_cache_results: bool,

@@ -1,3 +1,8 @@
+# Swap out this many keys-pairs on every iteration.
+# For simulated annealing it's best to keep the variation between iterations
+# as small as possible. Thus, one single swap may be best.
+key_switches: 1
+
 # Parameters for the solver.
 stall_accepted: 1000
 

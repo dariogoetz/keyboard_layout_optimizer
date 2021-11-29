@@ -13,6 +13,9 @@ use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
+    /// In each modification of the layout, swap this many key-pairs.
+    pub key_switches: usize,
+
     // Parameters for the solver.
     /// Optional: stop if there was no new best solution after 1000 iterations
     pub stall_accepted: u64,
@@ -27,9 +30,9 @@ pub struct Parameters {
 impl Default for Parameters {
     fn default() -> Self {
         Parameters {
+            key_switches: 1,
             // Parameters for the solver.
             stall_accepted: 1000,
-
             // Parameters for the [Executor].
             max_iters: 10_000,
         }
@@ -46,6 +49,7 @@ impl Parameters {
 struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
+    key_switches: usize,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -64,7 +68,9 @@ impl ArgminOp for AnnealingStruct<'_> {
     /// This function is called by the annealing function
     fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
         // in the following, the 1 will be replaced by something `temp`-depending
-        Ok(self.layout_generator.switch_n_keys(&param, 1))
+        Ok(self
+            .layout_generator
+            .switch_n_keys(&param, self.key_switches))
     }
 }
 
@@ -77,6 +83,7 @@ fn get_cost_sd(
     initial_layout: &Vec<usize>,
     evaluator: Arc<Evaluator>,
     layout_generator: &PermutationLayoutGenerator,
+    key_pair_switches: usize,
 ) -> f64 {
     const USED_NEIGHBORS: u16 = 100;
 
@@ -90,7 +97,7 @@ fn get_cost_sd(
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
 
-        current_layout = layout_generator.switch_n_keys(&current_layout, 1);
+        current_layout = layout_generator.switch_n_keys(&current_layout, key_pair_switches);
     }
 
     let sum: f64 = costs.iter().sum();
@@ -133,7 +140,12 @@ pub fn optimize(
         }
         false => {
             println!("\nCalculating initial temperature.");
-            let init_temp = get_cost_sd(&init_layout, Arc::new(evaluator.clone()), &pm);
+            let init_temp = get_cost_sd(
+                &init_layout,
+                Arc::new(evaluator.clone()),
+                &pm,
+                params.key_switches,
+            );
             println!("Initial temperature = {}\n", init_temp);
             init_temp
         }
@@ -142,6 +154,7 @@ pub fn optimize(
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
         layout_generator: &pm,
+        key_switches: params.key_switches,
     };
 
     // Create new SA solver with some parameters (see docs for details)
