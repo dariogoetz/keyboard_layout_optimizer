@@ -7,6 +7,11 @@ At the heart of the optimization lies a layout evaluation that involves multiple
 
 The optimization is implemented using the [genevo](https://github.com/innoave/genevo) crate. 
 
+## Results
+Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
+
+The corresponding webserver's implementation is located in the `layouts_webservice` crate.
+
 ## Features
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
 - evaluation based on prepared unigrams, bigrams, and trigrams or a text

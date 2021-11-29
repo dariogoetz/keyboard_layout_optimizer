@@ -122,24 +122,25 @@ impl GenomeBuilder<Vec<usize>> for LayoutBuilder {
     }
 }
 
-struct FixedLayoutBuilder {
-    prototype: PermutationLayoutGenerator,
+struct FromGivenLayoutBuilder {
+    indices: Vec<usize>,
 }
 
-impl FixedLayoutBuilder {
+impl FromGivenLayoutBuilder {
     fn with_permutable_layout(layout_prototype: &PermutationLayoutGenerator) -> Self {
         Self {
-            prototype: layout_prototype.clone(),
+            indices: layout_prototype.get_permutable_indices(),
         }
     }
 }
 
-impl GenomeBuilder<Vec<usize>> for FixedLayoutBuilder {
+impl GenomeBuilder<Vec<usize>> for FromGivenLayoutBuilder {
     fn build_genome<R>(&self, _: usize, _rng: &mut R) -> Vec<usize>
     where
         R: Rng + Sized,
     {
-        self.prototype.get_permutable_indices()
+        // start with initial layout
+        self.indices.clone()
     }
 }
 
@@ -190,7 +191,7 @@ pub fn init_optimization(
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     let initial_population: Population<Genotype> = if start_with_layout {
         build_population()
-            .with_genome_builder(FixedLayoutBuilder::with_permutable_layout(&pm))
+            .with_genome_builder(FromGivenLayoutBuilder::with_permutable_layout(&pm))
             .of_size(params.population_size)
             .uniform_at_random()
     } else {

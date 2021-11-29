@@ -2,8 +2,8 @@
 //! from given string representations of its base layer.
 
 use crate::key::Hand;
-use crate::keyboard::{KeyIndex, Keyboard};
-use crate::layout::{LayerKey, LayerKeyIndex, Layout};
+use crate::keyboard::Keyboard;
+use crate::layout::Layout;
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
@@ -154,95 +154,12 @@ impl NeoLayoutGenerator {
                 }
             });
 
-        // generate layer keys
-        let mut layerkeys = Vec::new();
-        let mut layerkey_index = 0;
-        let key_layers: Vec<Vec<LayerKeyIndex>> = key_chars
-            .iter()
-            .zip(self.keyboard.keys.iter())
-            .zip(self.fixed_keys.iter())
-            .enumerate()
-            .map(|(key_index, ((layer_chars, key), fixed))| {
-                let indices: Vec<LayerKeyIndex> = layer_chars
-                    .iter()
-                    .enumerate()
-                    .map(|(layer_id, c)| {
-                        let layerkey = LayerKey::new(
-                            layer_id,
-                            key.clone(),
-                            *c,
-                            Vec::new(),
-                            *fixed,
-                            false,
-                            key_index as KeyIndex,
-                        );
-                        layerkey_index += 1;
-                        layerkeys.push(layerkey);
-
-                        layerkey_index - 1
-                    })
-                    .collect();
-                indices
-            })
-            .collect();
-
-        let key_map = Self::gen_key_map(&layerkeys, &self.layer_costs);
-
-        self.modifiers.iter().for_each(|mods_per_hand| {
-            mods_per_hand.values().for_each(|mods| {
-                mods.iter().for_each(|mc| {
-                    layerkeys[*key_map.get(mc).unwrap() as usize].is_modifier = true;
-                });
-            });
-        });
-
-        layerkeys.iter_mut().for_each(|k| {
-            let mods = if k.layer > 0 && k.layer < self.modifiers.len() + 1 {
-                self.modifiers
-                    .get(k.layer - 1)
-                    .unwrap()
-                    .get(&k.key.hand.other())
-                    .map(|mods| mods.iter().map(|mc| *key_map.get(mc).unwrap()).collect())
-                    .unwrap_or_default()
-            } else {
-                Vec::new()
-            };
-
-            k.modifiers = mods;
-        });
-
         Ok(Layout::new(
-            layerkeys,
-            key_layers,
+            key_chars,
+            self.fixed_keys.clone(),
             self.keyboard.clone(),
-            key_map,
-            self.layer_costs.to_vec(),
+            self.modifiers.clone(),
+            self.layer_costs.clone(),
         ))
-    }
-
-    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
-        let mut m = FxHashMap::default();
-        layerkeys
-            .iter()
-            .enumerate()
-            .for_each(|(layerkey_index, layerkey)| {
-                let new_layerkey_index = layerkey_index as LayerKeyIndex;
-                let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
-                let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
-
-                let entry_cost = entry_layerkey.key.cost + 3.0 * layer_costs[entry_layerkey.layer];
-                let new_cost = layerkey.key.cost + 3.0 * layer_costs[layerkey.layer];
-
-                // if key already exists use the representation with lowest key cost
-                // if costs are identical, use lowest layer
-                if new_cost < entry_cost
-                    || ((new_cost - entry_cost).abs() < 0.01
-                        && layerkey.layer < entry_layerkey.layer)
-                {
-                    m.insert(layerkey.symbol, new_layerkey_index);
-                }
-            });
-
-        m
     }
 }
