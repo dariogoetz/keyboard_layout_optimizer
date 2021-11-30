@@ -8,7 +8,9 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
 
-use argmin::prelude::{Observe, ArgminOp, ArgminKV, IterState, ArgminSlogLogger, Error, Executor, ObserverMode};
+use argmin::prelude::{
+    ArgminKV, ArgminOp, ArgminSlogLogger, Error, Executor, IterState, Observe, ObserverMode,
+};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
 #[derive(Deserialize, Debug, Clone)]
@@ -75,7 +77,7 @@ impl ArgminOp for AnnealingStruct<'_> {
     }
 }
 
-struct Observer{
+struct Observer {
     id: String,
     layout_generator: PermutationLayoutGenerator,
 }
@@ -88,7 +90,7 @@ impl Observe<AnnealingStruct<'_>> for Observer {
     fn observe_iter(
         &mut self,
         state: &IterState<AnnealingStruct<'_>>,
-        _kv: &ArgminKV
+        _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let layout = self.layout_generator.generate_string(&state.param);
         let best_layout = self.layout_generator.generate_string(&state.best_param);
@@ -209,7 +211,7 @@ pub fn optimize(
 
     let observer = Observer {
         id: process_name.to_string(),
-        layout_generator: pm.clone()
+        layout_generator: pm.clone(),
     };
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
