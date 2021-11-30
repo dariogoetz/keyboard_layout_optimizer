@@ -8,7 +8,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
 
-use argmin::prelude::{ArgminOp, ArgminSlogLogger, Error, Executor, ObserverMode};
+use argmin::prelude::{Observe, ArgminOp, ArgminKV, IterState, ArgminSlogLogger, Error, Executor, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
 #[derive(Deserialize, Debug, Clone)]
@@ -72,6 +72,37 @@ impl ArgminOp for AnnealingStruct<'_> {
         Ok(self
             .layout_generator
             .switch_n_keys(&param, self.key_switches))
+    }
+}
+
+struct Observer{
+    id: String,
+    layout_generator: PermutationLayoutGenerator,
+}
+
+impl Observe<AnnealingStruct<'_>> for Observer {
+    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn observe_iter(
+        &mut self,
+        state: &IterState<AnnealingStruct<'_>>,
+        _kv: &ArgminKV
+    ) -> Result<(), Error> {
+        let layout = self.layout_generator.generate_string(&state.param);
+        let best_layout = self.layout_generator.generate_string(&state.best_param);
+        log::info!(
+            "{}: n: {:>3}, current: {} ({:>6.1}), best: {} ({:>6.1})",
+            self.id,
+            state.iter,
+            layout,
+            state.cost,
+            best_layout,
+            state.best_cost
+        );
+
+        Ok(())
     }
 }
 
@@ -176,10 +207,16 @@ pub fn optimize(
         // Optional: Start reannealing after no new best solution has been found for [params.reannealing_best] iterations
         .reannealing_best(params.reannealing_best);
 
+    let observer = Observer {
+        id: process_name.to_string(),
+        layout_generator: pm.clone()
+    };
+
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        .add_observer(ArgminSlogLogger::term(), ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
+        // .add_observer(ArgminSlogLogger::term(), ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
+        .add_observer(observer, ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         .run()
