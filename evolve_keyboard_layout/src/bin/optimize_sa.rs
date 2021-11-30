@@ -35,7 +35,11 @@ struct Options {
     #[structopt(long)]
     no_cache_results: bool,
 
-    /// Set the init_temp to 0.0, turning the Simulated Annealing algorithm into a greedy one.
+    /// Set the initial temperature (Will be overwritten by --greedy)
+    #[structopt(long)]
+    init_temp: Option<f64>,
+
+    /// Set the init_temp to 0.0, turning the Simulated Annealing algorithm into a greedy one
     #[structopt(short, long)]
     greedy: bool,
 
@@ -72,6 +76,23 @@ fn main() {
             &options.optimization_parameters,
         ));
 
+    let init_temp: Option<f64>;
+    if options.greedy {
+        init_temp = Some(f64::MIN_POSITIVE);
+    } else {
+        init_temp = match options.init_temp {
+            Some(t) => {
+                if t > 0.0 {
+                    Some(t)
+                } else {
+                    println!("Please input an initial-temperature that is bigger than 0.");
+                    None
+                }
+            }
+            None => None,
+        };
+    }
+
     // Activate multi-processing (true concurrency).
     let num_processes = match get_num_cpus() {
         1 => 1,
@@ -99,7 +120,7 @@ fn main() {
                     &layout_generator,
                     options.start_layout.is_some(),
                     &evaluator,
-                    options.greedy,
+                    init_temp,
                     !options.no_cache_results,
                 );
 

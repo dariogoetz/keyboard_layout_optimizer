@@ -122,7 +122,7 @@ pub fn optimize(
     layout_generator: &NeoLayoutGenerator,
     start_with_layout: bool,
     evaluator: &Evaluator,
-    greedy: bool,
+    optional_init_temp: Option<f64>,
     cache_results: bool,
 ) -> Layout {
     log::info!("{}: Starting optimization with: {:?}", process_name, params);
@@ -134,13 +134,13 @@ pub fn optimize(
         false => pm.generate_random(),
     };
 
-    let init_temp = match greedy {
-        true => {
+    let init_temp = match optional_init_temp {
+        Some(t) => {
             println!("\nWARNING: Currently, the option `--greedy` is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
             std::thread::sleep(std::time::Duration::from_secs(7));
-            f64::MIN_POSITIVE
+            t
         }
-        false => {
+        None => {
             log::info!("{}: Calculating initial temperature.", process_name);
             let init_temp = get_cost_sd(
                 &init_layout,
