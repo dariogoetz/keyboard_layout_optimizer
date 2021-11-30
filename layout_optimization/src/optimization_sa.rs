@@ -11,7 +11,7 @@ use std::sync::Arc;
 use argmin::prelude::{ArgminOp, ArgminSlogLogger, Error, Executor, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Parameters {
     /// In each modification of the layout, swap this many key-pairs.
     pub key_switches: usize,
@@ -60,15 +60,15 @@ impl ArgminOp for AnnealingStruct<'_> {
     type Jacobian = ();
     type Float = f64;
 
+    /// Evaluate the param (~the layout).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
         let layout = self.layout_generator.generate_layout(&param);
         let evaluation_result = self.evaluator.evaluate_layout(&layout);
         Ok(evaluation_result.total_cost())
     }
 
-    /// This function is called by the annealing function
+    /// Modify param (~the layout).
     fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
-        // in the following, the 1 will be replaced by something `temp`-depending
         Ok(self
             .layout_generator
             .switch_n_keys(&param, self.key_switches))
@@ -115,6 +115,7 @@ fn get_cost_sd(
 
 /// Performs one run of Simulated Annealing, then returns the best layout found.
 pub fn optimize(
+    process_name: &str,
     params: &Parameters,
     layout_str: &str,
     fixed_characters: &str,
@@ -124,7 +125,7 @@ pub fn optimize(
     greedy: bool,
     cache_results: bool,
 ) -> Layout {
-    log::info!("Starting optimization with: {:?}", params);
+    log::info!("{}: Starting optimization with: {:?}", process_name, params);
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
 
     // Get initial Layout.
@@ -140,14 +141,14 @@ pub fn optimize(
             f64::MIN_POSITIVE
         }
         false => {
-            println!("\nCalculating initial temperature.");
+            log::info!("{}: Calculating initial temperature.", process_name);
             let init_temp = get_cost_sd(
                 &init_layout,
                 Arc::new(evaluator.clone()),
                 &pm,
                 params.key_switches,
             );
-            println!("Initial temperature = {}\n", init_temp);
+            println!("{}: Initial temperature = {}", process_name, init_temp);
             init_temp
         }
     };
@@ -178,7 +179,7 @@ pub fn optimize(
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        .add_observer(ArgminSlogLogger::term(), ObserverMode::Always) //Every(100))
+        .add_observer(ArgminSlogLogger::term(), ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         .run()

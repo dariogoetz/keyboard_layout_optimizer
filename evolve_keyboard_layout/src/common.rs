@@ -8,13 +8,10 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
-
-
-use structopt::StructOpt;
 use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
-
+use structopt::StructOpt;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct NGramConfig {
@@ -53,7 +50,7 @@ impl LayoutConfig {
     }
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(StructOpt, Debug, Clone)]
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Filename of evaluation configuration file to use
@@ -97,10 +94,8 @@ pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
 }
 
 pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
-    let layout_config = LayoutConfig::from_yaml(layout_config).expect(&format!(
-        "Could not load config file {}",
-        layout_config
-    ));
+    let layout_config = LayoutConfig::from_yaml(layout_config)
+        .expect(&format!("Could not load config file {}", layout_config));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
