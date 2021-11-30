@@ -35,7 +35,7 @@ impl Default for Parameters {
             stall_accepted: 1000,
             reannealing_best: 4000,
             // Parameters for the [Executor].
-            max_iters: 10_000,
+            max_iters: 100_000,
         }
     }
 }
