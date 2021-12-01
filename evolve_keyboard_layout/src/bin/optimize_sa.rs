@@ -62,8 +62,8 @@ struct Options {
     run_forever: bool,
 }
 
-// An iterator for layouts to feed into the optimizer.
-// If `run_forever` is true, it iterates over the given layouts indefinitely
+/// An iterator for layouts to feed into the optimizer.
+/// If `run_forever` is true, it iterates over the given layouts indefinitely.
 struct LayoutIterator {
     layouts: Vec<String>,
     run_forever: bool,
@@ -85,20 +85,20 @@ impl Iterator for LayoutIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         let res = if self.i < self.layouts.len() {
-            // there are still elements left to give
+            // There are still elements left to give
             let res = self.layouts[self.i].clone();
             self.i += 1;
 
             Some(res)
         } else {
-            // all elements of this.layouts have been given
+            // All elements of this.layouts have been given
             if self.run_forever {
-                // loop around and start anew
+                // Loop around and start anew
                 self.i = 0;
 
                 Some(self.layouts[self.i].clone())
             } else {
-                // finish iteration
+                // Finish iteration
                 None
             }
         };
