@@ -17,7 +17,7 @@ pub struct Parameters {
     pub key_switches: usize,
 
     // Parameters for the solver.
-    /// Stop if there was no new best solution after this many iterations
+    /// Stop if there was no accepted solution after this many iterations
     pub stall_accepted: u64,
     /// Start reannealing after no new best solution has been found for this many iterations
     pub reannealing_best: u64,
