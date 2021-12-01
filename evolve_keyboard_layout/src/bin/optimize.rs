@@ -1,10 +1,7 @@
-use std::collections::HashMap;
-use std::fs::OpenOptions;
-use std::io::prelude::*;
 use structopt::StructOpt;
 
-use layout_optimization::optimization;
 use evolve_keyboard_layout::common;
+use layout_optimization::optimization;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -45,9 +42,11 @@ struct Options {
     #[structopt(long)]
     publish_as: Option<String>,
 
-
     /// Publish found layout to webservice at this url
-    #[structopt(long, default_value = "https://keyboard-layout-optimizer.herokuapp.com/api")]
+    #[structopt(
+        long,
+        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
+    )]
     publish_to: String,
 
     /// Repeat optimizations indefinitely
@@ -62,8 +61,8 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let mut optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
-        .expect(&format!(
+    let mut optimization_params =
+        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
@@ -92,46 +91,18 @@ fn main() {
         let evaluation_result = evaluator.evaluate_layout(&layout);
         println!("{}", evaluation_result);
 
+        // Log solution to file.
         if let Some(filename) = &options.append_solutions_to {
-            let mut file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(filename)
-                .unwrap();
-
-            if let Err(e) = writeln!(file, "{}", layout.as_text()) {
-                log::error!("Couldn't write to file: {}", e);
-            } else {
-                log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
-            }
+            common::append_to_file(&layout, filename);
         }
 
+        // Publish to webservice.
         if let Some(publish_name) = &options.publish_as {
-
-            let client = reqwest::blocking::Client::new();
-            let mut body = HashMap::new();
-            body.insert("published_by", publish_name.to_string());
-            body.insert("layout", layout.as_text());
-
-            let resp = client
-                .post(&options.publish_to)
-                .json(&body)
-                .send()
-                .ok();
-
-            if let Some(resp) = resp {
-                if resp.status().is_success() {
-                    log::info!("Published layout '{}' to {}", layout.as_text(), &options.publish_to);
-                } else {
-                    log::error!("Could not publish result to webservice: {:?}", &resp.text());
-                }
-            } else {
-                log::error!("Could not publish result to webservice");
-            }
+            common::publish_to_webservice(&layout, publish_name, &options.publish_to);
         }
 
         if !options.run_forever {
-            break
+            break;
         }
     }
 }
