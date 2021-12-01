@@ -171,7 +171,7 @@ pub fn optimize(
     };
     let init_temp = match optional_init_temp {
         Some(t) => {
-            println!("\nWARNING: Currently, the option `--greedy` is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
+            println!("\nWARNING: Currently, the options `--greedy` and `--init-temp` are bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
             std::thread::sleep(std::time::Duration::from_secs(7));
             t
         }
