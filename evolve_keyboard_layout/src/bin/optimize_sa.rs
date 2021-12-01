@@ -8,7 +8,7 @@ use structopt::StructOpt;
 use evolve_keyboard_layout::common;
 use layout_optimization::optimization_sa;
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
 struct Options {
     /// Evaluation parameters

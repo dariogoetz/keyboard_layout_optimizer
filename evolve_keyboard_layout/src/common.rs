@@ -50,7 +50,7 @@ impl LayoutConfig {
     }
 }
 
-#[derive(StructOpt, Debug, Clone)]
+#[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Filename of evaluation configuration file to use

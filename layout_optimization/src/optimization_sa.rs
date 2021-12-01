@@ -13,7 +13,7 @@ use argmin::prelude::{
 };
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug)]
 pub struct Parameters {
     /// In each modification of the layout, swap this many key-pairs.
     pub key_switches: usize,
