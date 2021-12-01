@@ -1,5 +1,4 @@
-use num_cpus::get as get_num_cpus;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{ParallelBridge, ParallelIterator};
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -29,7 +28,7 @@ struct Options {
 
     /// Start optimization from this layout (keys from left to right, top to bottom)
     #[structopt(short, long)]
-    start_layout: Option<String>,
+    start_layouts: Vec<String>,
 
     /// Do not cache intermediate results
     #[structopt(long)]
@@ -63,6 +62,51 @@ struct Options {
     run_forever: bool,
 }
 
+// An iterator for layouts to feed into the optimizer.
+// If `run_forever` is true, it iterates over the given layouts indefinitely
+struct LayoutIterator {
+    layouts: Vec<String>,
+    run_forever: bool,
+    i: usize,
+}
+
+impl LayoutIterator {
+    fn new<T: AsRef<str>>(layouts: &[T], run_forever: bool) -> Self {
+        Self {
+            layouts: layouts.iter().map(|s| s.as_ref().to_string()).collect(),
+            run_forever,
+            i: 0,
+        }
+    }
+}
+
+impl Iterator for LayoutIterator {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let res = if self.i < self.layouts.len() {
+            // there are still elements left to give
+            let res = self.layouts[self.i].clone();
+            self.i += 1;
+
+            Some(res)
+        } else {
+            // all elements of this.layouts have been given
+            if self.run_forever {
+                // loop around and start anew
+                self.i = 0;
+
+                Some(self.layouts[self.i].clone())
+            } else {
+                // finish iteration
+                None
+            }
+        };
+
+        res
+    }
+}
+
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
@@ -75,6 +119,14 @@ fn main() {
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
+
+    let mut layouts: Vec<String> = options.start_layouts.to_vec();
+    if layouts.is_empty() {
+        layouts = vec![options.fix_from.clone()];
+    }
+    let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
+
+    let start_from_layout = !options.start_layouts.is_empty();
 
     let init_temp: Option<f64>;
     if options.greedy {
@@ -93,27 +145,24 @@ fn main() {
         };
     }
 
-    // Activate multi-processing (true concurrency).
-    let num_processes = get_num_cpus();
-    println!("Spawning {} processes", num_processes);
-    (0..num_processes).into_par_iter().for_each(|idx| {
-        let process_name = format!("Process {}", idx + 1);
-        log::info!("Spawning {}", process_name);
-        // If it was provided, use the [start_layout] as [fix_from].
-        let fix_from = options
-            .start_layout
-            .as_ref()
-            .unwrap_or(&options.fix_from)
-            .to_string();
-        loop {
+    layout_iterator
+        .enumerate()
+        .par_bridge()
+        .for_each(|(i, fix_from)| {
+            if start_from_layout {
+                log::info!("Starting optimization {} from {}", i, fix_from);
+            } else {
+                log::info!("Starting optimization {}", i);
+            }
+
             // Perform the optimization.
             let layout = optimization_sa::optimize(
-                &process_name,
+                &format!("Process {}", i),
                 &optimization_params,
                 &fix_from,
                 &options.fix.clone().unwrap_or_else(|| "".to_string()),
                 &layout_generator,
-                options.start_layout.is_some(),
+                start_from_layout,
                 &evaluator,
                 init_temp,
                 !options.no_cache_results,
@@ -160,9 +209,5 @@ fn main() {
                     log::error!("Could not publish result to webservice");
                 }
             }
-            if !options.run_forever {
-                break;
-            }
-        }
-    });
+        });
 }
