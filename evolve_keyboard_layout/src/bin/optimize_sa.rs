@@ -94,84 +94,75 @@ fn main() {
     }
 
     // Activate multi-processing (true concurrency).
-    let num_processes = match get_num_cpus() {
-        1 => 1,
-        x => x - 1,
-    };
+    let num_processes = get_num_cpus();
     println!("Spawning {} processes", num_processes);
-    let _ = (0..num_processes)
-        .into_par_iter()
-        .map(|idx| {
-            let process_name = format!("Process {}", idx + 1);
-            log::info!("Spawning {}", process_name);
-            // If it was provided, use the [start_layout] as [fix_from].
-            let fix_from = options
-                .start_layout
-                .as_ref()
-                .unwrap_or(&options.fix_from)
-                .to_string();
-            loop {
-                // Perform the optimization.
-                let layout = optimization_sa::optimize(
-                    &process_name,
-                    &optimization_params,
-                    &fix_from,
-                    &options.fix.clone().unwrap_or_else(|| "".to_string()),
-                    &layout_generator,
-                    options.start_layout.is_some(),
-                    &evaluator,
-                    init_temp,
-                    !options.no_cache_results,
-                );
+    (0..num_processes).into_par_iter().for_each(|idx| {
+        let process_name = format!("Process {}", idx + 1);
+        log::info!("Spawning {}", process_name);
+        // If it was provided, use the [start_layout] as [fix_from].
+        let fix_from = options
+            .start_layout
+            .as_ref()
+            .unwrap_or(&options.fix_from)
+            .to_string();
+        loop {
+            // Perform the optimization.
+            let layout = optimization_sa::optimize(
+                &process_name,
+                &optimization_params,
+                &fix_from,
+                &options.fix.clone().unwrap_or_else(|| "".to_string()),
+                &layout_generator,
+                options.start_layout.is_some(),
+                &evaluator,
+                init_temp,
+                !options.no_cache_results,
+            );
 
-                // Plot some information regarding the layout.
-                println!("{}", layout.plot());
-                println!("{}", layout.plot_compact());
-                let evaluation_result = evaluator.evaluate_layout(&layout);
-                println!("{}", evaluation_result);
+            // Plot some information regarding the layout.
+            println!("{}", layout.plot());
+            println!("{}", layout.plot_compact());
+            let evaluation_result = evaluator.evaluate_layout(&layout);
+            println!("{}", evaluation_result);
 
-                // Log solution to file.
-                if let Some(filename) = &options.append_solutions_to {
-                    let mut file = OpenOptions::new()
-                        .create(true)
-                        .append(true)
-                        .open(filename)
-                        .unwrap();
-                    if let Err(e) = writeln!(file, "{}", layout.as_text()) {
-                        log::error!("Couldn't write to file: {}", e);
-                    } else {
-                        log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
-                    }
-                }
-
-                // Publish to webservice.
-                if let Some(publish_name) = &options.publish_as {
-                    let client = reqwest::blocking::Client::new();
-                    let mut body = HashMap::new();
-                    body.insert("published_by", publish_name.to_string());
-                    body.insert("layout", layout.as_text());
-                    let resp = client.post(&options.publish_to).json(&body).send().ok();
-                    if let Some(resp) = resp {
-                        if resp.status().is_success() {
-                            log::info!(
-                                "Published layout '{}' to {}",
-                                layout.as_text(),
-                                &options.publish_to
-                            );
-                        } else {
-                            log::error!(
-                                "Could not publish result to webservice: {:?}",
-                                &resp.text()
-                            );
-                        }
-                    } else {
-                        log::error!("Could not publish result to webservice");
-                    }
-                }
-                if !options.run_forever {
-                    break;
+            // Log solution to file.
+            if let Some(filename) = &options.append_solutions_to {
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .append(true)
+                    .open(filename)
+                    .unwrap();
+                if let Err(e) = writeln!(file, "{}", layout.as_text()) {
+                    log::error!("Couldn't write to file: {}", e);
+                } else {
+                    log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
                 }
             }
-        })
-        .collect::<Vec<()>>();
+
+            // Publish to webservice.
+            if let Some(publish_name) = &options.publish_as {
+                let client = reqwest::blocking::Client::new();
+                let mut body = HashMap::new();
+                body.insert("published_by", publish_name.to_string());
+                body.insert("layout", layout.as_text());
+                let resp = client.post(&options.publish_to).json(&body).send().ok();
+                if let Some(resp) = resp {
+                    if resp.status().is_success() {
+                        log::info!(
+                            "Published layout '{}' to {}",
+                            layout.as_text(),
+                            &options.publish_to
+                        );
+                    } else {
+                        log::error!("Could not publish result to webservice: {:?}", &resp.text());
+                    }
+                } else {
+                    log::error!("Could not publish result to webservice");
+                }
+            }
+            if !options.run_forever {
+                break;
+            }
+        }
+    });
 }
