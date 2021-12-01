@@ -8,9 +8,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
 
-use argmin::prelude::{
-    ArgminKV, ArgminOp, ArgminSlogLogger, Error, Executor, IterState, Observe, ObserverMode,
-};
+use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
 #[derive(Deserialize, Debug)]
@@ -77,6 +75,7 @@ impl ArgminOp for AnnealingStruct<'_> {
     }
 }
 
+/// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct Observer {
     id: String,
     layout_generator: PermutationLayoutGenerator,
@@ -90,20 +89,26 @@ impl Observe<AnnealingStruct<'_>> for Observer {
     fn observe_iter(
         &mut self,
         state: &IterState<AnnealingStruct<'_>>,
-        _kv: &ArgminKV,
+        kv: &ArgminKV,
     ) -> Result<(), Error> {
         let layout = self.layout_generator.generate_string(&state.param);
         let best_layout = self.layout_generator.generate_string(&state.best_param);
+        let mut temperature = String::from("Not found.");
+        for (key, value) in &kv.kv {
+            if key == &"t" {
+                temperature = format!("{:.5}", value);
+            }
+        }
         log::info!(
-            "{}: n: {:>3}, current: {} ({:>6.1}), best: {} ({:>6.1})",
+            "{}: n: {:>3}, current: {} ({:>6.1}), best: {} ({:>6.1}), temp: {}",
             self.id,
             state.iter,
             layout,
             state.cost,
             best_layout,
-            state.best_cost
+            state.best_cost,
+            temperature, // Already is formatted.
         );
-
         Ok(())
     }
 }
@@ -158,15 +163,12 @@ pub fn optimize(
     optional_init_temp: Option<f64>,
     cache_results: bool,
 ) -> Layout {
-    log::info!("{}: Starting optimization with: {:?}", process_name, params);
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
-
     // Get initial Layout.
     let init_layout = match start_with_layout {
         true => pm.get_permutable_indices(),
         false => pm.generate_random(),
     };
-
     let init_temp = match optional_init_temp {
         Some(t) => {
             println!("\nWARNING: Currently, the option `--greedy` is bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
@@ -185,13 +187,11 @@ pub fn optimize(
             init_temp
         }
     };
-
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
         layout_generator: &pm,
         key_switches: params.key_switches,
     };
-
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
     let solver = SimulatedAnnealing::new(init_temp) // 200.0)
@@ -208,16 +208,20 @@ pub fn optimize(
         /////////////////////////
         // Optional: Start reannealing after no new best solution has been found for [params.reannealing_best] iterations
         .reannealing_best(params.reannealing_best);
-
     let observer = Observer {
         id: process_name.to_string(),
         layout_generator: pm.clone(),
     };
 
+    log::info!(
+        "{}: Starting optimization with: initial_temperature: {:.2}, {:?}",
+        process_name,
+        init_temp,
+        params
+    );
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        // .add_observer(ArgminSlogLogger::term(), ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
         .add_observer(observer, ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
