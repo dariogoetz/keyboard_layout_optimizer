@@ -19,8 +19,6 @@ pub struct Parameters {
     // Parameters for the solver.
     /// Stop if there was no accepted solution after this many iterations
     pub stall_accepted: u64,
-    /// Start reannealing after no new best solution has been found for this many iterations
-    pub reannealing_best: u64,
 
     // Parameters for the [Executor].
     /// Set maximum number of iterations (defaults to `std::u64::MAX`)
@@ -33,9 +31,8 @@ impl Default for Parameters {
             key_switches: 1,
             // Parameters for the solver.
             stall_accepted: 1000,
-            reannealing_best: 4000,
             // Parameters for the [Executor].
-            max_iters: 100_000,
+            max_iters: 50_000,
         }
     }
 }
@@ -243,12 +240,8 @@ pub fn optimize(
         // Stopping criteria   //
         /////////////////////////
         // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
-        .stall_accepted(params.stall_accepted)
-        /////////////////////////
-        // Reannealing         //
-        /////////////////////////
-        // Optional: Start reannealing after no new best solution has been found for [params.reannealing_best] iterations
-        .reannealing_best(params.reannealing_best);
+        .stall_accepted(params.stall_accepted);
+
     let best_observer = BestObserver {
         id: process_name.to_string(),
         layout_generator: pm.clone(),
