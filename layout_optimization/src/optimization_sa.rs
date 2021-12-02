@@ -5,6 +5,7 @@ use layout_evaluation::evaluation::Evaluator;
 use super::common::PermutationLayoutGenerator;
 
 use anyhow::Result;
+use colored::Colorize;
 use serde::Deserialize;
 use std::sync::Arc;
 
@@ -90,8 +91,9 @@ impl Observe<AnnealingStruct<'_>> for BestObserver {
     ) -> Result<(), Error> {
         let best_layout = self.layout_generator.generate_string(&state.best_param);
         log::info!(
-            "{}: New best: {} ({:>6.1})",
+            "{}: {} {} ({:>6.1})",
             self.id,
+            "New best:".bold(),
             best_layout,
             state.best_cost,
         );
@@ -103,6 +105,7 @@ impl Observe<AnnealingStruct<'_>> for BestObserver {
 struct IterationObserver {
     id: String,
     layout_generator: PermutationLayoutGenerator,
+    log_everything: bool,
 }
 
 impl Observe<AnnealingStruct<'_>> for IterationObserver {
@@ -131,22 +134,40 @@ impl Observe<AnnealingStruct<'_>> for IterationObserver {
         ra_ac: false
         time: 0.533206799 */
         let mut temperature = String::from("Not found.");
+        let mut accepted = "Not found";
         for (key, value) in &kv.kv {
             match *key {
                 "t" => temperature = format!("{:.5}", value),
+                "acc" => accepted = value,
                 _ => {}
             }
         }
-        log::info!(
-            "{}: n: {:>3}, current: {} ({:>6.1}), best: {} ({:>6.1}), temp: {}",
+        let mut output = format!(
+            "{}: {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}",
             self.id,
+            "n:".bold(),
             state.iter,
+            "current:".bold(),
             layout,
             state.cost,
+            "best:".bold(),
             best_layout,
             state.best_cost,
-            temperature, // Already is formatted.
+            "temp:".bold(),
+            temperature,
         );
+        if self.log_everything {
+            let is_better = state.cost < state.prev_cost;
+            output.push_str(&format!(
+                " {} {}{} {} {}",
+                "better:".bold(),
+                is_better,
+                if is_better { " " } else { "" }, // Used to perserve alignment. {:.5} doesn't work.
+                "acc:".bold(),
+                accepted
+            ));
+        }
+        log::info!("{}", output);
         Ok(())
     }
 }
@@ -199,6 +220,7 @@ pub fn optimize(
     start_with_layout: bool,
     evaluator: &Evaluator,
     optional_init_temp: Option<f64>,
+    log_everything: bool,
     cache_results: bool,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
@@ -249,6 +271,12 @@ pub fn optimize(
     let iter_observer = IterationObserver {
         id: process_name.to_string(),
         layout_generator: pm.clone(),
+        log_everything,
+    };
+    let iter_observer_mode = if log_everything {
+        ObserverMode::Always
+    } else {
+        ObserverMode::Every(100)
     };
 
     log::info!(
@@ -261,7 +289,7 @@ pub fn optimize(
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
         .add_observer(best_observer, ObserverMode::NewBest)
-        .add_observer(iter_observer, ObserverMode::Every(100))
+        .add_observer(iter_observer, iter_observer_mode)
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         .run()

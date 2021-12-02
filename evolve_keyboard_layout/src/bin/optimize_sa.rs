@@ -39,6 +39,10 @@ struct Options {
     #[structopt(short, long)]
     greedy: bool,
 
+    /// If used, log every single iteration instead of every 100th.
+    #[structopt(long)]
+    log_everything: bool,
+
     /// Append found layouts to file
     #[structopt(long)]
     append_solutions_to: Option<String>,
@@ -162,6 +166,7 @@ fn main() {
                 start_from_layout,
                 &evaluator,
                 init_temp,
+                options.log_everything,
                 !options.no_cache_results,
             );
 
