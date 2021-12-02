@@ -76,12 +76,39 @@ impl ArgminOp for AnnealingStruct<'_> {
 }
 
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
-struct Observer {
+struct BestObserver {
     id: String,
     layout_generator: PermutationLayoutGenerator,
 }
 
-impl Observe<AnnealingStruct<'_>> for Observer {
+impl Observe<AnnealingStruct<'_>> for BestObserver {
+    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn observe_iter(
+        &mut self,
+        state: &IterState<AnnealingStruct<'_>>,
+        _kv: &ArgminKV,
+    ) -> Result<(), Error> {
+        let best_layout = self.layout_generator.generate_string(&state.best_param);
+        log::info!(
+            "{}: New best: {} ({:>6.1})",
+            self.id,
+            best_layout,
+            state.best_cost,
+        );
+        Ok(())
+    }
+}
+
+/// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
+struct IterationObserver {
+    id: String,
+    layout_generator: PermutationLayoutGenerator,
+}
+
+impl Observe<AnnealingStruct<'_>> for IterationObserver {
     fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
         Ok(())
     }
@@ -93,10 +120,24 @@ impl Observe<AnnealingStruct<'_>> for Observer {
     ) -> Result<(), Error> {
         let layout = self.layout_generator.generate_string(&state.param);
         let best_layout = self.layout_generator.generate_string(&state.best_param);
+        /* Structure of ArgminKV.kv: Vec<(&'static str, String)>
+        t: 111.38906945299198
+        new_be: true
+        acc: true
+        st_i_be: 0
+        st_i_ac: 0
+        ra_i_fi: 1
+        ra_i_be: 0
+        ra_i_ac: 0
+        ra_fi: false
+        ra_be: false
+        ra_ac: false
+        time: 0.533206799 */
         let mut temperature = String::from("Not found.");
         for (key, value) in &kv.kv {
-            if key == &"t" {
-                temperature = format!("{:.5}", value);
+            match *key {
+                "t" => temperature = format!("{:.5}", value),
+                _ => {}
             }
         }
         log::info!(
@@ -208,7 +249,11 @@ pub fn optimize(
         /////////////////////////
         // Optional: Start reannealing after no new best solution has been found for [params.reannealing_best] iterations
         .reannealing_best(params.reannealing_best);
-    let observer = Observer {
+    let best_observer = BestObserver {
+        id: process_name.to_string(),
+        layout_generator: pm.clone(),
+    };
+    let iter_observer = IterationObserver {
         id: process_name.to_string(),
         layout_generator: pm.clone(),
     };
@@ -222,7 +267,8 @@ pub fn optimize(
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        .add_observer(observer, ObserverMode::NewBest) //ObserverMode::Always) //Every(100))
+        .add_observer(best_observer, ObserverMode::NewBest)
+        .add_observer(iter_observer, ObserverMode::Every(100))
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
         .run()
