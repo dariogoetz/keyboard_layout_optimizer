@@ -1,8 +1,12 @@
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
+use rustc_hash::FxHashMap;
+use std::sync::{Arc, Mutex};
+
 use evolve_keyboard_layout::common;
 use layout_optimization::optimization_sa;
+use layout_evaluation::results::EvaluationResult;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -146,6 +150,11 @@ fn main() {
         };
     }
 
+    let cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>> = match !options.no_cache_results {
+        true => Some(Arc::new(Mutex::new(FxHashMap::default()))),
+        false => None,
+    };
+
     layout_iterator
         .enumerate()
         .par_bridge()
@@ -167,7 +176,7 @@ fn main() {
                 &evaluator,
                 init_temp,
                 options.log_everything,
-                !options.no_cache_results,
+                cache.clone(),
             );
 
             // Plot some information regarding the layout.

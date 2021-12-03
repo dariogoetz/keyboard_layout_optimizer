@@ -1,6 +1,7 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
+use layout_evaluation::results::EvaluationResult;
 
 use super::common::PermutationLayoutGenerator;
 
@@ -9,7 +10,7 @@ use colored::Colorize;
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
 use std::cell::RefCell;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
@@ -51,7 +52,7 @@ struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
-    cache: Option<RefCell<FxHashMap<Vec<usize>, f64>>>,
+    cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>>,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -63,28 +64,26 @@ impl ArgminOp for AnnealingStruct<'_> {
 
     /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
-        match &self.cache {
-            Some(ref_cell_cache) => {
-                // If there is a cache, use it.
-                let mut cache = ref_cell_cache.borrow_mut();
-                match cache.get(param) {
-                    Some(cost) => Ok(*cost),
-                    None => {
-                        let layout = self.layout_generator.generate_layout(&param);
-                        let evaluation_result = self.evaluator.evaluate_layout(&layout);
-                        let cost = evaluation_result.total_cost();
-                        cache.insert(param.to_owned(), cost);
-                        Ok(cost)
-                    }
-                }
-            }
+        let mut cache_val = None;
+        if let Some(result_cache) = &self.cache {
+            let cache = result_cache.lock().unwrap();
+            cache_val = cache.get(param).map(|v| v.clone());
+        }
+        let evaluation_result = match cache_val {
+            Some(evaluation_result) => evaluation_result,
             None => {
-                // If there is no cache, just evaluate the layout and return the cost.
                 let layout = self.layout_generator.generate_layout(&param);
                 let evaluation_result = self.evaluator.evaluate_layout(&layout);
-                Ok(evaluation_result.total_cost())
+                if let Some(result_cache) = &self.cache {
+                    let mut cache = result_cache.lock().unwrap();
+                    cache.insert(param.to_owned(), evaluation_result.clone());
+                }
+
+                evaluation_result
             }
-        }
+        };
+
+        Ok(evaluation_result.total_cost())
     }
 
     /// Modify param (~the layout).
@@ -243,7 +242,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     optional_init_temp: Option<f64>,
     log_everything: bool,
-    cache_results: bool,
+    cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
@@ -273,10 +272,7 @@ pub fn optimize(
         evaluator: Arc::new(evaluator.clone()),
         layout_generator: &pm,
         key_switches: params.key_switches,
-        cache: match cache_results {
-            true => Some(RefCell::new(FxHashMap::default())),
-            false => None,
-        },
+        cache,
     };
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
