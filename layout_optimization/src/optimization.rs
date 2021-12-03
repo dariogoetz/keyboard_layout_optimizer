@@ -1,7 +1,6 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::EvaluationResult;
 
 use super::common::{PermutationLayoutGenerator, Cache};
 
@@ -57,7 +56,7 @@ type Genotype = Vec<usize>;
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
     layout_generator: PermutationLayoutGenerator,
-    result_cache: Option<Cache<EvaluationResult>>,
+    result_cache: Option<Cache<usize>>,
 }
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
@@ -67,13 +66,13 @@ impl FitnessFunction<Genotype, usize> for FitnessCalc {
         let evaluation_result = match &self.result_cache {
             Some(result_cache) => {
                 result_cache.get_or_insert_with(&layout_str, || {
-                    self.evaluator.evaluate_layout(&l)
+                    self.evaluator.evaluate_layout(&l).optimization_score()
                 })
             },
-            None => self.evaluator.evaluate_layout(&l)
+            None => self.evaluator.evaluate_layout(&l).optimization_score()
         };
 
-        evaluation_result.optimization_score()
+        evaluation_result
     }
 
     fn average(&self, fitness_values: &[usize]) -> usize {

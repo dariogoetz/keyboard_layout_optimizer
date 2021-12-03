@@ -148,7 +148,7 @@ fn main() {
         };
     }
 
-    let cache: Option<Cache<EvaluationResult>> = match !options.no_cache_results {
+    let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
         false => None,
     };

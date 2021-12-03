@@ -1,7 +1,6 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::EvaluationResult;
 
 use super::common::{PermutationLayoutGenerator, Cache};
 
@@ -50,7 +49,7 @@ struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
-    result_cache: Option<Cache<EvaluationResult>>,
+    result_cache: Option<Cache<f64>>,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -67,13 +66,13 @@ impl ArgminOp for AnnealingStruct<'_> {
         let evaluation_result = match &self.result_cache {
             Some(result_cache) => {
                 result_cache.get_or_insert_with(&layout_str, || {
-                    self.evaluator.evaluate_layout(&l)
+                    self.evaluator.evaluate_layout(&l).total_cost()
                 })
             },
-            None => self.evaluator.evaluate_layout(&l)
+            None => self.evaluator.evaluate_layout(&l).total_cost()
         };
 
-        Ok(evaluation_result.total_cost())
+        Ok(evaluation_result)
     }
 
     /// Modify param (~the layout).
@@ -232,7 +231,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     optional_init_temp: Option<f64>,
     log_everything: bool,
-    result_cache: Option<Cache<EvaluationResult>>,
+    result_cache: Option<Cache<f64>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
