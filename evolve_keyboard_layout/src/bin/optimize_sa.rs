@@ -150,7 +150,7 @@ fn main() {
         };
     }
 
-    let cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>> = match !options.no_cache_results {
+    let cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>> = match !options.no_cache_results {
         true => Some(Arc::new(Mutex::new(FxHashMap::default()))),
         false => None,
     };

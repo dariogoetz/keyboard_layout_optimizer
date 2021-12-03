@@ -9,7 +9,6 @@ use anyhow::Result;
 use colored::Colorize;
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::cell::RefCell;
 use std::sync::{Arc, Mutex};
 
 use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
@@ -52,7 +51,7 @@ struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
-    cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>>,
+    cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -64,10 +63,11 @@ impl ArgminOp for AnnealingStruct<'_> {
 
     /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
+        let layout_str = self.layout_generator.generate_string(&param);
         let mut cache_val = None;
         if let Some(result_cache) = &self.cache {
             let cache = result_cache.lock().unwrap();
-            cache_val = cache.get(param).map(|v| v.clone());
+            cache_val = cache.get(&layout_str).map(|v| v.clone());
         }
         let evaluation_result = match cache_val {
             Some(evaluation_result) => evaluation_result,
@@ -76,7 +76,7 @@ impl ArgminOp for AnnealingStruct<'_> {
                 let evaluation_result = self.evaluator.evaluate_layout(&layout);
                 if let Some(result_cache) = &self.cache {
                     let mut cache = result_cache.lock().unwrap();
-                    cache.insert(param.to_owned(), evaluation_result.clone());
+                    cache.insert(layout_str, evaluation_result.clone());
                 }
 
                 evaluation_result
@@ -242,7 +242,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     optional_init_temp: Option<f64>,
     log_everything: bool,
-    cache: Option<Arc<Mutex<FxHashMap<Vec<usize>, EvaluationResult>>>>,
+    cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
