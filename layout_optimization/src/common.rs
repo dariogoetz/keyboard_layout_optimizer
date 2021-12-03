@@ -97,7 +97,7 @@ impl<T: Clone> Cache<T> {
         let cache_val;
         {
             let cache = self.cache.lock().unwrap();
-            cache_val = cache.get(elem).map(|v| v.clone());
+            cache_val = cache.get(elem).cloned();
         }
         cache_val.unwrap_or_else(|| {
             let res = f();
