@@ -3,13 +3,12 @@ use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
 use layout_evaluation::results::EvaluationResult;
 
-use super::common::PermutationLayoutGenerator;
+use super::common::{PermutationLayoutGenerator, Cache};
 
 use anyhow::Result;
 use colored::Colorize;
-use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
@@ -51,7 +50,7 @@ struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
-    cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
+    result_cache: Option<Cache<EvaluationResult>>,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -63,24 +62,15 @@ impl ArgminOp for AnnealingStruct<'_> {
 
     /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
-        let layout_str = self.layout_generator.generate_string(&param);
-        let mut cache_val = None;
-        if let Some(result_cache) = &self.cache {
-            let cache = result_cache.lock().unwrap();
-            cache_val = cache.get(&layout_str).map(|v| v.clone());
-        }
-        let evaluation_result = match cache_val {
-            Some(evaluation_result) => evaluation_result,
-            None => {
-                let layout = self.layout_generator.generate_layout(&param);
-                let evaluation_result = self.evaluator.evaluate_layout(&layout);
-                if let Some(result_cache) = &self.cache {
-                    let mut cache = result_cache.lock().unwrap();
-                    cache.insert(layout_str, evaluation_result.clone());
-                }
-
-                evaluation_result
-            }
+        let l = self.layout_generator.generate_layout(param);
+        let layout_str = self.layout_generator.generate_string(param);
+        let evaluation_result = match &self.result_cache {
+            Some(result_cache) => {
+                result_cache.get_or_insert_with(&layout_str, || {
+                    self.evaluator.evaluate_layout(&l)
+                })
+            },
+            None => self.evaluator.evaluate_layout(&l)
         };
 
         Ok(evaluation_result.total_cost())
@@ -242,7 +232,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     optional_init_temp: Option<f64>,
     log_everything: bool,
-    cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
+    result_cache: Option<Cache<EvaluationResult>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
@@ -272,7 +262,7 @@ pub fn optimize(
         evaluator: Arc::new(evaluator.clone()),
         layout_generator: &pm,
         key_switches: params.key_switches,
-        cache,
+        result_cache,
     };
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
@@ -310,7 +300,7 @@ pub fn optimize(
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        .add_observer(best_observer, ObserverMode::NewBest)
+        // .add_observer(best_observer, ObserverMode::NewBest)
         .add_observer(iter_observer, iter_observer_mode)
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)

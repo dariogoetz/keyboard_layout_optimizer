@@ -1,10 +1,8 @@
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
-use rustc_hash::FxHashMap;
-use std::sync::{Arc, Mutex};
-
 use evolve_keyboard_layout::common;
+use layout_optimization::common::Cache;
 use layout_optimization::optimization_sa;
 use layout_evaluation::results::EvaluationResult;
 
@@ -150,8 +148,8 @@ fn main() {
         };
     }
 
-    let cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>> = match !options.no_cache_results {
-        true => Some(Arc::new(Mutex::new(FxHashMap::default()))),
+    let cache: Option<Cache<EvaluationResult>> = match !options.no_cache_results {
+        true => Some(Cache::new()),
         false => None,
     };
 
@@ -167,7 +165,7 @@ fn main() {
 
             // Perform the optimization.
             let layout = optimization_sa::optimize(
-                &format!("Process {}", i),
+                &format!("Process {:>3}", i),
                 &optimization_params,
                 &fix_from,
                 &options.fix.clone().unwrap_or_else(|| "".to_string()),
