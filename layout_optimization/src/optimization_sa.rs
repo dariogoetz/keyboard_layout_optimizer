@@ -254,10 +254,10 @@ pub fn optimize(
     };
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
-    let solver = SimulatedAnnealing::new(init_temp) // 200.0)
+    let solver = SimulatedAnnealing::new(init_temp)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
-        .temp_func(SATempFunc::Boltzmann)
+        .temp_func(SATempFunc::Exponential(0.995))
         /////////////////////////
         // Stopping criteria   //
         /////////////////////////
