@@ -279,7 +279,7 @@ pub fn optimize(
     let solver = SimulatedAnnealing::new(init_temp)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
-        .temp_func(SATempFunc::Exponential(0.995))
+        .temp_func(SATempFunc::Exponential(0.997))
         /////////////////////////
         // Stopping criteria   //
         /////////////////////////
