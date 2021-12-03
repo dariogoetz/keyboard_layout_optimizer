@@ -5,8 +5,8 @@ key_switches: 1
 
 ### Parameters for the solver.
 # Stop if there was no accepted solution after this many iterations
-stall_accepted: 1000
+stall_accepted: 5000
 
 ### Parameters for the [Executor].
 # Set maximum number of iterations (defaults to `std::u64::MAX`)
-max_iters: 50000
+max_iters: 100000

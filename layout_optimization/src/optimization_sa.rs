@@ -6,7 +6,9 @@ use super::common::PermutationLayoutGenerator;
 
 use anyhow::Result;
 use colored::Colorize;
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
+use std::cell::RefCell;
 use std::sync::Arc;
 
 use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
@@ -31,9 +33,9 @@ impl Default for Parameters {
         Parameters {
             key_switches: 1,
             // Parameters for the solver.
-            stall_accepted: 1000,
+            stall_accepted: 5000,
             // Parameters for the [Executor].
-            max_iters: 50_000,
+            max_iters: 100_000,
         }
     }
 }
@@ -49,6 +51,7 @@ struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
+    cache: Option<RefCell<FxHashMap<Vec<usize>, f64>>>,
 }
 
 impl ArgminOp for AnnealingStruct<'_> {
@@ -58,11 +61,30 @@ impl ArgminOp for AnnealingStruct<'_> {
     type Jacobian = ();
     type Float = f64;
 
-    /// Evaluate the param (~the layout).
+    /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
-        let layout = self.layout_generator.generate_layout(&param);
-        let evaluation_result = self.evaluator.evaluate_layout(&layout);
-        Ok(evaluation_result.total_cost())
+        match &self.cache {
+            Some(ref_cell_cache) => {
+                // If there is a cache, use it.
+                let mut cache = ref_cell_cache.borrow_mut();
+                match cache.get(param) {
+                    Some(cost) => Ok(*cost),
+                    None => {
+                        let layout = self.layout_generator.generate_layout(&param);
+                        let evaluation_result = self.evaluator.evaluate_layout(&layout);
+                        let cost = evaluation_result.total_cost();
+                        cache.insert(param.to_owned(), cost);
+                        Ok(cost)
+                    }
+                }
+            }
+            None => {
+                // If there is no cache, just evaluate the layout and return the cost.
+                let layout = self.layout_generator.generate_layout(&param);
+                let evaluation_result = self.evaluator.evaluate_layout(&layout);
+                Ok(evaluation_result.total_cost())
+            }
+        }
     }
 
     /// Modify param (~the layout).
@@ -251,6 +273,10 @@ pub fn optimize(
         evaluator: Arc::new(evaluator.clone()),
         layout_generator: &pm,
         key_switches: params.key_switches,
+        cache: match cache_results {
+            true => Some(RefCell::new(FxHashMap::default())),
+            false => None,
+        },
     };
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
