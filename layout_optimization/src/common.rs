@@ -1,8 +1,8 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use rand::{seq::SliceRandom, thread_rng};
-use std::sync::{Arc, Mutex};
 use rustc_hash::FxHashMap;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
 pub struct PermutationLayoutGenerator {
@@ -83,7 +83,7 @@ impl PermutationLayoutGenerator {
 
 #[derive(Clone, Debug)]
 pub struct Cache<T: Clone> {
-    cache: Arc<Mutex<FxHashMap<String, T>>>
+    cache: Arc<Mutex<FxHashMap<String, T>>>,
 }
 
 impl<T: Clone> Cache<T> {

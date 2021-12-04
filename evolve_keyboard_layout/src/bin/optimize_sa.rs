@@ -4,7 +4,6 @@ use structopt::StructOpt;
 use evolve_keyboard_layout::common;
 use layout_optimization::common::Cache;
 use layout_optimization::optimization_sa;
-use layout_evaluation::results::EvaluationResult;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]

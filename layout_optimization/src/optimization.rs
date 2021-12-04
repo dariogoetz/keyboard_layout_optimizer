@@ -2,7 +2,7 @@ use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
 
-use super::common::{PermutationLayoutGenerator, Cache};
+use super::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
 use serde::Deserialize;
@@ -64,12 +64,10 @@ impl FitnessFunction<Genotype, usize> for FitnessCalc {
         let l = self.layout_generator.generate_layout(genome);
         let layout_str = self.layout_generator.generate_string(genome);
         let evaluation_result = match &self.result_cache {
-            Some(result_cache) => {
-                result_cache.get_or_insert_with(&layout_str, || {
-                    self.evaluator.evaluate_layout(&l).optimization_score()
-                })
-            },
-            None => self.evaluator.evaluate_layout(&l).optimization_score()
+            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
+                self.evaluator.evaluate_layout(&l).optimization_score()
+            }),
+            None => self.evaluator.evaluate_layout(&l).optimization_score(),
         };
 
         evaluation_result
@@ -257,7 +255,6 @@ pub fn optimize(
                             layout,
                             layout.plot_compact(),
                             layout.plot(),
-
                         );
                         println!("{}", evaluation_result);
 
@@ -303,7 +300,8 @@ pub fn optimize(
                 );
                 println!(
                     "\n{}",
-                    pm.generate_layout(&all_time_best.as_ref().unwrap().1).plot()
+                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
+                        .plot()
                 );
                 break;
             }

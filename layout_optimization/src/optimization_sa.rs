@@ -2,7 +2,7 @@ use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
 
-use super::common::{PermutationLayoutGenerator, Cache};
+use super::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
 use colored::Colorize;
@@ -64,12 +64,10 @@ impl ArgminOp for AnnealingStruct<'_> {
         let l = self.layout_generator.generate_layout(param);
         let layout_str = self.layout_generator.generate_string(param);
         let evaluation_result = match &self.result_cache {
-            Some(result_cache) => {
-                result_cache.get_or_insert_with(&layout_str, || {
-                    self.evaluator.evaluate_layout(&l).total_cost()
-                })
-            },
-            None => self.evaluator.evaluate_layout(&l).total_cost()
+            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
+                self.evaluator.evaluate_layout(&l).total_cost()
+            }),
+            None => self.evaluator.evaluate_layout(&l).total_cost(),
         };
 
         Ok(evaluation_result)
@@ -306,6 +304,6 @@ pub fn optimize(
         .run()
         .unwrap();
 
-    let best_layout_vec = res.state().get_best_param();
-    pm.generate_layout(&best_layout_vec)
+    let best_layout_param = res.state().get_best_param();
+    pm.generate_layout(&best_layout_param)
 }
