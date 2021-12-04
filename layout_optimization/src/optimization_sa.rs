@@ -297,7 +297,7 @@ pub fn optimize(
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let res = Executor::new(problem, solver, init_layout)
         // Optional: Attach a observer
-        // .add_observer(best_observer, ObserverMode::NewBest)
+        .add_observer(best_observer, ObserverMode::NewBest)
         .add_observer(iter_observer, iter_observer_mode)
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters)
