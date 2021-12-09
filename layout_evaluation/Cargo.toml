@@ -16,6 +16,7 @@ anyhow = "*"
 env_logger = "*"
 log = "*"
 rustc-hash = "*"
+priority-queue = "*"
 
 
 [dev-dependencies]

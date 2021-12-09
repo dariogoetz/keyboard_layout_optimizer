@@ -12,6 +12,7 @@ use crate::results::NormalizationType;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
+use priority_queue::PriorityQueue;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -73,7 +74,7 @@ impl TrigramMetric for Irregularity {
     ) -> (f64, Option<String>) {
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
-        let mut worst: Option<((&LayerKey, &LayerKey, &LayerKey), f64)> = None;
+        let mut worst = PriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost: f64 = trigrams
@@ -92,32 +93,35 @@ impl TrigramMetric for Irregularity {
                     if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
                         cost_with_mod += res;
                     };
-                    match worst {
-                        Some((_, worst_cost)) => {
-                            if res > worst_cost {
-                                worst = Some((trigram.clone(), res));
-                            }
-                        },
-                        None => {
-                            worst = Some((trigram.clone(), res));
-                        },
-                    };
+                    worst.push(
+                        (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
+                        (1_000_000.0 * res) as usize,
+                    );
                 };
 
                 res
             })
             .sum();
 
-        let msg = worst.map(|(trigram, cost)| {
-            format!(
-                "Worst trigram: {}{}{} makes {:5.2}% of total (quadratic) cost;  {:>5.2}% of cost involved a modifier",
-                trigram.0.symbol.to_string().escape_debug(),
-                trigram.1.symbol.to_string().escape_debug(),
-                trigram.2.symbol.to_string().escape_debug(),
-                100.0 * cost / total_cost,
-                100.0 * cost_with_mod / total_cost,
-            )
-        });
+        let msgs: Vec<String> = worst
+            .into_sorted_iter()
+            .take(3)
+            .map(|(trigram, cost)| {
+                format!(
+                    "{}{}{} ({:>5.2}%)",
+                    trigram.0.to_string().escape_debug(),
+                    trigram.1.to_string().escape_debug(),
+                    trigram.2.to_string().escape_debug(),
+                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                )
+            })
+            .collect();
+
+        let msg = Some(format!(
+            "Worst trigrams: {};  {:>5.2}% of cost involved a modifier",
+            msgs.join(", "),
+            100.0 * cost_with_mod / total_cost,
+        ));
 
         (total_cost.sqrt(), msg)
     }

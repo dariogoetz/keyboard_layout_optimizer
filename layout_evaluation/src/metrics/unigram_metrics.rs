@@ -1,5 +1,6 @@
 //! The `metrics` module provides a trait for unigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
+use priority_queue::PriorityQueue;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
@@ -30,38 +31,33 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst: Option<(&LayerKey, f64)> = None;
+        let mut worst = PriorityQueue::new();
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
         let total_cost = unigrams
             .iter()
             .filter_map(|(unigram, weight)| {
                 let res = self.individual_cost(*unigram, *weight, total_weight, layout);
                 if let Some(res) = res {
-                    match worst {
-                        Some((_, worst_cost)) => {
-                            if res > worst_cost {
-                                worst = Some((unigram.clone(), res));
-                            }
-                        },
-                        None => {
-                            if res > 0.0 {
-                                worst = Some((unigram.clone(), res));
-                            }
-                        },
-                    };
+                    worst.push(unigram.symbol, (1_000_000.0 * res) as usize);
                 };
 
                 res
             })
             .sum();
 
-        let msg = worst.map(|(unigram, cost)| {
-            format!(
-                "Worst unigram: {}, Cost: {:.2}% of total cost",
-                unigram.symbol.to_string().escape_debug(),
-                100.0 * cost / total_cost,
-            )
-        });
+        let msgs: Vec<String> = worst
+            .into_sorted_iter()
+            .take(3)
+            .map(|(unigram, cost)| {
+                format!(
+                    "{} ({:>5.2}%)",
+                    unigram.to_string().escape_debug(),
+                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                )
+            })
+            .collect();
+
+        let msg = Some(format!("Worst unigrams: {}", msgs.join(", ")));
 
         (total_cost, msg)
     }

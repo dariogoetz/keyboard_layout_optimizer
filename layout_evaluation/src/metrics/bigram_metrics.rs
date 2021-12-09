@@ -1,5 +1,6 @@
 //! The `metrics` module provides a trait for bigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
+use priority_queue::PriorityQueue;
 
 pub mod asymmetric_bigrams;
 pub mod finger_repeats;
@@ -37,7 +38,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst: Option<((&LayerKey, &LayerKey), f64)> = None;
+        let mut worst = PriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let total_cost = bigrams
@@ -48,33 +49,34 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                     if bigram.0.is_modifier || bigram.1.is_modifier {
                         cost_with_mod += res;
                     };
-                    match worst {
-                        Some((_, worst_cost)) => {
-                            if res > worst_cost {
-                                worst = Some((bigram.clone(), res));
-                            }
-                        },
-                        None => {
-                            if res > 0.0 {
-                                worst = Some((bigram.clone(), res));
-                            }
-                        },
-                    };
+                    worst.push(
+                        (bigram.0.symbol, bigram.1.symbol),
+                        (1_000_000.0 * res) as usize,
+                    );
                 };
 
                 res
             })
             .sum();
 
-        let msg = worst.map(|(bigram, cost)| {
-            format!(
-                "Worst bigram: {}{} makes {:>5.2}% of total cost;  {:>5.2}% of cost involved a modifier",
-                bigram.0.symbol.to_string().escape_debug(),
-                bigram.1.symbol.to_string().escape_debug(),
-                100.0 * cost / total_cost,
-                100.0 * cost_with_mod / total_cost,
-            )
-        });
+        let msgs: Vec<String> = worst
+            .into_sorted_iter()
+            .take(3)
+            .map(|(bigram, cost)| {
+                format!(
+                    "{}{} ({:>5.2}%)",
+                    bigram.0.to_string().escape_debug(),
+                    bigram.1.to_string().escape_debug(),
+                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                )
+            })
+            .collect();
+
+        let msg = Some(format!(
+            "Worst bigrams: {};  {:>5.2}% of cost involved a modifier",
+            msgs.join(", "),
+            100.0 * cost_with_mod / total_cost,
+        ));
 
         (total_cost, msg)
     }
