@@ -1,11 +1,13 @@
 //! The `metrics` module provides a trait for trigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::PriorityQueue;
+use priority_queue::DoublePriorityQueue;
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
 pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
+
+const N_WORST: usize = 3;
 
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
@@ -34,7 +36,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst = PriorityQueue::new();
+        let mut worst = DoublePriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost = trigrams
@@ -56,6 +58,9 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
                         (1_000_000.0 * res) as usize,
                     );
+                    if worst.len() > N_WORST {
+                        worst.pop_min();
+                    }
                 };
 
                 res
@@ -64,7 +69,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
 
         let msgs: Vec<String> = worst
             .into_sorted_iter()
-            .take(3)
+            .rev()
             .map(|(trigram, cost)| {
                 format!(
                     "{}{}{} ({:>5.2}%)",

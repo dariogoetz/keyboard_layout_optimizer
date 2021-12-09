@@ -12,8 +12,10 @@ use crate::results::NormalizationType;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use priority_queue::PriorityQueue;
+use priority_queue::DoublePriorityQueue;
 use serde::Deserialize;
+
+const N_WORST: usize = 3;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {}
@@ -74,7 +76,7 @@ impl TrigramMetric for Irregularity {
     ) -> (f64, Option<String>) {
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
-        let mut worst = PriorityQueue::new();
+        let mut worst = DoublePriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let total_cost: f64 = trigrams
@@ -97,6 +99,9 @@ impl TrigramMetric for Irregularity {
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
                         (1_000_000.0 * res) as usize,
                     );
+                    if worst.len() > N_WORST {
+                        worst.pop_min();
+                    }
                 };
 
                 res
@@ -105,7 +110,7 @@ impl TrigramMetric for Irregularity {
 
         let msgs: Vec<String> = worst
             .into_sorted_iter()
-            .take(3)
+            .rev()
             .map(|(trigram, cost)| {
                 format!(
                     "{}{}{} ({:>5.2}%)",

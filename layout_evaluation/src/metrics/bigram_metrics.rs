@@ -1,6 +1,6 @@
 //! The `metrics` module provides a trait for bigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::PriorityQueue;
+use priority_queue::DoublePriorityQueue;
 
 pub mod asymmetric_bigrams;
 pub mod finger_repeats;
@@ -11,6 +11,8 @@ pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod unbalancing_after_neighboring;
+
+const N_WORST: usize = 3;
 
 /// BigramMetric is a trait for metrics that iterates over weighted bigrams.
 pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
@@ -38,7 +40,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst = PriorityQueue::new();
+        let mut worst = DoublePriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let total_cost = bigrams
@@ -53,6 +55,9 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                         (bigram.0.symbol, bigram.1.symbol),
                         (1_000_000.0 * res) as usize,
                     );
+                    if worst.len() > N_WORST {
+                        worst.pop_min();
+                    }
                 };
 
                 res
@@ -61,7 +66,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
 
         let msgs: Vec<String> = worst
             .into_sorted_iter()
-            .take(3)
+            .rev()
             .map(|(bigram, cost)| {
                 format!(
                     "{}{} ({:>5.2}%)",

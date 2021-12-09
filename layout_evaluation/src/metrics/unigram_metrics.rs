@@ -1,10 +1,14 @@
 //! The `metrics` module provides a trait for unigram metrics.
+use std::usize;
+
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::PriorityQueue;
+use priority_queue::DoublePriorityQueue;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
 pub mod key_costs;
+
+const N_WORST: usize = 3;
 
 /// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
 pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
@@ -31,7 +35,8 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst = PriorityQueue::new();
+        let mut worst = DoublePriorityQueue::new();
+
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
         let total_cost = unigrams
             .iter()
@@ -39,6 +44,9 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 let res = self.individual_cost(*unigram, *weight, total_weight, layout);
                 if let Some(res) = res {
                     worst.push(unigram.symbol, (1_000_000.0 * res) as usize);
+                    if worst.len() > N_WORST {
+                        worst.pop_min();
+                    }
                 };
 
                 res
@@ -47,7 +55,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
 
         let msgs: Vec<String> = worst
             .into_sorted_iter()
-            .take(3)
+            .rev()
             .map(|(unigram, cost)| {
                 format!(
                     "{} ({:>5.2}%)",
