@@ -1,5 +1,6 @@
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
+    layout::Layout,
     layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
 };
 use layout_evaluation::{
@@ -8,13 +9,13 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
-
-
-use structopt::StructOpt;
 use anyhow::Result;
 use serde::Deserialize;
+use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 use std::sync::Arc;
-
+use structopt::StructOpt;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct NGramConfig {
@@ -97,10 +98,8 @@ pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
 }
 
 pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
-    let layout_config = LayoutConfig::from_yaml(layout_config).expect(&format!(
-        "Could not load config file {}",
-        layout_config
-    ));
+    let layout_config = LayoutConfig::from_yaml(layout_config)
+        .expect(&format!("Could not load config file {}", layout_config));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
@@ -161,4 +160,36 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     };
 
     Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics)
+}
+
+/// Appends a layout-string to a file.
+pub fn append_to_file(layout: &Layout, filename: &str) {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(filename)
+        .unwrap();
+    if let Err(e) = writeln!(file, "{}", layout.as_text()) {
+        log::error!("Couldn't write to file: {}", e);
+    } else {
+        log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
+    }
+}
+
+/// Publishes the layout to a webservice.
+pub fn publish_to_webservice(layout: &Layout, publish_name: &str, publish_to: &str) {
+    let client = reqwest::blocking::Client::new();
+    let mut body = HashMap::new();
+    body.insert("published_by", publish_name.to_string());
+    body.insert("layout", layout.as_text());
+    let resp = client.post(publish_to).json(&body).send().ok();
+    if let Some(resp) = resp {
+        if resp.status().is_success() {
+            log::info!("Published layout '{}' to {}", layout.as_text(), publish_to);
+        } else {
+            log::error!("Could not publish result to webservice: {:?}", &resp.text());
+        }
+    } else {
+        log::error!("Could not publish result to webservice");
+    }
 }

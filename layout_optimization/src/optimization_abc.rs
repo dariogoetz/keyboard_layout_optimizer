@@ -1,14 +1,12 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::EvaluationResult;
 
-use super::common::PermutationLayoutGenerator;
+use super::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
-use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::sync::{Arc, Mutex, mpsc::Receiver};
+use std::sync::{mpsc::Receiver, Arc};
 use std::usize;
 
 use abc::{scaling, Candidate, Context, HiveBuilder};
@@ -41,7 +39,7 @@ impl Parameters {
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
     layout_generator: PermutationLayoutGenerator,
-    result_cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
+    result_cache: Option<Cache<usize>>,
     n_switches: usize,
 }
 
@@ -55,25 +53,18 @@ impl Context for FitnessCalc {
 
     fn evaluate_fitness(&self, solution: &Self::Solution) -> f64 {
         let layout_str = solution.as_text();
-        let mut cache_val = None;
-        if let Some(result_cache) = &self.result_cache {
-            let cache = result_cache.lock().unwrap();
-            cache_val = cache.get(&layout_str).map(|v| v.clone());
-        }
-        let evaluation_result = match cache_val {
-            Some(res) => res,
-            None => {
-                let res = self.evaluator.evaluate_layout(&solution);
-                if let Some(result_cache) = &self.result_cache {
-                    let mut cache = result_cache.lock().unwrap();
-                    cache.insert(layout_str, res.clone());
-                }
-
-                res
-            }
+        let evaluation_result = match &self.result_cache {
+            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
+                self.evaluator
+                    .evaluate_layout(&solution)
+                    .optimization_score()
+            }),
+            None => self
+                .evaluator
+                .evaluate_layout(&solution)
+                .optimization_score(),
         };
-
-        evaluation_result.optimization_score() as f64
+        evaluation_result as f64
     }
 
     fn explore(&self, field: &[Candidate<Self::Solution>], n: usize) -> Self::Solution {
@@ -97,7 +88,10 @@ impl Context for FitnessCalc {
             });
 
         let permutated_layout_str: String = chars.iter().collect();
-        self.layout_generator.layout_generator.generate(&permutated_layout_str).unwrap()
+        self.layout_generator
+            .layout_generator
+            .generate(&permutated_layout_str)
+            .unwrap()
     }
 }
 
@@ -112,7 +106,7 @@ pub fn optimize(
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
 
     let result_cache = if cache_results {
-        Some(Arc::new(Mutex::new(FxHashMap::default())))
+        Some(Cache::new())
     } else {
         None
     };

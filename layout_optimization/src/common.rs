@@ -1,7 +1,8 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use rand::{seq::SliceRandom, thread_rng};
-
+use rustc_hash::FxHashMap;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
 pub struct PermutationLayoutGenerator {
@@ -60,6 +61,16 @@ impl PermutationLayoutGenerator {
         indices
     }
 
+    /// Takes in a Layout, switches [nr_switches] keys in that layout, then returns it.
+    /// Layout, in this case, is a [Vec<usize>].
+    pub fn switch_n_keys(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
+        let mut indices: Vec<usize> = permutation.to_vec();
+
+        // Shuffle some (self.n_switches) permutable chars
+        indices.partial_shuffle(&mut thread_rng(), nr_switches);
+        indices
+    }
+
     pub fn generate_layout(&self, permutation: &[usize]) -> Layout {
         let s = self.generate_string(permutation);
         self.layout_generator.generate(&s).unwrap()
@@ -67,5 +78,34 @@ impl PermutationLayoutGenerator {
 
     pub fn get_permutable_indices(&self) -> Vec<usize> {
         self.perm_indices.clone()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Cache<T: Clone> {
+    cache: Arc<Mutex<FxHashMap<String, T>>>,
+}
+
+impl<T: Clone> Cache<T> {
+    pub fn new() -> Self {
+        Self {
+            cache: Arc::new(Mutex::new(FxHashMap::default())),
+        }
+    }
+
+    pub fn get_or_insert_with<F: Fn() -> T>(&self, elem: &str, f: F) -> T {
+        let cache_val;
+        {
+            let cache = self.cache.lock().unwrap();
+            cache_val = cache.get(elem).cloned();
+        }
+        cache_val.unwrap_or_else(|| {
+            let res = f();
+            {
+                let mut cache = self.cache.lock().unwrap();
+                cache.insert(elem.to_owned(), res.clone());
+            }
+            res
+        })
     }
 }

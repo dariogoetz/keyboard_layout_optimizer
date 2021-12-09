@@ -1,14 +1,12 @@
 use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::EvaluationResult;
 
-use super::common::PermutationLayoutGenerator;
+use super::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
-use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::usize;
 
 use genevo::genetic::{Children, FitnessFunction, Parents};
@@ -58,32 +56,21 @@ type Genotype = Vec<usize>;
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
     layout_generator: PermutationLayoutGenerator,
-    result_cache: Option<Arc<Mutex<FxHashMap<String, EvaluationResult>>>>,
+    result_cache: Option<Cache<usize>>,
 }
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
         let l = self.layout_generator.generate_layout(genome);
         let layout_str = self.layout_generator.generate_string(genome);
-        let mut cache_val = None;
-        if let Some(result_cache) = &self.result_cache {
-            let cache = result_cache.lock().unwrap();
-            cache_val = cache.get(&layout_str).map(|v| v.clone());
-        }
-        let evaluation_result = match cache_val {
-            Some(res) => res,
-            None => {
-                let res = self.evaluator.evaluate_layout(&l);
-                if let Some(result_cache) = &self.result_cache {
-                    let mut cache = result_cache.lock().unwrap();
-                    cache.insert(layout_str, res.clone());
-                }
-
-                res
-            }
+        let evaluation_result = match &self.result_cache {
+            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
+                self.evaluator.evaluate_layout(&l).optimization_score()
+            }),
+            None => self.evaluator.evaluate_layout(&l).optimization_score(),
         };
 
-        evaluation_result.optimization_score()
+        evaluation_result
     }
 
     fn average(&self, fitness_values: &[usize]) -> usize {
@@ -202,7 +189,7 @@ pub fn init_optimization(
     };
 
     let result_cache = if cache_results {
-        Some(Arc::new(Mutex::new(FxHashMap::default())))
+        Some(Cache::new())
     } else {
         None
     };
@@ -268,7 +255,6 @@ pub fn optimize(
                             layout,
                             layout.plot_compact(),
                             layout.plot(),
-
                         );
                         println!("{}", evaluation_result);
 
@@ -314,7 +300,8 @@ pub fn optimize(
                 );
                 println!(
                     "\n{}",
-                    pm.generate_layout(&all_time_best.as_ref().unwrap().1).plot()
+                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
+                        .plot()
                 );
                 break;
             }
