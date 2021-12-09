@@ -279,6 +279,7 @@ Vue.component('layouts-table', {
     template: `
 <b-table
   sticky-header="600px"
+  primary-key="layout"
   small
   head-variant="light"
   sort-by="total_cost"
