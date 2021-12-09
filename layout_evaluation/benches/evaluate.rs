@@ -51,17 +51,18 @@ impl LayoutConfig {
 }
 
 pub fn evaluate_bench(c: &mut Criterion) {
-    let layout_config = LayoutConfig::from_yaml(&"../config/standard_keyboard.yml").expect(&format!(
-        "Could not load config file 'standard_keyboard.yml'",
-    ));
+    let layout_config = LayoutConfig::from_yaml(&"../config/standard_keyboard.yml").expect(
+        &format!("Could not load config file 'standard_keyboard.yml'",),
+    );
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
-    let eval_params = EvaluationParameters::from_yaml(&"../config/evaluation_parameters.yml").expect(
-        &format!("Could not read evaluation yaml file 'evaluation_parameters.yml'"),
-    );
+    let eval_params = EvaluationParameters::from_yaml(&"../config/evaluation_parameters.yml")
+        .expect(&format!(
+            "Could not read evaluation yaml file 'evaluation_parameters.yml'"
+        ));
 
     log::info!("Reading unigram file: '{}'", &eval_params.ngrams.unigrams);
     let unigrams =
@@ -84,7 +85,8 @@ pub fn evaluate_bench(c: &mut Criterion) {
 
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
 
-    let ngram_provider = OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config);
+    let ngram_provider =
+        OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config);
 
     let evaluator =
         Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics);

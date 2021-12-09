@@ -6,7 +6,7 @@ use super::{common::*, UnigramIndices};
 
 use crate::ngrams::Unigrams;
 
-use keyboard_layout::layout::{LayerKeyIndex, LayerKey, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
 fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
     let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
@@ -75,10 +75,7 @@ impl OnDemandUnigramMapper {
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
-    fn split_unigram_modifiers(
-        unigrams: &UnigramIndices,
-        layout: &Layout,
-    ) -> UnigramIndices {
+    fn split_unigram_modifiers(unigrams: &UnigramIndices, layout: &Layout) -> UnigramIndices {
         unigrams
             .iter()
             .map(|(k, w)| {

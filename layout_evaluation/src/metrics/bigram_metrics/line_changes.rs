@@ -47,8 +47,10 @@ impl LineChanges {
         Self {
             finger_is_short,
             finger_is_long,
-            short_up_to_long_or_long_down_to_short_reduction: params.short_up_to_long_or_long_down_to_short_reduction,
-            short_down_to_long_or_long_up_to_short_increase: params.short_down_to_long_or_long_up_to_short_increase,
+            short_up_to_long_or_long_down_to_short_reduction: params
+                .short_up_to_long_or_long_down_to_short_reduction,
+            short_down_to_long_or_long_up_to_short_increase: params
+                .short_down_to_long_or_long_up_to_short_increase,
             count_row_changes_between_hands: params.count_row_changes_between_hands,
         }
     }

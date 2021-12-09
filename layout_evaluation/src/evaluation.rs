@@ -45,16 +45,19 @@ pub struct MetricParameters {
     pub asymmetric_bigrams: WeightedParams<bigram_metrics::asymmetric_bigrams::Parameters>,
     pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
     pub finger_repeats_lateral: WeightedParams<bigram_metrics::finger_repeats_lateral::Parameters>,
-    pub finger_repeats_top_bottom: WeightedParams<bigram_metrics::finger_repeats_top_bottom::Parameters>,
+    pub finger_repeats_top_bottom:
+        WeightedParams<bigram_metrics::finger_repeats_top_bottom::Parameters>,
     pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
     pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
     pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
     pub no_handswitch_after_unbalancing_key:
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
-    pub unbalancing_after_neighboring: WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
+    pub unbalancing_after_neighboring:
+        WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
 
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
-    pub no_handswitch_in_trigram: WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
+    pub no_handswitch_in_trigram:
+        WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
     pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
     pub trigram_finger_repeats: WeightedParams<trigram_metrics::trigram_finger_repeats::Parameters>,
 }
@@ -63,10 +66,26 @@ pub struct MetricParameters {
 /// The metrics are handled as dynamically dispatched trait objects for the metric traits in the `metrics` module.
 #[derive(Clone, Debug)]
 pub struct Evaluator {
-    layout_metrics: Vec<(f64, NormalizationType, Box<dyn layout_metrics::LayoutMetric>)>,
-    unigram_metrics: Vec<(f64, NormalizationType, Box<dyn unigram_metrics::UnigramMetric>)>,
-    bigram_metrics: Vec<(f64, NormalizationType, Box<dyn bigram_metrics::BigramMetric>)>,
-    trigram_metrics: Vec<(f64, NormalizationType, Box<dyn trigram_metrics::TrigramMetric>)>,
+    layout_metrics: Vec<(
+        f64,
+        NormalizationType,
+        Box<dyn layout_metrics::LayoutMetric>,
+    )>,
+    unigram_metrics: Vec<(
+        f64,
+        NormalizationType,
+        Box<dyn unigram_metrics::UnigramMetric>,
+    )>,
+    bigram_metrics: Vec<(
+        f64,
+        NormalizationType,
+        Box<dyn bigram_metrics::BigramMetric>,
+    )>,
+    trigram_metrics: Vec<(
+        f64,
+        NormalizationType,
+        Box<dyn trigram_metrics::TrigramMetric>,
+    )>,
     ngram_mapper: Box<dyn NgramMapper>,
 }
 
@@ -120,7 +139,9 @@ impl Evaluator {
             params.hand_disbalance.enabled,
         );
         self.unigram_metric(
-            Box::new(unigram_metrics::key_costs::KeyCost::new(&params.key_costs.params)),
+            Box::new(unigram_metrics::key_costs::KeyCost::new(
+                &params.key_costs.params,
+            )),
             params.key_costs.weight,
             params.key_costs.normalization.clone(),
             params.key_costs.enabled,
@@ -144,31 +165,39 @@ impl Evaluator {
             params.finger_repeats.enabled,
         );
         self.bigram_metric(
-            Box::new(bigram_metrics::finger_repeats_lateral::FingerRepeatsLateral::new(
-                &params.finger_repeats_lateral.params,
-            )),
+            Box::new(
+                bigram_metrics::finger_repeats_lateral::FingerRepeatsLateral::new(
+                    &params.finger_repeats_lateral.params,
+                ),
+            ),
             params.finger_repeats_lateral.weight,
             params.finger_repeats_lateral.normalization.clone(),
             params.finger_repeats_lateral.enabled,
         );
         self.bigram_metric(
-            Box::new(bigram_metrics::finger_repeats_top_bottom::FingerRepeatsTopBottom::new(
-                &params.finger_repeats_top_bottom.params,
-            )),
+            Box::new(
+                bigram_metrics::finger_repeats_top_bottom::FingerRepeatsTopBottom::new(
+                    &params.finger_repeats_top_bottom.params,
+                ),
+            ),
             params.finger_repeats_top_bottom.weight,
             params.finger_repeats_top_bottom.normalization.clone(),
             params.finger_repeats_top_bottom.enabled,
         );
         self.bigram_metric(
-            Box::new(bigram_metrics::line_changes::LineChanges::new(&params.line_changes.params)),
+            Box::new(bigram_metrics::line_changes::LineChanges::new(
+                &params.line_changes.params,
+            )),
             params.line_changes.weight,
             params.line_changes.normalization.clone(),
             params.line_changes.enabled,
         );
         self.bigram_metric(
-            Box::new(bigram_metrics::manual_bigram_penalty::ManualBigramPenalty::new(
-                &params.manual_bigram_penalty.params,
-            )),
+            Box::new(
+                bigram_metrics::manual_bigram_penalty::ManualBigramPenalty::new(
+                    &params.manual_bigram_penalty.params,
+                ),
+            ),
             params.manual_bigram_penalty.weight,
             params.manual_bigram_penalty.normalization.clone(),
             params.manual_bigram_penalty.enabled,
@@ -216,9 +245,11 @@ impl Evaluator {
             params.irregularity.enabled,
         );
         self.trigram_metric(
-            Box::new(trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
-                &params.no_handswitch_in_trigram.params,
-            )),
+            Box::new(
+                trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
+                    &params.no_handswitch_in_trigram.params,
+                ),
+            ),
             params.no_handswitch_in_trigram.weight,
             params.no_handswitch_in_trigram.normalization.clone(),
             params.no_handswitch_in_trigram.enabled,
@@ -233,9 +264,11 @@ impl Evaluator {
             params.secondary_bigrams.enabled,
         );
         self.trigram_metric(
-            Box::new(trigram_metrics::trigram_finger_repeats::TrigramFingerRepeats::new(
-                &params.trigram_finger_repeats.params,
-            )),
+            Box::new(
+                trigram_metrics::trigram_finger_repeats::TrigramFingerRepeats::new(
+                    &params.trigram_finger_repeats.params,
+                ),
+            ),
             params.trigram_finger_repeats.weight,
             params.trigram_finger_repeats.normalization.clone(),
             params.trigram_finger_repeats.enabled,

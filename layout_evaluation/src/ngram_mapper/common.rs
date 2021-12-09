@@ -206,7 +206,7 @@ impl<'a> Iterator for TakeThreeLayerKey<'a> {
 
             if self.state_outer.is_none() {
                 // outer iterator ended -> no more elements
-                return None
+                return None;
             }
 
             // the middle iterator is a clone of the outer (plus one skip, which happened in the line above)
@@ -215,7 +215,7 @@ impl<'a> Iterator for TakeThreeLayerKey<'a> {
 
             if self.state_middle.is_none() {
                 // middle loop ended right after being initialized -> nothing left to do
-                return None
+                return None;
             }
         }
 
@@ -233,7 +233,7 @@ impl<'a> Iterator for TakeThreeLayerKey<'a> {
                         ),
                         self.weight * self.same_key_mod_factor,
                     ));
-                },
+                }
                 1 => {
                     // second variant is m2-basekey
                     self.middle_variant = 0;
@@ -256,8 +256,8 @@ impl<'a> Iterator for TakeThreeLayerKey<'a> {
                         self.state_middle = self.iter_middle.as_mut().unwrap().next().cloned();
                     }
 
-                    return res
-                },
+                    return res;
+                }
                 _ => (),
             }
         }
@@ -381,7 +381,6 @@ impl<'a> TakeThreeLayerKey<'a> {
         }
     }
 }
-
 
 // // use length 2 for up to 2 modifiers
 // // use length 10 for up to 3 modifiers

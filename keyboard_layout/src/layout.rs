@@ -93,7 +93,6 @@ impl Layout {
         modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
         layer_costs: Vec<f64>,
     ) -> Self {
-
         // generate layer keys
         let mut layerkeys = Vec::new();
         let mut layerkey_index = 0;

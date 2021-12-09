@@ -4,8 +4,8 @@
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
-use super::{BigramIndices, TrigramIndices};
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
+use super::{BigramIndices, TrigramIndices};
 
 use crate::ngrams::Bigrams;
 
@@ -79,7 +79,7 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
-    pub exclude_containing:  FxHashSet<char>,
+    pub exclude_containing: FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -118,20 +118,24 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)|
-                !config.exclude_containing.contains(&layerkey1.symbol)
+        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
+            !config.exclude_containing.contains(&layerkey1.symbol)
                 && !config.exclude_containing.contains(&layerkey2.symbol)
                 && !config.exclude_containing.contains(&layerkey3.symbol)
-        )
-        .for_each(|(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
-            let factor = if layerkey1.key.hand == layerkey2.key.hand && layerkey2.key.hand == layerkey3.key.hand {
-                config.factor_no_handswitch
-            } else {
-                config.factor_handswitch
-            };
+        })
+        .for_each(
+            |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
+                let factor = if layerkey1.key.hand == layerkey2.key.hand
+                    && layerkey2.key.hand == layerkey3.key.hand
+                {
+                    config.factor_no_handswitch
+                } else {
+                    config.factor_handswitch
+                };
 
-            *m.entry((*idx1, *idx3)).or_insert(0.0) += *weight * factor;
-        });
+                *m.entry((*idx1, *idx3)).or_insert(0.0) += *weight * factor;
+            },
+        );
     bigram_keys.extend(m);
 }
 
@@ -217,11 +221,7 @@ impl OnDemandBigramMapper {
     ///
     /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
     /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
-    fn split_bigram_modifiers(
-        &self,
-        bigrams: &BigramIndices,
-        layout: &Layout,
-    ) -> BigramIndices {
+    fn split_bigram_modifiers(&self, bigrams: &BigramIndices, layout: &Layout) -> BigramIndices {
         let mut bigram_keys = Vec::with_capacity(2 * bigrams.len());
 
         bigrams.iter().for_each(|((k1, k2), w)| {

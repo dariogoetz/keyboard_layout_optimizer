@@ -122,9 +122,12 @@ impl OnDemandTrigramMapper {
             let k2_take_one = TakeOneLayerKey::new(base2, &mods2, *w);
             let k3_take_one = TakeOneLayerKey::new(base3, &mods3, *w);
 
-            let k1_take_two = TakeTwoLayerKey::new(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor);
-            let k2_take_two = TakeTwoLayerKey::new(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor);
-            let k3_take_two = TakeTwoLayerKey::new(base3, &mods3, *w, self.split_modifiers.same_key_mod_factor);
+            let k1_take_two =
+                TakeTwoLayerKey::new(base1, &mods1, *w, self.split_modifiers.same_key_mod_factor);
+            let k2_take_two =
+                TakeTwoLayerKey::new(base2, &mods2, *w, self.split_modifiers.same_key_mod_factor);
+            let k3_take_two =
+                TakeTwoLayerKey::new(base3, &mods3, *w, self.split_modifiers.same_key_mod_factor);
 
             k1_take_one.clone().for_each(|(e1, _)| {
                 k2_take_one.clone().for_each(|(e2, _)| {

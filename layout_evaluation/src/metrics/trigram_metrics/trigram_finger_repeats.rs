@@ -59,10 +59,7 @@ impl TrigramMetric for TrigramFingerRepeats {
         }
 
         // exclude thumbs
-        if finger1 == Finger::Thumb
-            || finger2 == Finger::Thumb
-            || finger3 == Finger::Thumb
-        {
+        if finger1 == Finger::Thumb || finger2 == Finger::Thumb || finger3 == Finger::Thumb {
             return Some(0.0);
         }
 

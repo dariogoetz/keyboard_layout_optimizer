@@ -2,7 +2,6 @@ use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
 
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout ptimization")]
 struct Options {

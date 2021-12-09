@@ -1,7 +1,7 @@
+pub mod common;
 pub mod optimization;
 pub mod optimization_abc;
 pub mod optimization_sa;
-pub mod common;
 
 #[cfg(test)]
 mod tests {

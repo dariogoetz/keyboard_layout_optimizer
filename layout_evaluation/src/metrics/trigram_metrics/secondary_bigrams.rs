@@ -22,7 +22,7 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
-    pub exclude_containing:  FxHashSet<char>,
+    pub exclude_containing: FxHashSet<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -30,7 +30,7 @@ pub struct SecondaryBigrams {
     bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
     factor_no_handswitch: f64,
     factor_handswitch: f64,
-    exclude_containing:  FxHashSet<char>,
+    exclude_containing: FxHashSet<char>,
 }
 
 impl SecondaryBigrams {
@@ -64,12 +64,13 @@ impl TrigramMetric for SecondaryBigrams {
     ) -> Option<f64> {
         if self.exclude_containing.contains(&k1.symbol)
             || self.exclude_containing.contains(&k2.symbol)
-            || self.exclude_containing.contains(&k3.symbol) {
-                return Some(0.0)
+            || self.exclude_containing.contains(&k3.symbol)
+        {
+            return Some(0.0);
         };
 
         if k1 == k3 && k1.is_modifier {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         let factor = if k1.key.hand == k2.key.hand && k2.key.hand == k3.key.hand {
@@ -82,7 +83,8 @@ impl TrigramMetric for SecondaryBigrams {
             .bigram_metrics
             .iter()
             .map(|(metric_weight, _, metric)| {
-                factor * metric_weight
+                factor
+                    * metric_weight
                     * metric
                         .individual_cost(k1, k3, weight, total_weight, layout)
                         .unwrap_or(0.0)
