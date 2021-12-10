@@ -63,7 +63,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        (1_000_000.0 * cost) as usize,
+                        (1_000.0 * cost) as usize,
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
@@ -82,7 +82,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                         trigram.0.to_string().escape_debug(),
                         trigram.1.to_string().escape_debug(),
                         trigram.2.to_string().escape_debug(),
-                        100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                        100.0 * (cost as f64 / 1_000.0) / total_cost,
                     )
                 })
                 .collect();

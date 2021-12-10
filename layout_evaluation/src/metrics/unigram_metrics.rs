@@ -48,7 +48,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 (0.0, DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst), (unigram, cost)| {
                     total_cost += cost;
-                    worst.push(unigram.symbol, (1_000_000.0 * cost) as usize);
+                    worst.push(unigram.symbol, (1_000.0 * cost) as usize);
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
@@ -64,7 +64,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                     format!(
                         "{} ({:>5.2}%)",
                         unigram.to_string().escape_debug(),
-                        100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                        100.0 * (cost as f64 / 1_000.0) / total_cost,
                     )
                 })
                 .collect();
