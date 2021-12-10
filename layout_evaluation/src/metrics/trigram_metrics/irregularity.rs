@@ -75,7 +75,6 @@ impl TrigramMetric for Irregularity {
     ) -> (f64, Option<String>) {
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
-        let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = trigrams.iter().filter_map(|(trigram, weight)| {
             let res = self.individual_cost(
@@ -87,20 +86,19 @@ impl TrigramMetric for Irregularity {
                 layout,
             );
 
-            if let Some(res) = res {
-                if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
-                    cost_with_mod += res;
-                };
-            };
-
-            res.map(|c| (trigram.clone(), c))
+            res.map(|c| (trigram, c))
         });
 
         let (total_cost, msg) = if SHOW_WORST {
-            let (total_cost, worst) = cost_iter.fold(
-                (0.0, DoublePriorityQueue::new()),
-                |(mut total_cost, mut worst), (trigram, cost)| {
+            let (total_cost, cost_with_mod, worst) = cost_iter.fold(
+                (0.0, 0.0, DoublePriorityQueue::new()),
+                |(mut total_cost, mut cost_with_mod, mut worst), (trigram, cost)| {
                     total_cost += cost;
+
+                    if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
+                        cost_with_mod += cost;
+                    };
+
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
                         cost as usize,
@@ -109,7 +107,7 @@ impl TrigramMetric for Irregularity {
                         worst.pop_min();
                     }
 
-                    (total_cost, worst)
+                    (total_cost, cost_with_mod, worst)
                 },
             );
 
