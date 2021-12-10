@@ -12,6 +12,7 @@ pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod unbalancing_after_neighboring;
 
+const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;
 
 /// BigramMetric is a trait for metrics that iterates over weighted bigrams.
@@ -40,48 +41,61 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst = DoublePriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
-        let total_cost = bigrams
-            .iter()
-            .filter_map(|(bigram, weight)| {
-                let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
-                if let Some(res) = res {
-                    if bigram.0.is_modifier || bigram.1.is_modifier {
-                        cost_with_mod += res;
-                    };
+        let cost_iter = bigrams.iter().filter_map(|(bigram, weight)| {
+            let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
+            if let Some(res) = res {
+                if bigram.0.is_modifier || bigram.1.is_modifier {
+                    cost_with_mod += res;
+                };
+            };
+
+            res.map(|c| (bigram.clone(), c))
+        });
+
+        let (total_cost, msg) = if SHOW_WORST {
+            let (total_cost, worst) = cost_iter.fold(
+                (0.0, DoublePriorityQueue::new()),
+                |(mut total_cost, mut worst), (bigram, cost)| {
+                    total_cost += cost;
                     worst.push(
                         (bigram.0.symbol, bigram.1.symbol),
-                        (1_000_000.0 * res) as usize,
+                        (1_000_000.0 * cost) as usize,
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
-                };
 
-                res
-            })
-            .sum();
+                    (total_cost, worst)
+                },
+            );
 
-        let msgs: Vec<String> = worst
-            .into_sorted_iter()
-            .rev()
-            .map(|(bigram, cost)| {
-                format!(
-                    "{}{} ({:>5.2}%)",
-                    bigram.0.to_string().escape_debug(),
-                    bigram.1.to_string().escape_debug(),
-                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
-                )
-            })
-            .collect();
+            let msgs: Vec<String> = worst
+                .into_sorted_iter()
+                .rev()
+                .map(|(bigram, cost)| {
+                    format!(
+                        "{}{} ({:>5.2}%)",
+                        bigram.0.to_string().escape_debug(),
+                        bigram.1.to_string().escape_debug(),
+                        100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                    )
+                })
+                .collect();
 
-        let msg = Some(format!(
-            "Worst bigrams: {};  {:>5.2}% of cost involved a modifier",
-            msgs.join(", "),
-            100.0 * cost_with_mod / total_cost,
-        ));
+            let msg = Some(format!(
+                "Worst bigrams: {};  {:>5.2}% of cost involved a modifier",
+                msgs.join(", "),
+                100.0 * cost_with_mod / total_cost,
+            ));
+
+            (total_cost, msg)
+        } else {
+            let total_cost: f64 = cost_iter.map(|(_, c)| c).sum();
+
+            (total_cost, None)
+        };
 
         (total_cost, msg)
     }

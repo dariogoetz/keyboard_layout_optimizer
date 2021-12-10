@@ -7,14 +7,13 @@
 
 use super::TrigramMetric;
 use crate::metrics::bigram_metrics::BigramMetric;
-
 use crate::results::NormalizationType;
-
 use keyboard_layout::layout::{LayerKey, Layout};
 
 use priority_queue::DoublePriorityQueue;
 use serde::Deserialize;
 
+const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -76,57 +75,70 @@ impl TrigramMetric for Irregularity {
     ) -> (f64, Option<String>) {
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
-        let mut worst = DoublePriorityQueue::new();
         let mut cost_with_mod = 0.0;
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
-        let total_cost: f64 = trigrams
-            .iter()
-            .filter_map(|(trigram, weight)| {
-                let res = self.individual_cost(
-                    trigram.0,
-                    trigram.1,
-                    trigram.2,
-                    *weight,
-                    total_weight,
-                    layout,
-                );
+        let cost_iter = trigrams.iter().filter_map(|(trigram, weight)| {
+            let res = self.individual_cost(
+                trigram.0,
+                trigram.1,
+                trigram.2,
+                *weight,
+                total_weight,
+                layout,
+            );
 
-                if let Some(res) = res {
-                    if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
-                        cost_with_mod += res;
-                    };
+            if let Some(res) = res {
+                if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
+                    cost_with_mod += res;
+                };
+            };
+
+            res.map(|c| (trigram.clone(), c))
+        });
+
+        let (total_cost, msg) = if SHOW_WORST {
+            let (total_cost, worst) = cost_iter.fold(
+                (0.0, DoublePriorityQueue::new()),
+                |(mut total_cost, mut worst), (trigram, cost)| {
+                    total_cost += cost;
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        (1_000_000.0 * res) as usize,
+                        cost as usize,
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
-                };
 
-                res
-            })
-            .sum();
+                    (total_cost, worst)
+                },
+            );
 
-        let msgs: Vec<String> = worst
-            .into_sorted_iter()
-            .rev()
-            .map(|(trigram, cost)| {
-                format!(
-                    "{}{}{} ({:>5.2}%)",
-                    trigram.0.to_string().escape_debug(),
-                    trigram.1.to_string().escape_debug(),
-                    trigram.2.to_string().escape_debug(),
-                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
-                )
-            })
-            .collect();
+            let msgs: Vec<String> = worst
+                .into_sorted_iter()
+                .rev()
+                .map(|(trigram, cost)| {
+                    format!(
+                        "{}{}{} ({:>5.2}%)",
+                        trigram.0.to_string().escape_debug(),
+                        trigram.1.to_string().escape_debug(),
+                        trigram.2.to_string().escape_debug(),
+                        100.0 * (cost as f64) / total_cost,
+                    )
+                })
+                .collect();
 
-        let msg = Some(format!(
-            "Worst trigrams: {};  {:>5.2}% of cost involved a modifier",
-            msgs.join(", "),
-            100.0 * cost_with_mod / total_cost,
-        ));
+            let msg = Some(format!(
+                "Worst trigrams: {};  {:>5.2}% of cost involved a modifier",
+                msgs.join(", "),
+                100.0 * cost_with_mod / total_cost,
+            ));
+
+            (total_cost, msg)
+        } else {
+            let total_cost: f64 = cost_iter.map(|(_, c)| c).sum();
+
+            (total_cost, None)
+        };
 
         (total_cost.sqrt(), msg)
     }

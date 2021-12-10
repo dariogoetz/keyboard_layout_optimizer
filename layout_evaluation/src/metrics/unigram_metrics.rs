@@ -8,6 +8,7 @@ pub mod finger_balance;
 pub mod hand_disbalance;
 pub mod key_costs;
 
+const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;
 
 /// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
@@ -35,37 +36,47 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut worst = DoublePriorityQueue::new();
-
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
-        let total_cost = unigrams
-            .iter()
-            .filter_map(|(unigram, weight)| {
-                let res = self.individual_cost(*unigram, *weight, total_weight, layout);
-                if let Some(res) = res {
-                    worst.push(unigram.symbol, (1_000_000.0 * res) as usize);
+        let cost_iter = unigrams.iter().filter_map(|(unigram, weight)| {
+            let res = self.individual_cost(*unigram, *weight, total_weight, layout);
+
+            res.map(|c| (unigram.clone(), c))
+        });
+
+        let (total_cost, msg) = if SHOW_WORST {
+            let (total_cost, worst) = cost_iter.fold(
+                (0.0, DoublePriorityQueue::new()),
+                |(mut total_cost, mut worst), (unigram, cost)| {
+                    total_cost += cost;
+                    worst.push(unigram.symbol, (1_000_000.0 * cost) as usize);
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
-                };
 
-                res
-            })
-            .sum();
+                    (total_cost, worst)
+                },
+            );
 
-        let msgs: Vec<String> = worst
-            .into_sorted_iter()
-            .rev()
-            .map(|(unigram, cost)| {
-                format!(
-                    "{} ({:>5.2}%)",
-                    unigram.to_string().escape_debug(),
-                    100.0 * (cost as f64 / 1_000_000.0) / total_cost,
-                )
-            })
-            .collect();
+            let msgs: Vec<String> = worst
+                .into_sorted_iter()
+                .rev()
+                .map(|(unigram, cost)| {
+                    format!(
+                        "{} ({:>5.2}%)",
+                        unigram.to_string().escape_debug(),
+                        100.0 * (cost as f64 / 1_000_000.0) / total_cost,
+                    )
+                })
+                .collect();
 
-        let msg = Some(format!("Worst unigrams: {}", msgs.join(", ")));
+            let msg = Some(format!("Worst unigrams: {}", msgs.join(", ")));
+
+            (total_cost, msg)
+        } else {
+            let total_cost: f64 = cost_iter.map(|(_, c)| c).sum();
+
+            (total_cost, None)
+        };
 
         (total_cost, msg)
     }
