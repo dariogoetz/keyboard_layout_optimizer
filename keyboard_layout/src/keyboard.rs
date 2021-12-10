@@ -3,8 +3,8 @@
 use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 
 use anyhow::Result;
+use std::collections::HashMap;
 use serde::Deserialize;
-use string_template::Template;
 
 /// The index of a `Key` in the `keys` vec of a `Keyboard
 pub type KeyIndex = u16;
@@ -85,13 +85,18 @@ impl Keyboard {
 
     /// Plot a graphical representation of the keyboard with given key labels
     pub fn plot(&self, key_labels: &[&str]) -> String {
-        let template = Template::new(&self.plot_template);
-        template.render_positional(key_labels)
+        let mut reg = handlebars::Handlebars::new();
+        reg.register_escape_fn(handlebars::no_escape);
+        let labels: HashMap<usize, String> = key_labels.iter().map(|c| c.to_string()).enumerate().collect();
+        reg.render_template(&self.plot_template, &labels).unwrap()
+
     }
 
     /// Plot a compact graphical representation of the keyboard with given key labels without borders (compatible with ArneBab's input strings)
     pub fn plot_compact(&self, key_labels: &[&str]) -> String {
-        let template = Template::new(&self.plot_template_short);
-        template.render_positional(key_labels)
+        let mut reg = handlebars::Handlebars::new();
+        reg.register_escape_fn(handlebars::no_escape);
+        let labels: HashMap<usize, &str> = key_labels.iter().cloned().enumerate().collect();
+        reg.render_template(&self.plot_template_short, &labels).unwrap()
     }
 }
