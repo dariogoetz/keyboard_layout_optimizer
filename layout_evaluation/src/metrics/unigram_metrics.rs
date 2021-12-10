@@ -40,7 +40,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         let cost_iter = unigrams.iter().filter_map(|(unigram, weight)| {
             let res = self.individual_cost(*unigram, *weight, total_weight, layout);
 
-            res.map(|c| (unigram.clone(), c))
+            res.map(|c| (unigram, c))
         });
 
         let (total_cost, msg) = if SHOW_WORST {
