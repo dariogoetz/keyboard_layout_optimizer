@@ -1,64 +1,3 @@
-Vue.component('layouts-app', {
-    template: `
-<b-container fluid>
-
-  <b-row>
-    <b-col xl="6">
-      <b-form inline>
-        <b-form-input v-model="filter" debounce="500" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
-        <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family</b-form-checkbox>
-      </b-form>
-      <layouts-table :url="url" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
-    </b-col>
-
-    <b-col xl="6">
-      <b-form inline>
-        <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
-        <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
-      </b-form>
-      <layout-barplot :base-url="url" :layout-data="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
-    </b-col>
-  </b-row>
-
-  <b-row>
-    <b-col cols="6" v-for="detail in details">
-      <layout-details title="Details" :base-url="url" :layout="detail.layout"></layout-details>
-    </b-col>
-  </b-row>
-
-</b-container-fluid>
-`,
-    props: {
-        url: { type: String, default: "/api" },
-        relative: { type: Boolean, default: false },
-        logscale: { type: Boolean, default: false },
-        bestInFamily: { type: Boolean, default: false }
-    },
-    data () {
-        return {
-            details: [],
-            filter: null,
-        }
-    },
-    computed: {
-        chartStyles () {
-            return {
-                height: "600px",
-                position: "relative"
-            }
-        },
-    },
-    created () {
-    },
-    mounted () {
-    },
-    methods: {
-        setDetails (items) {
-            this.details = items
-        },
-    }
-})
-
 const COLORS = [
   '#4dc9f6',
   '#f67019',
@@ -74,14 +13,12 @@ const COLORS = [
 Vue.component('layout-barplot', {
     extends: VueChartJs.Bar,
     props: {
-        layoutData: { type: Array, default: [] },
-        baseUrl: { type: String, default: null },
+        layoutDetails: { type: Array, default: [] },
         relative: { type: Boolean, default: true },
         logscale: { type: Boolean, default: false }
     },
     data () {
         return {
-            layoutDetails: [],
         }
     },
     computed: {
@@ -168,38 +105,20 @@ Vue.component('layout-barplot', {
         this.renderChart(this.chartData, this.options)
     },
     watch: {
+        layoutDetails () {
+            this.render()
+        },
         relative () {
             this.render()
         },
         logscale () {
             this.render()
         },
-        layoutData () {
-            this.fetch()
-        },
         chartData () {
             this.render()
         }
     },
     methods: {
-        fetch () {
-            const res = this.layoutData.map(layoutData => {
-                const url = this.url(layoutData.layout)
-                if (url === null) return null
-                return fetch(url)
-                    .then(response => response.json())
-            })
-
-            Promise.all(res)
-                .then(data => {
-                    this.layoutDetails = data
-                })
-
-        },
-        url (layout) {
-            if (this.baseUrl === null || layout === null) return null
-            return `${this.baseUrl}/${layout}`
-        },
         render () {
             this.renderChart(this.chartData, this.options)
         }
@@ -219,28 +138,17 @@ Vue.component('layout-details', {
 </b-jumbotron>
 `,
     props: {
-        layout: { type: String, default: null },
+        layoutDetails: { type: Object, default: null },
         title: { type: String, default: null },
-        baseUrl: { type: String, default: null },
     },
     data () {
         return {
-            layoutDetails: null,
         }
     },
     watch: {
-        layout () {
-            this.fetch()
-        }
-    },
-    created () {
-        this.fetch()
+        layoutDetails () {},
     },
     computed: {
-        url () {
-            if (this.baseUrl === null || this.layout === null) return null
-            return `${this.baseUrl}/${this.layout}`
-        },
         plot () {
             if (this.layoutDetails === null) return ""
             const p = this.layoutDetails.plot.replaceAll("\n", "<br>")
@@ -264,14 +172,6 @@ Vue.component('layout-details', {
             return `${ this.layout } (${ this.layoutDetails.published_by })`
         },
     },
-    methods: {
-        fetch () {
-            if (this.url === null) return null
-            return fetch(this.url)
-                .then(response => response.json())
-                .then(data => this.layoutDetails = data)
-        },
-    }
 })
 
 
@@ -398,6 +298,3 @@ Vue.component('layouts-table', {
     }
 })
 
-var app = new Vue({
-    el: '#app',
-})
