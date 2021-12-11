@@ -169,7 +169,8 @@ Vue.component('layout-details', {
         },
         leadline () {
             if (this.layoutDetails === null) return ""
-            return `${ this.layout } (${ this.layoutDetails.published_by })`
+            if (!this.layoutDetails.published_by) return this.layoutDetails.layout
+            return `${ this.layoutDetails.layout } (${ this.layoutDetails.published_by })`
         },
     },
 })
