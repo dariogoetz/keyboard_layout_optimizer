@@ -35,7 +35,7 @@ jobs:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
 
-      - name: WASM build
+      - name: Build WASM 
         run: wasm-pack build --release
         working-directory: ./evolve_keyboard_layout_wasm
 
@@ -43,7 +43,11 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Webpage build
+      - name: Install node packages
+        run: npm install
+        working-directory: ./evolve_keyboard_layout_wasm/www
+
+      - name: Build Webpage
         run: npm run build
         working-directory: ./evolve_keyboard_layout_wasm/www
 
