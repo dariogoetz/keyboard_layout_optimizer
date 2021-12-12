@@ -35,7 +35,7 @@ jobs:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
 
-      - name: Build WASM 
+      - name: Build WASM
         run: wasm-pack build --release
         working-directory: ./evolve_keyboard_layout_wasm
 

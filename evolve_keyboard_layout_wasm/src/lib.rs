@@ -66,6 +66,38 @@ impl From<EvaluationResult> for LayoutEvaluation {
     }
 }
 
+#[wasm_bindgen]
+pub struct LayoutPlotter {
+    layout_generator: NeoLayoutGenerator,
+}
+
+#[wasm_bindgen]
+impl LayoutPlotter {
+    pub fn new(
+        layout_cfg_str: &str,
+    ) -> Result<LayoutPlotter, JsValue> {
+
+        utils::set_panic_hook();
+
+        let layout_cfg: LayoutConfig = serde_yaml::from_str(layout_cfg_str)
+            .map_err(|e| format!("Could not read layout config: {:?}", e))?;
+
+        let keyboard = Arc::new(
+            Keyboard::from_yaml_object(layout_cfg.keyboard)
+        );
+
+        let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
+
+        Ok(LayoutPlotter {
+            layout_generator,
+        })
+    }
+
+    pub fn plot(&self, layout_str: &str, layer: usize) -> String {
+        let layout = self.layout_generator.generate_unchecked(layout_str).unwrap();
+        layout.plot_layer(layer)
+    }
+}
 
 #[wasm_bindgen]
 pub struct LayoutEvaluator {

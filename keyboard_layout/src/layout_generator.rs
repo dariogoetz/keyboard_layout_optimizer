@@ -100,30 +100,11 @@ impl NeoLayoutGenerator {
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }
 
-    /// Generate a Neo variant `Layout` from a given string representation of its base layer (only non-fixed keys)
-    pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
+    /// Generate a Neo variant `Layout` from given string representation of its base layer.
+    /// Does not check whether the given string is valid (sufficient, correct and unique charactors).
+    /// This is useful for plotting unfinished or invalid layouts.
+    pub fn generate_unchecked(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
-
-        let char_set: HashSet<char> = HashSet::from_iter(chars.clone());
-        let layout_set: HashSet<char> = HashSet::from_iter(self.permutable_key_map.keys().cloned());
-
-        // Check for duplicate chars
-        if char_set.len() != chars.len() {
-            return Err(LayoutError::DuplicateChars(layout_keys.to_string()).into());
-        }
-
-        let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();
-        let mut missing_chars: Vec<char> = layout_set.difference(&char_set).cloned().collect();
-
-        unsupported_chars.sort();
-        missing_chars.sort();
-
-        if !unsupported_chars.is_empty() {
-            return Err(LayoutError::UnsupportedChars(unsupported_chars.iter().collect()).into());
-        }
-        if !missing_chars.is_empty() {
-            return Err(LayoutError::MissingChars(missing_chars.iter().collect()).into());
-        }
 
         // assemble a Vec<Vec<char>> representation of the layer for the given layout string
         let mut given_chars = chars.iter();
@@ -161,5 +142,33 @@ impl NeoLayoutGenerator {
             self.modifiers.clone(),
             self.layer_costs.clone(),
         ))
+    }
+
+    /// Generate a Neo variant `Layout` from a given string representation of its base layer (only non-fixed keys)
+    pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
+        let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
+
+        let char_set: HashSet<char> = HashSet::from_iter(chars.clone());
+        let layout_set: HashSet<char> = HashSet::from_iter(self.permutable_key_map.keys().cloned());
+
+        // Check for duplicate chars
+        if char_set.len() != chars.len() {
+            return Err(LayoutError::DuplicateChars(layout_keys.to_string()).into());
+        }
+
+        let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();
+        let mut missing_chars: Vec<char> = layout_set.difference(&char_set).cloned().collect();
+
+        unsupported_chars.sort();
+        missing_chars.sort();
+
+        if !unsupported_chars.is_empty() {
+            return Err(LayoutError::UnsupportedChars(unsupported_chars.iter().collect()).into());
+        }
+        if !missing_chars.is_empty() {
+            return Err(LayoutError::MissingChars(missing_chars.iter().collect()).into());
+        }
+
+        self.generate_unchecked(layout_keys)
     }
 }
