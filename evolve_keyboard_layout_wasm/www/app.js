@@ -1,4 +1,5 @@
-import layout_config from '../../config/standard_keyboard.yml'
+import standard_keyboard from '../../config/standard_keyboard.yml'
+import ortho from '../../config/ortho.yml'
 import eval_params from '../../config/evaluation_parameters.yml'
 
 const NKEYS = 32
@@ -18,7 +19,8 @@ Vue.component('evaluator-app', {
           <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
           <div v-else>Evaluate</div>
         </b-button>
-        <layout-plot :layout-string="layout" :wasm="wasm"></layout-plot>
+        <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
+        <layout-plot :layout-string="layout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
       </b-form>
     </b-col>
     <b-col xl="6">
@@ -55,6 +57,7 @@ Vue.component('evaluator-app', {
             trigrams: null,
             wasm: null,
             evalParams: null,
+            layoutConfigType: "standard",
             loading: true,
         }
     },
@@ -73,6 +76,13 @@ Vue.component('evaluator-app', {
             let layoutString = (this.layoutRaw || "").replace(" ", "")
             layoutString = layoutString.toLowerCase()
             return layoutString
+        },
+        layoutConfig () {
+            if (this.layoutConfigType === "standard") {
+                return standard_keyboard
+            } else if (this.layoutConfigType === "ortho") {
+                return ortho
+            }
         },
     },
     created () {
@@ -132,7 +142,7 @@ Vue.component('evaluator-app', {
             this.loading = true
             this.details = null
             this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
-                layout_config,
+                this.layoutConfig,
                 this.evalParams,
                 this.frequenciesNgramProvider
             )
@@ -149,7 +159,45 @@ Vue.component('evaluator-app', {
                 this.evaluate()
             }
         },
+        selectLayoutConfigType (layoutConfigType) {
+            this.layoutConfigType = layoutConfigType
+            this.updateEvaluator()
+        }
     }
+})
+
+
+Vue.component('keyboard-selector', {
+    template: `
+    <div>
+        <b-dropdown :text="label">
+          <b-dropdown-item :active="state==='standard'" @click="setStandard">ISO</b-dropdown-item>
+          <b-dropdown-item :active="state==='ortho'" @click="setOrtho">Ortho</b-dropdown-item>
+    </div>
+    `,
+    data () {
+        return {
+            state: "standard"
+        }
+    },
+    computed: {
+        label () {
+            return `Keyboard: ${this.state}`
+        },
+    },
+    methods: {
+        setStandard () {
+            this.state = "standard"
+            this.emit()
+        },
+        setOrtho () {
+            this.state = "ortho"
+            this.emit()
+        },
+        emit () {
+            this.$emit("selected", this.state)
+        }
+    },
 })
 
 
@@ -189,6 +237,7 @@ Vue.component('layout-plot', {
         layoutString: { type: String, default: "" },
         defaultSymbol: { type: String, default: "." },
         wasm: { type: Object, default: null },
+        layoutConfig: { type: Object, default: null },
     },
     data () {
         return {
@@ -201,12 +250,22 @@ Vue.component('layout-plot', {
             this.plot()
         },
         wasm () {
-            if (this.wasm === null) return
-            this.layoutPlotter = this.wasm.LayoutPlotter.new(layout_config)
-            this.plot()
+            this.update()
+        },
+        layoutConfig () {
+            this.update()
         },
     },
+    mounted () {
+        this.update()
+    },
     methods: {
+        update () {
+            console.log("update")
+            if (this.wasm === null || this.layoutConfig === null) return
+            this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
+            this.plot()
+        },
         plot () {
             if (this.layoutPlotter === null) return ""
 
