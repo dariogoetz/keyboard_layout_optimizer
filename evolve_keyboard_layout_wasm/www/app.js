@@ -12,8 +12,8 @@ Vue.component('evaluator-app', {
 
   <b-row>
     <b-col xl="6">
-      <b-form inline>
-        <b-form-input v-model="layout" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+      <b-form inline @submit.stop.prevent @submit="evaluate">
+        <b-form-input v-model="layoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
         <b-button :disabled="loading" @click="evaluate" variant="primary">
           <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
           <div v-else>Evaluate</div>
@@ -23,7 +23,7 @@ Vue.component('evaluator-app', {
       <layout-details v-if="details !== null" title="Details" :layout-details="details"></layout-details>
     </b-col>
 
-    <b-col xl="6">
+    <b-col v-if="details !== null" xl="6">
       <b-form inline>
         <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
         <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
@@ -41,8 +41,9 @@ Vue.component('evaluator-app', {
     data () {
         return {
             details: null,
-            layout: null,
+            layoutRaw: null,
             layoutEvaluator: null,
+            frequenciesNgramProvider: null,
             wasm: null,
             loading: true,
         }
@@ -57,6 +58,10 @@ Vue.component('evaluator-app', {
                 height: "600px",
                 position: "relative"
             }
+        },
+        layout () {
+            let layoutString = (this.layoutRaw || "").replace(" ", "")
+            return layoutString
         },
     },
     created () {
@@ -76,25 +81,36 @@ Vue.component('evaluator-app', {
             let bigrams = imports[2].default
             let trigrams = imports[3].default
 
-            this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
-                layout_config,
+            this.frequenciesNgramProvider = this.wasm.NgramProvider.with_frequencies(
                 eval_params,
                 unigrams,
                 bigrams,
                 trigrams
             )
+
+            this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
+                layout_config,
+                eval_params,
+                this.frequenciesNgramProvider
+            )
+
             this.loading = false
         })
     },
     methods: {
         evaluate () {
-            if (this.layout === null) return
             if (this.layout.length !== NKEYS) {
                 this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
+                return
             }
-            let details = this.layoutEvaluator.evaluate(this.layout)
-            details.layout = this.layout
-            this.details = details
+            try {
+                let details = this.layoutEvaluator.evaluate(this.layout)
+                details.layout = this.layout
+                this.details = details
+            } catch(err) {
+                this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
+                return
+            }
         }
     }
 })
@@ -131,10 +147,18 @@ Vue.component('layout-plot', {
         plot () {
             if (this.layoutPlotter === null) return ""
 
-            let layoutString = (this.layoutString || "").replace(" ", "")
-            const nMissing = NKEYS - layoutString.length
-            let layout = layoutString + Array(nMissing + 1).join(this.defaultSymbol)
-            this.plotString = this.layoutPlotter.plot(layout, 0)
+            const nMissing = NKEYS - this.layoutString.length
+            if (nMissing < 0) {
+                this.$bvToast.toast(`Too many symbols given (${this.layoutString.length} > ${NKEYS})`, {variant: "danger"})
+                return
+            }
+            let layout = this.layoutString + Array(nMissing + 1).join(this.defaultSymbol)
+            try {
+                this.plotString = this.layoutPlotter.plot(layout, 0)
+            } catch (err) {
+                this.$bvToast.toast(`Could not plot layout: ${err}`, {variant: "danger"})
+                return
+            }
         },
     },
 })
