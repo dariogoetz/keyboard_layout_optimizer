@@ -14,29 +14,34 @@ Vue.component('evaluator-app', {
   <b-row>
     <b-col xl="6">
       <b-form inline @submit.stop.prevent @submit="evaluate">
-        <b-form-input v-model="layoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
         <b-button :disabled="loading" @click="evaluate" variant="primary">
           <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
           <div v-else>Evaluate</div>
         </b-button>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
-        <layout-plot :layout-string="layout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
+        <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
       </b-form>
     </b-col>
     <b-col xl="6">
-        <config-file :initial-content="evalParams" @saved="updateEvalParams">
+      <config-file :initial-content="evalParams" @saved="updateEvalParams">
     </b-col>
   </b-row>
-  <b-row v-if="details !== null" >
-    <b-col xl="6">
-      <layout-details v-if="details !== null" title="Details" :layout-details="details"></layout-details>
+
+  <b-row>
+    <b-col v-for="detail in details" xl="6">
+      <layout-button :layout="detail.layout" @remove="removeLayout"></layout-button>
+      <layout-details title="Details" :layout-details="detail"></layout-details>
     </b-col>
-    <b-col xl="6">
+  </b-row>
+
+  <b-row v-if="details.length > 0">
+    <b-col>
       <b-form inline>
         <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
         <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
       </b-form>
-      <layout-barplot :layout-details="detailsArray" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
+      <layout-barplot :layout-details="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
   </b-row>
 
@@ -48,8 +53,8 @@ Vue.component('evaluator-app', {
     },
     data () {
         return {
-            details: null,
-            layoutRaw: null,
+            details: [],
+            inputLayoutRaw: null,
             layoutEvaluator: null,
             frequenciesNgramProvider: null,
             unigrams: null,
@@ -62,18 +67,14 @@ Vue.component('evaluator-app', {
         }
     },
     computed: {
-        detailsArray () {
-            if (this.details === null) return []
-            return [this.details]
-        },
         chartStyles () {
             return {
                 height: "600px",
                 position: "relative"
             }
         },
-        layout () {
-            let layoutString = (this.layoutRaw || "").replace(" ", "")
+        inputLayout () {
+            let layoutString = (this.inputLayoutRaw || "").replace(" ", "")
             layoutString = layoutString.toLowerCase()
             return layoutString
         },
@@ -111,15 +112,21 @@ Vue.component('evaluator-app', {
     },
     methods: {
         evaluate () {
-            if (this.layout.length !== NKEYS) {
+            if (this.inputLayout.length !== NKEYS) {
                 this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
                 return
             }
+
+            if (this.details.filter((d) => d.layout == this.inputLayout).length > 0) {
+                this.$bvToast.toast(`Layout ${this.inputLayout} is already available`, {variant: "primary"})
+                return
+            }
+
             try {
-                this.$bvToast.toast(`Evaluating layout "${this.layout}"`, {variant: "primary"})
-                let details = this.layoutEvaluator.evaluate(this.layout)
-                details.layout = this.layout
-                this.details = details
+                this.$bvToast.toast(`Evaluating layout "${this.inputLayout}"`, {variant: "primary"})
+                let details = this.layoutEvaluator.evaluate(this.inputLayout)
+                details.layout = this.inputLayout
+                this.details.push(details)
             } catch(err) {
                 this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
                 return
@@ -128,7 +135,7 @@ Vue.component('evaluator-app', {
         updateFrequenciesNgramProvider () {
             this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
             this.loading = true
-            this.details = null
+            this.details = []
             this.frequenciesNgramProvider = this.wasm.NgramProvider.with_frequencies(
                 this.evalParams,
                 this.unigrams,
@@ -140,7 +147,7 @@ Vue.component('evaluator-app', {
         updateEvaluator () {
             this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
             this.loading = true
-            this.details = null
+            this.details = []
             this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
                 this.layoutConfig,
                 this.evalParams,
@@ -162,40 +169,54 @@ Vue.component('evaluator-app', {
         selectLayoutConfigType (layoutConfigType) {
             this.layoutConfigType = layoutConfigType
             this.updateEvaluator()
-        }
+        },
+        removeLayout (layout) {
+            this.details = this.details.filter((d) => d.layout !== layout)
+        },
     }
 })
 
+Vue.component('layout-button', {
+    template: `
+    <div>
+        <b-button-group size="sm" class="mx-1">
+            <b-button>{{layout}}</b-button>
+            <b-button variant="danger" @click="remove"><b-icon-x-circle-fill></b-button>
+        </b-button-group>
+    </div>
+    `,
+    props: {
+        layout: { type: String, default: "", required: true },
+    },
+    methods: {
+        remove () {
+            this.$emit("remove", this.layout)
+        },
+    },
+})
 
 Vue.component('keyboard-selector', {
     template: `
     <div>
-        <b-dropdown :text="label">
-          <b-dropdown-item :active="state==='standard'" @click="setStandard">standard</b-dropdown-item>
-          <b-dropdown-item :active="state==='ortho'" @click="setOrtho">ortho</b-dropdown-item>
+        <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
     </div>
     `,
+    props: {
+        defaultSelection: { type: String, default: "standard" },
+    },
     data () {
         return {
-            state: "standard"
+            selected: this.defaultSelection,
+            options: [
+                { value: null, text: "Please select a keyboard"},
+                { value: "standard", text: "Standard" },
+                { value: "ortho", text: "Ortho" },
+            ],
         }
     },
-    computed: {
-        label () {
-            return `Keyboard: ${this.state}`
-        },
-    },
     methods: {
-        setStandard () {
-            this.state = "standard"
-            this.emit()
-        },
-        setOrtho () {
-            this.state = "ortho"
-            this.emit()
-        },
         emit () {
-            this.$emit("selected", this.state)
+            this.$emit("selected", this.selected)
         }
     },
 })
