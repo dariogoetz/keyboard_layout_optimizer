@@ -130,6 +130,20 @@ impl NgramProvider {
             ngram_provider,
         })
     }
+
+    pub fn with_text(eval_params_str: &str, text: &str) -> Result<NgramProvider, JsValue> {
+        let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
+            .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
+
+        let ngram_mapper_config = eval_params.ngram_mapper.clone();
+
+        let ngram_provider =
+            OnDemandNgramMapper::with_corpus(&text, ngram_mapper_config);
+
+        Ok(NgramProvider {
+            ngram_provider,
+        })
+    }
 }
 
 #[wasm_bindgen]
