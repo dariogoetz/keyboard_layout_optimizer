@@ -118,9 +118,24 @@ impl NeoLayoutGenerator {
                     key_chars.push(key_layers.clone());
                 } else {
                     let mut new_key_layers = Vec::new();
-                    let given_char = given_chars.next().unwrap();
+                    let given_char = given_chars.next();
+                    if given_char.is_none() {
+                        // number of given layout keys are insufficient
+                        log::warn!("Number of given symbols in layout string is smaller than number of non-fixed keys");
+                        return
+                    }
+                    let given_char = given_char.unwrap();
+
+                    let key_idx = self.permutable_key_map.get(&given_char);
+                    if key_idx.is_none() {
+                        // an unsupported symbol was provided
+                        log::warn!("Unsupported symbol in given layout keys: {}", given_char);
+                        return
+                    }
+                    let key_idx = key_idx.unwrap();
+
                     let given_key_layers =
-                        &self.keys[*self.permutable_key_map.get(given_char).unwrap()];
+                        &self.keys[*key_idx];
                     given_key_layers
                         .iter()
                         .enumerate()
