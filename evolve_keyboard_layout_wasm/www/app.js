@@ -61,6 +61,7 @@ Vue.component('evaluator-app', {
         },
         layout () {
             let layoutString = (this.layoutRaw || "").replace(" ", "")
+            layoutString = layoutString.toLowerCase()
             return layoutString
         },
     },
