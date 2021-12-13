@@ -22,7 +22,11 @@ Vue.component('evaluator-app', {
       <layout-plot :layout-string="layout" :wasm="wasm"></layout-plot>
       <layout-details v-if="details !== null" title="Details" :layout-details="details"></layout-details>
     </b-col>
-
+    <b-col xl="6">
+        <config-file :initial-content="evalParams" @saved="updateEvalParams">
+    </b-col>
+  </b-row>
+  <b-row>
     <b-col v-if="details !== null" xl="6">
       <b-form inline>
         <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
@@ -44,7 +48,11 @@ Vue.component('evaluator-app', {
             layoutRaw: null,
             layoutEvaluator: null,
             frequenciesNgramProvider: null,
+            unigrams: null,
+            bigrams: null,
+            trigrams: null,
             wasm: null,
+            evalParams: null,
             loading: true,
         }
     },
@@ -66,6 +74,8 @@ Vue.component('evaluator-app', {
         },
     },
     created () {
+        this.evalParams = eval_params
+
         let wasm_import = import("evolve-keyboard-layout-wasm")
         let unigram_import = import('../../1-gramme.arne.no-special.txt')
         let bigram_import = import('../../2-gramme.arne.no-special.txt')
@@ -77,23 +87,12 @@ Vue.component('evaluator-app', {
 
         Promise.all([wasm_import, unigram_import, bigram_import, trigram_import])
         .then((imports) => {
-            let wasm = imports[0]
-            let unigrams = imports[1].default
-            let bigrams = imports[2].default
-            let trigrams = imports[3].default
+            this.unigrams = imports[1].default
+            this.bigrams = imports[2].default
+            this.trigrams = imports[3].default
 
-            this.frequenciesNgramProvider = this.wasm.NgramProvider.with_frequencies(
-                eval_params,
-                unigrams,
-                bigrams,
-                trigrams
-            )
-
-            this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
-                layout_config,
-                eval_params,
-                this.frequenciesNgramProvider
-            )
+            this.updateFrequenciesNgramProvider()
+            this.updateEvaluator()
 
             this.loading = false
         })
@@ -105,6 +104,7 @@ Vue.component('evaluator-app', {
                 return
             }
             try {
+                this.$bvToast.toast(`Evaluating layout "${this.layout}"`, {variant: "primary"})
                 let details = this.layoutEvaluator.evaluate(this.layout)
                 details.layout = this.layout
                 this.details = details
@@ -112,16 +112,76 @@ Vue.component('evaluator-app', {
                 this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
                 return
             }
-        }
+        },
+        updateFrequenciesNgramProvider () {
+            this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
+            this.loading = true
+            this.details = null
+            this.frequenciesNgramProvider = this.wasm.NgramProvider.with_frequencies(
+                this.evalParams,
+                this.unigrams,
+                this.bigrams,
+                this.trigrams
+            )
+            this.loading = false
+        },
+        updateEvaluator () {
+            this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
+            this.loading = true
+            this.details = null
+            this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
+                layout_config,
+                this.evalParams,
+                this.frequenciesNgramProvider
+            )
+            this.loading = false
+        },
+        updateEvalParams (evalParams) {
+            let hadDetails = this.details !== null
+            this.evalParams = evalParams
+
+            this.updateFrequenciesNgramProvider()
+            this.updateEvaluator()
+
+            if (hadDetails) {
+                this.evaluate()
+            }
+        },
     }
+})
+
+
+Vue.component('config-file', {
+    template: `
+    <div>
+        <b-form-textarea
+          v-model="content"
+          rows="15"
+          style="font: 400 13px/18px 'Source Code Pro', monospace;"
+          no-resize
+        ></b-form-textarea>
+        <b-button class="float-right" variant="primary" @click="save">Save</b-button>
+    </div>
+    `,
+    props: {
+        initialContent: { type: String, default: "" },
+    },
+    data () {
+        return {
+            content: this.initialContent
+        }
+    },
+    methods: {
+        save () {
+            this.$emit("saved", this.content)
+        },
+    },
 })
 
 
 Vue.component('layout-plot', {
     template: `
-    <pre><code>
-{{plotString}}
-    </code></pre>
+    <pre><code v-html="plotString"></code></pre>
 `,
     props: {
         layoutString: { type: String, default: "" },
