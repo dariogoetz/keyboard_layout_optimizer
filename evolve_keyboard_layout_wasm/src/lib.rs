@@ -126,13 +126,13 @@ impl LayoutEvaluator {
 
         let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
 
-        let unigrams = Unigrams::from_str(unigrams_str)
+        let unigrams = Unigrams::from_frequencies_str(unigrams_str)
             .map_err(|e| format!("Could not load unigrams: {:?}", e))?;
 
-        let bigrams = Bigrams::from_str(bigrams_str)
+        let bigrams = Bigrams::from_frequencies_str(bigrams_str)
             .map_err(|e| format!("Could not load bigrams: {:?}", e))?;
 
-        let trigrams = Trigrams::from_str(trigrams_str)
+        let trigrams = Trigrams::from_frequencies_str(trigrams_str)
             .map_err(|e| format!("Could not load trigrams: {:?}", e))?;
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
