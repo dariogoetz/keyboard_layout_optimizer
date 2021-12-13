@@ -171,8 +171,8 @@ Vue.component('keyboard-selector', {
     template: `
     <div>
         <b-dropdown :text="label">
-          <b-dropdown-item :active="state==='standard'" @click="setStandard">ISO</b-dropdown-item>
-          <b-dropdown-item :active="state==='ortho'" @click="setOrtho">Ortho</b-dropdown-item>
+          <b-dropdown-item :active="state==='standard'" @click="setStandard">standard</b-dropdown-item>
+          <b-dropdown-item :active="state==='ortho'" @click="setOrtho">ortho</b-dropdown-item>
     </div>
     `,
     data () {
