@@ -1,5 +1,5 @@
 metrics:
-  # layour metrics
+  # layout metrics
   shortcut_keys:
     enabled: true
     weight: 0.35
