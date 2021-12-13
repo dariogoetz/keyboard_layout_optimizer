@@ -18,16 +18,18 @@ Vue.component('evaluator-app', {
           <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
           <div v-else>Evaluate</div>
         </b-button>
+        <layout-plot :layout-string="layout" :wasm="wasm"></layout-plot>
       </b-form>
-      <layout-plot :layout-string="layout" :wasm="wasm"></layout-plot>
-      <layout-details v-if="details !== null" title="Details" :layout-details="details"></layout-details>
     </b-col>
     <b-col xl="6">
         <config-file :initial-content="evalParams" @saved="updateEvalParams">
     </b-col>
   </b-row>
-  <b-row>
-    <b-col v-if="details !== null" xl="6">
+  <b-row v-if="details !== null" >
+    <b-col xl="6">
+      <layout-details v-if="details !== null" title="Details" :layout-details="details"></layout-details>
+    </b-col>
+    <b-col xl="6">
       <b-form inline>
         <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
         <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
