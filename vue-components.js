@@ -60,8 +60,14 @@ Vue.component('layout-barplot', {
                         values.push(mc.weighted_cost)
                     })
                 })
+
+                let label = details.layout
+                if (details.published_by) {
+                    label = `${details.published_by} (${details.layout})`
+                }
+
                 datasets.push({
-                    label: `${details.published_by} (${details.layout})`,
+                    label,
                     backgroundColor: COLORS[datasets.length],
                     data: values
                 })
