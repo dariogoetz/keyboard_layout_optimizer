@@ -259,12 +259,12 @@ Vue.component('layouts-table', {
             return [
                 {
                     key: 'published_by',
-                    label: 'Veröffentlicht von',
+                    label: 'Published by',
                     sortable: true
                 },
                 {
                     key: 'total_cost',
-                    label: 'Kosten',
+                    label: 'Cost',
                     sortable: true,
                     formatter: (c) => c.toFixed(2)
                 },
@@ -274,17 +274,17 @@ Vue.component('layouts-table', {
                 },
                 {
                     key: 'family',
-                    label: 'Familie',
+                    label: 'Family',
                     sortable: true
                 },
                 {
                     key: 'periodComma',
-                    label: 'Punkt/Komma',
+                    label: 'Period/Comma',
                     sortable: true,
                 },
                 {
                     key: 'highlight',
-                    label: 'Bekannt',
+                    label: 'Well-known',
                     sortable: true
                 }
             ]
