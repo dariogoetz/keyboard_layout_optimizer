@@ -8,9 +8,6 @@ Vue.component('evaluator-app', {
     template: `
 <b-container>
 
-  <h1>Keyboard Layout Evaluator</h1>
-  <hr>
-
   <b-row>
     <b-col xl="6" style="height: 500px">
       <h2>Keyboard Layout</h2>
@@ -37,7 +34,7 @@ Vue.component('evaluator-app', {
           <config-file :initial-content="evalParams" @saved="updateEvalParams">
         </b-tab>
 
-        <b-tab title="NGram Settings">
+        <b-tab title="Ngram Settings">
           <ngram-config @selected="updateNgramProviderParams"></ngram-config>
         </b-tab>
 
