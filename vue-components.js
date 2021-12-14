@@ -184,29 +184,46 @@ Vue.component('layout-details', {
 
 Vue.component('layouts-table', {
     template: `
-<b-table
-  sticky-header="600px"
-  primary-key="layout"
-  small
-  head-variant="light"
-  sort-by="total_cost"
-  sort-icon-left
-  no-sort-reset
-  :items="rows"
-  :fields="fields"
-  :filter="filter"
-  :tbody-tr-class="rowClass"
-  @row-clicked="onRowClicked"
->
-</b-table>`,
+<div>
+  <b-table
+    sticky-header="600px"
+    primary-key="layout"
+    small
+    head-variant="light"
+    sort-by="total_cost"
+    sort-icon-left
+    no-sort-reset
+    :items="rows"
+    :fields="fields"
+    :filter="filter"
+    :per-page="perPage"
+    :current-page="currentPage"
+    :tbody-tr-class="rowClass"
+    @row-clicked="onRowClicked"
+    @filtered="onFiltered"
+   >
+  </b-table>
+  <b-pagination
+    v-if="filteredRows > perPage"
+    v-model="currentPage"
+    :total-rows="filteredRows"
+    :per-page="perPage"
+    size="sm"
+  >
+  </b-pagination>
+</div>
+    `,
     props: {
         url: { type: String, default: null },
         bestInFamily: { type: Boolean, default: true },
-        filter: { type: String, default: null }
+        filter: { type: String, default: null },
+        perPage: { type: Number, default: 500 },
     },
     data () {
         return {
-            layouts: []
+            layouts: [],
+            currentPage: 1,
+            filteredRows: 0,
         }
 
     },
@@ -233,7 +250,6 @@ Vue.component('layouts-table', {
                     highlight: layout.highlight,
                     family: layout.layout.slice(12, 22),
                     periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
-                    selected: false,
                 }
                 return row
             })
@@ -272,36 +288,45 @@ Vue.component('layouts-table', {
                     sortable: true
                 }
             ]
-        }
+        },
     },
     created () {
         this.fetchLayouts()
+    },
+    watch: {
+        bestInFamily () {
+            this.rows.forEach(item => item.selected = false)
+            this.$emit('details', [])
+        },
     },
     methods: {
         fetchLayouts () {
             if (this.url === null) return null
             return fetch(this.url)
                 .then(response => response.json())
-                .then(data => { this.layouts = data })
+                .then(data => {
+                    this.layouts = data
+                    this.filteredRows = data.length
+                })
         },
         rowClass (item, type) {
             if (!item || type !== 'row') return
             if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowClicked(item) {
-            if(item.selected){
+        onRowClicked (item) {
+            if (item.selected) {
                 this.$set(item, 'selected', false)
             } else {
                 this.$set(item, 'selected', true)
             }
-            this.$emit("details", this.selectedRows())
+            let selection = this.rows.filter(item => item.selected).sort((a, b) => a.total_cost - b.total_cost)
+            this.$emit("details", selection)
         },
-        selectedRows() {
-            const res = this.rows.filter(item => item.selected)
-            res.sort((a, b) => a.total_cost - b.total_cost)
-            return res
-        }
+        onFiltered (items) {
+            this.filteredRows = items.length
+            this.currentPage = 1
+        },
     }
 })
 
