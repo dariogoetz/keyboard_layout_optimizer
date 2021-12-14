@@ -184,29 +184,49 @@ Vue.component('layout-details', {
 
 Vue.component('layouts-table', {
     template: `
-<b-table
-  sticky-header="600px"
-  primary-key="layout"
-  small
-  head-variant="light"
-  sort-by="total_cost"
-  sort-icon-left
-  no-sort-reset
-  :items="rows"
-  :fields="fields"
-  :filter="filter"
-  :tbody-tr-class="rowClass"
-  @row-clicked="onRowClicked"
->
-</b-table>`,
+<div>
+  <b-table
+    sticky-header="600px"
+    primary-key="layout"
+    small
+    head-variant="light"
+    sort-by="total_cost"
+    sort-icon-left
+    no-sort-reset
+    :items="rows"
+    :fields="fields"
+    :filter="filter"
+    :per-page="perPage"
+    :current-page="currentPage"
+    :tbody-tr-class="rowClass"
+    selectable
+    selectMode="multi"
+    @row-selected="onRowClicked"
+    @filtered="onFiltered"
+   >
+  </b-table>
+  <b-pagination
+    v-if="filteredRows > perPage"
+    v-model="currentPage"
+    :total-rows="filteredRows"
+    :per-page="perPage"
+    size="sm"
+  >
+  </b-pagination>
+</div>
+    `,
     props: {
         url: { type: String, default: null },
         bestInFamily: { type: Boolean, default: true },
-        filter: { type: String, default: null }
+        filter: { type: String, default: null },
+        perPage: { type: Number, default: 500 },
     },
     data () {
         return {
-            layouts: []
+            layouts: [],
+            selected: [],
+            currentPage: 1,
+            filteredRows: 0,
         }
 
     },
@@ -272,7 +292,7 @@ Vue.component('layouts-table', {
                     sortable: true
                 }
             ]
-        }
+        },
     },
     created () {
         this.fetchLayouts()
@@ -282,26 +302,23 @@ Vue.component('layouts-table', {
             if (this.url === null) return null
             return fetch(this.url)
                 .then(response => response.json())
-                .then(data => { this.layouts = data })
+                .then(data => {
+                    this.layouts = data
+                    this.filteredRows = data.length
+                })
         },
         rowClass (item, type) {
             if (!item || type !== 'row') return
-            if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowClicked(item) {
-            if(item.selected){
-                this.$set(item, 'selected', false)
-            } else {
-                this.$set(item, 'selected', true)
-            }
-            this.$emit("details", this.selectedRows())
+        onRowClicked (items) {
+            this.selected = items.slice().sort((a, b) => a.total_cost - b.total_cost)
+            this.$emit("details", this.selected)
         },
-        selectedRows() {
-            const res = this.rows.filter(item => item.selected)
-            res.sort((a, b) => a.total_cost - b.total_cost)
-            return res
-        }
+        onFiltered (items) {
+            this.filteredRows = items.length
+            this.currentPage = 1
+        },
     }
 })
 
