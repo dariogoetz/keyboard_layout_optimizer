@@ -9,7 +9,7 @@ Vue.component('evaluator-app', {
 <b-container>
 
   <b-row>
-    <b-col xl="6" style="height: 500px">
+    <b-col xl="6" style="height: 420px">
       <h2>Keyboard Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
 
@@ -26,7 +26,7 @@ Vue.component('evaluator-app', {
       </b-form>
     </b-col>
 
-    <b-col xl="6" style="height: 500px">
+    <b-col xl="6" style="height: 420px">
       <h2>Settings</h2>
       <b-tabs>
 
@@ -45,6 +45,8 @@ Vue.component('evaluator-app', {
       </b-tabs>
     </b-col>
   </b-row>
+
+  <hr>
 
   <b-row>
     <b-col v-for="detail in details" xl="6">
