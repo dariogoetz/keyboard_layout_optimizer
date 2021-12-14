@@ -2,11 +2,16 @@ Vue.component('layouts-app', {
     template: `
 <b-container fluid>
 
+  <h2>Explore Keyboard Layouts</h2>
+  Evaluate your own layouts at <a href="https://dariogoetz.github.io/keyboard_layout_optimizer/">https://dariogoetz.github.io/keyboard_layout_optimizer/</a>
+
+  <hr>
+
   <b-row>
     <b-col xl="6">
       <b-form inline>
         <b-form-input v-model="filter" debounce="500" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
-        <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family</b-form-checkbox>
+        <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family (clears selection)</b-form-checkbox>
       </b-form>
       <layouts-table :url="url" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
     </b-col>

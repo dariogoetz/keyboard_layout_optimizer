@@ -199,9 +199,7 @@ Vue.component('layouts-table', {
     :per-page="perPage"
     :current-page="currentPage"
     :tbody-tr-class="rowClass"
-    selectable
-    selectMode="multi"
-    @row-selected="onRowClicked"
+    @row-clicked="onRowClicked"
     @filtered="onFiltered"
    >
   </b-table>
@@ -224,7 +222,6 @@ Vue.component('layouts-table', {
     data () {
         return {
             layouts: [],
-            selected: [],
             currentPage: 1,
             filteredRows: 0,
         }
@@ -253,7 +250,6 @@ Vue.component('layouts-table', {
                     highlight: layout.highlight,
                     family: layout.layout.slice(12, 22),
                     periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
-                    selected: false,
                 }
                 return row
             })
@@ -297,6 +293,12 @@ Vue.component('layouts-table', {
     created () {
         this.fetchLayouts()
     },
+    watch: {
+        bestInFamily () {
+            this.rows.forEach(item => item.selected = false)
+            this.$emit('details', [])
+        },
+    },
     methods: {
         fetchLayouts () {
             if (this.url === null) return null
@@ -309,11 +311,17 @@ Vue.component('layouts-table', {
         },
         rowClass (item, type) {
             if (!item || type !== 'row') return
+            if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowClicked (items) {
-            this.selected = items.slice().sort((a, b) => a.total_cost - b.total_cost)
-            this.$emit("details", this.selected)
+        onRowClicked (item) {
+            if (item.selected) {
+                this.$set(item, 'selected', false)
+            } else {
+                this.$set(item, 'selected', true)
+            }
+            let selection = this.rows.filter(item => item.selected).sort((a, b) => a.total_cost - b.total_cost)
+            this.$emit("details", selection)
         },
         onFiltered (items) {
             this.filteredRows = items.length
