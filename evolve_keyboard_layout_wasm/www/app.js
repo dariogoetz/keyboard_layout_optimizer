@@ -132,33 +132,40 @@ Vue.component('evaluator-app', {
     },
     methods: {
         evaluateInput () {
-            let details = this.evaluate(this.inputLayout)
-            this.details.push(details)
+            let res = this.evaluate(this.inputLayout)
+            if (res !== null) {
+                this.details.push(res)
+            }
         },
         evaluateExisting () {
-            let details = this.details
-            this.details = []
-            this.details = details.map((d) => this.evaluate(d.layout))
+            const details = []
+            this.details.forEach((d) => {
+                let res = this.evaluate(d.layout)
+                if (res !== null) {
+                    details.push(res)
+                }
+            })
+            this.details = details
         },
         evaluate (layout) {
             if (layout.length !== NKEYS) {
                 this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
-                return
+                return null
             }
 
             if (this.details.filter((d) => d.layout == layout).length > 0) {
                 this.$bvToast.toast(`Layout ${layout} is already available`, {variant: "primary"})
-                return
+                return null
             }
 
             try {
                 this.$bvToast.toast(`Evaluating layout "${layout}"`, {variant: "primary"})
-                let details = this.layoutEvaluator.evaluate(layout)
-                details.layout = layout
-                return details
+                let res = this.layoutEvaluator.evaluate(layout)
+                res.layout = layout
+                return res
             } catch(err) {
                 this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
-                return
+                return null
             }
         },
         updateNgramProvider () {
