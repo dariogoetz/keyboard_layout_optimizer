@@ -139,7 +139,10 @@ Vue.component('evaluator-app', {
         },
         evaluateExisting () {
             const details = []
-            this.details.forEach((d) => {
+            const existingDetails = this.details
+            // empty this.details, otherwise the updated layouts will be ignored
+            this.details = []
+            existingDetails.forEach((d) => {
                 let res = this.evaluate(d.layout)
                 if (res !== null) {
                     details.push(res)
