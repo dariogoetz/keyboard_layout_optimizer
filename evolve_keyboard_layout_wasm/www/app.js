@@ -1,5 +1,5 @@
-import standard_keyboard from '../../config/standard_keyboard.yml'
-import ortho from '../../config/ortho.yml'
+import config_standard_keyboard from '../../config/standard_keyboard.yml'
+import config_ortho from '../../config/ortho.yml'
 import eval_params from '../../config/evaluation_parameters.yml'
 
 const NKEYS = 32
@@ -36,6 +36,10 @@ Vue.component('evaluator-app', {
 
         <b-tab title="Ngram Settings">
           <ngram-config @selected="updateNgramProviderParams"></ngram-config>
+        </b-tab>
+
+        <b-tab title="Keyboard Settings">
+          <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
         </b-tab>
 
       </b-tabs>
@@ -77,6 +81,8 @@ Vue.component('evaluator-app', {
             wasm: null,
             evalParams: null,
             layoutConfigType: "standard",
+            layoutConfigStandard: config_standard_keyboard,
+            layoutConfigOrtho: config_ortho,
             loading: true,
         }
     },
@@ -94,9 +100,9 @@ Vue.component('evaluator-app', {
         },
         layoutConfig () {
             if (this.layoutConfigType === "standard") {
-                return standard_keyboard
+                return this.layoutConfigStandard
             } else if (this.layoutConfigType === "ortho") {
-                return ortho
+                return this.layoutConfigOrtho
             }
         },
     },
@@ -202,8 +208,20 @@ Vue.component('evaluator-app', {
 
             this.evaluateExisting()
         },
+        updateLayoutConfig (layoutConfig) {
+            if (this.layoutConfigType === "standard") {
+                this.layoutConfigStandard = layoutConfig
+            } else if (this.layoutConfigType === "orto") {
+                this.layoutConfigOrtho = layoutConfig
+            }
+
+            this.updateEvaluator()
+
+            this.evaluateExisting()
+        },
         selectLayoutConfigType (layoutConfigType) {
             this.layoutConfigType = layoutConfigType
+
             this.updateEvaluator()
 
             this.evaluateExisting()
@@ -309,7 +327,6 @@ Vue.component('config-file', {
         v-model="content"
         rows="15"
         style="font: 400 13px/18px 'Source Code Pro', monospace;"
-        no-resize
       ></b-form-textarea>
       <b-button class="float-right" variant="primary" @click="save">Save</b-button>
     </div>
@@ -321,6 +338,11 @@ Vue.component('config-file', {
         return {
             content: this.initialContent
         }
+    },
+    watch: {
+        initialContent () {
+            this.content = this.initialContent
+        },
     },
     methods: {
         save () {
@@ -362,7 +384,6 @@ Vue.component('layout-plot', {
     },
     methods: {
         update () {
-            console.log("update")
             if (this.wasm === null || this.layoutConfig === null) return
             this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
             this.plot()
