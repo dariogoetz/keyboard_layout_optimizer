@@ -8,9 +8,14 @@ Vue.component('evaluator-app', {
     template: `
 <b-container>
 
+  <h1>Keyboard Layout Evaluator</h1>
+  Explore optimized layouts at <a href="https://keyboard-layout-optimizer.herokuapp.com">https://keyboard-layout-optimizer.herokuapp.com</a>
+  <hr>
+
   <b-row>
     <b-col xl="6" style="height: 420px">
-      <h2>Keyboard Layout</h2>
+      <h2>Layout</h2>
+
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
 
         <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
