@@ -211,7 +211,7 @@ Vue.component('evaluator-app', {
         updateLayoutConfig (layoutConfig) {
             if (this.layoutConfigType === "standard") {
                 this.layoutConfigStandard = layoutConfig
-            } else if (this.layoutConfigType === "orto") {
+            } else if (this.layoutConfigType === "ortho") {
                 this.layoutConfigOrtho = layoutConfig
             }
 
