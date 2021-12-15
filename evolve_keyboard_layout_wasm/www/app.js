@@ -6,32 +6,31 @@ const NKEYS = 32
 
 Vue.component('evaluator-app', {
     template: `
-<b-container>
+<b-container fluid>
 
   <h1>Keyboard Layout Evaluator</h1>
   Explore optimized layouts at <a href="https://keyboard-layout-optimizer.herokuapp.com">https://keyboard-layout-optimizer.herokuapp.com</a>
   <hr>
 
   <b-row>
-    <b-col xl="6" style="height: 420px">
-      <h2>Layout</h2>
 
+    <b-col xl="4" lg="6" style="height: 420px">
+      <h2>Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
 
         <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
-
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
-        <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
-
-        <b-button :disabled="loading" @click="evaluateInput" variant="primary">
-          <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
-          <div v-else>Evaluate</div>
-        </b-button>
-
       </b-form>
+      <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
+
+      <b-button :disabled="loading" @click="evaluateInput" variant="primary">
+        <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
+        <div v-else>Evaluate</div>
+      </b-button>
+
     </b-col>
 
-    <b-col xl="6" style="height: 420px">
+    <b-col xl="8" lg="6" style="height: 420px">
       <h2>Settings</h2>
       <b-tabs>
 
@@ -402,7 +401,11 @@ Vue.component('layout-plot', {
     methods: {
         update () {
             if (this.wasm === null || this.layoutConfig === null) return
-            this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
+            try {
+                this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
+            } catch (err) {
+                this.$bvToast.toast(`Error plotting the layout: ${err}`, {variant: 'danger'})
+            }
             this.plot()
         },
         plot () {
