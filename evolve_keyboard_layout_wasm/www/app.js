@@ -14,7 +14,7 @@ Vue.component('evaluator-app', {
 
   <b-row>
 
-    <b-col xl="4" lg="6" style="height: 420px">
+    <b-col xl="4" lg="6" style="height: 450px">
       <h2>Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
 
@@ -30,7 +30,7 @@ Vue.component('evaluator-app', {
 
     </b-col>
 
-    <b-col xl="8" lg="6" style="height: 420px">
+    <b-col xl="8" lg="6" style="height: 450px">
       <h2>Settings</h2>
       <b-tabs>
 
