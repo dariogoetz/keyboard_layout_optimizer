@@ -342,7 +342,7 @@ Vue.component('config-file', {
       <b-form-textarea
         v-model="content"
         rows="15"
-        style="font: 400 13px/18px 'Source Code Pro', monospace;"
+        style="font: 400 13px/18px 'DejaVuSansMonoBook', monospace;"
       ></b-form-textarea>
       <b-button class="float-right" variant="primary" @click="save">Save</b-button>
     </div>
