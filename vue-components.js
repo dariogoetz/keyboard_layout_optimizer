@@ -139,7 +139,7 @@ Vue.component('layout-details', {
         <pre style="overflow-y: hidden"><code v-html="plot"></code></pre>
         <h2>Gesamtkosten: {{ totalCost }}</h2>
         <hr>
-        <pre><code v-html="printed"></code></pre>
+        <pre style="overflow-y: hidden"><code v-html="printed"></code></pre>
     </div>
 </b-jumbotron>
 `,
