@@ -39,9 +39,9 @@ pub struct OnDemandUnigramMapper {
 }
 
 impl OnDemandUnigramMapper {
-    pub fn new(unigrams: &Unigrams, split_modifiers: SplitModifiersConfig) -> Self {
+    pub fn new(unigrams: Unigrams, split_modifiers: SplitModifiersConfig) -> Self {
         Self {
-            unigrams: unigrams.clone(),
+            unigrams,
             split_modifiers,
         }
     }

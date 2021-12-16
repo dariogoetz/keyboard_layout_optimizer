@@ -178,9 +178,9 @@ pub struct OnDemandBigramMapper {
 }
 
 impl OnDemandBigramMapper {
-    pub fn new(bigrams: &Bigrams, split_modifiers: SplitModifiersConfig) -> Self {
+    pub fn new(bigrams: Bigrams, split_modifiers: SplitModifiersConfig) -> Self {
         Self {
-            bigrams: bigrams.clone(),
+            bigrams,
             split_modifiers,
         }
     }

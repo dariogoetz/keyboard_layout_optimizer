@@ -46,9 +46,9 @@ pub struct OnDemandNgramMapper {
 impl OnDemandNgramMapper {
     /// Generate a `OnDemandNgramMapper` with given char-based ngrams.
     pub fn with_ngrams(
-        unigrams: &Unigrams,
-        bigrams: &Bigrams,
-        trigrams: &Trigrams,
+        unigrams: Unigrams,
+        bigrams: Bigrams,
+        trigrams: Trigrams,
         config: NgramMapperConfig,
     ) -> Self {
         Self {
@@ -66,9 +66,9 @@ impl OnDemandNgramMapper {
         let trigrams = Trigrams::from_str(text).expect("Could not generate trigrams from text.");
 
         Self {
-            unigram_mapper: OnDemandUnigramMapper::new(&unigrams, config.split_modifiers.clone()),
-            bigram_mapper: OnDemandBigramMapper::new(&bigrams, config.split_modifiers.clone()),
-            trigram_mapper: OnDemandTrigramMapper::new(&trigrams, config.split_modifiers.clone()),
+            unigram_mapper: OnDemandUnigramMapper::new(unigrams, config.split_modifiers.clone()),
+            bigram_mapper: OnDemandBigramMapper::new(bigrams, config.split_modifiers.clone()),
+            trigram_mapper: OnDemandTrigramMapper::new(trigrams, config.split_modifiers.clone()),
             config,
         }
     }

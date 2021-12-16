@@ -58,9 +58,9 @@ pub struct OnDemandTrigramMapper {
 }
 
 impl OnDemandTrigramMapper {
-    pub fn new(trigrams: &Trigrams, split_modifiers: SplitModifiersConfig) -> Self {
+    pub fn new(trigrams: Trigrams, split_modifiers: SplitModifiersConfig) -> Self {
         Self {
-            trigrams: trigrams.clone(),
+            trigrams,
             split_modifiers,
         }
     }

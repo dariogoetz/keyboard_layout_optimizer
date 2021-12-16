@@ -124,7 +124,7 @@ impl NgramProvider {
         let ngram_mapper_config = eval_params.ngram_mapper.clone();
 
         let ngram_provider =
-            OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config);
+            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
         Ok(NgramProvider {
             ngram_provider,
