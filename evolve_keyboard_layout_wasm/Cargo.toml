@@ -1,8 +1,8 @@
 [package]
-name = "evolve_keyboard_layout_wasm"
-version = "0.1.0"
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
+name = "evolve_keyboard_layout_wasm"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -11,11 +11,11 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-keyboard_layout = { path="../keyboard_layout" }
-layout_evaluation = { path="../layout_evaluation" }
+keyboard_layout = { path = "../keyboard_layout" }
+layout_evaluation = { path = "../layout_evaluation" }
 
-serde = { version = "1.0", features= ["derive"] }
-serde_yaml = "*" 
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "*"
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

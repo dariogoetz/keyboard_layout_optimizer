@@ -1,24 +1,31 @@
 [package]
-name = "layouts_webservice"
-version = "0.1.0"
 edition = "2018"
-publish = false
 license = "GPL-3.0-or-later"
+name = "layouts_webservice"
+publish = false
+version = "0.1.0"
 
 [dependencies]
 rocket = { path = "Rocket/core/lib", features = ["json"] }
 # rocket = { version = "0.5.0-rc.1", features = ["json"] }
 
 # the rocket_db_pools crate is not yet available on crates.io
-rocket_db_pools = { path = "Rocket/contrib/db_pools/lib/", features = ["sqlx_postgres"] }
+rocket_db_pools = { path = "Rocket/contrib/db_pools/lib/", features = [
+    "sqlx_postgres",
+] }
 # rocket_db_pools = { version = "0.1.0-rc", features = ["sqlx_postgres"] }
 
-sqlx = { version = "0.5.1", default-features = false, features = ["macros", "offline", "migrate", "postgres"] }
+sqlx = { version = "0.5.1", default-features = false, features = [
+    "macros",
+    "offline",
+    "migrate",
+    "postgres",
+] }
 
-serde = { version="^1.0", features=[ "derive" ] }
-serde_yaml = "*"
-serde_json = "*"
 anyhow = "*"
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "*"
+serde_yaml = "*"
 
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }
