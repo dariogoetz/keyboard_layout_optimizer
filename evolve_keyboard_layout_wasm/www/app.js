@@ -1,5 +1,6 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
+import config_ortho_bored from '../../config/ortho_bored.yml'
 import eval_params from '../../config/evaluation_parameters.yml'
 
 const NKEYS = 32
@@ -89,6 +90,7 @@ Vue.component('evaluator-app', {
             layoutConfigType: "standard",
             layoutConfigStandard: config_standard_keyboard,
             layoutConfigOrtho: config_ortho,
+            layoutConfigOrthoBored: config_ortho_bored,
             loading: true,
         }
     },
@@ -109,6 +111,8 @@ Vue.component('evaluator-app', {
                 return this.layoutConfigStandard
             } else if (this.layoutConfigType === "ortho") {
                 return this.layoutConfigOrtho
+            } else if (this.layoutConfigType === "ortho_bored") {
+                return this.layoutConfigOrthoBored
             }
         },
     },
@@ -229,6 +233,8 @@ Vue.component('evaluator-app', {
                 this.layoutConfigStandard = layoutConfig
             } else if (this.layoutConfigType === "ortho") {
                 this.layoutConfigOrtho = layoutConfig
+            } else if (this.layoutConfigType === "ortho_bored") {
+                this.layoutConfigOrthoBored = layoutConfig
             }
 
             this.updateEvaluator()
@@ -285,6 +291,7 @@ Vue.component('keyboard-selector', {
             options: [
                 { value: "standard", text: "Standard" },
                 { value: "ortho", text: "Ortho" },
+                { value: "ortho_bored", text: "Ortho (bored)" },
             ],
         }
     },
