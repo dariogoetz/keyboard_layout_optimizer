@@ -136,7 +136,7 @@ Vue.component('layout-details', {
     template: `
 <b-jumbotron :header="headline" :lead="leadline" header-level="5">
     <div v-if="layoutDetails !== null">
-        <pre><code v-html="plot"></code></pre>
+        <pre style="overflow-y: hidden"><code v-html="plot"></code></pre>
         <h2>Gesamtkosten: {{ totalCost }}</h2>
         <hr>
         <pre><code v-html="printed"></code></pre>
