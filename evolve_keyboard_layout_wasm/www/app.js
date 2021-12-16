@@ -1,7 +1,14 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
 import config_ortho_bored from '../../config/ortho_bored.yml'
+
 import eval_params from '../../config/evaluation_parameters.yml'
+
+const LAYOUT_CONFIGS = [
+    { key: 'standard', label: 'Standard', config: config_standard_keyboard },
+    { key: 'ortho', label: 'Ortho', config: config_ortho },
+    { key: 'ortho_bored', label: 'Ortho (bored)', config: config_ortho_bored },
+]
 
 const NKEYS = 32
 
@@ -75,6 +82,10 @@ Vue.component('evaluator-app', {
         logscale: { type: Boolean, default: false },
     },
     data () {
+        let layoutConfigs = {}
+        LAYOUT_CONFIGS.forEach((c) => {
+            layoutConfigs[c.key] = c.config
+        })
         return {
             details: [],
             inputLayoutRaw: null,
@@ -87,10 +98,8 @@ Vue.component('evaluator-app', {
             corpusText: null,
             wasm: null,
             evalParams: null,
-            layoutConfigType: "standard",
-            layoutConfigStandard: config_standard_keyboard,
-            layoutConfigOrtho: config_ortho,
-            layoutConfigOrthoBored: config_ortho_bored,
+            selectedLayoutConfig: "standard",
+            layoutConfigs,
             loading: true,
         }
     },
@@ -107,13 +116,7 @@ Vue.component('evaluator-app', {
             return layoutString
         },
         layoutConfig () {
-            if (this.layoutConfigType === "standard") {
-                return this.layoutConfigStandard
-            } else if (this.layoutConfigType === "ortho") {
-                return this.layoutConfigOrtho
-            } else if (this.layoutConfigType === "ortho_bored") {
-                return this.layoutConfigOrthoBored
-            }
+            return this.layoutConfigs[this.selectedLayoutConfig]
         },
     },
     created () {
@@ -229,20 +232,14 @@ Vue.component('evaluator-app', {
             this.evaluateExisting()
         },
         updateLayoutConfig (layoutConfig) {
-            if (this.layoutConfigType === "standard") {
-                this.layoutConfigStandard = layoutConfig
-            } else if (this.layoutConfigType === "ortho") {
-                this.layoutConfigOrtho = layoutConfig
-            } else if (this.layoutConfigType === "ortho_bored") {
-                this.layoutConfigOrthoBored = layoutConfig
-            }
+            this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
             this.updateEvaluator()
 
             this.evaluateExisting()
         },
-        selectLayoutConfigType (layoutConfigType) {
-            this.layoutConfigType = layoutConfigType
+        selectLayoutConfigType (selectedLayoutConfig) {
+            this.selectedLayoutConfig = selectedLayoutConfig
 
             this.updateEvaluator()
 
@@ -286,13 +283,13 @@ Vue.component('keyboard-selector', {
         defaultSelection: { type: String, default: "standard" },
     },
     data () {
+        let options = []
+        LAYOUT_CONFIGS.forEach(c => {
+            options.push({ value: c.key, text: c.label })
+        })
         return {
             selected: this.defaultSelection,
-            options: [
-                { value: "standard", text: "Standard" },
-                { value: "ortho", text: "Ortho" },
-                { value: "ortho_bored", text: "Ortho (bored)" },
-            ],
+            options,
         }
     },
     methods: {
