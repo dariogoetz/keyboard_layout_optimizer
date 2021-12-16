@@ -370,7 +370,7 @@ Vue.component('config-file', {
 
 Vue.component('layout-plot', {
     template: `
-    <pre><code v-html="plotString"></code></pre>
+    <pre style="overflow-y: hidden"><code v-html="plotString"></code></pre>
 `,
     props: {
         layoutString: { type: String, default: "" },
