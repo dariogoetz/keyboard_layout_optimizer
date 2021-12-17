@@ -127,7 +127,7 @@ impl NeoLayoutGenerator {
                     .permutable_key_map
                     .get(&given_char)
                     .ok_or(format!(
-                        "Unsupported symbol in given layout keys: {}",
+                        "Unsupported symbol in given layout keys: '{}'",
                         given_char
                     ))
                     .map_err(anyhow::Error::msg)?;
