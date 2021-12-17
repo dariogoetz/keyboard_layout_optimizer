@@ -15,11 +15,11 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LayoutError {
-    #[error("Invalid keyboard layout: Duplicate characters in layout {0}")]
-    DuplicateChars(String),
-    #[error("Invalid keyboard layout: Missing characters: {0}")]
+    #[error("Invalid keyboard layout: Duplicate characters in layout '{0}': '{1}'")]
+    DuplicateChars(String, String),
+    #[error("Invalid keyboard layout: Missing characters: '{0}'")]
     MissingChars(String),
-    #[error("Invalid keyboard layout: Unsupported characters: {0}")]
+    #[error("Invalid keyboard layout: Unsupported characters: '{0}'")]
     UnsupportedChars(String),
 }
 
@@ -126,7 +126,10 @@ impl NeoLayoutGenerator {
                 let key_idx = self
                     .permutable_key_map
                     .get(&given_char)
-                    .ok_or(format!("Unsupported symbol in given layout keys: {}", given_char))
+                    .ok_or(format!(
+                        "Unsupported symbol in given layout keys: {}",
+                        given_char
+                    ))
                     .map_err(anyhow::Error::msg)?;
 
                 let given_key_layers = &self.keys[*key_idx];
@@ -162,7 +165,20 @@ impl NeoLayoutGenerator {
 
         // Check for duplicate chars
         if char_set.len() != chars.len() {
-            return Err(LayoutError::DuplicateChars(layout_keys.to_string()).into());
+            let mut duplicates = HashSet::new();
+            let mut seen_chars = HashSet::new();
+            for char in chars.iter() {
+                if seen_chars.contains(char) {
+                    duplicates.insert(*char);
+                } else {
+                    seen_chars.insert(*char);
+                }
+            }
+            return Err(LayoutError::DuplicateChars(
+                layout_keys.to_string(),
+                duplicates.iter().cloned().collect::<String>(),
+            )
+            .into());
         }
 
         let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();
