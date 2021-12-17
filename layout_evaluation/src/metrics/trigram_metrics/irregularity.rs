@@ -101,7 +101,7 @@ impl TrigramMetric for Irregularity {
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        (1_000_000.0 * cost / (total_weight * total_weight)) as usize,  // bring to a scale that can be coerced to usize
+                        (1_000_000.0 * cost / (total_weight * total_weight)) as usize, // bring to a scale that can be coerced to usize
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
@@ -120,7 +120,8 @@ impl TrigramMetric for Irregularity {
                         trigram.0.to_string().escape_debug(),
                         trigram.1.to_string().escape_debug(),
                         trigram.2.to_string().escape_debug(),
-                        100.0 * (cost as f64) * total_weight * total_weight / (1_000_000.0 * total_cost),  // return to original scare in f64
+                        100.0 * (cost as f64) * total_weight * total_weight
+                            / (1_000_000.0 * total_cost), // return to original scare in f64
                     )
                 })
                 .collect();
