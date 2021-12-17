@@ -57,9 +57,12 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 },
             );
 
-            let msgs: Vec<String> = worst
+            let mut msgs = Vec::new();
+
+            let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
+                .filter(|(_, cost)| *cost > 0)
                 .map(|(unigram, cost)| {
                     format!(
                         "{} ({:>5.2}%)",
@@ -69,7 +72,11 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 })
                 .collect();
 
-            let msg = Some(format!("Worst unigrams: {}", msgs.join(", ")));
+            if !worst_msgs.is_empty() {
+                msgs.push(format!("Worst unigrams: {}", worst_msgs.join(", ")))
+            }
+
+            let msg = Some(msgs.join(";  "));
 
             (total_cost, msg)
         } else {

@@ -70,9 +70,12 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                 },
             );
 
-            let msgs: Vec<String> = worst
+            let mut msgs = Vec::new();
+
+            let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
+                .filter(|(_, cost)| *cost > 0)
                 .map(|(bigram, cost)| {
                     format!(
                         "{}{} ({:>5.2}%)",
@@ -82,12 +85,18 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                     )
                 })
                 .collect();
+            if !worst_msgs.is_empty() {
+                msgs.push(format!("Worst bigrams: {}", worst_msgs.join(", ")))
+            }
 
-            let msg = Some(format!(
-                "Worst bigrams: {};  {:>5.2}% of cost involved a modifier",
-                msgs.join(", "),
-                100.0 * cost_with_mod / total_cost,
-            ));
+            if total_cost > 0.0 {
+                msgs.push(format!(
+                    "{:>5.2}% of cost involved a modifier",
+                    100.0 * cost_with_mod / total_cost,
+                ));
+            }
+
+            let msg = Some(msgs.join(";  "));
 
             (total_cost, msg)
         } else {
