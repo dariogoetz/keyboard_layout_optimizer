@@ -1,8 +1,8 @@
 mod utils;
 
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
-use serde::{Deserialize, Serialize};
 
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
@@ -11,9 +11,9 @@ use keyboard_layout::{
 
 use layout_evaluation::{
     evaluation::{Evaluator, MetricParameters},
-    results::EvaluationResult,
     ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
     ngrams::{Bigrams, Trigrams, Unigrams},
+    results::EvaluationResult,
 };
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -73,28 +73,24 @@ pub struct LayoutPlotter {
 
 #[wasm_bindgen]
 impl LayoutPlotter {
-    pub fn new(
-        layout_cfg_str: &str,
-    ) -> Result<LayoutPlotter, JsValue> {
-
+    pub fn new(layout_cfg_str: &str) -> Result<LayoutPlotter, JsValue> {
         utils::set_panic_hook();
 
         let layout_cfg: LayoutConfig = serde_yaml::from_str(layout_cfg_str)
             .map_err(|e| format!("Could not read layout config: {:?}", e))?;
 
-        let keyboard = Arc::new(
-            Keyboard::from_yaml_object(layout_cfg.keyboard)
-        );
+        let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
 
-        let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
+        let layout_generator =
+            NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
 
-        Ok(LayoutPlotter {
-            layout_generator,
-        })
+        Ok(LayoutPlotter { layout_generator })
     }
 
     pub fn plot(&self, layout_str: &str, layer: usize) -> Result<String, JsValue> {
-        let layout = self.layout_generator.generate_unchecked(layout_str)
+        let layout = self
+            .layout_generator
+            .generate_unchecked(layout_str)
             .map_err(|e| format!("Could not plot the layout: {:?}", e))?;
         Ok(layout.plot_layer(layer))
     }
@@ -107,8 +103,12 @@ pub struct NgramProvider {
 
 #[wasm_bindgen]
 impl NgramProvider {
-    pub fn with_frequencies(eval_params_str: &str, unigrams_str: &str, bigrams_str: &str, trigrams_str: &str) -> Result<NgramProvider, JsValue> {
-
+    pub fn with_frequencies(
+        eval_params_str: &str,
+        unigrams_str: &str,
+        bigrams_str: &str,
+        trigrams_str: &str,
+    ) -> Result<NgramProvider, JsValue> {
         let unigrams = Unigrams::from_frequencies_str(unigrams_str)
             .map_err(|e| format!("Could not load unigrams: {:?}", e))?;
 
@@ -126,9 +126,7 @@ impl NgramProvider {
         let ngram_provider =
             OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
-        Ok(NgramProvider {
-            ngram_provider,
-        })
+        Ok(NgramProvider { ngram_provider })
     }
 
     pub fn with_text(eval_params_str: &str, text: &str) -> Result<NgramProvider, JsValue> {
@@ -137,12 +135,9 @@ impl NgramProvider {
 
         let ngram_mapper_config = eval_params.ngram_mapper.clone();
 
-        let ngram_provider =
-            OnDemandNgramMapper::with_corpus(&text, ngram_mapper_config);
+        let ngram_provider = OnDemandNgramMapper::with_corpus(&text, ngram_mapper_config);
 
-        Ok(NgramProvider {
-            ngram_provider,
-        })
+        Ok(NgramProvider { ngram_provider })
     }
 }
 
@@ -159,23 +154,21 @@ impl LayoutEvaluator {
         eval_params_str: &str,
         ngram_provider: &NgramProvider,
     ) -> Result<LayoutEvaluator, JsValue> {
-
         utils::set_panic_hook();
 
         let layout_cfg: LayoutConfig = serde_yaml::from_str(layout_cfg_str)
             .map_err(|e| format!("Could not read layout config: {:?}", e))?;
 
-        let keyboard = Arc::new(
-            Keyboard::from_yaml_object(layout_cfg.keyboard)
-        );
+        let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
 
-        let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
+        let layout_generator =
+            NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
-        let evaluator =
-            Evaluator::default(Box::new(ngram_provider.ngram_provider.clone())).default_metrics(&eval_params.metrics);
+        let evaluator = Evaluator::default(Box::new(ngram_provider.ngram_provider.clone()))
+            .default_metrics(&eval_params.metrics);
 
         Ok(LayoutEvaluator {
             layout_generator,
@@ -184,7 +177,9 @@ impl LayoutEvaluator {
     }
 
     pub fn evaluate(&self, layout_str: &str) -> Result<JsValue, JsValue> {
-        let layout = self.layout_generator.generate(layout_str)
+        let layout = self
+            .layout_generator
+            .generate(layout_str)
             .map_err(|e| format!("Could not generate layout: {:?}", e))?;
         let res = self.evaluator.evaluate_layout(&layout);
         let printed = Some(format!("{}", res));
@@ -197,7 +192,9 @@ impl LayoutEvaluator {
     }
 
     pub fn plot(&self, layout_str: &str, layer: usize) -> Result<String, JsValue> {
-        let layout = self.layout_generator.generate(layout_str)
+        let layout = self
+            .layout_generator
+            .generate(layout_str)
             .map_err(|e| format!("Could not plot the layout: {:?}", e))?;
         Ok(layout.plot_layer(layer))
     }
