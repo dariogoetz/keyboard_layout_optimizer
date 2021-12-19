@@ -109,13 +109,20 @@ impl MetricResults {
 
     /// Normalize a metric's cost value with given normalization strategy.
     fn normalize_value(&self, val: f64, normalization_type: &NormalizationType) -> f64 {
-        match normalization_type {
+        let mut res = match normalization_type {
             NormalizationType::Fixed(t) => val / t,
             NormalizationType::WeightFound(t) => val / (t * self.found_weight),
             NormalizationType::WeightAll(t) => {
                 val / (t * self.found_weight + self.not_found_weight)
             }
+        };
+
+        // instead of NAN, we prefer having 0.0 cost
+        if res.is_nan() {
+            res = 0.0
         }
+
+        return res
     }
 
     /// Helper function for weighting and normalizing individual metric's results.
