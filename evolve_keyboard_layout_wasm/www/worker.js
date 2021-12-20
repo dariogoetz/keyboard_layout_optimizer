@@ -11,10 +11,6 @@ let unigram_import = import('../../1-gramme.arne.no-special.txt')
 let bigram_import = import('../../2-gramme.arne.no-special.txt')
 let trigram_import = import('../../3-gramme.arne.no-special.txt')
 
-let ngramProvider;
-let layoutEvaluator;
-
-
 
 class Evaluator {
     constructor (wasm, unigrams, bigrams, trigrams) {
@@ -25,10 +21,6 @@ class Evaluator {
 
         this.ngramProvider = null
         this.layoutEvaluator = null
-    }
-
-    test () {
-        return "test"
     }
 
     initNgramProvider (ngramType, evalParams, corpusText) {
