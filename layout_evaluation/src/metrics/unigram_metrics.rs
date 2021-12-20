@@ -3,6 +3,7 @@ use std::usize;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 use priority_queue::DoublePriorityQueue;
+use float_ord::FloatOrd;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
@@ -48,7 +49,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 (0.0, DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst), (unigram, cost)| {
                     total_cost += cost;
-                    worst.push(unigram.symbol, cost as usize);
+                    worst.push(unigram.symbol, FloatOrd(cost));
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
@@ -62,12 +63,12 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
             let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
-                .filter(|(_, cost)| *cost > 0)
+                .filter(|(_, cost)| cost.0 > 0.0)
                 .map(|(unigram, cost)| {
                     format!(
                         "{} ({:>5.2}%)",
                         unigram.to_string().escape_debug(),
-                        100.0 * (cost as f64) / total_cost,
+                        100.0 * cost.0 / total_cost,
                     )
                 })
                 .collect();
