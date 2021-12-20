@@ -1,7 +1,7 @@
 //! The `metrics` module provides a trait for trigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
 use priority_queue::DoublePriorityQueue;
-use float_ord::FloatOrd;
+use ordered_float::OrderedFloat;
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
@@ -64,7 +64,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        FloatOrd(cost),
+                        OrderedFloat(cost),
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();

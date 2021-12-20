@@ -17,7 +17,7 @@ env_logger = "*"
 log = "*"
 rustc-hash = "*"
 priority-queue = "*"
-float-ord = "*"
+ordered-float = "*"
 
 
 [dev-dependencies]
