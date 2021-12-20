@@ -13,64 +13,6 @@ const LAYOUT_CONFIGS = [
 
 const NKEYS = 32
 
-// https://www.sitepen.com/blog/using-webassembly-with-web-workers
-function generateWebWorker() {
-
-    // Create an object to later interact with
-    const proxy = {};
-
-    // Keep track of the messages being sent
-    // so we can resolve them correctly
-    let id = 0;
-    let idPromises = {};
-
-    return new Promise((resolve, reject) => {
-        const worker = new Worker('worker.js');
-        worker.postMessage({eventType: "initialise"});
-        worker.addEventListener('message', function(event) {
-            const { eventType, eventData, eventId } = event.data;
-
-            if (eventType === "initialised") {
-                const methods = event.data.eventData;
-                methods.forEach((method) => {
-                    proxy[method] = function() {
-                        return new Promise((resolve, reject) => {
-                            worker.postMessage({
-                                eventType: "call",
-                                eventData: {
-                                    method: method,
-                                    arguments: Array.from(arguments) // arguments is not an array
-                                },
-                                eventId: id
-                            });
-
-                            idPromises[id] = { resolve, reject };
-                            id++
-                        });
-                    }
-                });
-                resolve(proxy);
-                return;
-            } else if (eventType === "result") {
-                if (eventId !== undefined && idPromises[eventId]) {
-                    idPromises[eventId].resolve(eventData);
-                    delete idPromises[eventId];
-                }
-            } else if (eventType === "error") {
-                if (eventId !== undefined && idPromises[eventId]) {
-                    idPromises[eventId].reject(event.data.eventData);
-                    delete idPromises[eventId];
-                }
-            }
-
-        });
-
-        worker.addEventListener("error", function(error) {
-            reject(error);
-        });
-    })
-
-}
 
 Vue.component('evaluator-app', {
     template: `
