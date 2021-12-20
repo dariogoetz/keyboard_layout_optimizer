@@ -60,7 +60,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
 
                     worst.push(
                         (bigram.0.symbol, bigram.1.symbol),
-                        (1_000.0 * cost) as usize,
+                        cost as usize,
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
@@ -81,7 +81,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                         "{}{} ({:>5.2}%)",
                         bigram.0.to_string().escape_debug(),
                         bigram.1.to_string().escape_debug(),
-                        100.0 * (cost as f64 / 1_000.0) / total_cost,
+                        100.0 * (cost as f64) / total_cost,
                     )
                 })
                 .collect();
