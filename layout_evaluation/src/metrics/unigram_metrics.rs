@@ -63,12 +63,12 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
             let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
-                .filter(|(_, cost)| cost.0 > 0.0)
+                .filter(|(_, cost)| cost.into_inner() > 0.0)
                 .map(|(unigram, cost)| {
                     format!(
                         "{} ({:>5.2}%)",
                         unigram.to_string().escape_debug(),
-                        100.0 * cost.0 / total_cost,
+                        100.0 * cost.into_inner() / total_cost,
                     )
                 })
                 .collect();

@@ -79,14 +79,14 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
             let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
-                .filter(|(_, cost)| cost.0 > 0.0)
+                .filter(|(_, cost)| cost.into_inner() > 0.0)
                 .map(|(trigram, cost)| {
                     format!(
                         "{}{}{} ({:>5.2}%)",
                         trigram.0.to_string().escape_debug(),
                         trigram.1.to_string().escape_debug(),
                         trigram.2.to_string().escape_debug(),
-                        100.0 * cost.0 / total_cost,
+                        100.0 * cost.into_inner() / total_cost,
                     )
                 })
                 .collect();
