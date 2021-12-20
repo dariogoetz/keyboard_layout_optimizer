@@ -185,9 +185,9 @@ Vue.component('evaluator-app', {
             this.wasm = wasm
         })
 
-        generateWebWorker().then((worker) => {
-            this.worker = worker
+        this.worker = Comlink.wrap(new Worker('worker.js'))
 
+        this.worker.init().then(() => {
             this.initNgramProvider().then(() => {
                 this.initLayoutEvaluator().then(() => {
                     // reduce initial value of this.loading
@@ -196,6 +196,7 @@ Vue.component('evaluator-app', {
             }).catch((err) => console.error(err))
         })
     },
+
     methods: {
         evaluateInput () {
             // check if the current layout is already available in this.details
