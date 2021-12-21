@@ -39,8 +39,8 @@ Vue.component('evaluator-app', {
         <div v-else>Evaluate</div>
       </b-button>
 
-      <b-button-group>
-        <b-button class="float-right" :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="primary">
+      <b-button-group class="float-right">
+        <b-button :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="primary">
           <div v-if="optStep > 0 || loading > 0">
             <b-spinner small></b-spinner>
             <span v-if="optStep > 0">Iteration {{optStep}}</span>
@@ -300,7 +300,10 @@ Vue.component('evaluator-app', {
             do {
                 res = await this.worker.optimizationStep()
                 if (res !== null) {
-                    this.inputLayoutRaw = res.layout
+                    if (res.layout !== this.inputLayout) {
+                        this.$bvToast.toast(`New layout found: ${res.layout}`, {variant: "primary"})
+                        this.inputLayoutRaw = res.layout
+                    }
                     this.optStep += 1
                 }
             } while (res !== null && !this.optCancel)
