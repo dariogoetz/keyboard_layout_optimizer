@@ -1,6 +1,7 @@
 //! The `metrics` module provides a trait for trigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
 use priority_queue::DoublePriorityQueue;
+use ordered_float::OrderedFloat;
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
@@ -63,7 +64,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        (1_000.0 * cost) as usize,
+                        OrderedFloat(cost),
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
@@ -73,25 +74,34 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                 },
             );
 
-            let msgs: Vec<String> = worst
+            let mut msgs = Vec::new();
+
+            let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
+                .filter(|(_, cost)| cost.into_inner() > 0.0)
                 .map(|(trigram, cost)| {
                     format!(
                         "{}{}{} ({:>5.2}%)",
                         trigram.0.to_string().escape_debug(),
                         trigram.1.to_string().escape_debug(),
                         trigram.2.to_string().escape_debug(),
-                        100.0 * (cost as f64 / 1_000.0) / total_cost,
+                        100.0 * cost.into_inner() / total_cost,
                     )
                 })
                 .collect();
+            if !worst_msgs.is_empty() {
+                msgs.push(format!("Worst trigrams: {}", worst_msgs.join(", ")))
+            }
 
-            let msg = Some(format!(
-                "Worst trigrams: {};  {:>5.2}% of cost involved a modifier",
-                msgs.join(", "),
-                100.0 * cost_with_mod / total_cost,
-            ));
+            if total_cost > 0.0 {
+                msgs.push(format!(
+                    "{:>5.2}% of cost involved a modifier",
+                    100.0 * cost_with_mod / total_cost,
+                ));
+            }
+
+            let msg = Some(msgs.join(";  "));
 
             (total_cost, msg)
         } else {

@@ -24,7 +24,14 @@ module.exports = {
       {
         test: /\.yml$/i,
         use: 'raw-loader',
-      }
+      },
+      {
+        test: /worker\.js$/,
+        loader: "worker-loader",
+        options: {
+          esModule: false,
+        }
+      },
       // {
       //   test: /\.js/i,
       //   use: 'raw-loader',

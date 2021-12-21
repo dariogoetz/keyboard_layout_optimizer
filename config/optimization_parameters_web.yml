@@ -1,0 +1,6 @@
+population_size: 100
+generation_limit: 100
+num_individuals_per_parents: 2
+selection_ratio: 0.3
+mutation_rate: 0.01
+reinsertion_ratio: 0.5

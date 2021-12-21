@@ -3,6 +3,9 @@ import config_ortho from '../../config/ortho.yml'
 import config_ortho_bored from '../../config/ortho_bored.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
+import opt_params from '../../config/optimization_parameters_web.yml'
+
+import Worker from "./worker.js"
 
 const LAYOUT_CONFIGS = [
     { key: 'standard', label: 'Standard', config: config_standard_keyboard },
@@ -11,6 +14,7 @@ const LAYOUT_CONFIGS = [
 ]
 
 const NKEYS = 32
+
 
 Vue.component('evaluator-app', {
     template: `
@@ -25,16 +29,27 @@ Vue.component('evaluator-app', {
     <b-col xl="4" lg="6" style="height: 450px">
       <h2>Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-
-        <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
       </b-form>
       <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
 
-      <b-button :disabled="loading" @click="evaluateInput" variant="primary">
-        <div v-if="loading"><b-spinner small></b-spinner> Loading</div>
+      <b-button :disabled="loading > 0" @click="evaluateInput" variant="primary">
+        <div v-if="loading > 0"><b-spinner small></b-spinner> Loading</div>
         <div v-else>Evaluate</div>
       </b-button>
+
+      <b-button-group class="float-right">
+        <b-button :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="primary">
+          <div v-if="optStep > 0 || loading > 0">
+            <b-spinner small></b-spinner>
+            <span v-if="optStep > 0">Iteration {{optStep}}</span>
+            <span v-else>Loading</span>
+          </div>
+          <div v-else>Optimize</div>
+        </b-button>
+        <b-button v-if="optStep > 0" @click="optCancelRequest" variant="danger"><b-icon-x-circle-fill /></b-button>
+      </b-button-group>
 
     </b-col>
 
@@ -52,6 +67,14 @@ Vue.component('evaluator-app', {
 
         <b-tab title="Keyboard Settings">
           <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
+        </b-tab>
+
+        <b-tab title="Optimization Parameters">
+      <b-form inline @submit.stop.prevent @submit="evaluateInput">
+          <label class="mr-sm-2">Fixed Keys</label>
+          <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        </b-form>
+          <config-file :initial-content="optParams" @saved="updateOptParams">
         </b-tab>
 
       </b-tabs>
@@ -89,18 +112,21 @@ Vue.component('evaluator-app', {
         return {
             details: [],
             inputLayoutRaw: null,
-            layoutEvaluator: null,
+            worker: null,
             ngramType: "prepared",
-            ngramProvider: null,
             unigrams: null,
             bigrams: null,
             trigrams: null,
             corpusText: null,
             wasm: null,
             evalParams: null,
+            optParams: null,
             selectedLayoutConfig: "standard",
             layoutConfigs,
-            loading: true,
+            loading: 1,
+            optStep: 0,
+            optFixed: ",.",
+            optCancel: false,
         }
     },
     computed: {
@@ -119,134 +145,177 @@ Vue.component('evaluator-app', {
             return this.layoutConfigs[this.selectedLayoutConfig]
         },
     },
+
     created () {
         this.evalParams = eval_params
+        this.optParams = opt_params
 
-        let wasm_import = import("evolve-keyboard-layout-wasm")
-        let unigram_import = import('../../1-gramme.arne.no-special.txt')
-        let bigram_import = import('../../2-gramme.arne.no-special.txt')
-        let trigram_import = import('../../3-gramme.arne.no-special.txt')
-
-        wasm_import.then((wasm) => {
+        import("evolve-keyboard-layout-wasm").then((wasm) => {
             this.wasm = wasm
         })
 
-        Promise.all([wasm_import, unigram_import, bigram_import, trigram_import])
-        .then((imports) => {
-            this.unigrams = imports[1].default
-            this.bigrams = imports[2].default
-            this.trigrams = imports[3].default
+        this.worker = Comlink.wrap(new Worker('worker.js'))
 
-            this.updateNgramProvider()
-            this.updateEvaluator()
-
-            this.loading = false
+        this.worker.init().then(() => {
+            this.initNgramProvider().then(() => {
+                this.initLayoutEvaluator().then(() => {
+                    // reduce initial value of this.loading
+                    this.loading -= 1
+                })
+            }).catch((err) => console.error(err))
         })
     },
+
     methods: {
         evaluateInput () {
-            let res = this.evaluate(this.inputLayout)
-            if (res !== null) {
-                this.details.push(res)
+            // check if the current layout is already available in this.details
+            let existing = this.details.filter((d) => d.layout == this.inputLayout)
+            if (existing.length > 0) {
+                this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, {variant: "primary"})
+            } else {
+                this.evaluate(this.inputLayout).then((res) => {
+                    this.details.push(res)
+                }).catch((err) => console.error(err))
             }
         },
+
         evaluateExisting () {
-            const details = []
-            const existingDetails = this.details
-            // empty this.details, otherwise the updated layouts will be ignored
-            this.details = []
-            existingDetails.forEach((d) => {
-                let res = this.evaluate(d.layout)
-                if (res !== null) {
-                    details.push(res)
-                }
+            let promises = []
+            this.details.forEach((d) => {
+                let promise = this.evaluate(d.layout)
+                promises.push(promise)
             })
-            this.details = details
+            Promise.all(promises).then((details) => {
+                this.details = details
+            }).catch((err) => console.error(err))
         },
+
         evaluate (layout) {
-            if (layout.length !== NKEYS) {
-                this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
-                return null
-            }
+                let promise = new Promise((resolve, reject) => {
+                if (layout.length !== NKEYS) {
+                    this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
+                    reject("Keyboard layout must have 32 (non-whitespace) symbols")
+                    return
+                }
 
-            if (this.details.filter((d) => d.layout == layout).length > 0) {
-                this.$bvToast.toast(`Layout ${layout} is already available`, {variant: "primary"})
-                return null
-            }
-
-            try {
                 this.$bvToast.toast(`Evaluating layout "${layout}"`, {variant: "primary"})
-                let res = this.layoutEvaluator.evaluate(layout)
-                res.layout = layout
-                return res
-            } catch(err) {
-                this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
-                return null
-            }
+                this.loading += 1
+                this.worker.evaluateLayout(layout).then((res) => {
+                    res.layout = layout
+                    this.loading -= 1
+                    resolve(res)
+                }).catch((err) => {
+                    this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
+                    this.loading -= 1
+                    reject(err)
+                })
+            })
+            return promise
         },
-        updateNgramProvider () {
-            this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
-            this.loading = true
-            if (this.ngramType === "prepared") {
-                this.ngramProvider = this.wasm.NgramProvider.with_frequencies(
-                    this.evalParams,
-                    this.unigrams,
-                    this.bigrams,
-                    this.trigrams
-                )
-            } else if (this.ngramType === "from_text") {
-                this.ngramProvider = this.wasm.NgramProvider.with_text(
-                    this.evalParams,
-                    this.corpusText
-                )
-            }
-            this.loading = false
+
+        initNgramProvider () {
+            // this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
+            this.loading += 1
+            return this.worker.initNgramProvider(this.ngramType, this.evalParams, this.corpusText).then(() => {
+                this.loading -= 1
+            })
         },
-        updateEvaluator () {
-            this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
-            this.loading = true
-            this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
-                this.layoutConfig,
-                this.evalParams,
-                this.ngramProvider
-            )
-            this.loading = false
+
+        initLayoutEvaluator () {
+            // this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
+            this.loading += 1
+            return this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParams).then(() => {
+                this.loading -= 1
+            })
         },
+
         updateEvalParams (evalParams) {
             this.evalParams = evalParams
 
-            this.updateNgramProvider()
-            this.updateEvaluator()
-
-            this.evaluateExisting()
+            this.initNgramProvider().then(() => {
+                this.initLayoutEvaluator().then(() => {
+                    this.evaluateExisting()
+                })
+            })
         },
+        updateOptParams (optParams) {
+            this.optParams = optParams
+        },
+
         updateNgramProviderParams (ngramType, ngramData) {
             this.ngramType = ngramType
             if (ngramType === "from_text") {
                 this.corpusText = ngramData
             }
 
-            this.updateNgramProvider()
-            this.updateEvaluator()
-
-            this.evaluateExisting()
+            this.initNgramProvider().then(() => {
+                this.initLayoutEvaluator().then(() => {
+                    this.evaluateExisting()
+                })
+            })
         },
+
         updateLayoutConfig (layoutConfig) {
             this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
-            this.updateEvaluator()
+            this.initLayoutEvaluator().then(() => {
+                this.evaluateExisting()
+            })
 
-            this.evaluateExisting()
         },
+
         selectLayoutConfigType (selectedLayoutConfig) {
             this.selectedLayoutConfig = selectedLayoutConfig
 
-            this.updateEvaluator()
-
-            this.evaluateExisting()
+            this.initLayoutEvaluator().then(() => {
+                this.evaluateExisting()
+            })
         },
+
         removeLayout (layout) {
             this.details = this.details.filter((d) => d.layout !== layout)
+        },
+
+        async optimizeInput () {
+            this.optStep = 1
+            this.optCancel = false
+
+            // check if given layout_str is valid
+            try {
+                await this.evaluate(this.inputLayout)
+            } catch (err) {
+                this.optStep = 0
+                this.optCancel = false
+                return
+            }
+
+            await this.worker.initLayoutOptimizer(
+                this.inputLayout,
+                this.optFixed,
+                this.optParams
+            )
+
+            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, {variant: "primary"})
+            let res
+            do {
+                res = await this.worker.optimizationStep()
+                if (res !== null) {
+                    if (res.layout !== this.inputLayout) {
+                        this.$bvToast.toast(`New layout found: ${res.layout}`, {variant: "primary"})
+                        this.inputLayoutRaw = res.layout
+                    }
+                    this.optStep += 1
+                }
+            } while (res !== null && !this.optCancel)
+
+            this.$bvToast.toast("Optimization finished", {variant: "primary"})
+            this.optStep = 0
+            this.optCancel = false
+        },
+
+        optCancelRequest () {
+            this.optCancel = true
+            this.$bvToast.toast("Stopping optimization", {variant: "primary"})
         },
     }
 })
@@ -256,7 +325,7 @@ Vue.component('layout-button', {
     <div>
       <b-button-group size="sm" class="mx-1">
         <b-button>{{layout}}</b-button>
-        <b-button variant="danger" @click="remove"><b-icon-x-circle-fill></b-button>
+        <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
     </div>
     `,

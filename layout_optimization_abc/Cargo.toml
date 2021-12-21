@@ -2,10 +2,8 @@
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
-name = "evolve_keyboard_layout"
+name = "layout_optimization_abc"
 version = "0.1.0"
-
-default-run = "evaluate"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -13,22 +11,13 @@ default-run = "evaluate"
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }
 layout_optimization = { path = "../layout_optimization" }
-layout_optimization_genevo = { path = "../layout_optimization_genevo" }
-layout_optimization_sa = { path = "../layout_optimization_sa" }
-layout_optimization_abc = { path = "../layout_optimization_abc" }
 
-anyhow = "*"
-dotenv = "*"
+abc = "0.2.3"
+anyhow = "1.0.45"
 env_logger = "*"
 log = "*"
-rand = "*"
-rayon = "1.5.1"
-reqwest = { version = "0.11", features = ["blocking", "json"] }
-rustc-hash = "*"
+num_cpus = "*"
+rand = "0.8.4"
+rustc-hash = "1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
-serde_yaml = "*"
-structopt = "*"
-
-[profile.release]
-lto = true
+serde_yaml = "0.8.21"

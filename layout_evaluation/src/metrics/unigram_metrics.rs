@@ -3,6 +3,7 @@ use std::usize;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 use priority_queue::DoublePriorityQueue;
+use ordered_float::OrderedFloat;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
@@ -48,7 +49,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 (0.0, DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst), (unigram, cost)| {
                     total_cost += cost;
-                    worst.push(unigram.symbol, (1_000.0 * cost) as usize);
+                    worst.push(unigram.symbol, OrderedFloat(cost));
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
@@ -57,19 +58,26 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 },
             );
 
-            let msgs: Vec<String> = worst
+            let mut msgs = Vec::new();
+
+            let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
+                .filter(|(_, cost)| cost.into_inner() > 0.0)
                 .map(|(unigram, cost)| {
                     format!(
                         "{} ({:>5.2}%)",
                         unigram.to_string().escape_debug(),
-                        100.0 * (cost as f64 / 1_000.0) / total_cost,
+                        100.0 * cost.into_inner() / total_cost,
                     )
                 })
                 .collect();
 
-            let msg = Some(format!("Worst unigrams: {}", msgs.join(", ")));
+            if !worst_msgs.is_empty() {
+                msgs.push(format!("Worst unigrams: {}", worst_msgs.join(", ")))
+            }
+
+            let msg = Some(msgs.join(";  "));
 
             (total_cost, msg)
         } else {

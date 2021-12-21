@@ -155,7 +155,7 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
                 trigrams = trigrams.tops(tops);
             }
 
-            OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config)
+            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config)
         }
     };
 

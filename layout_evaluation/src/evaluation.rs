@@ -102,7 +102,7 @@ impl Evaluator {
     }
 
     /// Add all "default" metrics to the evaluator.
-    pub fn default_metrics(&mut self, params: &MetricParameters) -> Self {
+    pub fn default_metrics(mut self, params: &MetricParameters) -> Self {
         // layout metrics
         self.layout_metric(
             Box::new(layout_metrics::asymmetric_keys::AsymmetricKeys::new(
@@ -274,7 +274,7 @@ impl Evaluator {
             params.trigram_finger_repeats.enabled,
         );
 
-        self.to_owned()
+        self
     }
 
     /// Add a metric that operates only on the layout itself ("layout metric").
@@ -284,11 +284,10 @@ impl Evaluator {
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
-    ) -> Self {
+    ) {
         if enabled {
             self.layout_metrics.push((weight, normalization, metric));
         }
-        self.to_owned()
     }
 
     /// Add a metric that operates on the unigram data ("unigram metric").
@@ -298,11 +297,10 @@ impl Evaluator {
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
-    ) -> Self {
+    ) {
         if enabled {
             self.unigram_metrics.push((weight, normalization, metric));
         }
-        self.to_owned()
     }
 
     /// Add a metric that operates on the bigram data ("bigram metric").
@@ -312,11 +310,10 @@ impl Evaluator {
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
-    ) -> Self {
+    ) {
         if enabled {
             self.bigram_metrics.push((weight, normalization, metric));
         }
-        self.to_owned()
     }
 
     /// Add a metric that operates on the trigram data ("trigram metric").
@@ -326,11 +323,10 @@ impl Evaluator {
         weight: f64,
         normalization: NormalizationType,
         enabled: bool,
-    ) -> Self {
+    ) {
         if enabled {
             self.trigram_metrics.push((weight, normalization, metric));
         }
-        self.to_owned()
     }
 
     /// Evaluate all layout metrics for a layout.

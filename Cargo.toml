@@ -3,6 +3,9 @@ members = [
     "keyboard_layout",
     "layout_evaluation",
     "layout_optimization",
+    "layout_optimization_genevo",
+    "layout_optimization_sa",
+    "layout_optimization_abc",
     "evolve_keyboard_layout",
     # "layouts_webservice",
 ]

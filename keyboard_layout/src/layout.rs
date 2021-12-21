@@ -5,6 +5,7 @@
 use crate::key::{Hand, Key};
 use crate::keyboard::{KeyIndex, Keyboard};
 
+use anyhow::Result;
 use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
@@ -92,7 +93,7 @@ impl Layout {
         keyboard: Arc<Keyboard>,
         modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
         layer_costs: Vec<f64>,
-    ) -> Self {
+    ) -> Result<Self> {
         // generate layer keys
         let mut layerkeys = Vec::new();
         let mut layerkey_index = 0;
@@ -127,22 +128,36 @@ impl Layout {
 
         let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
 
-        modifiers.iter().for_each(|mods_per_hand| {
-            mods_per_hand.values().for_each(|mods| {
-                mods.iter().for_each(|mc| {
-                    layerkeys[*key_map.get(mc).unwrap() as usize].is_modifier = true;
-                });
-            });
-        });
+        // a map that resolvers the `modifiers` chars to LayerKeyIndex
+        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> = Vec::new();
+        for mods_per_hand in modifiers.iter() {
+            let mut resolved_mods_per_hand = FxHashMap::default();
+            for (hand, mods) in mods_per_hand.iter() {
+                let mut resolved_mods = Vec::new();
+                for mc in mods.iter() {
+                    let mod_idx = *key_map
+                        .get(mc)
+                        .ok_or(format!("Modifier '{}' is not a supported symbol", mc))
+                        .map_err(anyhow::Error::msg)?;
+
+                    resolved_mods.push(mod_idx);
+
+                    // flag this layerkey as modifier
+                    layerkeys[mod_idx as usize].is_modifier = true;
+                }
+                resolved_mods_per_hand.insert(hand.clone(), resolved_mods);
+            }
+            mod_map.push(resolved_mods_per_hand);
+        }
 
         layerkeys.iter_mut().for_each(|k| {
             let mods = if k.layer > 0 && k.layer < modifiers.len() + 1 {
-                modifiers
+                mod_map
                     .get(k.layer - 1)
-                    .unwrap()
+                    .unwrap()  // can not fail due to above check
                     .get(&k.key.hand.other())
-                    .map(|mods| mods.iter().map(|mc| *key_map.get(mc).unwrap()).collect())
-                    .unwrap_or_default()
+                    .map(|mods| mods.to_vec())
+                    .unwrap_or_default()  // default is an empty vec
             } else {
                 Vec::new()
             };
@@ -150,13 +165,13 @@ impl Layout {
             k.modifiers = mods;
         });
 
-        Self {
+        Ok(Self {
             layerkeys,
             key_layers,
             keyboard,
             key_map,
             layer_costs,
-        }
+        })
     }
 
     fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {

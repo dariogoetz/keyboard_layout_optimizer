@@ -15,11 +15,11 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LayoutError {
-    #[error("Invalid keyboard layout: Duplicate characters in layout {0}")]
-    DuplicateChars(String),
-    #[error("Invalid keyboard layout: Missing characters: {0}")]
+    #[error("Invalid keyboard layout: Duplicate characters in layout '{0}': '{1}'")]
+    DuplicateChars(String, String),
+    #[error("Invalid keyboard layout: Missing characters: '{0}'")]
     MissingChars(String),
-    #[error("Invalid keyboard layout: Unsupported characters: {0}")]
+    #[error("Invalid keyboard layout: Unsupported characters: '{0}'")]
     UnsupportedChars(String),
 }
 
@@ -110,53 +110,50 @@ impl NeoLayoutGenerator {
         let mut given_chars = chars.iter();
 
         let mut key_chars = Vec::new();
-        self.keys
-            .iter()
-            .zip(self.fixed_keys.iter())
-            .for_each(|(key_layers, fixed)| {
-                if *fixed {
-                    key_chars.push(key_layers.clone());
-                } else {
-                    let mut new_key_layers = Vec::new();
-                    let given_char = given_chars.next();
-                    if given_char.is_none() {
-                        // number of given layout keys are insufficient
-                        log::warn!("Number of given symbols in layout string is smaller than number of non-fixed keys");
-                        return
-                    }
-                    let given_char = given_char.unwrap();
-
-                    let key_idx = self.permutable_key_map.get(&given_char);
-                    if key_idx.is_none() {
-                        // an unsupported symbol was provided
-                        log::warn!("Unsupported symbol in given layout keys: {}", given_char);
-                        return
-                    }
-                    let key_idx = key_idx.unwrap();
-
-                    let given_key_layers =
-                        &self.keys[*key_idx];
-                    given_key_layers
-                        .iter()
-                        .enumerate()
-                        .for_each(|(layer_id, c)| {
-                            if !self.fixed_layers.contains(&layer_id) {
-                                new_key_layers.push(*c);
-                            } else {
-                                new_key_layers.push(*key_layers.get(layer_id).unwrap_or(&'␡'));
-                            }
-                        });
-                    key_chars.push(new_key_layers);
+        for (key_layers, fixed) in self.keys.iter().zip(self.fixed_keys.iter()) {
+            if *fixed {
+                key_chars.push(key_layers.clone());
+            } else {
+                let mut new_key_layers = Vec::new();
+                let given_char = given_chars.next();
+                if given_char.is_none() {
+                    // number of given layout keys are insufficient
+                    log::warn!("Number of given symbols in layout string is smaller than number of non-fixed keys");
+                    break;
                 }
-            });
+                let given_char = given_char.unwrap();
 
-        Ok(Layout::new(
+                let key_idx = self
+                    .permutable_key_map
+                    .get(&given_char)
+                    .ok_or(format!(
+                        "Unsupported symbol in given layout keys: '{}'",
+                        given_char
+                    ))
+                    .map_err(anyhow::Error::msg)?;
+
+                let given_key_layers = &self.keys[*key_idx];
+                given_key_layers
+                    .iter()
+                    .enumerate()
+                    .for_each(|(layer_id, c)| {
+                        if !self.fixed_layers.contains(&layer_id) {
+                            new_key_layers.push(*c);
+                        } else {
+                            new_key_layers.push(*key_layers.get(layer_id).unwrap_or(&'␡'));
+                        }
+                    });
+                key_chars.push(new_key_layers);
+            }
+        }
+
+        Layout::new(
             key_chars,
             self.fixed_keys.clone(),
             self.keyboard.clone(),
             self.modifiers.clone(),
             self.layer_costs.clone(),
-        ))
+        )
     }
 
     /// Generate a Neo variant `Layout` from a given string representation of its base layer (only non-fixed keys)
@@ -168,7 +165,20 @@ impl NeoLayoutGenerator {
 
         // Check for duplicate chars
         if char_set.len() != chars.len() {
-            return Err(LayoutError::DuplicateChars(layout_keys.to_string()).into());
+            let mut duplicates = HashSet::new();
+            let mut seen_chars = HashSet::new();
+            for char in chars.iter() {
+                if seen_chars.contains(char) {
+                    duplicates.insert(*char);
+                } else {
+                    seen_chars.insert(*char);
+                }
+            }
+            return Err(LayoutError::DuplicateChars(
+                layout_keys.to_string(),
+                duplicates.iter().cloned().collect::<String>(),
+            )
+            .into());
         }
 
         let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();

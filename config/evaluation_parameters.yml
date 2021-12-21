@@ -1,5 +1,7 @@
 metrics:
   # layout metrics
+
+  # Specified symbols shall be located within the leftmost 5 columns of the left hand
   shortcut_keys:
     enabled: true
     weight: 0.35
@@ -7,9 +9,11 @@ metrics:
       type: fixed
       value: 1.0
     params:
+      # symbols that shall be considered "shortcut keys"
       shortcut_chars: cvxz
       cost: 1.0
 
+  # Symbols of specified groups shall have the same relative location to each others
   asymmetric_keys:
     enabled: true
     weight: 5.0
@@ -17,6 +21,9 @@ metrics:
       type: fixed
       value: 1.0
     params:
+      # List of pairs of symbol groups for which the keys shall have the same relative position
+      # e.g. ["auo", "äüö"] means that the relative location of a -> ä shall be identical to u -> ü
+      # and o -> ö. Otherwise, a cost is counted.
       similar_letters:
         - ["auo", "äüö"]
         - ["auo", "äüö"]
@@ -25,6 +32,8 @@ metrics:
         # - ["sfdn", "tpbm"]
 
   # unigram metrics
+
+  # Each finger's load shall be relative to the specified weights
   finger_balance:
     enabled: true
     weight: 69.0
@@ -32,6 +41,7 @@ metrics:
       type: fixed
       value: 1.0
     params:
+      # Intended factors for finger load. Thumb values are ignored.
       intended_loads:
         [Left, Pinky]: 1.0
         [Left, Ring]: 1.6
@@ -44,6 +54,7 @@ metrics:
         [Right, Ring]: 1.6
         [Right, Pinky]: 1.0
 
+  # Each hand's load shall be close to 50%
   hand_disbalance:
     enabled: true
     weight: 40.0
@@ -53,6 +64,7 @@ metrics:
     params:
       null: null
 
+  # Each keystroke incurs a cost (defined in the keyboard's layout config)
   key_costs:
     enabled: true
     weight: 7.55
@@ -63,6 +75,9 @@ metrics:
       null: null
 
   # bigram metrics
+
+  # If the keys corresponding to a bigram are not symmetrical on left and right hand, a cost is
+  # counted.
   asymmetric_bigrams:
     enabled: true
     weight: 1.0
@@ -72,6 +87,11 @@ metrics:
     params:
       null: null
 
+  # If both keys corresponding to a bigram belong to the same finger, a cost is counted.
+  # No cost incurs, if it is the same key. Such repeats are weighted with an additional
+  # factor, if the index or pinky finger is involved.
+  # Bigrams that appear often (more than a specified share of the total number of bigrams) are
+  # weighted with an additional factor.
   finger_repeats:
     enabled: true
     weight: 780.0
@@ -79,12 +99,23 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Costs of repeats with the index finger are multiplied with this factor
       index_finger_factor: 0.9
+      # Costs of repeats with the pinky finger are multiplied with this factor
       pinky_finger_factor: 1.2
+      # Common bigrams are weighted additionally only if their absolute weight exceeds this
+      # threshold
       total_weight_threshold: 20
+      # Common bigrams are weighted additionally only if their relative weight exceeds this
+      # fraction
       critical_fraction: 1.00025 # >1 -> do not use
+      # Common bigrams are weighted additionally by this factor
       factor: 5.0
 
+  # If both keys corresponding to a bigram belong to the same finger AND are more than one row
+  # apart vertically, a cost is counted depending on their vertical distance.
+  # Bigrams that appear often (more than a specified share of the total number of bigrams) are
+  # weighted with an additional factor.
   finger_repeats_top_bottom:
     enabled: true
     weight: 1850.0
@@ -92,12 +123,22 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Costs of repeats with the index finger are multiplied with this factor
       index_finger_factor: 0.9
+      # Costs of repeats with the pinky finger are multiplied with this factor
       pinky_finger_factor: 1.2
+      # Common bigrams are weighted additionally only if their absolute weight exceeds this
+      # threshold
       total_weight_threshold: 20
+      # Common bigrams are weighted additionally only if their relative weight exceeds this
+      # fraction
       critical_fraction: 1.00025 # >1 -> do not use
+      # Common bigrams are weighted additionally by this factor
       factor: 5.0
 
+  # If both keys corresponding to a bigram belong to the same finger AND belong to the same row,
+  # a cost is counted.
+  # No cost incurs, if it is the same key. Such repeats are weighted with an additional
   finger_repeats_lateral:
     enabled: true
     weight: 780.0
@@ -107,6 +148,9 @@ metrics:
     params:
       null: null
 
+  # If the keys corresponding to a bigram belong to fingers of the same hand, a cost is counted
+  # depending on their vertical and horizontal distance. Depending on the direction of movement and
+  # "length" of the involved fingers, additional factors may be involved.
   line_changes:
     enabled: true
     weight: 5.5
@@ -114,12 +158,22 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"]]  # no left pinky!
+      # List of fingers that are considered "short"
+      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"], ["Left", "Pinky"]]
+      # List of fingers that are considered "long"
       long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
+      # If the movement is directed upwards from a short towards a long
+      # or downwards from a long towards a short finger,
+      # the cost is reduced by this factor
       short_up_to_long_or_long_down_to_short_reduction: 0.25
+      # If the movement is directed downwards from a short towards a long
+      # or upwards from a long towards a short finger,
+      # the cost is increased by this factor
       short_down_to_long_or_long_up_to_short_increase: 0.5
+      # Whether also bigrams involving both hands shall be considered
       count_row_changes_between_hands: false
 
+  # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
     enabled: true
     weight: 1050.0
@@ -127,6 +181,8 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # key positions as matrix positions and the corresponding costs
+      # [from_position, to_position]: weight
       matrix_positions:
         # all combinations with pinky will be added automatically
         #
@@ -144,6 +200,8 @@ metrics:
         [[3, 2], [3, 5]]: -0.01
         [[3, 8], [3, 11]]: -0.01
 
+  # Depending on which fingers of the same hand are used to hit the keys of a bigram, costs are
+  # counted.
   movement_pattern:
     enabled: true
     weight: 50.0
@@ -151,6 +209,9 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # from: Finger for first symbol of the bigram
+      # to: Finger for second symbol of the bigram
+      # cost: Cost to count for such a movement
       finger_switch_costs:
         - { from: [Left, Pinky],   to: [Left, Ring],    cost: 8 }
         - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
@@ -182,6 +243,9 @@ metrics:
         - { from: [Right, Pointer], to: [Right, Ring],    cost: 0.3 }
         - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
 
+  # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
+  # config), a cost is counted. If the second key is unbalancing as well, an additional cost
+  # depending on the distance to the first key is added.
   no_handswitch_after_unbalancing_key:
     enabled: true
     weight: 18.0
@@ -189,8 +253,11 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Additional cost factor if the second key is also unbalancing
       unbalancing_after_unbalancing: 4
 
+  # If (at least) one of the keys corresponding to a bigram is "unbalancing" (as defined in the
+  # keyboard's layout config), a cost is counted based on their distance.
   unbalancing_after_neighboring:
     enabled: true
     weight: 200.0
@@ -201,6 +268,10 @@ metrics:
       null: null
 
   # trigram metrics
+
+  # The `irregularity` metric evaluates all bigram metrics that can be computed on individual
+  # bigrams (in particular not the finger- and hand-balance metrics) for the first and second half
+  # of each trigram. Their cost is multiplied and the square root of the resulting sum is taken.
   irregularity:
     enabled: true
     weight: 8.25
@@ -210,6 +281,9 @@ metrics:
     params:
       null: null
 
+  # If there is no handswitch in a trigram, a cost is counted. The cost is multiplied by factors
+  # depending on whether the three keys corresponding to the trigram are "in line" ("rolling
+  # movement") or if there is a directional change.
   no_handswitch_in_trigram:
     enabled: true
     weight: 465.0
@@ -217,9 +291,16 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Count this factor if there is a direction change in the trigram
       factor_with_direction_change: 1.0
+      # Count this factor if there is no direction change in the trigram
       factor_without_direction_change: 0.0
 
+  # The `secondary_bigrams` metric evaluates all bigram metrics that can be computed on individual
+  # bigrams (in particular not the finger- and hand-balance metrics) for the bigram resulting from
+  # the first and last symbol of the trigram. Depending on whether the trigram involves a
+  # handswitch or not, factors are applied. Trigrams involving one of a list of specified symbols
+  # are excluded.
   secondary_bigrams:
     enabled: true
     weight: 0.2
@@ -227,10 +308,15 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Multiply the cost with this factor if no handswitch occurs in the trigram
       factor_no_handswitch: 0.7
+      # Multiply the cost with this factor if a handswitch occurs in the trigram
       factor_handswitch: 0.8
+      # Exclude secondary bigrams from trigrams involving one of the following symbols
       exclude_containing: [",", "."]
 
+  # If all keys corresponding to a trigram are hit by the same finger (and are all unequal), a cost
+  # is counted. A factor is multiplied for each bigram with keys belonging to different columns.
   trigram_finger_repeats:
     enabled: true
     weight: 10000.0
@@ -238,26 +324,42 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Multiply by this factor for each of the bigrams that have a lateral movement
       factor_lateral_movement: 1.2
 
+# Paths to ngram frequency files
 ngrams:
   unigrams: 1-gramme.arne.no-special.txt
   bigrams: 2-gramme.arne.no-special.txt
   trigrams: 3-gramme.arne.no-special.txt
 
 ngram_mapper:
+  # Split symbols belonging to higher layers of the layout into combinations involving modifiers
+  # required to activate the layer
   split_modifiers:
     enabled: true
+    # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
+    # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
 
+  # Add secondary bigrams from trigrams to the pool of bigrams. Secondary bigrams contain the first
+  # and last key corresponding to a trigram.
   secondary_bigrams_from_trigrams:
     enabled: false
+    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
     factor_no_handswitch: 0.7
+    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
     factor_handswitch: 0.8
+    # Exclude trigrams that contain one of the following symbols
     exclude_containing: [",", "."]
 
+  # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
+  # specified thresholds.
   increase_common_bigrams:
     enabled: false
+    # Bigrams with a relative weight exceeding this threshold are considered
     critical_fraction: 0.001
+    # The weight for bigrams exceeding both thresholds is multiplied by this factor
     factor: 2.0
+    # Bigrams with an absolute weight exceeding this threshold are considered
     total_weight_threshold: 20.0
