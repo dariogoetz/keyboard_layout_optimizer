@@ -40,7 +40,7 @@ Vue.component('evaluator-app', {
       </b-button>
 
       <b-button-group class="float-right">
-        <b-button :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="primary">
+        <b-button :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="secondary">
           <div v-if="optStep > 0 || loading > 0">
             <b-spinner small></b-spinner>
             <span v-if="optStep > 0">Iteration {{optStep}}</span>
@@ -146,52 +146,55 @@ Vue.component('evaluator-app', {
         },
     },
 
-    created () {
+    async created () {
         this.evalParams = eval_params
         this.optParams = opt_params
 
-        import("evolve-keyboard-layout-wasm").then((wasm) => {
-            this.wasm = wasm
-        })
+        this.wasm = await import("evolve-keyboard-layout-wasm")
 
         this.worker = Comlink.wrap(new Worker('worker.js'))
+        await this.worker.init()
 
-        this.worker.init().then(() => {
-            this.initNgramProvider().then(() => {
-                this.initLayoutEvaluator().then(() => {
-                    // reduce initial value of this.loading
-                    this.loading -= 1
-                })
-            }).catch((err) => console.error(err))
-        })
+        await this.initNgramProvider()
+        await this.initLayoutEvaluator()
+
+        // reduce initial value of this.loading
+        this.loading -= 1
     },
 
     methods: {
-        evaluateInput () {
+        async evaluateInput () {
             // check if the current layout is already available in this.details
             let existing = this.details.filter((d) => d.layout == this.inputLayout)
             if (existing.length > 0) {
                 this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, {variant: "primary"})
             } else {
-                this.evaluate(this.inputLayout).then((res) => {
-                    this.details.push(res)
-                }).catch((err) => console.error(err))
+                try {
+                    let details = await this.evaluate(this.inputLayout)
+                    this.details.push(details)
+                } catch (err) {
+                    console.error(err)
+                }
             }
         },
 
-        evaluateExisting () {
+        async evaluateExisting () {
             let promises = []
             this.details.forEach((d) => {
                 let promise = this.evaluate(d.layout)
                 promises.push(promise)
             })
-            Promise.all(promises).then((details) => {
+
+            try {
+                let details = await Promise.all(promises)
                 this.details = details
-            }).catch((err) => console.error(err))
+            } catch (err) {
+                console.error(err)
+            }
         },
 
-        evaluate (layout) {
-                let promise = new Promise((resolve, reject) => {
+        async evaluate (layout) {
+            let promise = new Promise(async (resolve, reject) => {
                 if (layout.length !== NKEYS) {
                     this.$bvToast.toast("Keyboard layout must have 32 (non-whitespace) symbols", {variant: "danger"})
                     reject("Keyboard layout must have 32 (non-whitespace) symbols")
@@ -200,76 +203,70 @@ Vue.component('evaluator-app', {
 
                 this.$bvToast.toast(`Evaluating layout "${layout}"`, {variant: "primary"})
                 this.loading += 1
-                this.worker.evaluateLayout(layout).then((res) => {
+                try {
+                    let res = await this.worker.evaluateLayout(layout)
                     res.layout = layout
                     this.loading -= 1
                     resolve(res)
-                }).catch((err) => {
+                } catch (err) {
                     this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
                     this.loading -= 1
                     reject(err)
-                })
+                }
             })
             return promise
         },
 
-        initNgramProvider () {
+        async initNgramProvider () {
             // this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
             this.loading += 1
-            return this.worker.initNgramProvider(this.ngramType, this.evalParams, this.corpusText).then(() => {
-                this.loading -= 1
-            })
+            await this.worker.initNgramProvider(this.ngramType, this.evalParams, this.corpusText)
+            this.loading -= 1
         },
 
-        initLayoutEvaluator () {
+        async initLayoutEvaluator () {
             // this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
             this.loading += 1
-            return this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParams).then(() => {
-                this.loading -= 1
-            })
+            await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParams)
+            this.loading -= 1
         },
 
-        updateEvalParams (evalParams) {
+        async updateEvalParams (evalParams) {
             this.evalParams = evalParams
 
-            this.initNgramProvider().then(() => {
-                this.initLayoutEvaluator().then(() => {
-                    this.evaluateExisting()
-                })
-            })
+            await this.initNgramProvider()
+            await this.initLayoutEvaluator()
+            await this.evaluateExisting()
         },
+
         updateOptParams (optParams) {
             this.optParams = optParams
         },
 
-        updateNgramProviderParams (ngramType, ngramData) {
+        async updateNgramProviderParams (ngramType, ngramData) {
             this.ngramType = ngramType
             if (ngramType === "from_text") {
                 this.corpusText = ngramData
             }
 
-            this.initNgramProvider().then(() => {
-                this.initLayoutEvaluator().then(() => {
-                    this.evaluateExisting()
-                })
-            })
+            await this.initNgramProvider()
+            await this.initLayoutEvaluator()
+            await this.evaluateExisting()
         },
 
-        updateLayoutConfig (layoutConfig) {
+        async updateLayoutConfig (layoutConfig) {
             this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
-            this.initLayoutEvaluator().then(() => {
-                this.evaluateExisting()
-            })
+            await this.initLayoutEvaluator()
+            await this.evaluateExisting()
 
         },
 
-        selectLayoutConfigType (selectedLayoutConfig) {
+        async selectLayoutConfigType (selectedLayoutConfig) {
             this.selectedLayoutConfig = selectedLayoutConfig
 
-            this.initLayoutEvaluator().then(() => {
-                this.evaluateExisting()
-            })
+            await this.initLayoutEvaluator()
+            await this.evaluateExisting()
         },
 
         removeLayout (layout) {
