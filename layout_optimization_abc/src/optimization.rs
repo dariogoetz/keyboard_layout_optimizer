@@ -2,7 +2,7 @@ use keyboard_layout::layout::Layout;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
 
-use super::common::{Cache, PermutationLayoutGenerator};
+use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
 use serde::Deserialize;

@@ -1,4 +1,4 @@
-pub mod common;
+pub mod optimization;
 
 #[cfg(test)]
 mod tests {

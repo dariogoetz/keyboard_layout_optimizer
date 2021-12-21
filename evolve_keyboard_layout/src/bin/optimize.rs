@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
-use layout_optimization::optimization;
+use layout_optimization_genevo::optimization;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]

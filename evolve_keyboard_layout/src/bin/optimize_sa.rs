@@ -3,7 +3,7 @@ use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
 use layout_optimization::common::Cache;
-use layout_optimization::optimization_sa;
+use layout_optimization_sa::optimization;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -117,7 +117,7 @@ fn main() {
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let optimization_params =
-        optimization_sa::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
+        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
@@ -163,7 +163,7 @@ fn main() {
             }
 
             // Perform the optimization.
-            let layout = optimization_sa::optimize(
+            let layout = optimization::optimize(
                 &format!("Process {:>3}", i),
                 &optimization_params,
                 &fix_from,

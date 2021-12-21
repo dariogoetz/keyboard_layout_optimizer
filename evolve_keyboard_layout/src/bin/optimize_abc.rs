@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
-use layout_optimization::optimization_abc;
+use layout_optimization_abc::optimization;
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -50,14 +50,14 @@ fn main() {
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let optimization_params =
-        optimization_abc::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
+        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
 
     let fix_from = options.fix_from.to_string();
 
-    for new_best in optimization_abc::optimize(
+    for new_best in optimization::optimize(
         &optimization_params,
         &evaluator,
         &fix_from,
