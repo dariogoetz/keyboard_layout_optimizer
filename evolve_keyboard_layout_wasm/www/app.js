@@ -63,19 +63,19 @@ Vue.component('evaluator-app', {
       <h2>Settings</h2>
       <b-tabs>
 
-        <b-tab title="Evaluation Parameters">
+        <b-tab title="Evaluation">
           <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
         </b-tab>
 
-        <b-tab title="Ngram Settings">
+        <b-tab title="Ngrams">
           <ngram-config @selected="updateNgramProviderParams"></ngram-config>
         </b-tab>
 
-        <b-tab title="Keyboard Settings">
+        <b-tab title="Keyboard">
           <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
         </b-tab>
 
-        <b-tab title="Optimization Parameters">
+        <b-tab title="Optimization">
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
           <label class="mr-sm-2">Fixed Keys</label>
           <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
@@ -381,12 +381,10 @@ Vue.component('evaluator-app', {
 
 Vue.component('layout-button', {
     template: `
-    <div>
       <b-button-group size="sm" class="mx-1">
         <b-button>{{layout}}</b-button>
         <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
-    </div>
     `,
     props: {
         layout: { type: String, default: "", required: true },
@@ -400,12 +398,10 @@ Vue.component('layout-button', {
 
 Vue.component('keyboard-selector', {
     template: `
-    <div>
     <b-form inline>
       <label class="mr-sm-2">Keyboard</label>
       <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
     </b-form>
-    </div>
     `,
     props: {
         defaultSelection: { type: String, default: "standard" },
