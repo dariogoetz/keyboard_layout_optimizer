@@ -15,6 +15,7 @@ const evaluator = {
     trigrams: null,
     ngramProvider: null,
     layoutEvaluator: null,
+    layoutOptimizer: null,
 
     init () {
         return Promise.all([wasm_import, unigram_import, bigram_import, trigram_import])
@@ -48,6 +49,20 @@ const evaluator = {
             evalParams,
             this.ngramProvider,
         )
+    },
+
+    initLayoutOptimizer (layout, fixed_chars, optParams) {
+        this.layoutOptimizer = this.wasm.LayoutOptimizer.new(
+            layout,
+            optParams,
+            this.layoutEvaluator,
+            fixed_chars,
+            true,
+        )
+    },
+
+    optimizationStep () {
+        return this.layoutOptimizer.step()
     },
 
     evaluateLayout (layout) {

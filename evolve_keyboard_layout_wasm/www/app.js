@@ -3,6 +3,8 @@ import config_ortho from '../../config/ortho.yml'
 import config_ortho_bored from '../../config/ortho_bored.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
+import opt_params from '../../config/optimization_parameters_web.yml'
+
 import Worker from "./worker.js"
 
 const LAYOUT_CONFIGS = [
@@ -27,8 +29,7 @@ Vue.component('evaluator-app', {
     <b-col xl="4" lg="6" style="height: 450px">
       <h2>Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-
-        <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0" ></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
       </b-form>
       <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig"></layout-plot>
@@ -37,6 +38,18 @@ Vue.component('evaluator-app', {
         <div v-if="loading > 0"><b-spinner small></b-spinner> Loading</div>
         <div v-else>Evaluate</div>
       </b-button>
+
+      <b-button-group>
+        <b-button class="float-right" :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="primary">
+          <div v-if="optStep > 0 || loading > 0">
+            <b-spinner small></b-spinner>
+            <span v-if="optStep > 0">Iteration {{optStep}}</span>
+            <span v-else>Loading</span>
+          </div>
+          <div v-else>Optimize</div>
+        </b-button>
+        <b-button v-if="optStep > 0" @click="optCancelRequest" variant="danger"><b-icon-x-circle-fill /></b-button>
+      </b-button-group>
 
     </b-col>
 
@@ -54,6 +67,14 @@ Vue.component('evaluator-app', {
 
         <b-tab title="Keyboard Settings">
           <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
+        </b-tab>
+
+        <b-tab title="Optimization Parameters">
+      <b-form inline @submit.stop.prevent @submit="evaluateInput">
+          <label class="mr-sm-2">Fixed Keys</label>
+          <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        </b-form>
+          <config-file :initial-content="optParams" @saved="updateOptParams">
         </b-tab>
 
       </b-tabs>
@@ -99,9 +120,13 @@ Vue.component('evaluator-app', {
             corpusText: null,
             wasm: null,
             evalParams: null,
+            optParams: null,
             selectedLayoutConfig: "standard",
             layoutConfigs,
             loading: 1,
+            optStep: 0,
+            optFixed: ",.",
+            optCancel: false,
         }
     },
     computed: {
@@ -120,8 +145,10 @@ Vue.component('evaluator-app', {
             return this.layoutConfigs[this.selectedLayoutConfig]
         },
     },
+
     created () {
         this.evalParams = eval_params
+        this.optParams = opt_params
 
         import("evolve-keyboard-layout-wasm").then((wasm) => {
             this.wasm = wasm
@@ -211,6 +238,9 @@ Vue.component('evaluator-app', {
                 })
             })
         },
+        updateOptParams (optParams) {
+            this.optParams = optParams
+        },
 
         updateNgramProviderParams (ngramType, ngramData) {
             this.ngramType = ngramType
@@ -245,6 +275,45 @@ Vue.component('evaluator-app', {
         removeLayout (layout) {
             this.details = this.details.filter((d) => d.layout !== layout)
         },
+
+        async optimizeInput () {
+            this.optStep = 1
+            this.optCancel = false
+
+            // check if given layout_str is valid
+            try {
+                await this.evaluate(this.inputLayout)
+            } catch (err) {
+                this.optStep = 0
+                this.optCancel = false
+                return
+            }
+
+            await this.worker.initLayoutOptimizer(
+                this.inputLayout,
+                this.optFixed,
+                this.optParams
+            )
+
+            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, {variant: "primary"})
+            let res
+            do {
+                res = await this.worker.optimizationStep()
+                if (res !== null) {
+                    this.inputLayoutRaw = res.layout
+                    this.optStep += 1
+                }
+            } while (res !== null && !this.optCancel)
+
+            this.$bvToast.toast("Optimization finished", {variant: "primary"})
+            this.optStep = 0
+            this.optCancel = false
+        },
+
+        optCancelRequest () {
+            this.optCancel = true
+            this.$bvToast.toast("Stopping optimization", {variant: "primary"})
+        },
     }
 })
 
@@ -253,7 +322,7 @@ Vue.component('layout-button', {
     <div>
       <b-button-group size="sm" class="mx-1">
         <b-button>{{layout}}</b-button>
-        <b-button variant="danger" @click="remove"><b-icon-x-circle-fill></b-button>
+        <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
     </div>
     `,
