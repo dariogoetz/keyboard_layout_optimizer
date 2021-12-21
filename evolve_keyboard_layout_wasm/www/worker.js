@@ -59,6 +59,8 @@ const evaluator = {
             fixed_chars,
             true,
         )
+
+        return this.layoutOptimizer.parameters()
     },
 
     optimizationStep () {
@@ -70,6 +72,10 @@ const evaluator = {
         res.layout = layout
         return res
     },
+
+    permutableKeys () {
+        return this.layoutEvaluator.permutable_keys()
+    }
 }
 
 Comlink.expose(evaluator)

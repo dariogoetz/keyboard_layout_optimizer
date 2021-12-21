@@ -5,7 +5,7 @@ use layout_evaluation::evaluation::Evaluator;
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 use std::sync::Arc;
 use std::usize;
 
@@ -18,7 +18,7 @@ use genevo::random::SliceRandom;
 use genevo::simulation::simulator::Simulator;
 use genevo::types::fmt::Display;
 
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Parameters {
     pub population_size: usize,
     pub generation_limit: u64,
