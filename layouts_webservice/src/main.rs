@@ -114,7 +114,7 @@ fn rocket() -> _ {
         &p
     ));
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
-    let ngram_mapper = OnDemandNgramMapper::with_ngrams(&unigrams, &bigrams, &trigrams, ngram_mapper_config);
+    let ngram_mapper = OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
     let evaluator =
         Evaluator::default(Box::new(ngram_mapper)).default_metrics(&eval_params.metrics);
