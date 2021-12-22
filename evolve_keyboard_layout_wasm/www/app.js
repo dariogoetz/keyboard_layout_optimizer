@@ -385,8 +385,8 @@ Vue.component('layout-button', {
     template: `
       <div>
         <b-button-group size="sm" class="mx-1">
-          <b-button disabled>{{layout}}</b-button>
-          <b-button variant="light" @click="showModal = !showModal">Publish</b-button>
+          <b-button disabled variant="outline-dark">{{layout}}</b-button>
+          <b-button variant="secondary" @click="showModal = !showModal">Publish</b-button>
           <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
         </b-button-group>
         <b-modal v-model="showModal" title="Publish Layout" @ok="publish">
