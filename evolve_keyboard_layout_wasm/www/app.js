@@ -436,9 +436,9 @@ Vue.component('layout-button', {
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
-                    this.$bvToast.toast(`Layout had already been published: Cost: ${resData.total_cost}`, {variant: 'warning'})
+                    this.$bvToast.toast(`Layout had already been published: Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'warning'})
                 } else {
-                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost}`, {variant: 'primary'})
+                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'primary'})
                 }
             } catch (err) {
                 this.$bvToast.toast(`Error while publishing layout: ${err}`, {variant: 'danger'})
