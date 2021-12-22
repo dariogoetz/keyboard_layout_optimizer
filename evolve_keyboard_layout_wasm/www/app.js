@@ -37,8 +37,8 @@ Vue.component('evaluator-app', {
       <h2>Layout</h2>
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
         <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
-        <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
+        <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
       </b-form>
       <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig" :permutableKeys="permutableKeys"></layout-plot>
 
