@@ -386,10 +386,10 @@ Vue.component('layout-button', {
       <div>
         <b-button-group size="sm" class="mx-1">
           <b-button disabled>{{layout}}</b-button>
-          <b-button v-b-modal.modal variant="light">Publish</b-button>
+          <b-button variant="light" @click="showModal = !showModal">Publish</b-button>
           <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
         </b-button-group>
-        <b-modal id="modal" title="Publish Layout" @ok="publish">
+        <b-modal v-model="showModal" title="Publish Layout" @ok="publish">
           <label class="mr-sm-2">Publish Name</label>
           <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         </b-modal>
@@ -402,6 +402,7 @@ Vue.component('layout-button', {
         return {
             publishName: null,
             showNameState: false,
+            showModal: false,
         }
     },
     computed: {
