@@ -19,6 +19,7 @@ serde = { version="^1.0", features=[ "derive" ] }
 serde_yaml = "*"
 serde_json = "*"
 anyhow = "*"
+async-trait = "*"
 
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }

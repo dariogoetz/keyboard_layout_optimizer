@@ -81,6 +81,40 @@ impl LayoutConfig {
     }
 }
 
+use async_trait::async_trait;
+use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::Header;
+use rocket::{Request, Response};
+
+pub struct Cors;
+
+#[async_trait]
+impl Fairing for Cors {
+    fn info(&self) -> Info {
+        Info {
+            name: "Cross-Origin-Resource-Sharing Middleware",
+            kind: Kind::Response,
+        }
+    }
+
+    async fn on_response<'r>(&self,
+        _request: &'r Request<'_>,
+        response: &mut Response<'r>) {
+        response.set_header(Header::new(
+            "Access-Control-Allow-Origin",
+            "http://localhost:8080,https://dariogoetz.github.io",
+        ));
+        response.set_header(Header::new(
+            "Access-Control-Allow-Methods",
+            "GET, POST, PATCH, OPTIONS",
+        ));
+        response.set_header(Header::new(
+            "Access-Control-Allow-Headers",
+            "*"
+        ));
+    }
+}
+
 #[launch]
 fn rocket() -> _ {
     let rocket = rocket::build();
@@ -125,5 +159,6 @@ fn rocket() -> _ {
         .manage(layout_generator)
         .attach(AdHoc::config::<Options>())
         .attach(api::stage())
+        .attach(Cors)
         .mount("/", FileServer::from(&options.static_dir))
 }

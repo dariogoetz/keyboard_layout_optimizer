@@ -7,6 +7,8 @@ import opt_params from '../../config/optimization_parameters_web.yml'
 
 import Worker from "./worker.js"
 
+const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
+
 const LAYOUT_CONFIGS = [
     { key: 'standard', label: 'Standard', config: config_standard_keyboard },
     { key: 'ortho', label: 'Ortho', config: config_ortho },
@@ -381,18 +383,66 @@ Vue.component('evaluator-app', {
 
 Vue.component('layout-button', {
     template: `
-      <b-button-group size="sm" class="mx-1">
-        <b-button>{{layout}}</b-button>
-        <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
-      </b-button-group>
+      <div>
+        <b-button-group size="sm" class="mx-1">
+          <b-button>{{layout}}</b-button>
+          <b-button v-b-modal.modal variant="light">Publish</b-button>
+          <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
+        </b-button-group>
+        <b-modal id="modal" title="Publish Layout" @ok="publish">
+          <label class="mr-sm-2">Publish Name</label>
+          <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        </b-modal>
+      </div>
     `,
     props: {
         layout: { type: String, default: "", required: true },
+    },
+    data () {
+        return {
+            publishName: null,
+            showNameState: false,
+        }
+    },
+    computed: {
+        nameState () {
+            if (!this.showNameState) {
+                return null
+            } else if (this.publishName === null || this.publishName.length === 0) {
+                return false
+            } else {
+                return true
+            }
+        },
     },
     methods: {
         remove () {
             this.$emit("remove", this.layout)
         },
+        async publish (bvModalEvt) {
+            this.showNameState = true
+            if (!this.nameState) {
+                bvModalEvt.preventDefault()
+                return
+            }
+            try {
+                let res = await fetch(PUBLISH_URL, {
+                    method: "POST",
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName })
+                })
+                let resData = await res.json()
+                if (resData.published_by !== this.publishName) {
+                    this.$bvToast.toast(`Layout had already been published: Cost: ${resData.total_cost}`, {variant: 'warning'})
+                } else {
+                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost}`, {variant: 'primary'})
+                }
+            } catch (err) {
+                this.$bvToast.toast(`Error while publishing layout: ${err}`, {variant: 'danger'})
+            }
+        }
     },
 })
 

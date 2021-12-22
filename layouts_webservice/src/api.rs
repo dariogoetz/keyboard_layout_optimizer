@@ -65,6 +65,10 @@ struct PostLayout {
     secret: Option<String>,
 }
 
+#[options("/")]
+fn cors_preflight() -> () {
+}
+
 #[post("/", data = "<layout>")]
 async fn post(
     mut db: Connection<Db>,
@@ -250,6 +254,6 @@ pub fn stage() -> AdHoc {
             .attach(Db::init())
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
             // .mount("/", routes![list, post, get, delete, reeval])
-            .mount("/api", routes![list, post, get, reeval])
+            .mount("/api", routes![list, post, get, reeval, cors_preflight])
     })
 }
