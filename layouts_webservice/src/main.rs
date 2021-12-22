@@ -102,7 +102,7 @@ impl Fairing for Cors {
         response: &mut Response<'r>) {
         response.set_header(Header::new(
             "Access-Control-Allow-Origin",
-            "http://localhost:8080,https://dariogoetz.github.io",
+            "http://localhost:8080, https://dariogoetz.github.io",
         ));
         response.set_header(Header::new(
             "Access-Control-Allow-Methods",
