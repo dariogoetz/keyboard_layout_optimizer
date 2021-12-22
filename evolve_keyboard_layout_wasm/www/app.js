@@ -227,6 +227,7 @@ Vue.component('evaluator-app', {
             let existing = this.details.filter((d) => d.layout == this.inputLayout)
             if (existing.length > 0) {
                 this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, {variant: "primary"})
+                this.showInputValidState = false
             } else {
                 try {
                     let details = await this.evaluate(this.inputLayout)
