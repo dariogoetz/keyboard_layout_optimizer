@@ -227,6 +227,7 @@ Vue.component('evaluator-app', {
             let existing = this.details.filter((d) => d.layout == this.inputLayout)
             if (existing.length > 0) {
                 this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, {variant: "primary"})
+                this.showInputValidState = false
             } else {
                 try {
                     let details = await this.evaluate(this.inputLayout)
@@ -385,11 +386,11 @@ Vue.component('layout-button', {
     template: `
       <div>
         <b-button-group size="sm" class="mx-1">
-          <b-button disabled>{{layout}}</b-button>
-          <b-button v-b-modal.modal variant="light">Publish</b-button>
+          <b-button disabled variant="outline-dark">{{layout}}</b-button>
+          <b-button variant="secondary" @click="showModal = !showModal">Publish</b-button>
           <b-button variant="danger" @click="remove"><b-icon-x-circle-fill /></b-button>
         </b-button-group>
-        <b-modal id="modal" title="Publish Layout" @ok="publish">
+        <b-modal v-model="showModal" title="Publish Layout" @ok="publish">
           <label class="mr-sm-2">Publish Name</label>
           <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         </b-modal>
@@ -402,6 +403,7 @@ Vue.component('layout-button', {
         return {
             publishName: null,
             showNameState: false,
+            showModal: false,
         }
     },
     computed: {
@@ -435,9 +437,9 @@ Vue.component('layout-button', {
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
-                    this.$bvToast.toast(`Layout had already been published: Cost: ${resData.total_cost}`, {variant: 'warning'})
+                    this.$bvToast.toast(`Layout had already been published: Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'warning'})
                 } else {
-                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost}`, {variant: 'primary'})
+                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'primary'})
                 }
             } catch (err) {
                 this.$bvToast.toast(`Error while publishing layout: ${err}`, {variant: 'danger'})
