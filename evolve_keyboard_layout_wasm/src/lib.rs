@@ -17,7 +17,8 @@ use layout_evaluation::{
 };
 
 use layout_optimization::common;
-use layout_optimization_genevo::optimization;
+use layout_optimization_genevo::optimization as gen_optimization;
+use layout_optimization_sa::optimization as sa_optimization;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -215,10 +216,10 @@ impl LayoutEvaluator {
 #[wasm_bindgen]
 pub struct LayoutOptimizer {
     evaluator: Evaluator,
-    simulator: optimization::MySimulator,
+    simulator: gen_optimization::MySimulator,
     permutation_layout_generator: common::PermutationLayoutGenerator,
     all_time_best: Option<(usize, Vec<usize>)>,
-    parameters: optimization::Parameters,
+    parameters: gen_optimization::Parameters,
 }
 
 #[wasm_bindgen]
@@ -232,10 +233,11 @@ impl LayoutOptimizer {
     ) -> Result<LayoutOptimizer, JsValue> {
         utils::set_panic_hook();
 
-        let parameters: optimization::Parameters = serde_yaml::from_str(optimization_params_str)
-            .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
+        let parameters: gen_optimization::Parameters =
+            serde_yaml::from_str(optimization_params_str)
+                .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
-        let (simulator, permutation_layout_generator) = optimization::init_optimization(
+        let (simulator, permutation_layout_generator) = gen_optimization::init_optimization(
             &parameters,
             &layout_evaluator.evaluator,
             layout_str,
@@ -305,3 +307,98 @@ impl LayoutOptimizer {
         }
     }
 }
+
+/* #[wasm_bindgen]
+pub struct LayoutOptimizer {
+    evaluator: Evaluator,
+    simulator: sa_optimization::MySimulator,
+    permutation_layout_generator: common::PermutationLayoutGenerator,
+    all_time_best: Option<(usize, Vec<usize>)>,
+    parameters: sa_optimization::Parameters,
+}
+
+#[wasm_bindgen]
+impl LayoutOptimizer {
+    pub fn new(
+        layout_str: &str,
+        optimization_params_str: &str,
+        layout_evaluator: &LayoutEvaluator,
+        fixed_characters: &str,
+        start_with_layout: bool,
+    ) -> Result<LayoutOptimizer, JsValue> {
+        utils::set_panic_hook();
+
+        let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
+            .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
+
+        let (simulator, permutation_layout_generator) = sa_optimization::init_optimization(
+            &parameters,
+            &layout_evaluator.evaluator,
+            layout_str,
+            &layout_evaluator.layout_generator,
+            fixed_characters,
+            start_with_layout,
+            true,
+        );
+
+        Ok(LayoutOptimizer {
+            evaluator: layout_evaluator.evaluator.clone(),
+            simulator,
+            permutation_layout_generator,
+            all_time_best: None,
+            parameters,
+        })
+    }
+
+    pub fn parameters(&self) -> JsValue {
+        return JsValue::from_serde(&self.parameters).unwrap();
+    }
+
+    pub fn step(&mut self) -> Result<JsValue, JsValue> {
+        use genevo::prelude::*;
+
+        let result = self.simulator.step();
+        match result {
+            Ok(SimResult::Intermediate(step)) => {
+                let best_solution = step.result.best_solution;
+                if let Some(king) = &self.all_time_best {
+                    if best_solution.solution.fitness > king.0 {
+                        self.all_time_best = Some((
+                            best_solution.solution.fitness,
+                            best_solution.solution.genome.clone(),
+                        ));
+                    }
+                } else {
+                    self.all_time_best = Some((
+                        best_solution.solution.fitness,
+                        best_solution.solution.genome.clone(),
+                    ));
+                }
+
+                let layout = self
+                    .permutation_layout_generator
+                    .generate_layout(&self.all_time_best.as_ref().unwrap().1);
+                let res = self.evaluator.evaluate_layout(&layout);
+                let printed = Some(format!("{}", res));
+                let plot = Some(layout.plot());
+                let layout_str = Some(layout.as_text());
+
+                let mut res: LayoutEvaluation = res.into();
+                res.printed = printed;
+                res.plot = plot;
+                res.layout = layout_str;
+
+                return Ok(JsValue::from_serde(&Some(res)).unwrap());
+            }
+            Ok(SimResult::Final(_, _, _, _)) => {
+                return Ok(JsValue::from_serde(&None::<Option<EvaluationResult>>).unwrap());
+                // break
+            }
+            Err(error) => {
+                return Err(format!("Error in optimization: {:?}", error))?;
+                // break
+            }
+        }
+    }
+}
+ */
