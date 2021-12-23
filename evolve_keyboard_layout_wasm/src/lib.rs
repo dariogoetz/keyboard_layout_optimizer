@@ -205,6 +205,11 @@ impl LayoutEvaluator {
             .map_err(|e| format!("Could not plot the layout: {:?}", e))?;
         Ok(layout.plot_layer(layer))
     }
+
+    pub fn permutable_keys(&self) -> JsValue {
+        let permutable_keys = self.layout_generator.permutable_keys();
+        return JsValue::from_serde(&permutable_keys).unwrap();
+    }
 }
 
 #[wasm_bindgen]
@@ -213,6 +218,7 @@ pub struct LayoutOptimizer {
     simulator: optimization::MySimulator,
     permutation_layout_generator: common::PermutationLayoutGenerator,
     all_time_best: Option<(usize, Vec<usize>)>,
+    parameters: optimization::Parameters,
 }
 
 #[wasm_bindgen]
@@ -226,11 +232,11 @@ impl LayoutOptimizer {
     ) -> Result<LayoutOptimizer, JsValue> {
         utils::set_panic_hook();
 
-        let cfg: optimization::Parameters = serde_yaml::from_str(optimization_params_str)
+        let parameters: optimization::Parameters = serde_yaml::from_str(optimization_params_str)
             .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
         let (simulator, permutation_layout_generator) = optimization::init_optimization(
-            &cfg,
+            &parameters,
             &layout_evaluator.evaluator,
             layout_str,
             &layout_evaluator.layout_generator,
@@ -244,7 +250,12 @@ impl LayoutOptimizer {
             simulator,
             permutation_layout_generator,
             all_time_best: None,
+            parameters,
         })
+    }
+
+    pub fn parameters(&self) -> JsValue {
+        return JsValue::from_serde(&self.parameters).unwrap();
     }
 
     pub fn step(&mut self) -> Result<JsValue, JsValue> {

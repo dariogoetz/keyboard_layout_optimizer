@@ -196,4 +196,9 @@ impl NeoLayoutGenerator {
 
         self.generate_unchecked(layout_keys)
     }
+
+    /// Get the list of permutable symbols
+    pub fn permutable_keys(&self) -> Vec<char> {
+        self.permutable_key_map.keys().cloned().collect()
+    }
 }

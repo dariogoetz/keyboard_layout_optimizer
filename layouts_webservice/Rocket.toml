@@ -6,6 +6,7 @@ unigrams = "../1-gramme.arne.no-special.txt"
 bigrams = "../2-gramme.arne.no-special.txt"
 trigrams = "../3-gramme.arne.no-special.txt"
 secret = "super_duper_secret"
+allowed_cors_origins = "http://localhost:8080"
 
 [default.databases.sqlx]
 url = "postgres://postgres:super_secret@localhost:15432/postgres"
