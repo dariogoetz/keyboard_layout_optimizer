@@ -1,5 +1,5 @@
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js")
-;
+    ;
 // instantiate wasm module
 let wasm_import = import("evolve-keyboard-layout-wasm")
 let unigram_import = import('../../1-gramme.arne.no-special.txt')
@@ -17,7 +17,7 @@ const evaluator = {
     layoutEvaluator: null,
     layoutOptimizer: null,
 
-    init () {
+    init() {
         return Promise.all([wasm_import, unigram_import, bigram_import, trigram_import])
             .then((imports) => {
                 this.wasm = imports[0]
@@ -27,7 +27,7 @@ const evaluator = {
             })
     },
 
-    initNgramProvider (ngramType, evalParams, corpusText) {
+    initNgramProvider(ngramType, evalParams, corpusText) {
         if (ngramType === 'prepared') {
             this.ngramProvider = this.wasm.NgramProvider.with_frequencies(
                 evalParams,
@@ -43,7 +43,7 @@ const evaluator = {
         }
     },
 
-    initLayoutEvaluator (layoutConfig, evalParams) {
+    initLayoutEvaluator(layoutConfig, evalParams) {
         this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
             layoutConfig,
             evalParams,
@@ -51,7 +51,7 @@ const evaluator = {
         )
     },
 
-    initLayoutOptimizer (layout, fixed_chars, optParams) {
+    initLayoutOptimizer(layout, fixed_chars, optParams) {
         this.layoutOptimizer = this.wasm.LayoutOptimizer.new(
             layout,
             optParams,
@@ -63,19 +63,19 @@ const evaluator = {
         return this.layoutOptimizer.parameters()
     },
 
-    optimizationStep () {
+    optimizationStep() {
         return this.layoutOptimizer.step()
     },
 
-    evaluateLayout (layout) {
+    evaluateLayout(layout) {
         let res = this.layoutEvaluator.evaluate(layout)
         res.layout = layout
         return res
     },
 
-    permutableKeys () {
+    permutableKeys() {
         return this.layoutEvaluator.permutable_keys()
-    }
+    },
 }
 
 Comlink.expose(evaluator)

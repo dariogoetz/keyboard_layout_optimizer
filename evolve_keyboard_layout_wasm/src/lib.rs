@@ -308,6 +308,36 @@ impl LayoutOptimizer {
     }
 }
 
+#[wasm_bindgen]
+pub fn sa_optimize(
+    optimization_params_str: &str,
+    layout_evaluator: &LayoutEvaluator,
+    layout_str: &str,
+    fixed_characters: &str,
+    layout_generator: &NeoLayoutGenerator,
+    start_with_layout: bool,
+    evaluator: &Evaluator,
+    optional_init_temp: Option<f64>,
+    log_everything: bool,
+    result_cache: Option<Cache<f64>>,
+) {
+    let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
+        .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
+    let result = sa_optimization::optimize(
+        "Web optimization",
+        parameters,
+        layout_str,
+        fixed_characters,
+        layout_generator,
+        start_with_layout,
+        evaluator,
+        optional_init_temp,
+        log_everything,
+        result_cache,
+    );
+    result
+}
+
 /* #[wasm_bindgen]
 pub struct LayoutOptimizer {
     evaluator: Evaluator,

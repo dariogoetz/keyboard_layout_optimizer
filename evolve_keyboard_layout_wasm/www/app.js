@@ -54,7 +54,7 @@ Vue.component('evaluator-app', {
             <span v-if="optStep > 0">Iteration {{optStep}}/{{optTotalSteps}}</span>
             <span v-else>Loading</span>
           </div>
-          <div v-else>Optimize using {{ optMode }}</div>
+          <div v-else>Optimize</div>
         </b-button>
         <b-button v-if="optStep > 0" @click="optCancelRequest" variant="danger"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
@@ -337,7 +337,7 @@ Vue.component('evaluator-app', {
         },
 
         async startOptimization() {
-            if (this.optMode === "simulated annealing") {
+            if (this.optMode === "simulated_annealing") {
                 this.saOptimization()
             } else if (this.optMode === "genevo") {
                 this.genevoOtimization()
