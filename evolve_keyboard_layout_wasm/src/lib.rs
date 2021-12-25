@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{
     keyboard::{Keyboard, KeyboardYAML},
+    layout::Layout,
     layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
 };
 
@@ -316,11 +317,11 @@ pub fn sa_optimize(
     fixed_characters: &str,
     start_with_layout: bool,
     optional_init_temp: Option<f64>,
-) {
+) -> String {
     let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
-    let result = sa_optimization::optimize(
+    let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         parameters,
         layout_str,
@@ -332,7 +333,7 @@ pub fn sa_optimize(
         /* log_everything: */ false,
         Cache::new(),
     );
-    result
+    result.as_text()
 }
 
 /* #[wasm_bindgen]
