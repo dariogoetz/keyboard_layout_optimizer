@@ -218,7 +218,7 @@ impl LayoutEvaluator {
 pub struct LayoutOptimizer {
     evaluator: Evaluator,
     simulator: gen_optimization::MySimulator,
-    permutation_layout_generator: common::PermutationLayoutGenerator,
+    permutation_layout_generator: PermutationLayoutGenerator,
     all_time_best: Option<(usize, Vec<usize>)>,
     parameters: gen_optimization::Parameters,
 }
@@ -319,19 +319,20 @@ pub fn sa_optimize(
     optional_init_temp: Option<f64>,
 ) -> String {
     let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
-        .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
+        .map_err(|e| format!("Could not read optimization params: {:?}", e))
+        .unwrap();
 
     let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
-        parameters,
+        &parameters,
         layout_str,
         fixed_characters,
         layout_evaluator.layout_generator,
         start_with_layout,
-        evaluator.evaluator,
+        layout_evaluator.evaluator,
         optional_init_temp,
         /* log_everything: */ false,
-        Cache::new(),
+        Some(Cache::new()),
     );
     result.as_text()
 }
