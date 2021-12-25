@@ -61,24 +61,20 @@ impl ArgminOp for AnnealingStruct<'_> {
 
     /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
-        let layout_str = self.layout_generator.generate_string(param);
+        let evaluate_layout_str = |layout_str: &str| -> f64 {
+            let l = self
+                .layout_generator
+                .layout_generator
+                .generate(layout_str)
+                .unwrap();
+            self.evaluator.evaluate_layout(&l).total_cost()
+        };
+
+        let layout_string = self.layout_generator.generate_string(param);
         let evaluation_result = match &self.result_cache {
-            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
-                let l = self
-                    .layout_generator
-                    .layout_generator
-                    .generate(&layout_str)
-                    .unwrap();
-                self.evaluator.evaluate_layout(&l).total_cost()
-            }),
-            None => {
-                let l = self
-                    .layout_generator
-                    .layout_generator
-                    .generate(&layout_str)
-                    .unwrap();
-                self.evaluator.evaluate_layout(&l).total_cost()
-            }
+            Some(result_cache) => result_cache
+                .get_or_insert_with(&layout_string, || evaluate_layout_str(&layout_string)),
+            None => evaluate_layout_str(&layout_string),
         };
 
         Ok(evaluation_result)
