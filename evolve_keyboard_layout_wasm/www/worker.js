@@ -51,7 +51,20 @@ const evaluator = {
         )
     },
 
-    initLayoutOptimizer(layout, fixed_chars, optParams) {
+    async saOptimize(layout, fixed_chars, optParams) {
+        let optLayout = this.wasm.sa_optimize(
+            layout,
+            optParams,
+            this.layoutEvaluator,
+            fixed_chars,
+            true,
+            120, // TODO: Implement a way to input the initial temperature.
+        )
+
+        return optLayout
+    },
+
+    initGenLayoutOptimizer(layout, fixed_chars, optParams) {
         this.layoutOptimizer = this.wasm.LayoutOptimizer.new(
             layout,
             optParams,
@@ -63,7 +76,7 @@ const evaluator = {
         return this.layoutOptimizer.parameters()
     },
 
-    optimizationStep() {
+    genOptimizationStep() {
         return this.layoutOptimizer.step()
     },
 

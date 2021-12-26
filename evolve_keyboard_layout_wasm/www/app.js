@@ -3,7 +3,8 @@ import config_ortho from '../../config/ortho.yml'
 import config_ortho_bored from '../../config/ortho_bored.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
-import opt_params from '../../config/optimization_parameters_web.yml'
+import gen_opt_params from '../../config/optimization_parameters_web.yml'
+import sa_opt_params from '../../config/optimization_parameters_sa_web.yml'
 
 import Worker from "./worker.js"
 
@@ -82,7 +83,7 @@ Vue.component('evaluator-app', {
           <label class="mr-sm-2">Fixed Keys</label>
           <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         </b-form>
-          <config-file :initial-content="optParamsStr" @saved="updateOptParams">
+          <config-file :initial-content="genOptParamsStr" @saved="updateOptParams">
         </b-tab>
 
       </b-tabs>
@@ -126,9 +127,10 @@ Vue.component('evaluator-app', {
             ngramType: "prepared",
             corpusText: null,
             evalParamsStr: null,
-            optMode: 'genevo',
+            optMode: 'simulated_annealing',
             permutableKeys: null,
-            optParamsStr: null,
+            genOptParamsStr: null,
+            saOptParamsStr: null,
             optParams: null,
             selectedLayoutConfig: "standard",
             layoutConfigs,
@@ -207,7 +209,8 @@ Vue.component('evaluator-app', {
 
     async created() {
         this.evalParamsStr = eval_params
-        this.optParamsStr = opt_params
+        this.genOptParamsStr = gen_opt_params
+        this.saOptParamsStr = sa_opt_params
 
         this.wasm = await import("evolve-keyboard-layout-wasm")
 
@@ -303,7 +306,7 @@ Vue.component('evaluator-app', {
         },
 
         updateOptParams(optParamsStr) {
-            this.optParamsStr = optParamsStr
+            this.genOptParamsStr = optParamsStr
         },
 
         async updateNgramProviderParams(ngramType, ngramData) {
@@ -338,15 +341,22 @@ Vue.component('evaluator-app', {
 
         async startOptimization() {
             if (this.optMode === "simulated_annealing") {
-                this.saOptimization()
+                await this.saOptimization()
             } else if (this.optMode === "genevo") {
-                this.genevoOtimization()
+                await this.genevoOtimization()
             } else {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
         },
 
-        async saOptimization() { },
+        async saOptimization() {
+            let layout = await this.worker.saOptimize(
+                this.inputLayout,
+                this.optFixed,
+                this.saOptParamsStr,
+            )
+            console.log(layout)
+        },
 
         async genevoOtimization() {
             // check if given layout_str is valid
@@ -360,10 +370,10 @@ Vue.component('evaluator-app', {
                 return
             }
 
-            this.optParams = await this.worker.initLayoutOptimizer(
+            this.optParams = await this.worker.initGenLayoutOptimizer(
                 this.inputLayout,
                 this.optFixed,
-                this.optParamsStr
+                this.genOptParamsStr
             )
 
             this.optTotalSteps = this.optParams.generation_limit
@@ -373,7 +383,7 @@ Vue.component('evaluator-app', {
             this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
             let res
             do {
-                res = await this.worker.optimizationStep()
+                res = await this.worker.genOptimizationStep()
                 if (res !== null) {
                     if (res.layout !== this.inputLayout) {
                         this.$bvToast.toast(`New layout found: ${res.layout}`, { variant: "primary" })
@@ -450,7 +460,7 @@ Vue.component('layout-button', {
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
-                    this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'warning'})
+                    this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'warning' })
                 } else {
                     this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'primary' })
                 }
