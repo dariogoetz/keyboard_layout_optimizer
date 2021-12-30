@@ -1,7 +1,7 @@
 //! The `metrics` module provides a trait for trigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::DoublePriorityQueue;
 use ordered_float::OrderedFloat;
+use priority_queue::DoublePriorityQueue;
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;

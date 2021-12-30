@@ -1,6 +1,6 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
-import config_ortho_bored from '../../config/ortho_bored.yml'
+import config_ortho_bored from '../../config/moonlander.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
 import gen_opt_params from '../../config/optimization_parameters_web.yml'
@@ -13,7 +13,7 @@ const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 const LAYOUT_CONFIGS = [
     { key: 'standard', label: 'Standard', config: config_standard_keyboard },
     { key: 'ortho', label: 'Ortho', config: config_ortho },
-    { key: 'ortho_bored', label: 'Ortho (bored)', config: config_ortho_bored },
+    { key: 'moonlander', label: 'Moonlander', config: config_ortho_bored },
 ]
 
 function setDifference(setA, setB) {

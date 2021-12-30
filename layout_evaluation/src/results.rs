@@ -122,7 +122,7 @@ impl MetricResults {
             res = 0.0
         }
 
-        return res
+        return res;
     }
 
     /// Helper function for weighting and normalizing individual metric's results.

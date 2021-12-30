@@ -1,7 +1,7 @@
 //! The `metrics` module provides a trait for bigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::DoublePriorityQueue;
 use ordered_float::OrderedFloat;
+use priority_queue::DoublePriorityQueue;
 
 pub mod asymmetric_bigrams;
 pub mod finger_repeats;
@@ -59,10 +59,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                         cost_with_mod += cost;
                     };
 
-                    worst.push(
-                        (bigram.0.symbol, bigram.1.symbol),
-                        OrderedFloat(cost),
-                    );
+                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }

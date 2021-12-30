@@ -5,7 +5,7 @@ use layout_evaluation::evaluation::Evaluator;
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::usize;
 

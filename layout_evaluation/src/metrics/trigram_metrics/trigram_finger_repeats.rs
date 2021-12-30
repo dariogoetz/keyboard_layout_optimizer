@@ -58,11 +58,6 @@ impl TrigramMetric for TrigramFingerRepeats {
             return Some(0.0);
         }
 
-        // exclude thumbs
-        if finger1 == Finger::Thumb || finger2 == Finger::Thumb || finger3 == Finger::Thumb {
-            return Some(0.0);
-        }
-
         // only consider same finger on same hand
         if hand1 != hand2 || hand2 != hand3 {
             return Some(0.0);
@@ -78,12 +73,14 @@ impl TrigramMetric for TrigramFingerRepeats {
 
         let mut cost = weight;
 
-        if pos1.0 != pos2.0 {
-            cost *= self.factor_lateral_movement;
-        }
+        if k1.key.finger != Finger::Thumb {
+            if pos1.0 != pos2.0 {
+                cost *= self.factor_lateral_movement;
+            }
 
-        if pos2.0 != pos3.0 {
-            cost *= self.factor_lateral_movement;
+            if pos2.0 != pos3.0 {
+                cost *= self.factor_lateral_movement;
+            }
         }
 
         Some(cost)
