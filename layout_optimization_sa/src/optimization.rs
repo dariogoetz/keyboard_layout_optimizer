@@ -14,6 +14,9 @@ use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
+    /// Initial temperature. Gets eventually lowered down to (almost) zero during optimization.
+    pub init_temp: Option<f64>,
+
     /// In each modification of the layout, swap this many key-pairs.
     pub key_switches: usize,
 
@@ -29,6 +32,7 @@ pub struct Parameters {
 impl Default for Parameters {
     fn default() -> Self {
         Parameters {
+            init_temp: Some(150.0),
             key_switches: 1,
             // Parameters for the solver.
             stall_accepted: 5000,
@@ -42,6 +46,18 @@ impl Parameters {
     pub fn from_yaml(filename: &str) -> Result<Self> {
         let f = std::fs::File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
+    }
+    /// Make sure that the used temperature is bigger than zero.
+    /// => Negative values and zero get turned into `f64::MIN_POSITIVE`.
+    pub fn correct_init_temp(&mut self) {
+        if let Some(init_temp) = self.init_temp {
+            let corrected_init_temp = if init_temp <= 0.0 {
+                f64::MIN_POSITIVE
+            } else {
+                init_temp
+            };
+            self.init_temp = Some(corrected_init_temp);
+        }
     }
 }
 
@@ -234,7 +250,6 @@ pub fn optimize(
     layout_generator: &NeoLayoutGenerator,
     start_with_layout: bool,
     evaluator: &Evaluator,
-    optional_init_temp: Option<f64>,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
 ) -> Layout {
@@ -244,9 +259,9 @@ pub fn optimize(
         true => pm.get_permutable_indices(),
         false => pm.generate_random(),
     };
-    let init_temp = match optional_init_temp {
+    let init_temp = match params.init_temp {
         Some(t) => {
-            println!("\n\n{}: Currently, the options `--greedy` and `--init-temp` are bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n\n", "WARNING".bold().yellow());
+            println!("\n\n{}: Currently, the very first modification always gets accepted. This mainly is an issue when using the option `--greedy` and otherwise doesn't affect optimization.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n\n", "WARNING".bold().yellow());
             t
         }
         None => {

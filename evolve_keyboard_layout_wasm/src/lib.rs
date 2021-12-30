@@ -320,14 +320,8 @@ pub fn sa_optimize(
 ) -> String {
     let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
-        .unwrap();
-
-    // Make sure that the used temperature is bigger than zero.
-    let corrected_init_temp = if init_temp <= 0.0 {
-        f64::MIN_POSITIVE
-    } else {
-        init_temp
-    };
+        .unwrap()
+        .correct_init_temp(); // Make sure that the used temperature is bigger than zero.
 
     let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
@@ -337,7 +331,6 @@ pub fn sa_optimize(
         &layout_evaluator.layout_generator,
         start_with_layout,
         &layout_evaluator.evaluator,
-        Some(corrected_init_temp),
         /* log_everything: */ false,
         Some(Cache::new()),
     );

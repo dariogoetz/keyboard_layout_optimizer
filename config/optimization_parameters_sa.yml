@@ -1,3 +1,12 @@
+### Initial temperature
+# Should be about 150. Commas are allowed (150.42).
+# Set to 0 (or a negative number) if a greedy algorithm is preferred.
+# If you want the optimizer to calculate the starting-temperature for you, use one of the following:
+# init_temp: null
+# init_temp: 
+# init_temp: ~
+init_temp: 150
+
 # Swap out this many keys-pairs on every iteration.
 # For simulated annealing it's best to keep the variation between iterations
 # as small as possible. Thus, one single swap may be best.
