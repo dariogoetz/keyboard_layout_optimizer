@@ -65,7 +65,6 @@ impl BigramMetric for FingerRepeats {
         if k1 == k2
             || k1.key.hand != k2.key.hand
             || k1.key.finger != k2.key.finger
-            || k1.key.finger == Finger::Thumb
         {
             return Some(0.0);
         }
