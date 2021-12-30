@@ -337,7 +337,7 @@ pub fn sa_optimize(
         &layout_evaluator.layout_generator,
         start_with_layout,
         &layout_evaluator.evaluator,
-        None, //Some(corrected_init_temp),
+        Some(corrected_init_temp),
         /* log_everything: */ false,
         Some(Cache::new()),
     );
