@@ -47,7 +47,7 @@ impl Parameters {
         let f = std::fs::File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
     }
-    /// Make sure that the used temperature is bigger than zero.
+    /// Makes sure that [self.init_temp] is greater than zero.
     /// => Negative values and zero get turned into `f64::MIN_POSITIVE`.
     pub fn correct_init_temp(&mut self) {
         if let Some(init_temp) = self.init_temp {

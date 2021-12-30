@@ -316,12 +316,11 @@ pub fn sa_optimize(
     layout_evaluator: &LayoutEvaluator,
     fixed_characters: &str,
     start_with_layout: bool,
-    init_temp: f64,
 ) -> String {
-    let parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
+    let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
-        .unwrap()
-        .correct_init_temp(); // Make sure that the used temperature is bigger than zero.
+        .unwrap();
+    parameters.correct_init_temp(); // Make sure that the used temperature is bigger than zero.
 
     let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
