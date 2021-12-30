@@ -13,7 +13,7 @@ layout_evaluation = { path = "../layout_evaluation" }
 layout_optimization = { path = "../layout_optimization" }
 
 anyhow = "1.0.45"
-argmin = "0.4.7"
+argmin = { version = "0.4.7", features = ["wasm-bindgen"] }
 colored = "2.0.0"
 env_logger = "*"
 log = "*"
