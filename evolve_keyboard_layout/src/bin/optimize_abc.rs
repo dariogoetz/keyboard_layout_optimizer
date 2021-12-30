@@ -49,8 +49,8 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let optimization_params =
-        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
+    let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
+        .expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));

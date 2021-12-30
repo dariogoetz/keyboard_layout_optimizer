@@ -2,8 +2,8 @@
 use std::usize;
 
 use keyboard_layout::layout::{LayerKey, Layout};
-use priority_queue::DoublePriorityQueue;
 use ordered_float::OrderedFloat;
+use priority_queue::DoublePriorityQueue;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
