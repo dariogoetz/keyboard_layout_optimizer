@@ -2,9 +2,9 @@ importScripts("https://unpkg.com/comlink/dist/umd/comlink.js")
 ;
 // instantiate wasm module
 let wasm_import = import("evolve-keyboard-layout-wasm")
-let unigram_import = import('../../1-gramme.arne.no-special.txt')
-let bigram_import = import('../../2-gramme.arne.no-special.txt')
-let trigram_import = import('../../3-gramme.arne.no-special.txt')
+let unigram_import = import('../../corpus/arne_no_special/1-grams.txt')
+let bigram_import = import('../../corpus/arne_no_special/2-grams.txt')
+let trigram_import = import('../../corpus/arne_no_special/3-grams.txt')
 
 
 const evaluator = {

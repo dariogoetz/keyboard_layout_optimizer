@@ -14,6 +14,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
+use std::path::Path;
 use std::sync::Arc;
 use structopt::StructOpt;
 
@@ -57,6 +58,10 @@ impl LayoutConfig {
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
+    /// Path to ngram files
+    #[structopt(short, long, default_value = "corpus/arne_no_special")]
+    pub ngrams: String,
+
     /// Filename of evaluation configuration file to use
     #[structopt(short, long, default_value = "config/evaluation_parameters.yml")]
     pub eval_parameters: String,
@@ -133,20 +138,23 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     let ngram_provider = match text {
         Some(txt) => OnDemandNgramMapper::with_corpus(&txt, ngram_mapper_config),
         None => {
-            log::info!("Reading unigram file: '{}'", &eval_params.ngrams.unigrams);
-            let mut unigrams = Unigrams::from_file(&eval_params.ngrams.unigrams).expect(&format!(
-                "Could not read 1-gramme file from '{}'.",
-                &eval_params.ngrams.unigrams
+            let p = Path::new(&options.ngrams).join(eval_params.ngrams.unigrams);
+            log::info!("Reading unigram file: '{:?}'", p);
+            let mut unigrams = Unigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+                "Could not read 1-gramme file from '{:?}'.",
+                &p
             ));
-            log::info!("Reading bigram file: '{}'", &eval_params.ngrams.bigrams);
-            let mut bigrams = Bigrams::from_file(&eval_params.ngrams.bigrams).expect(&format!(
-                "Could not read 2-gramme file from '{}'.",
-                &eval_params.ngrams.bigrams
+            let p = Path::new(&options.ngrams).join(eval_params.ngrams.bigrams);
+            log::info!("Reading bigram file: '{:?}'", p);
+            let mut bigrams = Bigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+                "Could not read 2-gramme file from '{:?}'.",
+                &p
             ));
-            log::info!("Reading trigram file: '{}'", &eval_params.ngrams.trigrams);
-            let mut trigrams = Trigrams::from_file(&eval_params.ngrams.trigrams).expect(&format!(
-                "Could not read 3-gramme file from '{}'.",
-                &eval_params.ngrams.trigrams
+            let p = Path::new(&options.ngrams).join(eval_params.ngrams.trigrams);
+            log::info!("Reading trigram file: '{:?}'", p);
+            let mut trigrams = Trigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+                "Could not read 3-gramme file from '{:?}'.",
+                &p
             ));
 
             if let Some(tops) = options.tops {

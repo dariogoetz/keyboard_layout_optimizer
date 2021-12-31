@@ -16,12 +16,16 @@ use layout_evaluation::{
 use anyhow::Result;
 use serde::Deserialize;
 use std::sync::Arc;
+use std::path::Path;
 
 mod api;
 
 
 #[derive(Clone, Deserialize, Debug)]
 struct Options {
+    /// Path to ngram files
+    pub ngrams: String,
+
     /// Filename of evaluation configuration file to use
     pub eval_parameters: String,
 
@@ -30,15 +34,6 @@ struct Options {
 
     /// Directory with static content to serve
     pub static_dir: String,
-
-    /// Unigram file
-    pub unigrams: String,
-
-    /// Bigram file
-    pub bigrams: String,
-
-    /// Trigram file
-    pub trigrams: String,
 
     /// Secret for performing admin actions
     pub secret: String,
@@ -137,19 +132,19 @@ fn rocket() -> _ {
         "Could not read evaluation yaml file '{}'",
         &options.eval_parameters
     ));
-    let p = &options.unigrams;
-    let unigrams = Unigrams::from_file(&p).expect(&format!(
-        "Could not read 1-gramme file from '{}'.",
+    let p = Path::new(&options.ngrams).join(eval_params.ngrams.unigrams);
+    let unigrams = Unigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+        "Could not read 1-gramme file from '{:?}'.",
         &p
     ));
-    let p = &options.bigrams;
-    let bigrams = Bigrams::from_file(&p).expect(&format!(
-        "Could not read 2-gramme file from '{}'.",
+    let p = Path::new(&options.ngrams).join(eval_params.ngrams.bigrams);
+    let bigrams = Bigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+        "Could not read 2-gramme file from '{:?}'.",
         &p
     ));
-    let p = &options.trigrams;
-    let trigrams = Trigrams::from_file(&p).expect(&format!(
-        "Could not read 3-gramme file from '{}'.",
+    let p = Path::new(&options.ngrams).join(eval_params.ngrams.trigrams);
+    let trigrams = Trigrams::from_file(&p.to_str().unwrap()).expect(&format!(
+        "Could not read 3-gramme file from '{:?}'.",
         &p
     ));
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
