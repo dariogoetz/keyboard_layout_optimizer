@@ -327,12 +327,6 @@ metrics:
       # Multiply by this factor for each of the bigrams that have a lateral movement
       factor_lateral_movement: 1.2
 
-# filenames of ngram frequency files
-ngrams:
-  unigrams: 1-grams.txt
-  bigrams: 2-grams.txt
-  trigrams: 3-grams.txt
-
 ngram_mapper:
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
   # required to activate the layer

@@ -19,16 +19,8 @@ use std::sync::Arc;
 use structopt::StructOpt;
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct NGramConfig {
-    pub unigrams: String,
-    pub bigrams: String,
-    pub trigrams: String,
-}
-
-#[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
     pub metrics: MetricParameters,
-    pub ngrams: NGramConfig,
     pub ngram_mapper: NgramMapperConfig,
 }
 
@@ -138,19 +130,19 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     let ngram_provider = match text {
         Some(txt) => OnDemandNgramMapper::with_corpus(&txt, ngram_mapper_config),
         None => {
-            let p = Path::new(&options.ngrams).join(eval_params.ngrams.unigrams);
+            let p = Path::new(&options.ngrams).join("1-grams.txt");
             log::info!("Reading unigram file: '{:?}'", p);
             let mut unigrams = Unigrams::from_file(&p.to_str().unwrap()).expect(&format!(
                 "Could not read 1-gramme file from '{:?}'.",
                 &p
             ));
-            let p = Path::new(&options.ngrams).join(eval_params.ngrams.bigrams);
+            let p = Path::new(&options.ngrams).join("2-grams.txt");
             log::info!("Reading bigram file: '{:?}'", p);
             let mut bigrams = Bigrams::from_file(&p.to_str().unwrap()).expect(&format!(
                 "Could not read 2-gramme file from '{:?}'.",
                 &p
             ));
-            let p = Path::new(&options.ngrams).join(eval_params.ngrams.trigrams);
+            let p = Path::new(&options.ngrams).join("3-grams.txt");
             log::info!("Reading trigram file: '{:?}'", p);
             let mut trigrams = Trigrams::from_file(&p.to_str().unwrap()).expect(&format!(
                 "Could not read 3-gramme file from '{:?}'.",

@@ -43,16 +43,8 @@ struct Options {
 }
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct NGramConfig {
-    pub unigrams: String,
-    pub bigrams: String,
-    pub trigrams: String,
-}
-
-#[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
     pub metrics: MetricParameters,
-    pub ngrams: NGramConfig,
     pub ngram_mapper: NgramMapperConfig,
 }
 
@@ -132,17 +124,17 @@ fn rocket() -> _ {
         "Could not read evaluation yaml file '{}'",
         &options.eval_parameters
     ));
-    let p = Path::new(&options.ngrams).join(eval_params.ngrams.unigrams);
+    let p = Path::new(&options.ngrams).join("1-grams.txt");
     let unigrams = Unigrams::from_file(&p.to_str().unwrap()).expect(&format!(
         "Could not read 1-gramme file from '{:?}'.",
         &p
     ));
-    let p = Path::new(&options.ngrams).join(eval_params.ngrams.bigrams);
+    let p = Path::new(&options.ngrams).join("2-grams.txt");
     let bigrams = Bigrams::from_file(&p.to_str().unwrap()).expect(&format!(
         "Could not read 2-gramme file from '{:?}'.",
         &p
     ));
-    let p = Path::new(&options.ngrams).join(eval_params.ngrams.trigrams);
+    let p = Path::new(&options.ngrams).join("3-grams.txt");
     let trigrams = Trigrams::from_file(&p.to_str().unwrap()).expect(&format!(
         "Could not read 3-gramme file from '{:?}'.",
         &p
