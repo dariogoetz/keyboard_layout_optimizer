@@ -112,7 +112,7 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     let text = options.text.as_ref().cloned().or_else(|| {
         options.corpus.as_ref().map(|corpus_file| {
             std::fs::read_to_string(&corpus_file)
-                .expect(&format!("Could not read corpus file from {}.", corpus_file,))
+                .expect(&format!("Could not read corpus file from {}.", corpus_file))
         })
     });
 
