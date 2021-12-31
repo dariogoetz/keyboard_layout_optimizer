@@ -163,6 +163,7 @@ impl MetricResults {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct EvaluationResult {
+    layout: String,
     individual_results: Vec<MetricResults>,
 }
 
@@ -186,8 +187,8 @@ impl std::fmt::Display for EvaluationResult {
 }
 
 impl EvaluationResult {
-    pub fn new(individual_results: Vec<MetricResults>) -> Self {
-        Self { individual_results }
+    pub fn new(layout: String, individual_results: Vec<MetricResults>) -> Self {
+        Self { layout, individual_results }
     }
 
     pub fn total_cost(&self) -> f64 {
