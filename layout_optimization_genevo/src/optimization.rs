@@ -270,7 +270,7 @@ pub fn optimize(
                         best_solution.solution.genome.clone(),
                     ));
                 }
-                log::debug!(
+                log::info!(
                     "{}, average_fitness: {}, \
                      best fitness: {}, all time best: {}, duration: {}, processing_time: {}, generation's best: {}",
                     format!("Generation {}:", step.iteration).yellow().bold(),
