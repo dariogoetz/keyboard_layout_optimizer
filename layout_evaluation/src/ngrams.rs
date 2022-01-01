@@ -32,9 +32,7 @@ impl Unigrams {
                 *grams.entry(c).or_insert(0.0) += 1.0;
             });
 
-        Ok(Self {
-            grams,
-        })
+        Ok(Self { grams })
     }
 
     /// Read unigrams and weights from a string containing lines with unigrams and their weights.
@@ -53,9 +51,7 @@ impl Unigrams {
             *grams.entry(c).or_insert(0.0) += weight;
         }
 
-        Ok(Unigrams {
-            grams,
-        })
+        Ok(Unigrams { grams })
     }
 
     /// Read unigrams and weights from a file containing lines with unigrams and their weights.
@@ -92,9 +88,7 @@ impl Unigrams {
             self.grams.len(),
             grams.len()
         );
-        Self {
-            grams,
-        }
+        Self { grams }
     }
 
     /// Save frequencies to file
@@ -139,9 +133,7 @@ impl Bigrams {
                 *grams.entry(c).or_insert(0.0) += 1.0;
             });
 
-        Ok(Self {
-            grams,
-        })
+        Ok(Self { grams })
     }
 
     /// Read bigrams and weights from a string containing lines with bigrams and their weights.
@@ -159,9 +151,7 @@ impl Bigrams {
             *grams.entry((c[0], c[1])).or_insert(0.0) += weight;
         }
 
-        Ok(Bigrams {
-            grams,
-        })
+        Ok(Bigrams { grams })
     }
 
     /// Read bigrams and weights from a file containing lines with bigrams and their weights.
@@ -198,9 +188,7 @@ impl Bigrams {
             self.grams.len(),
             grams.len()
         );
-        Self {
-            grams,
-        }
+        Self { grams }
     }
 
     /// Save frequencies to file
@@ -250,9 +238,7 @@ impl Trigrams {
                 *grams.entry((c1, c2, c3)).or_insert(0.0) += 1.0;
             });
 
-        Ok(Self {
-            grams,
-        })
+        Ok(Self { grams })
     }
 
     /// Read trigrams and weights from a string containing lines with trigrams and their weights.
@@ -270,9 +256,7 @@ impl Trigrams {
             *grams.entry((c[0], c[1], c[2])).or_insert(0.0) += weight;
         }
 
-        Ok(Trigrams {
-            grams,
-        })
+        Ok(Trigrams { grams })
     }
 
     /// Read trigrams and weights from a file containing lines with trigrams and their weights.
@@ -310,9 +294,7 @@ impl Trigrams {
             self.grams.len(),
             grams.len()
         );
-        Self {
-            grams,
-        }
+        Self { grams }
     }
 
     /// Save frequencies to file

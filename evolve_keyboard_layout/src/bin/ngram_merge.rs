@@ -110,11 +110,9 @@ fn main() {
     }
     .save_frequencies(out.join("1-grams.txt"))
     .unwrap();
-    Bigrams {
-        grams: res_bigrams,
-    }
-    .save_frequencies(out.join("2-grams.txt"))
-    .unwrap();
+    Bigrams { grams: res_bigrams }
+        .save_frequencies(out.join("2-grams.txt"))
+        .unwrap();
     Trigrams {
         grams: res_trigrams,
     }
