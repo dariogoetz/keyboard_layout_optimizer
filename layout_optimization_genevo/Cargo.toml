@@ -13,6 +13,7 @@ layout_evaluation = { path = "../layout_evaluation" }
 layout_optimization = { path = "../layout_optimization" }
 
 anyhow = "1.0.45"
+colored = "*"
 env_logger = "*"
 genevo = "0.7.0"
 log = "*"
