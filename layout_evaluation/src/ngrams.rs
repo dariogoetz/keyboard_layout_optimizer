@@ -12,7 +12,6 @@ use std::path::Path;
 #[derive(Clone, Debug)]
 pub struct Unigrams {
     pub grams: FxHashMap<char, f64>,
-    pub total_weight: f64,
 }
 
 fn process_special_characters(s: &str) -> String {
@@ -27,24 +26,20 @@ impl Unigrams {
     /// Collect unigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         text.chars()
             //.filter(|c| !c.is_whitespace())
             .for_each(|c| {
                 *grams.entry(c).or_insert(0.0) += 1.0;
-                total_weight += 1.0;
             });
 
         Ok(Self {
             grams,
-            total_weight,
         })
     }
 
     /// Read unigrams and weights from a string containing lines with unigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -55,13 +50,11 @@ impl Unigrams {
                 log::error!("Len of unigram {} is unequad one: {:?}", unigram, chars);
             }
             let c = *chars.get(0).unwrap_or(&' ');
-            total_weight += weight;
             *grams.entry(c).or_insert(0.0) += weight;
         }
 
         Ok(Unigrams {
             grams,
-            total_weight,
         })
     }
 
@@ -71,10 +64,15 @@ impl Unigrams {
         Unigrams::from_frequencies_str(&data)
     }
 
+    /// Total weight of all combined unigrams
+    pub fn total_weight(&self) -> f64 {
+        self.grams.values().sum()
+    }
+
     /// Return a reduced set of the unigrams containing only the most common unigrams up to a
     /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
-        let target_weight = fraction * self.total_weight;
+        let target_weight = fraction * self.total_weight();
         let mut total_weight = 0.0;
         let mut sorted_grams: Vec<(char, f64)> = self.grams.clone().into_iter().collect();
         sorted_grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
@@ -96,7 +94,6 @@ impl Unigrams {
         );
         Self {
             grams,
-            total_weight,
         }
     }
 
@@ -129,32 +126,27 @@ impl Unigrams {
 #[derive(Clone, Debug)]
 pub struct Bigrams {
     pub grams: FxHashMap<(char, char), f64>,
-    pub total_weight: f64,
 }
 
 impl Bigrams {
     /// Collect bigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         text.chars()
             .zip(text.chars().skip(1))
             //.filter(|(c1, c2)| !c1.is_whitespace() && !c2.is_whitespace())
             .for_each(|c| {
                 *grams.entry(c).or_insert(0.0) += 1.0;
-                total_weight += 1.0;
             });
 
         Ok(Self {
             grams,
-            total_weight,
         })
     }
 
     /// Read bigrams and weights from a string containing lines with bigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -164,13 +156,11 @@ impl Bigrams {
             if c.len() != 2 {
                 log::info!("Len of bigram {} is unequal two: {:?}", bigram, c);
             }
-            total_weight += weight;
             *grams.entry((c[0], c[1])).or_insert(0.0) += weight;
         }
 
         Ok(Bigrams {
             grams,
-            total_weight,
         })
     }
 
@@ -180,10 +170,15 @@ impl Bigrams {
         Bigrams::from_frequencies_str(&data)
     }
 
+    /// Total weight of all combined bigrams
+    pub fn total_weight(&self) -> f64 {
+        self.grams.values().sum()
+    }
+
     /// Return a reduced set of the bigrams containing only the most common bigrams up to a
     /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
-        let target_weight = fraction * self.total_weight;
+        let target_weight = fraction * self.total_weight();
         let mut total_weight = 0.0;
         let mut sorted_grams: Vec<((char, char), f64)> = self.grams.clone().into_iter().collect();
         sorted_grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
@@ -205,7 +200,6 @@ impl Bigrams {
         );
         Self {
             grams,
-            total_weight,
         }
     }
 
@@ -240,14 +234,12 @@ impl Bigrams {
 #[derive(Clone, Debug)]
 pub struct Trigrams {
     pub grams: FxHashMap<(char, char, char), f64>,
-    pub total_weight: f64,
 }
 
 impl Trigrams {
     /// Collect trigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         text.chars()
             .zip(text.chars().skip(1))
             .zip(text.chars().skip(2))
@@ -256,19 +248,16 @@ impl Trigrams {
             //})
             .for_each(|((c1, c2), c3)| {
                 *grams.entry((c1, c2, c3)).or_insert(0.0) += 1.0;
-                total_weight += 1.0;
             });
 
         Ok(Self {
             grams,
-            total_weight,
         })
     }
 
     /// Read trigrams and weights from a string containing lines with trigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        let mut total_weight = 0.0;
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -278,13 +267,11 @@ impl Trigrams {
             if c.len() != 3 {
                 log::info!("Len of trigram {} is unequal three: {:?}", trigram, c);
             }
-            total_weight += weight;
             *grams.entry((c[0], c[1], c[2])).or_insert(0.0) += weight;
         }
 
         Ok(Trigrams {
             grams,
-            total_weight,
         })
     }
 
@@ -294,10 +281,15 @@ impl Trigrams {
         Trigrams::from_frequencies_str(&data)
     }
 
+    /// Total weight of all combined trigrams
+    pub fn total_weight(&self) -> f64 {
+        self.grams.values().sum()
+    }
+
     /// Return a reduced set of the trigrams containing only the most common trigrams up to a
     /// given combined fraction.
     pub fn tops(&self, fraction: f64) -> Self {
-        let target_weight = fraction * self.total_weight;
+        let target_weight = fraction * self.total_weight();
         let mut total_weight = 0.0;
         let mut sorted_grams: Vec<((char, char, char), f64)> =
             self.grams.clone().into_iter().collect();
@@ -320,7 +312,6 @@ impl Trigrams {
         );
         Self {
             grams,
-            total_weight,
         }
     }
 

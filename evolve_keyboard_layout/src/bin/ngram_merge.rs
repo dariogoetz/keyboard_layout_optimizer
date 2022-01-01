@@ -53,9 +53,9 @@ fn main() {
     let mut res_bigrams = FxHashMap::default();
     let mut res_trigrams = FxHashMap::default();
 
-    let mut unigram_total: Option<f64> = None;
-    let mut bigram_total: Option<f64> = None;
-    let mut trigram_total: Option<f64> = None;
+    let mut target_unigrams_total: Option<f64> = None;
+    let mut target_bigrams_total: Option<f64> = None;
+    let mut target_trigrams_total: Option<f64> = None;
 
     for component in options.components {
         log::info!("Processing {}...", component.1);
@@ -64,10 +64,12 @@ fn main() {
         let unigrams = Unigrams::from_file(&p.to_str().unwrap())
             .expect(&format!("Could not read 1-gramme file from '{:?}'.", &p));
 
+        let unigrams_total = unigrams.total_weight();
+
         // first ngram file determines "absolute level"
-        unigram_total = unigram_total.or(Some(unigrams.total_weight));
+        target_unigrams_total = target_unigrams_total.or(Some(unigrams_total));
         add(
-            component.0 * unigram_total.unwrap() / unigrams.total_weight,
+            component.0 * target_unigrams_total.unwrap() / unigrams_total,
             &mut res_unigrams,
             &unigrams.grams,
         );
@@ -76,10 +78,12 @@ fn main() {
         let bigrams = Bigrams::from_file(&p.to_str().unwrap())
             .expect(&format!("Could not read 2-gramme file from '{:?}'.", &p));
 
+        let bigrams_total = bigrams.total_weight();
+
         // first ngram file determines "absolute level"
-        bigram_total = bigram_total.or(Some(bigrams.total_weight));
+        target_bigrams_total = target_bigrams_total.or(Some(bigrams_total));
         add(
-            component.0 * bigram_total.unwrap() / bigrams.total_weight,
+            component.0 * target_bigrams_total.unwrap() / bigrams_total,
             &mut res_bigrams,
             &bigrams.grams,
         );
@@ -88,10 +92,12 @@ fn main() {
         let trigrams = Trigrams::from_file(&p.to_str().unwrap())
             .expect(&format!("Could not read 3-gramme file from '{:?}'.", &p));
 
+        let trigrams_total = trigrams.total_weight();
+
         // first ngram file determines "absolute level"
-        trigram_total = trigram_total.or(Some(trigrams.total_weight));
+        target_trigrams_total = target_trigrams_total.or(Some(trigrams_total));
         add(
-            component.0 * trigram_total.unwrap() / trigrams.total_weight,
+            component.0 * target_trigrams_total.unwrap() / trigrams_total,
             &mut res_trigrams,
             &trigrams.grams,
         );
@@ -101,19 +107,16 @@ fn main() {
     let out = Path::new(&options.out);
     Unigrams {
         grams: res_unigrams,
-        total_weight: 0.0,
     }
     .save_frequencies(out.join("1-grams.txt"))
     .unwrap();
     Bigrams {
         grams: res_bigrams,
-        total_weight: 0.0,
     }
     .save_frequencies(out.join("2-grams.txt"))
     .unwrap();
     Trigrams {
         grams: res_trigrams,
-        total_weight: 0.0,
     }
     .save_frequencies(out.join("3-grams.txt"))
     .unwrap();
