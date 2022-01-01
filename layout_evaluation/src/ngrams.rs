@@ -4,6 +4,9 @@
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
+use std::fs::{create_dir_all, File};
+use std::io::Write;
+use std::path::Path;
 
 /// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
@@ -14,6 +17,10 @@ pub struct Unigrams {
 
 fn process_special_characters(s: &str) -> String {
     s.replace("\\n", "\n").replace("\\\\", "\\")
+}
+
+fn process_special_characters_inverse(s: &str) -> String {
+    s.replace("\\", "\\\\").replace("\n", "\\n")
 }
 
 impl Unigrams {
@@ -91,6 +98,25 @@ impl Unigrams {
             grams,
             total_weight,
         }
+    }
+
+    /// Save frequencies to file
+    pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
+        let p = filename.as_ref();
+        create_dir_all(&p.parent().unwrap())
+            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+
+        let mut grams: Vec<(char, f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
+
+        let mut file = File::create(&filename)
+            .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        grams.iter().for_each(|(c, w)| {
+            let processed = process_special_characters_inverse(&c.to_string());
+            writeln!(&mut file, "{} {}", w, processed).unwrap();
+        });
+
+        Ok(())
     }
 }
 
@@ -176,6 +202,26 @@ impl Bigrams {
             grams,
             total_weight,
         }
+    }
+
+    /// Save frequencies to file
+    pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
+        let p = filename.as_ref();
+        create_dir_all(&p.parent().unwrap())
+            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+
+        let mut grams: Vec<((char, char), f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
+
+        let mut file = File::create(&filename)
+            .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        grams.iter().for_each(|((c1, c2), w)| {
+            let processed1 = process_special_characters_inverse(&c1.to_string());
+            let processed2 = process_special_characters_inverse(&c2.to_string());
+            writeln!(&mut file, "{} {}{}", w, processed1, processed2).unwrap();
+        });
+
+        Ok(())
     }
 }
 
@@ -265,5 +311,26 @@ impl Trigrams {
             grams,
             total_weight,
         }
+    }
+
+    /// Save frequencies to file
+    pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
+        let p = filename.as_ref();
+        create_dir_all(&p.parent().unwrap())
+            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+
+        let mut grams: Vec<((char, char, char), f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
+
+        let mut file = File::create(&filename)
+            .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        grams.iter().for_each(|((c1, c2, c3), w)| {
+            let processed1 = process_special_characters_inverse(&c1.to_string());
+            let processed2 = process_special_characters_inverse(&c2.to_string());
+            let processed3 = process_special_characters_inverse(&c3.to_string());
+            writeln!(&mut file, "{} {}{}{}", w, processed1, processed2, processed3).unwrap();
+        });
+
+        Ok(())
     }
 }
