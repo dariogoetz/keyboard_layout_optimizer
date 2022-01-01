@@ -5,8 +5,8 @@ use layout_evaluation::evaluation::Evaluator;
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 use colored::Colorize;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::usize;
 
@@ -253,7 +253,9 @@ pub fn optimize(
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "{}: {} (score: {})\n{}",
-                            format!("New best in generation {}:", step.iteration).yellow().bold(),
+                            format!("New best in generation {}:", step.iteration)
+                                .yellow()
+                                .bold(),
                             layout,
                             format!("{}", evaluation_result.total_cost()).yellow(),
                             layout.plot(),

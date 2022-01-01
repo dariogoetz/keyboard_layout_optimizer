@@ -474,12 +474,7 @@ impl Evaluator {
 
         EvaluationResult::new(
             layout.as_text(),
-            vec![
-                layout_costs,
-                unigram_costs,
-                bigram_costs,
-            trigram_costs,
-            ]
+            vec![layout_costs, unigram_costs, bigram_costs, trigram_costs],
         )
     }
 }

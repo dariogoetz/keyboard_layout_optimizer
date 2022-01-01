@@ -103,10 +103,15 @@ impl Unigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap())
-            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+            format!(
+                "Unable to create directory '{}': {}",
+                p.to_str().unwrap(),
+                e
+            )
+        })?;
 
-        let mut grams: Vec<(char, f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        let mut grams: Vec<(char, f64)> = self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
         let mut file = File::create(&filename)
@@ -207,10 +212,16 @@ impl Bigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap())
-            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+            format!(
+                "Unable to create directory '{}': {}",
+                p.to_str().unwrap(),
+                e
+            )
+        })?;
 
-        let mut grams: Vec<((char, char), f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        let mut grams: Vec<((char, char), f64)> =
+            self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
         let mut file = File::create(&filename)
@@ -316,10 +327,16 @@ impl Trigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap())
-            .map_err(|e| format!("Unable to create directory '{}': {}", p.to_str().unwrap(), e))?;
+        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+            format!(
+                "Unable to create directory '{}': {}",
+                p.to_str().unwrap(),
+                e
+            )
+        })?;
 
-        let mut grams: Vec<((char, char, char), f64)> = self.grams.iter().map(|(c, w)| (*c, *w) ).collect();
+        let mut grams: Vec<((char, char, char), f64)> =
+            self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
         let mut file = File::create(&filename)
@@ -328,7 +345,12 @@ impl Trigrams {
             let processed1 = process_special_characters_inverse(&c1.to_string());
             let processed2 = process_special_characters_inverse(&c2.to_string());
             let processed3 = process_special_characters_inverse(&c3.to_string());
-            writeln!(&mut file, "{} {}{}{}", w, processed1, processed2, processed3).unwrap();
+            writeln!(
+                &mut file,
+                "{} {}{}{}",
+                w, processed1, processed2, processed3
+            )
+            .unwrap();
         });
 
         Ok(())

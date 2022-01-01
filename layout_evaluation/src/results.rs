@@ -188,7 +188,10 @@ impl std::fmt::Display for EvaluationResult {
 
 impl EvaluationResult {
     pub fn new(layout: String, individual_results: Vec<MetricResults>) -> Self {
-        Self { layout, individual_results }
+        Self {
+            layout,
+            individual_results,
+        }
     }
 
     pub fn total_cost(&self) -> f64 {
