@@ -61,7 +61,7 @@ impl Parameters {
     }
 }
 
-struct AnnealingStruct<'a> {
+pub struct AnnealingStruct<'a> {
     evaluator: Arc<Evaluator>,
     layout_generator: &'a PermutationLayoutGenerator,
     key_switches: usize,
@@ -164,6 +164,7 @@ impl Observe<AnnealingStruct<'_>> for IterationObserver {
         ra_be: false
         ra_ac: false
         time: 0.533206799 */
+        println!("{}", state.is_best());
         let mut temperature = String::from("Not found.");
         let mut accepted = "Not found";
         for (key, value) in &kv.kv {
@@ -242,7 +243,12 @@ fn get_cost_sd(
 }
 
 /// Performs one run of Simulated Annealing, then returns the best layout found.
-pub fn optimize(
+pub fn optimize<
+    /* ERROR */
+    OBS: Observe<
+            ArgminOp<Param = Vec<usize>, Output = f64, Hessian = (), Jacobian = (), Float = f64>,
+        > + 'static,
+>(
     process_name: &str,
     params: &Parameters,
     layout_str: &str,
@@ -252,6 +258,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
+    custom_observer: OBS,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.

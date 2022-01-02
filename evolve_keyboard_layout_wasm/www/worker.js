@@ -52,6 +52,7 @@ const evaluator = {
     },
 
     async saOptimize(layout, fixed_chars, optParams) {
+        console.log(optParams)
         let optLayout = this.wasm.sa_optimize(
             layout,
             optParams,

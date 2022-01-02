@@ -350,12 +350,26 @@ Vue.component('evaluator-app', {
         },
 
         async saOptimization() {
+            console.info('started saOptimization with "' + this.inputLayout + '"')
+            this.optTotalSteps = 100
+            this.optStep = 1
             let layout = await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
                 this.saOptParamsStr,
             )
+            this.optStep = 0
             console.log(layout)
+        },
+
+        updateOptStep(stepNr) {
+            console.log("updateOptStep(stepNr) {")
+            this.optStep = stepNr
+        },
+
+        newBestAlert(layout, cost) {
+            console.log("newBestAlert(layout, cost) {")
+            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
         },
 
         async genevoOtimization() {

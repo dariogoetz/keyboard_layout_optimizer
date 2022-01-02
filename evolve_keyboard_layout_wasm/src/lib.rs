@@ -1,5 +1,6 @@
 mod utils;
 
+use argmin::prelude::{ArgminKV, Error, IterState, Observe /* , ObserverMode */};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
@@ -309,6 +310,41 @@ impl LayoutOptimizer {
     }
 }
 
+#[wasm_bindgen(module = "js/www/app.js")]
+extern "C" {
+    fn updateOptStep(stepNr: u64);
+    fn newBestAlert(layout: String, cost: f64);
+}
+
+/// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
+struct SaObserver {
+    layout_generator: PermutationLayoutGenerator,
+}
+
+impl Observe<sa_optimization::AnnealingStruct<'_>> for SaObserver {
+    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn observe_iter(
+        &mut self,
+        state: &IterState<sa_optimization::AnnealingStruct<'_>>,
+        _kv: &ArgminKV,
+    ) -> Result<(), Error> {
+        let iteration_nr = state.iter;
+        if iteration_nr % 10 == 0 {
+            updateOptStep(iteration_nr);
+        }
+        if state.is_best() {
+            newBestAlert(
+                self.layout_generator.generate_string(&state.param),
+                state.cost,
+            );
+        }
+        Ok(())
+    }
+}
+
 #[wasm_bindgen]
 pub fn sa_optimize(
     layout_str: &str,
@@ -320,7 +356,8 @@ pub fn sa_optimize(
     let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
         .unwrap();
-    parameters.correct_init_temp(); // Make sure that the used temperature is bigger than zero.
+    // Make sure the initial temperature is greater than zero.
+    parameters.correct_init_temp();
 
     let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",

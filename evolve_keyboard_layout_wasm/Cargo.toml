@@ -21,6 +21,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "*"
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
 
+argmin = "0.4.7"
 genevo = { version = "0.7.0", features = ["wasm-bindgen"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
