@@ -154,10 +154,10 @@ impl Layout {
             let mods = if k.layer > 0 && k.layer < modifiers.len() + 1 {
                 mod_map
                     .get(k.layer - 1)
-                    .unwrap()  // can not fail due to above check
+                    .unwrap() // can not fail due to above check
                     .get(&k.key.hand.other())
                     .map(|mods| mods.to_vec())
-                    .unwrap_or_default()  // default is an empty vec
+                    .unwrap_or_default() // default is an empty vec
             } else {
                 Vec::new()
             };
