@@ -302,7 +302,7 @@ impl LayoutOptimizer {
     }
 }
 
-#[wasm_bindgen(module = "js/www/app.js")]
+#[wasm_bindgen(raw_module = "../www/communicate.js")]
 extern "C" {
     fn updateOptStep(stepNr: u64);
     fn newBestAlert(layout: String, cost: f64);

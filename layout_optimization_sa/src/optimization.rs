@@ -134,7 +134,7 @@ impl Observe<AnnealingStruct> for BestObserver {
 
 impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
     fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
+        (*self).as_ref().observe_init(_name, _kv)
     }
 
     fn observe_iter(&mut self, _state: &IterState<AnnealingStruct>, _kv: &ArgminKV) -> Result<(), Error> {
