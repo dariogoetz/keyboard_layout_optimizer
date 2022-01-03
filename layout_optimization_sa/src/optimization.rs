@@ -132,7 +132,15 @@ impl Observe<AnnealingStruct> for BestObserver {
     }
 }
 
-impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {}
+impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
+    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
+        Ok(())
+    }
+
+    fn observe_iter(&mut self, _state: &IterState<AnnealingStruct>, _kv: &ArgminKV) -> Result<(), Error> {
+        (*self).as_mut().observe_iter(_state, _kv)
+    }
+}
 
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct IterationObserver {
