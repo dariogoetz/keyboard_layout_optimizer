@@ -1,4 +1,3 @@
-use argmin::prelude::Observe;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 

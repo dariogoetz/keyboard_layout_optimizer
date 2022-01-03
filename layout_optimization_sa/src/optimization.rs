@@ -111,10 +111,6 @@ struct BestObserver {
 }
 
 impl Observe<AnnealingStruct> for BestObserver {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
-    }
-
     fn observe_iter(
         &mut self,
         state: &IterState<AnnealingStruct>,
@@ -132,13 +128,14 @@ impl Observe<AnnealingStruct> for BestObserver {
     }
 }
 
+/// Necessary to avoid errors when importing a [custom_observer] to `optimize()`.
 impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        (*self).as_ref().observe_init(_name, _kv)
-    }
-
-    fn observe_iter(&mut self, _state: &IterState<AnnealingStruct>, _kv: &ArgminKV) -> Result<(), Error> {
-        (*self).as_mut().observe_iter(_state, _kv)
+    fn observe_iter(
+        &mut self,
+        state: &IterState<AnnealingStruct>,
+        kv: &ArgminKV,
+    ) -> Result<(), Error> {
+        (*self).as_mut().observe_iter(state, kv)
     }
 }
 
@@ -150,10 +147,6 @@ struct IterationObserver {
 }
 
 impl Observe<AnnealingStruct> for IterationObserver {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
-    }
-
     fn observe_iter(
         &mut self,
         state: &IterState<AnnealingStruct>,
@@ -174,7 +167,6 @@ impl Observe<AnnealingStruct> for IterationObserver {
         ra_be: false
         ra_ac: false
         time: 0.533206799 */
-        println!("{}", state.is_best());
         let mut temperature = String::from("Not found.");
         let mut accepted = "Not found";
         for (key, value) in &kv.kv {

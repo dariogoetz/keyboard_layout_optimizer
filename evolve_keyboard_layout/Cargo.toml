@@ -18,7 +18,6 @@ layout_optimization_genevo = { path = "../layout_optimization_genevo" }
 layout_optimization_sa = { path = "../layout_optimization_sa" }
 
 anyhow = "*"
-argmin = "0.4.7"
 dotenv = "*"
 env_logger = "*"
 log = "*"

@@ -310,10 +310,6 @@ struct SaObserver {
 }
 
 impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
-    }
-
     fn observe_iter(
         &mut self,
         state: &IterState<sa_optimization::AnnealingStruct>,
@@ -351,7 +347,11 @@ pub fn sa_optimize(
     parameters.correct_init_temp();
 
     let observer = SaObserver {
-        layout_generator: PermutationLayoutGenerator::new(layout_str, fixed_characters, &layout_evaluator.layout_generator),
+        layout_generator: PermutationLayoutGenerator::new(
+            layout_str,
+            fixed_characters,
+            &layout_evaluator.layout_generator,
+        ),
         update_callback,
         new_best_callback,
     };
