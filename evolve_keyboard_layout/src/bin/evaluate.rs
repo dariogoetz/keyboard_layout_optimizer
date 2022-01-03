@@ -1,5 +1,6 @@
 use keyboard_layout::layout::Layout;
 use layout_evaluation::results::EvaluationResult;
+use serde::Serialize;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use structopt::StructOpt;
@@ -7,6 +8,24 @@ use structopt::StructOpt;
 use rayon::prelude::*;
 
 use evolve_keyboard_layout::common;
+
+#[derive(Serialize)]
+struct LayoutEvaluation {
+    details: EvaluationResult,
+    total_cost: f64,
+}
+
+impl From<EvaluationResult> for LayoutEvaluation {
+    fn from(details: EvaluationResult) -> Self {
+        let total_cost = details.total_cost();
+        Self {
+            details,
+            total_cost,
+        }
+    }
+}
+
+
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
@@ -82,7 +101,7 @@ fn main() {
 
     // print results
     if options.json {
-        let results: Vec<EvaluationResult> = results.into_iter().map(|(_, res)| res).collect();
+        let results: Vec<LayoutEvaluation> = results.into_iter().map(|(_, res)| res.into()).collect();
         println!("{}", serde_json::to_string(&results).unwrap());
     } else {
         for (layout, evaluation_result) in results {

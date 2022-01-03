@@ -5,6 +5,7 @@ use layout_evaluation::evaluation::Evaluator;
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
+use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::usize;
@@ -251,12 +252,14 @@ pub fn optimize(
                         let layout = pm.generate_layout(&best_solution.solution.genome);
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
-                            "New best:\n{}\n\n{}\n{}",
+                            "{}: {} (score: {})\n{}",
+                            format!("New best in generation {}:", step.iteration)
+                                .yellow()
+                                .bold(),
                             layout,
-                            layout.plot_compact(),
+                            format!("{}", evaluation_result.total_cost()).yellow(),
                             layout.plot(),
                         );
-                        println!("{}", evaluation_result);
 
                         all_time_best = Some((
                             best_solution.solution.fitness,
@@ -269,10 +272,10 @@ pub fn optimize(
                         best_solution.solution.genome.clone(),
                     ));
                 }
-                println!(
-                    "Step: generation: {}, average_fitness: {}, \
+                log::info!(
+                    "{}, average_fitness: {}, \
                      best fitness: {}, all time best: {}, duration: {}, processing_time: {}, generation's best: {}",
-                    step.iteration,
+                    format!("Generation {}:", step.iteration).yellow().bold(),
                     evaluated_population.average_fitness(),
                     best_solution.solution.fitness,
                     all_time_best.as_ref().unwrap().0,
@@ -281,27 +284,17 @@ pub fn optimize(
                     pm.generate_layout(&best_solution.solution.genome)
                 );
             }
-            Ok(SimResult::Final(step, processing_time, duration, stop_reason)) => {
-                println!("{}", stop_reason);
+            Ok(SimResult::Final(step, processing_time, duration, _stop_reason)) => {
+                let layout = pm.generate_layout(&all_time_best.as_ref().unwrap().1);
                 println!(
-                    "Final result after {}: generation: {}, processing_time: {}",
-                    duration.fmt(),
+                    "{} after generation {}, duration {}, processing time {}\n\n{}\n\n{}\n{}",
+                    "Final result".green().bold(),
                     step.iteration,
-                    processing_time.fmt()
-                );
-                println!(
-                    "\n{}",
-                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
-                );
-                println!(
-                    "\n{}",
-                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
-                        .plot_compact()
-                );
-                println!(
-                    "\n{}",
-                    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
-                        .plot()
+                    duration.fmt(),
+                    processing_time.fmt(),
+                    layout,
+                    layout.plot_compact(),
+                    layout.plot()
                 );
                 break;
             }

@@ -472,11 +472,9 @@ impl Evaluator {
             .into_iter()
             .for_each(|mc| trigram_costs.add_result(mc));
 
-        EvaluationResult::new(vec![
-            layout_costs,
-            unigram_costs,
-            bigram_costs,
-            trigram_costs,
-        ])
+        EvaluationResult::new(
+            layout.as_text(),
+            vec![layout_costs, unigram_costs, bigram_costs, trigram_costs],
+        )
     }
 }

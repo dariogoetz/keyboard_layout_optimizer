@@ -34,15 +34,7 @@ extern "C" {
 }
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct NGramConfig {
-    pub unigrams: String,
-    pub bigrams: String,
-    pub trigrams: String,
-}
-
-#[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
-    pub ngrams: NGramConfig,
     pub metrics: MetricParameters,
     pub ngram_mapper: NgramMapperConfig,
 }
