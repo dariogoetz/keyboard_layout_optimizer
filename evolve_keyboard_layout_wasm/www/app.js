@@ -54,9 +54,11 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="setInput('k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj')">koy</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('kuü.ävgcljfßhieaodtrnsxyö,qbpwmz')">AdNW</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
+      <b-button class="mb-2" size="sm" @click="randomInput(true)">random (std)</b-button>
+      <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
         <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
       </b-form>
@@ -242,6 +244,22 @@ Vue.component('evaluator-app', {
     },
 
     methods: {
+        randomInput(fix) {
+            let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
+            if (fix) {
+                array = 'zluaqwbdgyjßcrieomntshvxüäöpfk'.split('')
+
+            }
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            let res = array.join('')
+            if (fix) {
+                res = array.slice(0, array.length - 1).join('') + ',.' + array[array.length - 1]
+            }
+            this.inputLayoutRaw = res
+        },
         setInput (layout) {
             this.inputLayoutRaw = layout
         },
