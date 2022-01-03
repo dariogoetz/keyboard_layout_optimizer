@@ -32,7 +32,7 @@ const evaluator = {
         } else if (ngramType === 'from_text') {
             this.ngramProvider = this.wasm.NgramProvider.with_text(
                 evalParams,
-                corpusText
+                ngramData
             )
         }
     },
