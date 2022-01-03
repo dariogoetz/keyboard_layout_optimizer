@@ -2,9 +2,7 @@
 eval_parameters = "../config/evaluation_parameters.yml"
 layout_config = "../config/standard_keyboard.yml"
 static_dir = "static"
-unigrams = "../1-gramme.arne.no-special.txt"
-bigrams = "../2-gramme.arne.no-special.txt"
-trigrams = "../3-gramme.arne.no-special.txt"
+ngrams = "../corpus/arne_no_special"
 secret = "super_duper_secret"
 allowed_cors_origins = "http://localhost:8080"
 

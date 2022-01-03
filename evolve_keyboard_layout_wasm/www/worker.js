@@ -1,39 +1,32 @@
-importScripts("https://unpkg.com/comlink/dist/umd/comlink.js")
-    ;
-// instantiate wasm module
-let wasm_import = import("evolve-keyboard-layout-wasm")
-let unigram_import = import('../../1-gramme.arne.no-special.txt')
-let bigram_import = import('../../2-gramme.arne.no-special.txt')
-let trigram_import = import('../../3-gramme.arne.no-special.txt')
-
+importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
 const evaluator = {
-
     wasm: null,
-    unigrams: null,
-    bigrams: null,
-    trigrams: null,
     ngramProvider: null,
     layoutEvaluator: null,
     layoutOptimizer: null,
 
     init() {
-        return Promise.all([wasm_import, unigram_import, bigram_import, trigram_import])
-            .then((imports) => {
-                this.wasm = imports[0]
-                this.unigrams = imports[1].default
-                this.bigrams = imports[2].default
-                this.trigrams = imports[3].default
+        return import("evolve-keyboard-layout-wasm")
+            .then((wasm) => {
+                this.wasm = wasm
             })
     },
 
-    initNgramProvider(ngramType, evalParams, corpusText) {
+    async initNgramProvider(ngramType, evalParams, ngramData) {
         if (ngramType === 'prepared') {
+            let unigrams = await import(`../../corpus/${ngramData}/1-grams.txt`)
+                .then((ngrams) => ngrams.default)
+            let bigrams = await import(`../../corpus/${ngramData}/2-grams.txt`)
+                .then((ngrams) => ngrams.default)
+            let trigrams = await import(`../../corpus/${ngramData}/3-grams.txt`)
+                .then((ngrams) => ngrams.default)
+
             this.ngramProvider = this.wasm.NgramProvider.with_frequencies(
                 evalParams,
-                this.unigrams,
-                this.bigrams,
-                this.trigrams
+                unigrams,
+                bigrams,
+                trigrams
             )
         } else if (ngramType === 'from_text') {
             this.ngramProvider = this.wasm.NgramProvider.with_text(

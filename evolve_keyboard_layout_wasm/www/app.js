@@ -15,6 +15,18 @@ const LAYOUT_CONFIGS = [
     { key: 'ortho', label: 'Ortho', config: config_ortho },
     { key: 'moonlander', label: 'Moonlander', config: config_ortho_bored },
 ]
+const DEFAULT_LAYOUT_CONFIG = 'standard'
+
+const NGRAMS = [
+    { key: 'deu_wiki_0.6_eng_wiki_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'deu_wiki_1m', label: 'Wikipedia (deu)', description: 'Ngram frequencies from German Wikipedia 2021. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'eng_wiki_1m', label: 'Wikipedia (eng)', description: 'Ngram frequencies from English Wikipedia 2016. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'deu_mixed_0.6_eng_news_typical_0.4', label: 'Mixed/News typical (deu/eng 60/40)', description: 'Ngram frequencies from German "Mixed Typical (2011)" and English "News Typical (2016)" in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'deu_mixed_1m', label: 'Mixed Typical (deu)', description: 'Ngram frequencies from German "Mixed 2011". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'eng_news_typical_1m', label: 'News Typical (eng)', description: 'Ngram frequencies from English "News Typical 2016". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'arne_no_special', label: 'ArneBab', description: 'Ngram frequencies used in ArneBabs optimizer. Sourced from <a href="https://hg.sr.ht/~arnebab/evolve-keyboard-layout">ArneBabs optimizer</a>.' },
+]
+const DEFAULT_NGRAM = 'deu_wiki_0.6_eng_wiki_0.4'
 
 function setDifference(setA, setB) {
     var _difference = new Set(setA);
@@ -125,6 +137,7 @@ Vue.component('evaluator-app', {
             wasm: null,
             worker: null,
             ngramType: "prepared",
+            ngrams: "arne_no_special",
             corpusText: null,
             evalParamsStr: null,
             optMode: 'simulated_annealing',
@@ -285,7 +298,11 @@ Vue.component('evaluator-app', {
         async initNgramProvider() {
             // this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
             this.loading += 1
-            await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, this.corpusText)
+            let data = this.ngrams
+            if (this.ngramType === "from_text") {
+                data = this.corpusText
+            }
+            await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
             this.loading -= 1
         },
 
@@ -311,8 +328,11 @@ Vue.component('evaluator-app', {
 
         async updateNgramProviderParams(ngramType, ngramData) {
             this.ngramType = ngramType
+
             if (ngramType === "from_text") {
                 this.corpusText = ngramData
+            } else {
+                this.ngrams = ngramData
             }
 
             await this.initNgramProvider()
@@ -493,7 +513,7 @@ Vue.component('keyboard-selector', {
     </b-form>
     `,
     props: {
-        defaultSelection: { type: String, default: "standard" },
+        defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
     },
     data() {
         let options = []
@@ -516,7 +536,6 @@ Vue.component('ngram-config', {
     template: `
     <div>
       <b-form-select label="NGram Type" v-model="selected" :options="options" @change="select"></b-form-select>
-      <div v-if="selected === 'prepared'">Using prepared ngram frequencies</div>
       <div v-if="selected === 'from_text'">
         <b-form-textarea
           v-model="text"
@@ -526,25 +545,40 @@ Vue.component('ngram-config', {
         </b-form-textarea>
         <b-button class="float-right" variant="primary" @click="save">Save</b-button>
       </div>
+      <div v-else>
+        <br>
+        <span v-html="detailsHTML"></span>
+      </div>
     </div>
     `,
     props: {
-        defaultSelection: { type: String, default: "prepared" },
+        defaultSelection: { type: String, default: DEFAULT_NGRAM },
     },
     data() {
+        let options = []
+        let description = {}
+        NGRAMS.forEach(c => {
+            options.push({value: c.key, text: c.label})
+            description[c.key] = c.description
+        })
+        options.push({ value: "from_text", text: "From Text" })
+
         return {
             selected: this.defaultSelection,
-            options: [
-                { value: "prepared", text: "Prepared" },
-                { value: "from_text", text: "From Text" },
-            ],
+            options,
             text: "",
+            description,
         }
+    },
+    computed: {
+        detailsHTML () {
+            return this.description[this.selected]
+        },
     },
     methods: {
         select() {
-            if (this.selected === "prepared") {
-                this.$emit("selected", this.selected, null)
+            if (this.selected !== "from_text") {
+                this.$emit("selected", "prepared", this.selected)
             }
         },
         save() {
