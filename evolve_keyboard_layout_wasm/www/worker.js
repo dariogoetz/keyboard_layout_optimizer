@@ -1,4 +1,4 @@
-importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
+importScripts("https://unpkg.com/comlink/dist/umd/comlink.js")
 
 const evaluator = {
     wasm: null,
@@ -52,6 +52,8 @@ const evaluator = {
             this.layoutEvaluator,
             fixed_chars,
             true,
+            (val) => console.log("update", val),
+            (layout, cost) => console.log("new best", layout, cost),
             120, // TODO: Implement a way to input the initial temperature.
         )
 

@@ -20,6 +20,7 @@ layout_optimization_sa = { path = "../layout_optimization_sa" }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "*"
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
+js-sys = "*"
 
 argmin = "0.4.7"
 genevo = { version = "0.7.0", features = ["wasm-bindgen"] }

@@ -302,15 +302,11 @@ impl LayoutOptimizer {
     }
 }
 
-#[wasm_bindgen(raw_module = "../www/communicate.js")]
-extern "C" {
-    fn updateOptStep(stepNr: u64);
-    fn newBestAlert(layout: String, cost: f64);
-}
-
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
+    update_callback: js_sys::Function,
+    new_best_callback: js_sys::Function,
 }
 
 impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
@@ -324,14 +320,15 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let iteration_nr = state.iter;
+        let this = JsValue::null();
         if iteration_nr % 10 == 0 {
-            updateOptStep(iteration_nr);
+            let iter_js = JsValue::from(iteration_nr);
+            let _ = self.update_callback.call1(&this, &iter_js);
         }
         if state.is_best() {
-            newBestAlert(
-                self.layout_generator.generate_string(&state.param),
-                state.cost,
-            );
+            let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
+            let cost_js = JsValue::from(state.cost);
+            let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
         }
         Ok(())
     }
@@ -344,6 +341,8 @@ pub fn sa_optimize(
     layout_evaluator: &LayoutEvaluator,
     fixed_characters: &str,
     start_with_layout: bool,
+    update_callback: js_sys::Function,
+    new_best_callback: js_sys::Function,
 ) -> String {
     let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
@@ -352,7 +351,9 @@ pub fn sa_optimize(
     parameters.correct_init_temp();
 
     let observer = SaObserver {
-        layout_generator: PermutationLayoutGenerator::new(layout_str, fixed_characters, &layout_evaluator.layout_generator)
+        layout_generator: PermutationLayoutGenerator::new(layout_str, fixed_characters, &layout_evaluator.layout_generator),
+        update_callback,
+        new_best_callback,
     };
 
     let result: Layout = sa_optimization::optimize(
