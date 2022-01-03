@@ -13,11 +13,12 @@ default-run = "evaluate"
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }
 layout_optimization = { path = "../layout_optimization" }
+layout_optimization_abc = { path = "../layout_optimization_abc" }
 layout_optimization_genevo = { path = "../layout_optimization_genevo" }
 layout_optimization_sa = { path = "../layout_optimization_sa" }
-layout_optimization_abc = { path = "../layout_optimization_abc" }
 
 anyhow = "*"
+argmin = "0.4.7"
 dotenv = "*"
 env_logger = "*"
 log = "*"

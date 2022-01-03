@@ -61,14 +61,14 @@ impl Parameters {
     }
 }
 
-pub struct AnnealingStruct<'a> {
+pub struct AnnealingStruct {
     evaluator: Arc<Evaluator>,
-    layout_generator: &'a PermutationLayoutGenerator,
+    layout_generator: PermutationLayoutGenerator,
     key_switches: usize,
     result_cache: Option<Cache<f64>>,
 }
 
-impl ArgminOp for AnnealingStruct<'_> {
+impl ArgminOp for AnnealingStruct {
     type Param = Vec<usize>;
     type Output = f64;
     type Hessian = ();
@@ -110,14 +110,14 @@ struct BestObserver {
     layout_generator: PermutationLayoutGenerator,
 }
 
-impl Observe<AnnealingStruct<'_>> for BestObserver {
+impl Observe<AnnealingStruct> for BestObserver {
     fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
         Ok(())
     }
 
     fn observe_iter(
         &mut self,
-        state: &IterState<AnnealingStruct<'_>>,
+        state: &IterState<AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let best_layout = self.layout_generator.generate_string(&state.best_param);
@@ -139,14 +139,14 @@ struct IterationObserver {
     log_everything: bool,
 }
 
-impl Observe<AnnealingStruct<'_>> for IterationObserver {
+impl Observe<AnnealingStruct> for IterationObserver {
     fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
         Ok(())
     }
 
     fn observe_iter(
         &mut self,
-        state: &IterState<AnnealingStruct<'_>>,
+        state: &IterState<AnnealingStruct>,
         kv: &ArgminKV,
     ) -> Result<(), Error> {
         let layout = self.layout_generator.generate_string(&state.param);
@@ -243,12 +243,7 @@ fn get_cost_sd(
 }
 
 /// Performs one run of Simulated Annealing, then returns the best layout found.
-pub fn optimize<
-    /* ERROR */
-    OBS: Observe<
-            ArgminOp<Param = Vec<usize>, Output = f64, Hessian = (), Jacobian = (), Float = f64>,
-        > + 'static,
->(
+pub fn optimize(
     process_name: &str,
     params: &Parameters,
     layout_str: &str,
@@ -258,7 +253,7 @@ pub fn optimize<
     evaluator: &Evaluator,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
-    custom_observer: OBS,
+    custom_observer: Option<Box<&dyn Observe<AnnealingStruct>>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
@@ -285,7 +280,7 @@ pub fn optimize<
     };
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
-        layout_generator: &pm,
+        layout_generator: pm.clone(),
         key_switches: params.key_switches,
         result_cache,
     };
@@ -300,21 +295,38 @@ pub fn optimize<
         /////////////////////////
         // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
         .stall_accepted(params.stall_accepted);
-
-    let best_observer = BestObserver {
-        id: process_name.to_string(),
-        layout_generator: pm.clone(),
-    };
-    let iter_observer = IterationObserver {
-        id: process_name.to_string(),
-        layout_generator: pm.clone(),
-        log_everything,
-    };
-    let iter_observer_mode = if log_everything {
-        ObserverMode::Always
-    } else {
-        ObserverMode::Every(100)
-    };
+    // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
+    let mut executor = Executor::new(problem, solver, init_layout)
+        .timer(false)
+        // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
+        .max_iters(params.max_iters);
+    match custom_observer {
+        Some(observer) => {
+            // If a custom Observer was supplied, only use that Observer.
+            executor = executor.add_observer(observer, ObserverMode::Always);
+        }
+        // If no custom Observer was supplied, use the default setup.
+        None => {
+            let best_observer = BestObserver {
+                id: process_name.to_string(),
+                layout_generator: pm.clone(),
+            };
+            let iter_observer = IterationObserver {
+                id: process_name.to_string(),
+                layout_generator: pm.clone(),
+                log_everything,
+            };
+            let iter_observer_mode = if log_everything {
+                ObserverMode::Always
+            } else {
+                ObserverMode::Every(100)
+            };
+            // Optional: Attach a observer
+            executor = executor
+                .add_observer(best_observer, ObserverMode::NewBest)
+                .add_observer(iter_observer, iter_observer_mode);
+        }
+    }
 
     log::info!(
         "{}: Starting optimization with: initial_temperature: {:.2}, {:?}",
@@ -322,16 +334,7 @@ pub fn optimize<
         init_temp,
         params
     );
-    // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
-    let res = Executor::new(problem, solver, init_layout)
-        .timer(false)
-        // Optional: Attach a observer
-        .add_observer(best_observer, ObserverMode::NewBest)
-        .add_observer(iter_observer, iter_observer_mode)
-        // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
-        .max_iters(params.max_iters)
-        .run()
-        .unwrap();
+    let res = executor.run().unwrap();
 
     let best_layout_param = res.state().get_best_param();
     pm.generate_layout(&best_layout_param)

@@ -1,3 +1,4 @@
+use argmin::prelude::Observe;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
@@ -151,6 +152,8 @@ fn main() {
                 log::info!("Starting optimization {}", i);
             }
 
+            let custom_observer: Option<Box<&dyn Observe<optimization::AnnealingStruct>>> = None;
+
             // Perform the optimization.
             let layout = optimization::optimize(
                 &format!("Process {:>3}", i),
@@ -162,6 +165,7 @@ fn main() {
                 &evaluator,
                 options.log_everything,
                 cache.clone(),
+                custom_observer,
             );
 
             // Plot some information regarding the layout.
