@@ -1,6 +1,6 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
-import config_ortho_bored from '../../config/moonlander.yml'
+import config_moonlander from '../../config/moonlander.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
 import gen_opt_params from '../../config/optimization_parameters_web.yml'
@@ -13,7 +13,7 @@ const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 const LAYOUT_CONFIGS = [
     { key: 'standard', label: 'Standard', config: config_standard_keyboard },
     { key: 'ortho', label: 'Ortho', config: config_ortho },
-    { key: 'moonlander', label: 'Moonlander', config: config_ortho_bored },
+    { key: 'moonlander', label: 'Moonlander', config: config_moonlander },
 ]
 const DEFAULT_LAYOUT_CONFIG = 'standard'
 
@@ -48,6 +48,14 @@ Vue.component('evaluator-app', {
 
     <b-col xl="4" lg="6" style="height: 450px">
       <h2>Layout</h2>
+
+      <b-button class="mb-2" size="sm" @click="setInput('zluaqwbdgyjßcrieomntshvxüäöpf,.k')">mine</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('jduaxphlmwqßctieobnrsgfvüäöyz,.k')">bone</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j')">neo2</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj')">koy</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('kuü.ävgcljfßhieaodtrnsxyö,qbpwmz')">AdNW</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
+
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
         <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
@@ -238,6 +246,9 @@ Vue.component('evaluator-app', {
     },
 
     methods: {
+        setInput(layout) {
+            this.inputLayoutRaw = layout
+        },
         async evaluateInput() {
             this.showInputValidState = true
             // check if the current layout is already available in this.details
