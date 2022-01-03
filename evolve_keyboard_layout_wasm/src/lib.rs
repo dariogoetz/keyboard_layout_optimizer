@@ -313,14 +313,14 @@ struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
 }
 
-impl Observe<sa_optimization::AnnealingStruct<'_>> for SaObserver {
+impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
     fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
         Ok(())
     }
 
     fn observe_iter(
         &mut self,
-        state: &IterState<sa_optimization::AnnealingStruct<'_>>,
+        state: &IterState<sa_optimization::AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let iteration_nr = state.iter;
@@ -351,6 +351,10 @@ pub fn sa_optimize(
     // Make sure the initial temperature is greater than zero.
     parameters.correct_init_temp();
 
+    let observer = SaObserver {
+        layout_generator: PermutationLayoutGenerator::new(layout_str, fixed_characters, &layout_evaluator.layout_generator)
+    };
+
     let result: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         &parameters,
@@ -361,6 +365,7 @@ pub fn sa_optimize(
         &layout_evaluator.evaluator,
         /* log_everything: */ false,
         Some(Cache::new()),
+        Some(Box::new(observer)),
     );
     result.as_text()
 }

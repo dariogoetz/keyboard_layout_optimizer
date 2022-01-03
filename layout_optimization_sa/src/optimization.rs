@@ -132,6 +132,8 @@ impl Observe<AnnealingStruct> for BestObserver {
     }
 }
 
+impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {}
+
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct IterationObserver {
     id: String,
@@ -253,7 +255,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
-    custom_observer: Option<Box<&dyn Observe<AnnealingStruct>>>,
+    custom_observer: Option<Box<dyn Observe<AnnealingStruct>>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
