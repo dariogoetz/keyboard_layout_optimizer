@@ -83,31 +83,32 @@ Vue.component('evaluator-app', {
 
     </b-col>
 
-    <b-col xl="8" lg="6" style="height: 450px">
+    <b-col xl="8" lg="6">
       <h2>Settings</h2>
-      <b-tabs>
+        <b-overlay :show="optStep > 0" style="height: 420px">
+          <b-tabs>
+            <b-tab title="Evaluation">
+              <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
+            </b-tab>
 
-        <b-tab title="Evaluation">
-          <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
-        </b-tab>
+            <b-tab title="Ngrams">
+              <ngram-config @selected="updateNgramProviderParams"></ngram-config>
+            </b-tab>
 
-        <b-tab title="Ngrams">
-          <ngram-config @selected="updateNgramProviderParams"></ngram-config>
-        </b-tab>
+            <b-tab title="Keyboard">
+              <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
+            </b-tab>
 
-        <b-tab title="Keyboard">
-          <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
-        </b-tab>
+            <b-tab title="Optimization">
+              <b-form inline @submit.stop.prevent @submit="evaluateInput">
+                <label class="mr-sm-2">Fixed Keys</label>
+                <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+              </b-form>
+              <config-file :initial-content="optParamsStr" @saved="updateOptParams">
+            </b-tab>
 
-        <b-tab title="Optimization">
-      <b-form inline @submit.stop.prevent @submit="evaluateInput">
-          <label class="mr-sm-2">Fixed Keys</label>
-          <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
-        </b-form>
-          <config-file :initial-content="optParamsStr" @saved="updateOptParams">
-        </b-tab>
-
-      </b-tabs>
+          </b-tabs>
+        </b-overlay>
     </b-col>
   </b-row>
 
