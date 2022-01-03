@@ -145,14 +145,16 @@ Vue.component('evaluator-app', {
             showInputValidState: false,
             wasm: null,
             worker: null,
-            ngramType: "prepared",
-            ngrams: "arne_no_special",
+            ngramProviderInitialized: false,
+            evaluatorInitialized: false,
+            ngramType: null,
+            ngrams: null,
             corpusText: null,
             evalParamsStr: null,
             permutableKeys: null,
             optParamsStr: null,
             optParams: null,
-            selectedLayoutConfig: "standard",
+            selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
             optStep: 0,
@@ -282,6 +284,9 @@ Vue.component('evaluator-app', {
         },
 
         async evaluateExisting () {
+            if (!this.evaluatorInitialized || this.worker === null) {
+                return
+            }
             let promises = []
             this.details.forEach((d) => {
                 let promise = this.evaluate(d.layout)
@@ -321,21 +326,27 @@ Vue.component('evaluator-app', {
         },
 
         async initNgramProvider () {
-            // this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
+            if (this.ngrams === null || this.worker === null) {
+                return
+            }
             this.loading += 1
             let data = this.ngrams
             if (this.ngramType === "from_text") {
                 data = this.corpusText
             }
             await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
+            this.ngramProviderInitialized = true
             this.loading -= 1
         },
 
         async initLayoutEvaluator () {
-            // this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
+            if (!this.ngramProviderInitialized || this.worker === null) {
+                return
+            }
             this.loading += 1
             await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
             this.permutableKeys = await this.worker.permutableKeys()
+            this.evaluatorInitialized = true
             this.loading -= 1
         },
 
@@ -517,6 +528,9 @@ Vue.component('keyboard-selector', {
             options,
         }
     },
+    created () {
+        this.emit()
+    },
     methods: {
         emit () {
             this.$emit("selected", this.selected)
@@ -561,6 +575,9 @@ Vue.component('ngram-config', {
             text: "",
             description,
         }
+    },
+    created () {
+        this.select()
     },
     computed: {
         detailsHTML () {
