@@ -377,19 +377,27 @@ Vue.component('evaluator-app', {
                 this.inputLayout,
                 this.optFixed,
                 this.saOptParamsStr,
+                this.updateOptTotalSteps,
+                this.updateOptStep,
+                this.newBestAlert.bind(this), // Doesn't work either.
             )
             this.optStep = 0
             console.log(layout)
         },
 
+        updateOptTotalSteps(maxStepNr) {
+            console.log("updateOptTotalSteps(maxStepNr) {")
+            //this.optTotalSteps = maxStepNr
+        },
+
         updateOptStep(stepNr) {
             console.log("updateOptStep(stepNr) {")
-            this.optStep = stepNr
+            //this.optStep = stepNr
         },
 
         newBestAlert(layout, cost) {
             console.log("newBestAlert(layout, cost) {")
-            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
+            //this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
         },
 
         async genevoOtimization() {
@@ -558,7 +566,7 @@ Vue.component('ngram-config', {
         let options = []
         let description = {}
         NGRAMS.forEach(c => {
-            options.push({value: c.key, text: c.label})
+            options.push({ value: c.key, text: c.label })
             description[c.key] = c.description
         })
         options.push({ value: "from_text", text: "From Text" })
@@ -571,7 +579,7 @@ Vue.component('ngram-config', {
         }
     },
     computed: {
-        detailsHTML () {
+        detailsHTML() {
             return this.description[this.selected]
         },
     },

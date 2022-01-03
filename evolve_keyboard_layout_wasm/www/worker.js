@@ -44,7 +44,7 @@ const evaluator = {
         )
     },
 
-    async saOptimize(layout, fixed_chars, optParams) {
+    async saOptimize(layout, fixed_chars, optParams, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
         console.log(optParams)
         let optLayout = this.wasm.sa_optimize(
             layout,
@@ -52,9 +52,9 @@ const evaluator = {
             this.layoutEvaluator,
             fixed_chars,
             true,
-            (val) => console.log("update", val),
-            (layout, cost) => console.log("new best", layout, cost),
-            120, // TODO: Implement a way to input the initial temperature.
+            /*             (nr) => setMaxStepNr(nr),
+                        (nr) => setCurrentStepNr(nr),
+                        (layout, cost) => notifyNewBest(layout, cost), */
         )
 
         return optLayout
