@@ -2,20 +2,23 @@
 //! to travel for a bigram (excluding thumbs). The vertical distance is normalized by the "horizontal" distance
 //! of the fingers. More precisely, the number of rows to travel is squared and divided by the
 //! finger distance. Additional adjustments are applied if the movement is upwards/downwards from/to
-//! short/long fingers and if the involved keys are unbalancing (as configured for the keyboard).
+//! shorter/longer fingers and if the involved keys are unbalancing (as configured for the keyboard).
 //! The resulting value is squared (after being multiplied to the bigram's weight).
+//!
+//! In contrast to ArneBab's metric, finger length is compared relatively to each other, not
+//! absolutely.
 
 use super::BigramMetric;
 
 use keyboard_layout::key::{Finger, Hand, HandFingerMap};
 use keyboard_layout::layout::{LayerKey, Layout};
 
+use std::collections::hash_map::HashMap;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    short_fingers: Vec<(Hand, Finger)>,
-    long_fingers: Vec<(Hand, Finger)>,
+    finger_lengths: HashMap<Hand, HashMap<Finger, f64>>,
     short_up_to_long_or_long_down_to_short_reduction: f64,
     short_down_to_long_or_long_up_to_short_increase: f64,
     count_row_changes_between_hands: bool,
@@ -23,8 +26,7 @@ pub struct Parameters {
 
 #[derive(Clone, Debug)]
 pub struct LineChanges {
-    finger_is_short: HandFingerMap<bool>,
-    finger_is_long: HandFingerMap<bool>,
+    finger_lengths: HandFingerMap<f64>,
     short_up_to_long_or_long_down_to_short_reduction: f64,
     short_down_to_long_or_long_up_to_short_increase: f64,
     count_row_changes_between_hands: bool,
@@ -32,27 +34,34 @@ pub struct LineChanges {
 
 impl LineChanges {
     pub fn new(params: &Parameters) -> Self {
-        let mut finger_is_short = HandFingerMap::with_default(false);
-        params
-            .short_fingers
-            .iter()
-            .for_each(|(h, f)| finger_is_short.set(h, f, true));
-
-        let mut finger_is_long = HandFingerMap::with_default(false);
-        params
-            .long_fingers
-            .iter()
-            .for_each(|(h, f)| finger_is_long.set(h, f, true));
+        let finger_lengths = HandFingerMap::with_hashmap(&params.finger_lengths, 1.0);
 
         Self {
-            finger_is_short,
-            finger_is_long,
+            finger_lengths,
             short_up_to_long_or_long_down_to_short_reduction: params
                 .short_up_to_long_or_long_down_to_short_reduction,
             short_down_to_long_or_long_up_to_short_increase: params
                 .short_down_to_long_or_long_up_to_short_increase,
             count_row_changes_between_hands: params.count_row_changes_between_hands,
         }
+    }
+}
+
+impl LineChanges {
+    #[inline(always)]
+    fn finger_is_longer(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
+        let len1 = self.finger_lengths.get(h1, f1);
+        let len2 = self.finger_lengths.get(h2, f2);
+
+        len1 > len2
+    }
+
+    #[inline(always)]
+    fn finger_is_shorter(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
+        let len1 = self.finger_lengths.get(h1, f1);
+        let len2 = self.finger_lengths.get(h2, f2);
+
+        len1 < len2
     }
 }
 
@@ -77,6 +86,9 @@ impl BigramMetric for LineChanges {
         let h1 = k1.key.hand;
         let h2 = k2.key.hand;
 
+        let first_is_longer = self.finger_is_longer(&h1, &f1, &h2, &f2);
+        let first_is_shorter = self.finger_is_shorter(&h1, &f1, &h2, &f2);
+
         if f1 == Finger::Thumb || f2 == Finger::Thumb {
             return Some(0.0);
         }
@@ -93,18 +105,14 @@ impl BigramMetric for LineChanges {
         let upwards: bool = pos2.1 < pos1.1;
         let downwards: bool = pos2.1 > pos1.1;
 
-        if (upwards && *self.finger_is_short.get(&h1, &f1) && *self.finger_is_long.get(&h2, &f2))
-            || (downwards
-                && *self.finger_is_long.get(&h1, &f1)
-                && *self.finger_is_short.get(&h2, &f2))
+        if (upwards && first_is_shorter)
+            || (downwards && first_is_longer)
         {
             num_rows -= self.short_up_to_long_or_long_down_to_short_reduction;
         }
 
-        if (downwards && *self.finger_is_short.get(&h1, &f1) && *self.finger_is_long.get(&h2, &f2))
-            || (upwards
-                && *self.finger_is_long.get(&h1, &f1)
-                && *self.finger_is_short.get(&h2, &f2))
+        if (downwards && first_is_shorter)
+            || (upwards && first_is_longer)
         {
             num_rows += self.short_down_to_long_or_long_up_to_short_increase;
         }

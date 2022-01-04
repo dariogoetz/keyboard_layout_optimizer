@@ -158,10 +158,18 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      # List of fingers that are considered "short"
-      short_fingers: [["Left", "Pointer"], ["Right", "Pointer"], ["Right", "Pinky"], ["Left", "Pinky"]]
-      # List of fingers that are considered "long"
-      long_fingers: [["Left", "Middle"], ["Left", "Ring"], ["Right", "Middle"], ["Right", "Ring"]]
+      # Finger lengths
+      finger_lengths:
+        Left:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Pointer: 2
+        Right:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Pointer: 2
       # If the movement is directed upwards from a short towards a long
       # or downwards from a long towards a short finger,
       # the cost is reduced by this factor
