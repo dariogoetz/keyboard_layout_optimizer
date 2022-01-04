@@ -572,7 +572,7 @@ Vue.component('ngram-config', {
             options.push({value: c.key, text: c.label})
             description[c.key] = c.description
         })
-        options.push({ value: "from_text", text: "From Text" })
+        options.push({ value: 'from_text', text: 'From Text' })
 
         return {
             selected: this.defaultSelection,
@@ -591,8 +591,10 @@ Vue.component('ngram-config', {
     },
     methods: {
         select () {
-            if (this.selected !== "from_text") {
-                this.$emit("selected", "prepared", this.selected)
+            if (this.selected === 'from_text') {
+                this.$emit('selected', 'from_text', this.text)
+            } else {
+                this.$emit('selected', 'prepared', this.selected)
             }
         },
         save () {
