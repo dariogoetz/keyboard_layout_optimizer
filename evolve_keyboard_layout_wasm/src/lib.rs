@@ -305,10 +305,9 @@ impl LayoutOptimizer {
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
-    /*     max_iters_callback: js_sys::Function,
+    max_iters_callback: js_sys::Function,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
-    */
 }
 
 impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
@@ -317,7 +316,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         state: &IterState<sa_optimization::AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
-        /* let iteration_nr = state.iter;
+        let iteration_nr = state.iter;
         let this = JsValue::null();
         if iteration_nr % 10 == 0 {
             if iteration_nr == 0 {
@@ -331,7 +330,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
             let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
             let cost_js = JsValue::from(state.cost);
             let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
-        } */
+        }
         Ok(())
     }
 }
@@ -343,9 +342,9 @@ pub fn sa_optimize(
     layout_evaluator: &LayoutEvaluator,
     fixed_characters: &str,
     start_with_layout: bool,
-    /* max_iters_callback: &js_sys::Function,
-    update_callback: &js_sys::Function,
-    new_best_callback: &js_sys::Function, */
+    max_iters_callback: js_sys::Function,
+    update_callback: js_sys::Function,
+    new_best_callback: js_sys::Function,
 ) -> String {
     let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
@@ -359,9 +358,9 @@ pub fn sa_optimize(
             fixed_characters,
             &layout_evaluator.layout_generator,
         ),
-        /* max_iters_callback,
+        max_iters_callback,
         update_callback,
-        new_best_callback, */
+        new_best_callback,
     };
 
     let result: Layout = sa_optimization::optimize(

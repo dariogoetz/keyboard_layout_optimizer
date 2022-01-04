@@ -388,9 +388,9 @@ Vue.component('evaluator-app', {
                 this.inputLayout,
                 this.optFixed,
                 this.saOptParamsStr,
-                this.updateOptTotalSteps,
-                this.updateOptStep,
-                this.newBestAlert.bind(this), // Doesn't work either.
+                Comlink.proxy(this.updateOptTotalSteps),
+                Comlink.proxy(this.updateOptStep),
+                Comlink.proxy(this.newBestAlert.bind(this)), // Doesn't work either.
             )
             this.optStep = 0
             console.log(layout)
@@ -398,17 +398,17 @@ Vue.component('evaluator-app', {
 
         updateOptTotalSteps(maxStepNr) {
             console.log("updateOptTotalSteps(maxStepNr) {")
-            //this.optTotalSteps = maxStepNr
+            this.optTotalSteps = maxStepNr
         },
 
         updateOptStep(stepNr) {
             console.log("updateOptStep(stepNr) {")
-            //this.optStep = stepNr
+            this.optStep = stepNr
         },
 
         newBestAlert(layout, cost) {
             console.log("newBestAlert(layout, cost) {")
-            //this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
+            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
         },
 
         async genevoOtimization() {
