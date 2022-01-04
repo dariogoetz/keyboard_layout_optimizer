@@ -390,7 +390,7 @@ Vue.component('evaluator-app', {
                 this.saOptParamsStr,
                 Comlink.proxy(this.updateOptTotalSteps),
                 Comlink.proxy(this.updateOptStep),
-                Comlink.proxy(this.newBestAlert.bind(this)), // Doesn't work either.
+                Comlink.proxy(this.newBestAlert),
             )
             this.optStep = 0
             console.log(layout)

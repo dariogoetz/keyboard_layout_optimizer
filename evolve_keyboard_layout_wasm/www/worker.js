@@ -45,18 +45,14 @@ const evaluator = {
     },
 
     async saOptimize(layout, fixed_chars, optParams, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
-        function print(value) {
-            console.log(value);
-            console.info(value);
-        }
-        console.log(optParams)
+        await setMaxStepNr(5)
         let optLayout = this.wasm.sa_optimize(
             layout,
             optParams,
             this.layoutEvaluator,
             fixed_chars,
             true,
-            print,//setMaxStepNr,
+            setMaxStepNr,
             setCurrentStepNr,
             notifyNewBest,
         )
