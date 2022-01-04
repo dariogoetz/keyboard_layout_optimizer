@@ -2,7 +2,7 @@
 eval_parameters = "../config/evaluation_parameters.yml"
 layout_config = "../config/standard_keyboard.yml"
 static_dir = "static"
-ngrams = "../corpus/arne_no_special"
+ngrams = "../corpus/deu_mixed_web_wiki_0.6_eng_news_typical_web_wiki_0.4"
 secret = "super_duper_secret"
 allowed_cors_origins = "http://localhost:8080"
 
