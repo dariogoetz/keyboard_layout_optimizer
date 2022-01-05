@@ -45,6 +45,10 @@ const evaluator = {
     },
 
     async saOptimize(layout, fixed_chars, optParams, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
+        // Needed to make this function work in Firefox.
+        // In other browsers (for example in Chromium or Midori),
+        // `await setMaxStepNr(5)` isn't necessary. In this case,
+        // the whole function can be turned into a syncronous one.
         await setMaxStepNr(5)
         let optLayout = this.wasm.sa_optimize(
             layout,
