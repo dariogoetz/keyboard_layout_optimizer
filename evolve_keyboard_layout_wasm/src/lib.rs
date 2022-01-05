@@ -317,7 +317,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
     ) -> Result<(), Error> {
         let iteration_nr = state.iter;
         let this = JsValue::null();
-        if iteration_nr % 10 == 0 {
+        if (iteration_nr % 10 == 0) && (iteration_nr > 0) {
             let iter_js = JsValue::from(iteration_nr);
             let _ = self.update_callback.call1(&this, &iter_js);
         }
@@ -351,6 +351,8 @@ pub fn sa_optimize(
     let this = JsValue::null();
     let max_iters_js = JsValue::from(parameters.max_iters);
     let _ = max_iters_callback.call1(&this, &max_iters_js);
+    let one = JsValue::from(1);
+    let _ = update_callback.call1(&this, &one);
 
     let observer = SaObserver {
         layout_generator: PermutationLayoutGenerator::new(
