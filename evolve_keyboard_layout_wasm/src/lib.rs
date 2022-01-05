@@ -305,7 +305,6 @@ impl LayoutOptimizer {
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
-    max_iters_callback: js_sys::Function,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
 }
@@ -319,10 +318,6 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         let iteration_nr = state.iter;
         let this = JsValue::null();
         if iteration_nr % 10 == 0 {
-            if iteration_nr == 0 {
-                let max_iters_js = JsValue::from(state.max_iters);
-                let _ = self.max_iters_callback.call1(&this, &max_iters_js);
-            }
             let iter_js = JsValue::from(iteration_nr);
             let _ = self.update_callback.call1(&this, &iter_js);
         }
@@ -352,13 +347,17 @@ pub fn sa_optimize(
     // Make sure the initial temperature is greater than zero.
     parameters.correct_init_temp();
 
+    // Display the maximum amount of iterations on the website.
+    let this = JsValue::null();
+    let max_iters_js = JsValue::from(parameters.max_iters);
+    let _ = max_iters_callback.call1(&this, &max_iters_js);
+
     let observer = SaObserver {
         layout_generator: PermutationLayoutGenerator::new(
             layout_str,
             fixed_characters,
             &layout_evaluator.layout_generator,
         ),
-        max_iters_callback,
         update_callback,
         new_best_callback,
     };

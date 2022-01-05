@@ -382,8 +382,6 @@ Vue.component('evaluator-app', {
 
         async saOptimization() {
             console.info('started saOptimization with "' + this.inputLayout + '"')
-            this.optTotalSteps = 100
-            this.optStep = 1
             let layout = await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
