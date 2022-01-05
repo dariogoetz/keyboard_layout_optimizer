@@ -370,11 +370,11 @@ Vue.component('evaluator-app', {
             this.details = this.details.filter((d) => d.layout !== layout)
         },
 
-        async startOptimization() {
+        startOptimization() {
             if (this.optMode === "simulated_annealing") {
-                await this.saOptimization()
+                this.saOptimization()
             } else if (this.optMode === "genevo") {
-                await this.genevoOtimization()
+                this.genevoOtimization()
             } else {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
@@ -386,6 +386,7 @@ Vue.component('evaluator-app', {
                 this.inputLayout,
                 this.optFixed,
                 this.saOptParamsStr,
+                Comlink.proxy(() => { }),
                 Comlink.proxy(this.updateOptTotalSteps),
                 Comlink.proxy(this.updateOptStep),
                 Comlink.proxy(this.newBestAlert),
