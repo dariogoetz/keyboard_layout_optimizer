@@ -39,6 +39,8 @@ function setDifference(setA, setB) {
     return _difference;
 }
 
+Vue.use(VueCodemirror)
+
 Vue.component('evaluator-app', {
     template: `
 <b-container fluid>
@@ -606,11 +608,7 @@ Vue.component('ngram-config', {
 Vue.component('config-file', {
     template: `
     <div>
-      <b-form-textarea
-        v-model="content"
-        rows="15"
-        style="font: 400 13px/18px 'DejaVuSansMonoBook', monospace;"
-      ></b-form-textarea>
+      <codemirror :value="content" :options="options"></codemirror>
       <b-button class="float-right" variant="primary" @click="save">Save</b-button>
     </div>
     `,
@@ -619,7 +617,13 @@ Vue.component('config-file', {
     },
     data () {
         return {
-            content: this.initialContent
+            content: this.initialContent,
+            options: {
+                mode: 'yaml',
+                lineNumbers: true,
+                styleActiveLine: true,
+                autoRefresh: true,
+            }
         }
     },
     watch: {
