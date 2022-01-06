@@ -10,6 +10,7 @@ use crate::metrics::bigram_metrics::BigramMetric;
 use crate::results::NormalizationType;
 use keyboard_layout::layout::{LayerKey, Layout};
 
+use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 use serde::Deserialize;
 
@@ -60,6 +61,7 @@ impl TrigramMetric for Irregularity {
                     * metric
                         .individual_cost(k2, k3, weight, total_weight, layout)
                         .unwrap_or(0.0);
+
                 (cost1, cost2)
             })
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
@@ -101,7 +103,7 @@ impl TrigramMetric for Irregularity {
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        (1_000_000.0 * cost / (total_weight * total_weight)) as usize, // bring to a scale that can be coerced to usize
+                        OrderedFloat(cost),
                     );
                     if worst.len() > N_WORST {
                         worst.pop_min();
@@ -116,15 +118,14 @@ impl TrigramMetric for Irregularity {
             let worst_msgs: Vec<String> = worst
                 .into_sorted_iter()
                 .rev()
-                .filter(|(_, cost)| *cost > 0)
+                .filter(|(_, cost)| cost.into_inner() > 0.0)
                 .map(|(trigram, cost)| {
                     format!(
                         "{}{}{} ({:>5.2}%)",
                         trigram.0.to_string().escape_debug(),
                         trigram.1.to_string().escape_debug(),
                         trigram.2.to_string().escape_debug(),
-                        100.0 * (cost as f64) * total_weight * total_weight
-                            / (1_000_000.0 * total_cost), // return to original scare in f64
+                        100.0 * cost.into_inner() / total_cost,
                     )
                 })
                 .collect();
