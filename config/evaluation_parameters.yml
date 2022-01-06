@@ -103,6 +103,8 @@ metrics:
       index_finger_factor: 0.9
       # Costs of repeats with the pinky finger are multiplied with this factor
       pinky_finger_factor: 1.2
+      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
+      unbalancing_factor: 1.0
       # Common bigrams are weighted additionally only if their absolute weight exceeds this
       # threshold
       total_weight_threshold: 20
@@ -127,6 +129,8 @@ metrics:
       index_finger_factor: 0.9
       # Costs of repeats with the pinky finger are multiplied with this factor
       pinky_finger_factor: 1.2
+      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
+      unbalancing_factor: 1.0
       # Common bigrams are weighted additionally only if their absolute weight exceeds this
       # threshold
       total_weight_threshold: 20
@@ -146,7 +150,8 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      null: null
+      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
+      unbalancing_factor: 1.0
 
   # If the keys corresponding to a bigram belong to fingers of the same hand, a cost is counted
   # depending on their vertical and horizontal distance. Depending on the direction of movement and

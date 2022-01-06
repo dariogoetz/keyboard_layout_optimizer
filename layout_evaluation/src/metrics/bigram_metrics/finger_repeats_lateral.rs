@@ -11,14 +11,21 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct Parameters {}
+pub struct Parameters {
+    /// If some of the involved keys are unbalancing, add the unbalancing weight with this factor
+    pub unbalancing_factor: f64,
+}
 
 #[derive(Clone, Debug)]
-pub struct FingerRepeatsLateral {}
+pub struct FingerRepeatsLateral {
+    unbalancing_factor: f64,
+}
 
 impl FingerRepeatsLateral {
-    pub fn new(_params: &Parameters) -> Self {
-        Self {}
+    pub fn new(params: &Parameters) -> Self {
+        Self {
+            unbalancing_factor: params.unbalancing_factor,
+        }
     }
 }
 
@@ -45,6 +52,6 @@ impl BigramMetric for FingerRepeatsLateral {
             return Some(0.0);
         }
 
-        Some(weight)
+        Some((1.0 + self.unbalancing_factor * k1.key.unbalancing) * (1.0 + self.unbalancing_factor * k2.key.unbalancing) * weight)
     }
 }
