@@ -25,8 +25,6 @@ impl From<EvaluationResult> for LayoutEvaluation {
     }
 }
 
-
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
 struct Options {
@@ -101,7 +99,8 @@ fn main() {
 
     // print results
     if options.json {
-        let results: Vec<LayoutEvaluation> = results.into_iter().map(|(_, res)| res.into()).collect();
+        let results: Vec<LayoutEvaluation> =
+            results.into_iter().map(|(_, res)| res.into()).collect();
         println!("{}", serde_json::to_string(&results).unwrap());
     } else {
         for (layout, evaluation_result) in results {

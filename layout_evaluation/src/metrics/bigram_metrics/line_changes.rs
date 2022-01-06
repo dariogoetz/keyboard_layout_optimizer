@@ -13,8 +13,8 @@ use super::BigramMetric;
 use keyboard_layout::key::{Finger, Hand, HandFingerMap};
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use std::collections::hash_map::HashMap;
 use serde::Deserialize;
+use std::collections::hash_map::HashMap;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
@@ -105,15 +105,11 @@ impl BigramMetric for LineChanges {
         let upwards: bool = pos2.1 < pos1.1;
         let downwards: bool = pos2.1 > pos1.1;
 
-        if (upwards && first_is_shorter)
-            || (downwards && first_is_longer)
-        {
+        if (upwards && first_is_shorter) || (downwards && first_is_longer) {
             num_rows -= self.short_up_to_long_or_long_down_to_short_reduction;
         }
 
-        if (downwards && first_is_shorter)
-            || (upwards && first_is_longer)
-        {
+        if (downwards && first_is_shorter) || (upwards && first_is_longer) {
             num_rows += self.short_down_to_long_or_long_up_to_short_increase;
         }
 

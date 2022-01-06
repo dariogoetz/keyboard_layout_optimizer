@@ -51,7 +51,11 @@ impl LayoutConfig {
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Path to ngram files
-    #[structopt(short, long, default_value = "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4")]
+    #[structopt(
+        short,
+        long,
+        default_value = "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
+    )]
     pub ngrams: String,
 
     /// Filename of evaluation configuration file to use

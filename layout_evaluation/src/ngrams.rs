@@ -129,7 +129,8 @@ impl Bigrams {
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
-        chars.clone()
+        chars
+            .clone()
             .zip(chars.clone().skip(1))
             //.filter(|(c1, c2)| !c1.is_whitespace() && !c2.is_whitespace())
             .for_each(|c| {
@@ -233,7 +234,8 @@ impl Trigrams {
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
-        chars.clone()
+        chars
+            .clone()
             .zip(chars.clone().skip(1))
             .zip(chars.clone().skip(2))
             //.filter(|((c1, c2), c3)| {
