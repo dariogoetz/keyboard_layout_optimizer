@@ -27,6 +27,7 @@ const NGRAMS = [
     { key: 'deu_mixed_0.6_eng_news_typical_0.4', label: 'Mixed/News typical (deu/eng 60/40)', description: 'Ngram frequencies from German "Mixed Typical (2011)" and English "News Typical (2016)" in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'deu_mixed_1m', label: 'Mixed Typical (deu)', description: 'Ngram frequencies from German "Mixed 2011". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'eng_news_typical_1m', label: 'News Typical (eng)', description: 'Ngram frequencies from English "News Typical 2016". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'irc_neo', label: '#neo - IRC', description: 'Ngram frequencies from the #neo IRC channel. Mostly in German.' },
     { key: 'arne_no_special', label: 'ArneBab', description: 'Ngram frequencies used in ArneBabs optimizer. Sourced from <a href="https://hg.sr.ht/~arnebab/evolve-keyboard-layout">ArneBabs optimizer</a>.' },
 ]
 const DEFAULT_NGRAM = 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4'
