@@ -611,7 +611,7 @@ Vue.component('ngram-config', {
 Vue.component('config-file', {
     template: `
     <div>
-      <codemirror :value="content" :options="options"></codemirror>
+      <codemirror v-model="content" :options="options"></codemirror>
       <b-button class="float-right" variant="primary" @click="save">Save</b-button>
     </div>
     `,
