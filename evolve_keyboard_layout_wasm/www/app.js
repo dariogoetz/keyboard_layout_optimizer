@@ -1,6 +1,7 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
 import config_moonlander from '../../config/moonlander.yml'
+import config_crkbd from '../../config/crkbd.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
 import opt_params from '../../config/optimization_parameters_web.yml'
@@ -13,6 +14,7 @@ const LAYOUT_CONFIGS = [
     { key: 'standard', label: 'Standard', config: config_standard_keyboard },
     { key: 'ortho', label: 'Ortho', config: config_ortho },
     { key: 'moonlander', label: 'Moonlander', config: config_moonlander },
+    { key: 'crkbd', label: 'Corne (crkbd)', config: config_crkbd },
 ]
 const DEFAULT_LAYOUT_CONFIG = 'standard'
 
