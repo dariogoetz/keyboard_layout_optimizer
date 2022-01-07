@@ -78,7 +78,9 @@ impl BigramMetric for FingerRepeatsTopBottom {
             return Some(0.0);
         }
 
-        let mut cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing) * (1.0 + self.unbalancing_factor * k2.key.unbalancing) * weight;
+        let mut cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing)
+            * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
+            * weight;
 
         // NOTE: In ArneBab's solution, increasing common repeats is done in a previous, separate step (in "finger_repeats_from_file")
 

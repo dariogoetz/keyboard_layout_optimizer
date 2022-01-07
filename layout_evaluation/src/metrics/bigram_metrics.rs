@@ -50,48 +50,58 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         });
 
         let (total_cost, msg) = if SHOW_WORST {
-            let (total_cost, cost_with_mod, worst) = cost_iter.fold(
-                (0.0, 0.0, DoublePriorityQueue::new()),
-                |(mut total_cost, mut cost_with_mod, mut worst), (bigram, cost)| {
+            let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
+                (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
+                |(mut total_cost, mut worst, mut worst_nonfixed), (bigram, cost)| {
                     total_cost += cost;
 
-                    if bigram.0.is_modifier || bigram.1.is_modifier {
-                        cost_with_mod += cost;
-                    };
-
                     worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                    if !bigram.0.is_fixed && !bigram.1.is_fixed {
+                        worst_nonfixed.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                    }
+
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
+                    if worst_nonfixed.len() > N_WORST {
+                        worst_nonfixed.pop_min();
+                    }
 
-                    (total_cost, cost_with_mod, worst)
+                    (total_cost, worst, worst_nonfixed)
                 },
             );
 
+            let gen_msgs = |q: DoublePriorityQueue<(char, char), OrderedFloat<f64>>| {
+                let worst_msgs: Vec<String> = q
+                    .into_sorted_iter()
+                    .rev()
+                    .filter(|(_, cost)| cost.into_inner() > 0.0)
+                    .map(|(bigram, cost)| {
+                        format!(
+                            "{}{} ({:>5.2}%)",
+                            bigram.0.to_string().escape_debug(),
+                            bigram.1.to_string().escape_debug(),
+                            100.0 * cost.into_inner() / total_cost,
+                        )
+                    })
+                    .collect();
+
+                worst_msgs
+            };
+
             let mut msgs = Vec::new();
 
-            let worst_msgs: Vec<String> = worst
-                .into_sorted_iter()
-                .rev()
-                .filter(|(_, cost)| cost.into_inner() > 0.0)
-                .map(|(bigram, cost)| {
-                    format!(
-                        "{}{} ({:>5.2}%)",
-                        bigram.0.to_string().escape_debug(),
-                        bigram.1.to_string().escape_debug(),
-                        100.0 * cost.into_inner() / total_cost,
-                    )
-                })
-                .collect();
+            let worst_msgs = gen_msgs(worst);
             if !worst_msgs.is_empty() {
-                msgs.push(format!("Worst bigrams: {}", worst_msgs.join(", ")))
+                msgs.push(format!("Worst: {}", worst_msgs.join(", ")))
             }
 
-            if total_cost > 0.0 {
+            let worst_nonfixed_msgs = gen_msgs(worst_nonfixed);
+            if !worst_nonfixed_msgs.is_empty() {
                 msgs.push(format!(
-                    "{:>5.2}% of cost involved a modifier",
-                    100.0 * cost_with_mod / total_cost,
-                ));
+                    "Worst non-fixed: {}",
+                    worst_nonfixed_msgs.join(", ")
+                ))
             }
 
             let msg = Some(msgs.join(";  "));
