@@ -48,6 +48,13 @@ keyboard:
     - [                 27, 28, 29,   29, 28, 27                ]
     - [                     28,           28                    ]
 
+  fixed_keys:
+    - [ false, false, false, false, false, false,                  false, false, false, false, false, false]
+    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
+    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
+    - [                              true,  true,  true,    true,  true,  true                     ]
+    - [                                     true,                  true                            ]
+
 
 
   plot_template: |2
@@ -121,13 +128,6 @@ base_layout:
       - ["⇙"]
       - [""]
       - ["⇧"]
-
-  fixed_keys:
-    - [ false, false, false, false, false, false,                  false, false, false, false, false, false]
-    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
-    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
-    - [                              true,  true,  true,    true,  true,  true                     ]
-    - [                                     true,                  true                            ]
 
   fixed_layers: [2, 3]
 
