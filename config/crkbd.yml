@@ -106,10 +106,12 @@ base_layout:
     # Reihe 4 mit Leertaste
     - - ["⇚"]
       - [" ", " ", " ", "0", " ", " "]
-      - ["♕"]
-      - ["⇧"]
+      - ["⌫"]
       - ["⏎"]
+      - ["⇧"]
       - ["⇙"]
+      - [""]
+      - [""]
 
   fixed_keys:
     - [ false, false, false, false, false, false,                  false, false, false, false, false, false]
