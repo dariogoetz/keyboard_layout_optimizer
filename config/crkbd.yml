@@ -15,7 +15,7 @@ keyboard:
     - [Left, Left, Left, Left, Left, Left,                Right, Right, Right, Right, Right, Right]
     - [Left, Left, Left, Left, Left, Left,                Right, Right, Right, Right, Right, Right]
     - [Left, Left, Left, Left, Left, Left,                Right, Right, Right, Right, Right, Right]
-    - [                        Left, Left, Left,   Right, Right, Right, Right                     ]
+    - [                        Left, Left, Left,   Right, Right, Right                            ]
 
   fingers:
     - [Pinky, Pinky, Ring,  Middle, Pointer, Pointer,                 Pointer, Pointer, Middle, Ring,  Pinky, Pinky]
@@ -112,10 +112,10 @@ base_layout:
       - ["⇙"]
 
   fixed_keys:
-    - [ false, false, false, false, false, false,        false, false, false, false, false, false]
-    - [  true, false, false, false, false, false,        false, false, false, false, false,  true]
-    - [  true, false, false, false, false, false,        false, false, false, false, false,  true]
-    - [  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true]
+    - [ false, false, false, false, false, false,                  false, false, false, false, false, false]
+    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
+    - [  true, false, false, false, false, false,                  false, false, false, false, false,  true]
+    - [                              true,  true,  true,    true,  true,  true                     ]
 
   fixed_layers: [2, 3]
 
