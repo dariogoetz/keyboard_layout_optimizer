@@ -92,53 +92,65 @@ impl TrigramMetric for Irregularity {
         });
 
         let (total_cost, msg) = if SHOW_WORST {
-            let (total_cost, cost_with_mod, worst) = cost_iter.fold(
-                (0.0, 0.0, DoublePriorityQueue::new()),
-                |(mut total_cost, mut cost_with_mod, mut worst), (trigram, cost)| {
+            let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
+                (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
+                |(mut total_cost, mut worst, mut worst_nonfixed), (trigram, cost)| {
                     total_cost += cost;
-
-                    if trigram.0.is_modifier || trigram.1.is_modifier || trigram.2.is_modifier {
-                        cost_with_mod += cost;
-                    };
 
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
                         OrderedFloat(cost),
                     );
+                    if !trigram.0.is_fixed && !trigram.1.is_fixed && !trigram.2.is_fixed {
+                        worst_nonfixed.push(
+                            (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
+                            OrderedFloat(cost),
+                        );
+                    }
+
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
+                    if worst_nonfixed.len() > N_WORST {
+                        worst_nonfixed.pop_min();
+                    }
 
-                    (total_cost, cost_with_mod, worst)
+                    (total_cost, worst, worst_nonfixed)
                 },
             );
 
+            let gen_msgs = |q: DoublePriorityQueue<(char, char, char), OrderedFloat<f64>>| {
+                let worst_msgs: Vec<String> = q
+                    .into_sorted_iter()
+                    .rev()
+                    .filter(|(_, cost)| cost.into_inner() > 0.0)
+                    .map(|(gram, cost)| {
+                        format!(
+                            "{}{}{} ({:>5.2}%)",
+                            gram.0.to_string().escape_debug(),
+                            gram.1.to_string().escape_debug(),
+                            gram.2.to_string().escape_debug(),
+                            100.0 * cost.into_inner() / total_cost,
+                        )
+                    })
+                    .collect();
+
+                worst_msgs
+            };
+
             let mut msgs = Vec::new();
 
-            let worst_msgs: Vec<String> = worst
-                .into_sorted_iter()
-                .rev()
-                .filter(|(_, cost)| cost.into_inner() > 0.0)
-                .map(|(trigram, cost)| {
-                    format!(
-                        "{}{}{} ({:>5.2}%)",
-                        trigram.0.to_string().escape_debug(),
-                        trigram.1.to_string().escape_debug(),
-                        trigram.2.to_string().escape_debug(),
-                        100.0 * cost.into_inner() / total_cost,
-                    )
-                })
-                .collect();
-
+            let worst_msgs = gen_msgs(worst);
             if !worst_msgs.is_empty() {
-                msgs.push(format!("Worst trigrams: {}", worst_msgs.join(", ")))
+                msgs.push(format!("Worst: {}", worst_msgs.join(", ")))
             }
 
-            if total_cost > 0.0 {
+            let worst_nonfixed_msgs = gen_msgs(worst_nonfixed);
+            if !worst_nonfixed_msgs.is_empty() {
                 msgs.push(format!(
-                    "{:>5.2}% of cost involved a modifier",
-                    100.0 * cost_with_mod / total_cost,
-                ));
+                    "Worst non-fixed: {}",
+                    worst_nonfixed_msgs.join(", ")
+                ))
             }
 
             let msg = Some(msgs.join(";  "));
