@@ -390,9 +390,16 @@ Vue.component('evaluator-app', {
                 Comlink.proxy(this.updateOptTotalSteps),
                 Comlink.proxy(this.updateOptStep),
                 Comlink.proxy(this.newBestAlert),
+                Comlink.proxy(this.wantsToQuit),
             )
             this.optStep = 0
             console.log(layout)
+        },
+
+        wantsToQuit() {
+            const wantsToQuit = this.optCancel;
+            console.log(wantsToQuit);
+            return wantsToQuit;
         },
 
         updateOptTotalSteps(maxStepNr) {
@@ -406,7 +413,8 @@ Vue.component('evaluator-app', {
         },
 
         newBestAlert(layout, cost) {
-            console.log("newBestAlert(layout, cost) {")
+            console.log(`newBestAlert(layout, cost) {
+                ${layout}, ${cost}`)
             this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
         },
 

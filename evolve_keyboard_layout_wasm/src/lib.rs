@@ -31,6 +31,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
 
 #[derive(Clone, Deserialize, Debug)]
@@ -302,11 +304,21 @@ impl LayoutOptimizer {
     }
 }
 
+fn crash() {
+    let v: Vec<u8> = vec![];
+    let _ = v[5];
+}
+fn stop_if_wanted(this: &JsValue, get_wants_to_stop: &js_sys::Function) {
+    let stop_opt = get_wants_to_stop.call0(this).unwrap(); // ????????????
+    log(&format!("Rust: {:?}", stop_opt));
+}
+
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
+    stop_callback: js_sys::Function,
 }
 
 impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
@@ -315,8 +327,9 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         state: &IterState<sa_optimization::AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
-        let iteration_nr = state.iter;
         let this = JsValue::null();
+        stop_if_wanted(&this, &self.stop_callback);
+        let iteration_nr = state.iter;
         if (iteration_nr % 10 == 0) && (iteration_nr > 0) {
             let iter_js = JsValue::from(iteration_nr);
             let _ = self.update_callback.call1(&this, &iter_js);
@@ -340,6 +353,7 @@ pub fn sa_optimize(
     max_iters_callback: js_sys::Function,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
+    stop_callback: js_sys::Function,
 ) -> String {
     let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
@@ -362,6 +376,7 @@ pub fn sa_optimize(
         ),
         update_callback,
         new_best_callback,
+        stop_callback,
     };
 
     let result: Layout = sa_optimization::optimize(
