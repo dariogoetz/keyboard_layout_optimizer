@@ -8,6 +8,8 @@ use anyhow::Result;
 use colored::Colorize;
 use serde::Deserialize;
 use std::sync::Arc;
+use rand::prelude::*;
+use rand_xoshiro::Xoshiro256PlusPlus;
 
 use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
 use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
@@ -261,9 +263,11 @@ pub fn optimize(
         key_switches: params.key_switches,
         result_cache,
     };
+
+    let rng = Xoshiro256PlusPlus::from_entropy();
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
-    let solver = SimulatedAnnealing::new(init_temp)
+    let solver = SimulatedAnnealing::new(init_temp, rng)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
         .temp_func(SATempFunc::Exponential(0.997))
