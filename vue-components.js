@@ -1,8 +1,8 @@
 const LAYOUT_CONFIGS = [
-    { key: 'standard', label: 'Standard' },
-    { key: 'ortho', label: 'Ortho' },
-    { key: 'moonlander', label: 'Moonlander' },
-    { key: 'crkbd', label: 'Corne (crkbd)' },
+    { key: 'standard', label: 'Standard', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+    { key: 'ortho', label: 'Ortho', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+    { key: 'moonlander', label: 'Moonlander', family: (s) => s.slice(11, 21), periodComma: (s) => s.slice(29, 31) },
+    { key: 'crkbd', label: 'Corne (crkbd)', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
 ]
 const DEFAULT_LAYOUT_CONFIG = 'standard'
 
@@ -229,20 +229,32 @@ Vue.component('layouts-table', {
         perPage: { type: Number, default: 500 },
     },
     data () {
+        let familyGen = {}
+        LAYOUT_CONFIGS.forEach((c) => {
+            familyGen[c.key] = c.family
+        })
+        let periodCommaGen = {}
+        LAYOUT_CONFIGS.forEach((c) => {
+            periodCommaGen[c.key] = c.periodComma
+        })
         return {
             layouts: [],
             currentPage: 1,
             filteredRows: 0,
+            familyGen,
+            periodCommaGen,
         }
 
     },
     computed: {
         rows () {
+            let familyGen = this.familyGen[this.layoutConfig]
+            let periodCommaGen = this.periodCommaGen[this.layoutConfig]
             let layouts = this.layouts
             if (this.bestInFamily) {
                 let familyMap = new Map()
                 this.layouts.forEach(layout => {
-                    let family = layout.layout.slice(12, 22)
+                    let family = familyGen(layout.layout)
                     let familyBest = familyMap.get(family)
                     if (familyBest === undefined || layout.total_cost < familyBest.total_cost) {
                         familyMap.set(family, layout)
@@ -252,13 +264,14 @@ Vue.component('layouts-table', {
             }
 
             const res = layouts.map((layout, i) => {
+                let family = familyGen(layout.layout)
                 const row = {
                     layout: layout.layout,
                     total_cost: layout.total_cost,
                     published_by: layout.published_by,
                     highlight: layout.highlight,
-                    family: layout.layout.slice(12, 22),
-                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
+                    periodComma: periodCommaGen(layout.layout) == ',.' ? 'standard' : 'unusual',
+                    family,
                 }
                 return row
             })
