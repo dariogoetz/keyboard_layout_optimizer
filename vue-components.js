@@ -1,3 +1,11 @@
+const LAYOUT_CONFIGS = [
+    { key: 'standard', label: 'Standard' },
+    { key: 'ortho', label: 'Ortho' },
+    { key: 'moonlander', label: 'Moonlander' },
+    { key: 'crkbd', label: 'Corne (crkbd)' },
+]
+const DEFAULT_LAYOUT_CONFIG = 'standard'
+
 const COLORS = [
   '#4dc9f6',
   '#f67019',
@@ -215,6 +223,7 @@ Vue.component('layouts-table', {
     `,
     props: {
         url: { type: String, default: null },
+        layoutConfig: {type: String, default: DEFAULT_LAYOUT_CONFIG },
         bestInFamily: { type: Boolean, default: true },
         filter: { type: String, default: null },
         perPage: { type: Number, default: 500 },
@@ -298,11 +307,18 @@ Vue.component('layouts-table', {
             this.rows.forEach(item => item.selected = false)
             this.$emit('details', [])
         },
+        layoutConfig () {
+            this.fetchLayouts()
+        },
     },
     methods: {
         fetchLayouts () {
             if (this.url === null) return null
-            return fetch(this.url)
+            let url = this.url
+            if (this.layoutConfig !== null) {
+                url = `${this.url}?layout_config=${this.layoutConfig}`
+            }
+            return fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     this.layouts = data
@@ -328,5 +344,35 @@ Vue.component('layouts-table', {
             this.currentPage = 1
         },
     }
+})
+
+Vue.component('keyboard-selector', {
+    template: `
+    <b-form inline>
+      <label class="mr-sm-2">Keyboard</label>
+      <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
+    </b-form>
+    `,
+    props: {
+        defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
+    },
+    data () {
+        let options = []
+        LAYOUT_CONFIGS.forEach(c => {
+            options.push({ value: c.key, text: c.label })
+        })
+        return {
+            selected: this.defaultSelection,
+            options,
+        }
+    },
+    created () {
+        this.emit()
+    },
+    methods: {
+        emit () {
+            this.$emit("selected", this.selected)
+        }
+    },
 })
 
