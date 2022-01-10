@@ -3,7 +3,7 @@ Vue.component('layouts-app', {
 <b-container fluid>
 
   <h1>Evaluate Keyboard Layouts</h1>
-  Evaluate your own layouts at <a href="https://dariogoetz.github.io/keyboard_layout_optimizer/">https://dariogoetz.github.io/keyboard_layout_optimizer/</a>
+  Evaluate your own layouts and inspect configuration parameters at <a href="https://dariogoetz.github.io/keyboard_layout_optimizer/">https://dariogoetz.github.io/keyboard_layout_optimizer/</a>
 
   <hr>
 
