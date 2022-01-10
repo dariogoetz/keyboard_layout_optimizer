@@ -75,6 +75,7 @@ Vue.component('layouts-app', {
         },
         keyboardSelected (layoutConfig) {
             this.details = []
+            this.filter = null
             this.layoutConfig = layoutConfig
         },
     }
