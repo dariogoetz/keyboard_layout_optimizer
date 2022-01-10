@@ -19,9 +19,16 @@ else
     URL="$3"
 fi
 
+if [ -z "$4" ]
+  then
+    LAYOUT_CONFIG="standard"
+else
+    LAYOUT_CONFIG="$4"
+fi
 
-for layout in `cat $1`
+
+for LAYOUT in `cat $1`
 do
-    echo "Publishing $layout to $URL"
-    curl -X 'POST' -d "{\"layout\": \"$layout\", \"published_by\": \"$2\"}" $URL
+    echo "Publishing $LAYOUT to $URL"
+    curl -X 'POST' -d "{\"layout\": \"$LAYOUT\", \"published_by\": \"$2\", \"layout_config\": \"$LAYOUT_CONFIG\"}" $URL
 done

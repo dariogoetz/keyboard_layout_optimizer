@@ -10,10 +10,11 @@ Vue.component('layouts-app', {
   <b-row>
     <b-col xl="6">
       <b-form inline>
-        <b-form-input v-model="filter" debounce="500" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <keyboard-selector @selected="keyboardSelected"></keyboard-selector>
+        <b-form-input v-model="filter" debounce="500" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0 ml-sm-2"></b-form-input>
         <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family (clears selection)</b-form-checkbox>
       </b-form>
-      <layouts-table :url="url" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
+      <layouts-table :url="url" :layout-config="layoutConfig" :bestInFamily="bestInFamily" :filter="filter" @details="setDetails"></layouts-table>
     </b-col>
 
     <b-col xl="6">
@@ -43,6 +44,7 @@ Vue.component('layouts-app', {
         return {
             details: [],
             filter: null,
+            layoutConfig: DEFAULT_LAYOUT_CONFIG,
         }
     },
     computed: {
@@ -62,7 +64,7 @@ Vue.component('layouts-app', {
             // fetch details for all selected items
             const res = items.map(layoutData => {
                 if (this.url === null) return null
-                return fetch(`${this.url}/${layoutData.layout}`)
+                return fetch(`${this.url}/${layoutData.layout}?layout_config=${this.layoutConfig}`)
                     .then(response => response.json())
             })
 
@@ -70,6 +72,10 @@ Vue.component('layouts-app', {
                 .then(layoutDetails => {
                     this.details = layoutDetails
                 })
+        },
+        keyboardSelected (layoutConfig) {
+            this.details = []
+            this.layoutConfig = layoutConfig
         },
     }
 })

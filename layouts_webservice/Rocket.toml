@@ -1,6 +1,12 @@
 [default]
 eval_parameters = "../config/evaluation_parameters.yml"
-layout_config = "../config/standard_keyboard.yml"
+layout_configs = [
+    ["standard", "../config/standard_keyboard.yml"],
+    ["ortho", "../config/ortho.yml"],
+    ["moonlander", "../config/moonlander.yml"],
+    ["crkbd", "../config/crkbd.yml"]
+]
+default_layout_config = "standard"
 static_dir = "static"
 ngrams = "../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
 secret = "super_duper_secret"

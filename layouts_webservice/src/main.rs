@@ -17,6 +17,7 @@ use layout_evaluation::{
 use serde::Deserialize;
 use std::path::Path;
 use std::sync::Arc;
+use std::collections::HashMap;
 
 mod api;
 
@@ -28,8 +29,11 @@ struct Options {
     /// Filename of evaluation configuration file to use
     pub eval_parameters: String,
 
-    /// Filename of layout configuration file to use
-    pub layout_config: String,
+    /// Identifiers and filenames of layout configuration file to use
+    pub layout_configs: Vec<(String, String)>,
+
+    /// Default layout config to use if unspecified
+    pub default_layout_config: String,
 
     /// Directory with static content to serve
     pub static_dir: String,
@@ -79,12 +83,19 @@ fn rocket() -> _ {
 
     let options: Options = figment.extract().expect("config");
 
-    let layout_config = LayoutConfig::from_yaml(&options.layout_config).expect(&format!(
-        "Could not load config file '{}'",
-        &options.layout_config
-    ));
-    let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
-    let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
+    let mut layout_generators: HashMap<String, NeoLayoutGenerator> = HashMap::default();
+    for (config_id, layout_config) in &options.layout_configs {
+        let layout_config = LayoutConfig::from_yaml(&layout_config).expect(&format!(
+            "Could not load config file '{}'",
+            &layout_config
+        ));
+
+        let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
+        let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
+        layout_generators.insert(config_id.to_owned(), layout_generator);
+
+    }
+
     let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
         "Could not read evaluation yaml file '{}'",
         &options.eval_parameters
@@ -107,7 +118,7 @@ fn rocket() -> _ {
 
     rocket
         .manage(evaluator)
-        .manage(layout_generator)
+        .manage(layout_generators)
         .attach(AdHoc::config::<Options>())
         .attach(api::stage())
         .attach(Cors {

@@ -8,15 +8,14 @@ import opt_params from '../../config/optimization_parameters_web.yml'
 
 import Worker from "./worker.js"
 
-const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
+const LAYOUT_CONFIGS = {
+    standard: config_standard_keyboard,
+    ortho: config_ortho,
+    moonlander: config_moonlander,
+    crkbd: config_crkbd,
+}
 
-const LAYOUT_CONFIGS = [
-    { key: 'standard', label: 'Standard', config: config_standard_keyboard },
-    { key: 'ortho', label: 'Ortho', config: config_ortho },
-    { key: 'moonlander', label: 'Moonlander', config: config_moonlander },
-    { key: 'crkbd', label: 'Corne (crkbd)', config: config_crkbd },
-]
-const DEFAULT_LAYOUT_CONFIG = 'standard'
+const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 
 const NGRAMS = [
     { key: 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4', label: 'Blend (deu/eng 60/40)', description: 'Ngram frequencies from various German and English corpora in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
@@ -145,10 +144,8 @@ Vue.component('evaluator-app', {
         logscale: { type: Boolean, default: false },
     },
     data () {
-        let layoutConfigs = {}
-        LAYOUT_CONFIGS.forEach((c) => {
-            layoutConfigs[c.key] = c.config
-        })
+        // LAYOUT_CONFIGS is defined in "vue-components.js"
+        let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
         return {
             details: [],
             inputLayoutRaw: null,
@@ -514,36 +511,6 @@ Vue.component('layout-button', {
             } catch (err) {
                 this.$bvToast.toast(`Error while publishing layout: ${err}`, {variant: 'danger'})
             }
-        }
-    },
-})
-
-Vue.component('keyboard-selector', {
-    template: `
-    <b-form inline>
-      <label class="mr-sm-2">Keyboard</label>
-      <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
-    </b-form>
-    `,
-    props: {
-        defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
-    },
-    data () {
-        let options = []
-        LAYOUT_CONFIGS.forEach(c => {
-            options.push({ value: c.key, text: c.label })
-        })
-        return {
-            selected: this.defaultSelection,
-            options,
-        }
-    },
-    created () {
-        this.emit()
-    },
-    methods: {
-        emit () {
-            this.$emit("selected", this.selected)
         }
     },
 })

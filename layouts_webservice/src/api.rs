@@ -7,6 +7,7 @@ use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::State;
 use rocket::{Build, Rocket};
 use rocket_db_pools::{sqlx, Connection, Database};
+use std::collections::HashMap;
 
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::evaluation::Evaluator;
@@ -30,6 +31,7 @@ struct LayoutEvaluationDB {
     printed: String,
     published_by: Option<String>,
     highlight: bool,
+    layout_config: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -41,6 +43,7 @@ struct LayoutEvaluation {
     printed: Option<String>,
     plot: Option<String>,
     highlight: bool,
+    layout_config: String,
 }
 
 impl From<LayoutEvaluationDB> for LayoutEvaluation {
@@ -49,10 +52,11 @@ impl From<LayoutEvaluationDB> for LayoutEvaluation {
             layout: item.layout,
             total_cost: item.total_cost,
             published_by: item.published_by,
-            details: None, //Some(serde_json::from_str(&item.details_json).unwrap()),
-            printed: None, //Some(item.printed),
+            details: None,
+            printed: None,
             plot: None,
             highlight: item.highlight,
+            layout_config: item.layout_config,
         }
     }
 }
@@ -63,6 +67,7 @@ struct PostLayout {
     published_by: Option<String>,
     highlight: Option<bool>,
     secret: Option<String>,
+    layout_config: Option<String>,
 }
 
 #[options("/")]
@@ -73,7 +78,7 @@ fn cors_preflight() -> () {
 async fn post(
     mut db: Connection<Db>,
     layout: Json<PostLayout>,
-    layout_generator: &State<NeoLayoutGenerator>,
+    layout_generators: &State<HashMap<String, NeoLayoutGenerator>>,
     evaluator: &State<Evaluator>,
     config: &State<Options>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
@@ -85,14 +90,17 @@ async fn post(
     };
 
     // generate layout
+    let layout_config = layout.layout_config.clone().unwrap_or(config.default_layout_config.to_owned());
+    let layout_generator = layout_generators.get(&layout_config).ok_or(Status::BadRequest)?;
     let l = layout_generator
         .generate(&layout.layout)
         .map_err(|_| Status::BadRequest)?;
     let layout_str = l.as_text();
 
     // check if layout is in database already
-    let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = $1")
+    let result = sqlx::query_as::<_, LayoutEvaluationDB>("SELECT * FROM layouts WHERE layout = $1 AND layout_config = $2")
         .bind(&layout_str)
+        .bind(&layout_config)
         .fetch_one(&mut *db)
         .await
         .ok();
@@ -111,15 +119,17 @@ async fn post(
                     .map_err(|_| Status::InternalServerError)?,
                 printed: format!("{}", evaluation_result),
                 highlight,
+                layout_config,
             };
 
-            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, printed, highlight, created) VALUES ($1, $2, $3, $4, $5, $6, NOW())")
+            sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, printed, highlight, layout_config, created) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())")
                 .bind(&result.layout)
                 .bind(&result.total_cost)
                 .bind(&result.published_by)
                 .bind(&result.details_json)
                 .bind(&result.printed)
                 .bind(&result.highlight)
+                .bind(&result.layout_config)
                 .execute(&mut *db)
                 .await
                 .map_err(|_| Status::InternalServerError)?;
@@ -132,11 +142,16 @@ async fn post(
     Ok(Created::new("/").body(Json(result.into())))
 }
 
-#[get("/")]
-async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
+#[get("/?<layout_config>")]
+async fn list(
+    layout_config: Option<String>,
+    config: &State<Options>,
+    mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
+    let layout_config = layout_config.unwrap_or(config.default_layout_config.to_owned());
     let layouts = sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight FROM layouts",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight, layout_config FROM layouts WHERE layout_config = $1",
     )
+    .bind(&layout_config)
     .fetch_all(&mut *db)
     .await
     .map_err(|e| {
@@ -150,34 +165,44 @@ async fn list(mut db: Connection<Db>) -> Result<Json<Vec<LayoutEvaluation>>> {
     Ok(Json(layouts))
 }
 
-#[get("/<layout>")]
+#[get("/<layout>?<layout_config>")]
 async fn get(
     mut db: Connection<Db>,
     layout: &str,
-    layout_generator: &State<NeoLayoutGenerator>,
-) -> Option<Json<LayoutEvaluation>> {
+    layout_config: Option<String>,
+    layout_generators: &State<HashMap<String, NeoLayoutGenerator>>,
+    config: &State<Options>,
+) -> Result<Json<LayoutEvaluation>> {
+    let layout_config = layout_config.unwrap_or(config.default_layout_config.to_owned());
+    let layout_generator = layout_generators.get(&layout_config).ok_or(Status::BadRequest)?;
+
     sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight FROM layouts WHERE layout = $1",
+        "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight, layout_config FROM layouts WHERE layout = $1 AND layout_config = $2",
     )
     .bind(layout)
+    .bind(&layout_config)
     .fetch_one(&mut *db)
     .await
+    .map_err(|e| {
+        eprintln!("Error while fetching layout from db: {:?}", e);
+        Status::InternalServerError
+    })
     .map(|e| {
         let mut res: LayoutEvaluation = e.clone().into();
-        let l = layout_generator.generate(&e.layout).unwrap();
+        let l = layout_generator
+                .generate(&e.layout).unwrap();
         res.plot = Some(l.plot());
         res.details = Some(serde_json::from_str(&e.details_json).unwrap());
         res.printed = Some(e.printed);
         Json(res)
     })
-    .ok()
 }
 
 #[post("/reeval", data = "<secret>")]
 async fn reeval(
     mut db: Connection<Db>,
     secret: &str,
-    layout_generator: &State<NeoLayoutGenerator>,
+    layout_generators: &State<HashMap<String, NeoLayoutGenerator>>,
     evaluator: &State<Evaluator>,
     config: &State<Options>,
 ) -> Result<()> {
@@ -189,13 +214,14 @@ async fn reeval(
 
     println!("Reevaluating results");
     let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
-        "SELECT id, layout, total_cost, details_json, printed, published_by, highlight FROM layouts",
+        "SELECT id, layout, total_cost, details_json, printed, published_by, highlight, layout_config FROM layouts",
     )
     .fetch_all(&mut *db)
     .await
     .map_err(|_| Status::InternalServerError)?;
 
     for result in results {
+        let layout_generator = layout_generators.get(&result.layout_config).ok_or(Status::BadRequest)?;
         let layout = layout_generator.generate(&result.layout).unwrap();
         let evaluation_result = evaluator.evaluate_layout(&layout);
         let total_cost = evaluation_result.total_cost();
@@ -224,17 +250,6 @@ async fn reeval(
     Ok(())
 }
 
-// #[delete("/<layout>")]
-// async fn delete(mut db: Connection<Db>, layout: &str) -> Result<Option<()>> {
-//     let result = sqlx::query("DELETE FROM layouts WHERE layout = $1")
-//         .bind(layout)
-//         .execute(&mut *db)
-//         .await
-//         .map_err(|_| Status::InternalServerError)?;
-
-//     Ok((result.rows_affected() == 1).then(|| ()))
-// }
-
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     match Db::fetch(&rocket) {
         Some(db) => match sqlx::migrate!("db/migrations").run(&**db).await {
@@ -253,7 +268,6 @@ pub fn stage() -> AdHoc {
         rocket
             .attach(Db::init())
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
-            // .mount("/", routes![list, post, get, delete, reeval])
             .mount("/api", routes![list, post, get, reeval, cors_preflight])
     })
 }
