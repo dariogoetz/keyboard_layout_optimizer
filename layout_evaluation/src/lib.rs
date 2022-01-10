@@ -1,3 +1,4 @@
+pub mod config;
 pub mod evaluation;
 pub mod metrics;
 pub mod ngram_mapper;

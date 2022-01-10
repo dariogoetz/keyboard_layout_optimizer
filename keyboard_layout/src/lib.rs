@@ -6,6 +6,7 @@
 //! with a given layout. It provides data about the involved key properties, required modifiers,
 //! and other associated properties.
 
+pub mod config;
 pub mod key;
 pub mod keyboard;
 pub mod layout;

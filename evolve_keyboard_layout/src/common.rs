@@ -1,51 +1,19 @@
 use keyboard_layout::{
-    keyboard::{Keyboard, KeyboardYAML},
-    layout::Layout,
-    layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
+    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::NeoLayoutGenerator,
 };
 use layout_evaluation::{
-    evaluation::{Evaluator, MetricParameters},
-    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    config::EvaluationParameters,
+    evaluation::Evaluator,
+    ngram_mapper::on_demand_ngram_mapper::OnDemandNgramMapper,
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
-use anyhow::Result;
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::Path;
 use std::sync::Arc;
 use structopt::StructOpt;
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct EvaluationParameters {
-    pub metrics: MetricParameters,
-    pub ngram_mapper: NgramMapperConfig,
-}
-
-impl EvaluationParameters {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let k: EvaluationParameters = serde_yaml::from_reader(f)?;
-        Ok(k)
-    }
-}
-
-#[derive(Deserialize, Debug)]
-pub struct LayoutConfig {
-    pub keyboard: KeyboardYAML,
-    pub base_layout: BaseLayoutYAML,
-}
-
-impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
-
-        Ok(cfg)
-    }
-}
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout evaluation")]

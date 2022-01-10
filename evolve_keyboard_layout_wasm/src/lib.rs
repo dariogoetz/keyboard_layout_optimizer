@@ -1,17 +1,19 @@
 mod utils;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{
-    keyboard::{Keyboard, KeyboardYAML},
-    layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
+    config::LayoutConfig,
+    keyboard::Keyboard,
+    layout_generator::NeoLayoutGenerator,
 };
 
 use layout_evaluation::{
-    evaluation::{Evaluator, MetricParameters},
-    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    config::EvaluationParameters,
+    evaluation::Evaluator,
+    ngram_mapper::on_demand_ngram_mapper::OnDemandNgramMapper,
     ngrams::{Bigrams, Trigrams, Unigrams},
     results::EvaluationResult,
 };
@@ -28,18 +30,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
-}
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct EvaluationParameters {
-    pub metrics: MetricParameters,
-    pub ngram_mapper: NgramMapperConfig,
-}
-
-#[derive(Deserialize, Debug)]
-pub struct LayoutConfig {
-    pub keyboard: KeyboardYAML,
-    pub base_layout: BaseLayoutYAML,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -73,7 +63,7 @@ impl LayoutPlotter {
     pub fn new(layout_cfg_str: &str) -> Result<LayoutPlotter, JsValue> {
         utils::set_panic_hook();
 
-        let layout_cfg: LayoutConfig = serde_yaml::from_str(layout_cfg_str)
+        let layout_cfg = LayoutConfig::from_str(layout_cfg_str)
             .map_err(|e| format!("Could not read layout config: {:?}", e))?;
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
@@ -153,7 +143,7 @@ impl LayoutEvaluator {
     ) -> Result<LayoutEvaluator, JsValue> {
         utils::set_panic_hook();
 
-        let layout_cfg: LayoutConfig = serde_yaml::from_str(layout_cfg_str)
+        let layout_cfg = LayoutConfig::from_str(layout_cfg_str)
             .map_err(|e| format!("Could not read layout config: {:?}", e))?;
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
