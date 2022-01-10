@@ -59,6 +59,25 @@ pub struct Options {
     pub no_increase_common_bigrams: bool,
 }
 
+#[derive(StructOpt, Debug)]
+#[structopt(name = "Keyboard layout publication")]
+pub struct PublishingOptions {
+    /// Publish found layout to webservice under this name
+    #[structopt(long)]
+    pub publish_as: Option<String>,
+
+    /// Publish found layout to webservice for this layout config
+    #[structopt(long, default_value = "standard")]
+    pub publish_layout_config: String,
+
+    /// Publish found layout to webservice at this url
+    #[structopt(
+        long,
+        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
+    )]
+    pub publish_to: String,
+}
+
 pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
     (
         init_layout_generator(&options.layout_config),
@@ -143,11 +162,18 @@ pub fn append_to_file(layout: &Layout, filename: &str) {
 }
 
 /// Publishes the layout to a webservice.
-pub fn publish_to_webservice(layout: &Layout, publish_name: &str, publish_to: &str) {
+pub fn publish_to_webservice(
+    layout: &Layout,
+    publish_name: &str,
+    publish_to: &str,
+    publish_layout_config: &str,
+) {
     let client = reqwest::blocking::Client::new();
     let mut body = HashMap::new();
     body.insert("published_by", publish_name.to_string());
     body.insert("layout", layout.as_text());
+    body.insert("layout_config", publish_layout_config.to_string());
+
     let resp = client.post(publish_to).json(&body).send().ok();
     if let Some(resp) = resp {
         if resp.status().is_success() {
