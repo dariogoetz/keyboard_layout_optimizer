@@ -15,9 +15,9 @@ use layout_evaluation::{
 };
 
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
-use std::collections::HashMap;
 
 mod api;
 
@@ -85,15 +85,12 @@ fn rocket() -> _ {
 
     let mut layout_generators: HashMap<String, NeoLayoutGenerator> = HashMap::default();
     for (config_id, layout_config) in &options.layout_configs {
-        let layout_config = LayoutConfig::from_yaml(&layout_config).expect(&format!(
-            "Could not load config file '{}'",
-            &layout_config
-        ));
+        let layout_config = LayoutConfig::from_yaml(&layout_config)
+            .expect(&format!("Could not load config file '{}'", &layout_config));
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
         let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
         layout_generators.insert(config_id.to_owned(), layout_generator);
-
     }
 
     let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
