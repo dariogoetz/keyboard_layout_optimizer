@@ -124,7 +124,7 @@ Vue.component('evaluator-app', {
 
   <b-row>
     <b-col v-for="detail in details" xl="6">
-      <layout-button :layout="detail.layout" @remove="removeLayout"></layout-button>
+      <layout-button :layout="detail.layout" :layout-config="selectedLayoutConfig" @remove="removeLayout"></layout-button>
       <layout-details title="Details" :layout-details="detail"></layout-details>
     </b-col>
 
@@ -465,6 +465,7 @@ Vue.component('layout-button', {
     `,
     props: {
         layout: { type: String, default: "", required: true },
+        layoutConfig: { type: String, required: true },
     },
     data () {
         return {
@@ -500,7 +501,7 @@ Vue.component('layout-button', {
                     headers: {
                       'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName })
+                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName, layout_config: this.layoutConfig })
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
