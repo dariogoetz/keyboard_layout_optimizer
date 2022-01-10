@@ -1,6 +1,6 @@
 mod utils;
 
-use argmin::prelude::{ArgminKV, Error, IterState, Observe /* , ObserverMode */};
+use argmin::prelude::{ArgminKV, Error, IterState, Observe};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;

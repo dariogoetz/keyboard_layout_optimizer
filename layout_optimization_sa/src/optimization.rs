@@ -6,11 +6,14 @@ use layout_optimization::common::{Cache, PermutationLayoutGenerator};
 
 use anyhow::Result;
 use colored::Colorize;
+use rand_xoshiro::{rand_core::SeedableRng, Xoshiro256PlusPlus};
 use serde::Deserialize;
 use std::sync::Arc;
 
-use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
-use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
+use argmin::{
+    prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode},
+    solver::simulatedannealing::{SATempFunc, SimulatedAnnealing},
+};
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
@@ -264,10 +267,7 @@ pub fn optimize(
         false => pm.generate_random(),
     };
     let init_temp = match params.init_temp {
-        Some(t) => {
-            println!("\n\n{}: Currently, the very first modification always gets accepted. This mainly is an issue when using the option `--greedy` and otherwise doesn't affect optimization.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n\n", "WARNING".bold().yellow());
-            t
-        }
+        Some(t) => t,
         None => {
             log::info!("{}: Calculating initial temperature.", process_name);
             let init_temp = get_cost_sd(
@@ -276,7 +276,7 @@ pub fn optimize(
                 &pm,
                 params.key_switches,
             );
-            println!("{}: Initial temperature = {}", process_name, init_temp);
+            log::info!("{}: Initial temperature = {}", process_name, init_temp);
             init_temp
         }
     };
@@ -288,7 +288,8 @@ pub fn optimize(
     };
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
-    let solver = SimulatedAnnealing::new(init_temp)
+    let rng = Xoshiro256PlusPlus::from_entropy();
+    let solver = SimulatedAnnealing::new(init_temp, rng)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
         .temp_func(SATempFunc::Exponential(0.997))
