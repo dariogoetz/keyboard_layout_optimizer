@@ -79,7 +79,7 @@ impl ArgminOp for AnnealingStruct<'_> {
     fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
         Ok(self
             .layout_generator
-            .switch_n_keys(&param, self.key_switches))
+            .perform_n_swaps(&param, self.key_switches))
     }
 }
 
@@ -205,7 +205,7 @@ fn get_cost_sd(
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
 
-        current_layout = layout_generator.switch_n_keys(&current_layout, key_pair_switches);
+        current_layout = layout_generator.perform_n_swaps(&current_layout, key_pair_switches);
     }
 
     let sum: f64 = costs.iter().sum();

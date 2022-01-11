@@ -63,11 +63,39 @@ impl PermutationLayoutGenerator {
 
     /// Takes in a Layout, switches [nr_switches] keys in that layout, then returns it.
     /// Layout, in this case, is a [Vec<usize>].
-    pub fn switch_n_keys(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
+    pub fn perform_n_swaps(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
         let mut indices: Vec<usize> = permutation.to_vec();
+        let vec: Vec<usize> = (0..permutation.len()).collect();
+        let rng = &mut thread_rng();
 
-        // Shuffle some (self.n_switches) permutable chars
-        indices.partial_shuffle(&mut thread_rng(), nr_switches);
+        // Perform nr_switches switches
+        for _ in  0..nr_switches {
+            let mut sw = vec.choose_multiple(rng, 2);
+            let sw0 = sw.next().unwrap();
+            let sw1 = sw.next().unwrap();
+            let tmp = indices[*sw0];
+            indices[*sw0] = indices[*sw1];
+            indices[*sw1] = tmp;
+        }
+
+        indices
+    }
+
+
+    pub fn switch_n_keys(&self, permutation: &[usize], n_keys: usize) -> Vec<usize> {
+        let mut indices: Vec<usize> = permutation.to_vec();
+        let rng = &mut thread_rng();
+
+        let vec: Vec<usize> = (0..permutation.len()).collect();
+        let sw_from: Vec<&usize> = vec.choose_multiple(rng, n_keys).collect();
+        let mut sw_to = sw_from.to_vec();
+        sw_to.shuffle(rng);
+
+        // Perform nr_switches switches
+        for (from, to) in  sw_from.into_iter().zip(sw_to.into_iter()) {
+            indices[*to] = permutation[*from];
+        }
+
         indices
     }
 
