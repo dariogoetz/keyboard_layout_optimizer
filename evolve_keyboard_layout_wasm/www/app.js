@@ -164,7 +164,6 @@ Vue.component('evaluator-app', {
             permutableKeys: null,
             genOptParamsStr: null,
             saOptParamsStr: null,
-            optParams: null,
             selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
@@ -485,13 +484,13 @@ Vue.component('evaluator-app', {
                 return
             }
 
-            this.optParams = await this.worker.initGenLayoutOptimizer(
+            const optParams = await this.worker.initGenLayoutOptimizer(
                 this.inputLayout,
                 this.optFixed,
                 this.genOptParamsStr
             )
 
-            this.optTotalSteps = this.optParams.generation_limit
+            this.optTotalSteps = optParams.generation_limit
             this.optStep = 1
             this.optCancel = false
 
