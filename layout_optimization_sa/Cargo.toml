@@ -14,7 +14,6 @@ layout_optimization = { path = "../layout_optimization" }
 
 anyhow = "1.0.45"
 argmin = { version = "0.5.0", features = ["wasm-bindgen"] }
-rand_xoshiro = { version = "0.6.0", features = ["serde1"] }
 colored = "2.0.0"
 env_logger = "*"
 log = "*"

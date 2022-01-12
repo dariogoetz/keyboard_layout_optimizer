@@ -9,8 +9,6 @@ use colored::Colorize;
 use rand_xoshiro::{rand_core::SeedableRng, Xoshiro256PlusPlus};
 use serde::Deserialize;
 use std::sync::Arc;
-use rand::prelude::*;
-use rand_xoshiro::Xoshiro256PlusPlus;
 
 use argmin::{
     prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode},
