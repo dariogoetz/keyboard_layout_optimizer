@@ -367,6 +367,7 @@ Vue.component('evaluator-app', {
         },
 
         async updateEvalParams(evalParamsStr) {
+            this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
             this.evalParamsStr = evalParamsStr
 
             await this.initNgramProvider()
@@ -376,11 +377,11 @@ Vue.component('evaluator-app', {
 
         updateOptParams(newOptParamsStr) {
             if (this.optMode === "simulated_annealing") {
+                this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
                 this.saOptParamsStr = newOptParamsStr;
-                this.$bvToast.toast("Saved new optimization-parameters", { variant: "primary" })
             } else if (this.optMode === "genevo") {
+                this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
                 this.genOptParamsStr = newOptParamsStr;
-                this.$bvToast.toast("Saved new optimization-parameters", { variant: "primary" })
             } else {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
@@ -401,6 +402,7 @@ Vue.component('evaluator-app', {
         },
 
         async updateLayoutConfig(layoutConfig) {
+            this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
             this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
             await this.initLayoutEvaluator()
@@ -641,8 +643,9 @@ Vue.component('ngram-config', {
                 this.$emit('selected', 'prepared', this.selected)
             }
         },
-        save() {
-            this.$emit("selected", this.selected, this.text)
+        async save() {
+            await this.$emit("selected", this.selected, this.text)
+            this.$bvToast.toast("Updated n-grams", { variant: "primary" })
         },
     },
 })
