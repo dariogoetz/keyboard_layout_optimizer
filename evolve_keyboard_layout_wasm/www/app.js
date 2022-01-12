@@ -437,7 +437,6 @@ Vue.component('evaluator-app', {
         },
 
         async saOptimization() {
-            console.info('started saOptimization with "' + this.inputLayout + '"')
             let layout = await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
@@ -449,19 +448,14 @@ Vue.component('evaluator-app', {
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.optStep = 0
-            console.log(layout)
         },
         updateOptTotalSteps(maxStepNr) {
-            console.log("updateOptTotalSteps(maxStepNr) {")
             this.optTotalSteps = maxStepNr
         },
         updateOptStep(stepNr) {
-            console.log("updateOptStep(stepNr) {")
             this.optStep = stepNr
         },
         newBestAlert(layout, cost) {
-            console.log(`newBestAlert(layout, cost) {
-                ${layout}, ${cost}`)
             this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
         },
         stopSaOptimization() {
