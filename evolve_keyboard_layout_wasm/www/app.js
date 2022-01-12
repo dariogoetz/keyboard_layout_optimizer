@@ -417,7 +417,19 @@ Vue.component('evaluator-app', {
             this.details = this.details.filter((d) => d.layout !== layout)
         },
 
-        startOptimization() {
+        async startOptimization() {
+            // check if given layout_str is valid
+            try {
+                this.showInputValidState = true
+                await this.evaluate(this.inputLayout)
+                this.showInputValidState = false
+            } catch (err) {
+                this.optStep = 0
+                this.optCancel = false
+                return
+            }
+            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
+
             if (this.optMode === "simulated_annealing") {
                 this.saOptimization()
             } else if (this.optMode === "genevo") {
@@ -442,54 +454,42 @@ Vue.component('evaluator-app', {
                 this.optFixed,
                 this.saOptParamsStr,
                 Comlink.proxy(() => { }),
-                Comlink.proxy(this.updateOptTotalSteps),
-                Comlink.proxy(this.updateOptStep),
-                Comlink.proxy(this.newBestAlert),
+                Comlink.proxy(this.setOptTotalSteps),
+                Comlink.proxy(this.setOptStep),
+                Comlink.proxy(this.setNewBest),
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.optStep = 0
         },
-        updateOptTotalSteps(maxStepNr) {
+        setOptTotalSteps(maxStepNr) {
             this.optTotalSteps = maxStepNr
         },
-        updateOptStep(stepNr) {
+        setOptStep(stepNr) {
             this.optStep = stepNr
         },
-        newBestAlert(layout, cost) {
+        setNewBest(layout, cost) {
             this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
+            this.inputLayoutRaw = layout
         },
         stopSaOptimization() {
             this.$bvToast.toast("Stopping optimization", { variant: "primary" })
             this.rawWorker.terminate()
-            this.createWorkers().then(() => {
+            this.createWorkers().then((_data) => {
                 this.$bvToast.toast("Optimization finished", { variant: "primary" });
                 this.optStep = 0;
             })
         },
 
         async genevoOtimization() {
-            // check if given layout_str is valid
-            try {
-                this.showInputValidState = true
-                await this.evaluate(this.inputLayout)
-                this.showInputValidState = false
-            } catch (err) {
-                this.optStep = 0
-                this.optCancel = false
-                return
-            }
-
             const optParams = await this.worker.initGenLayoutOptimizer(
                 this.inputLayout,
                 this.optFixed,
                 this.genOptParamsStr
             )
-
             this.optTotalSteps = optParams.generation_limit
             this.optStep = 1
             this.optCancel = false
 
-            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
             let res
             do {
                 res = await this.worker.genOptimizationStep()
