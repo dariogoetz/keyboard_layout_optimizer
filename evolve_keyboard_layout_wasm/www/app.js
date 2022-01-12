@@ -87,7 +87,7 @@ Vue.component('evaluator-app', {
           </div>
           <div v-else>Optimize</div>
         </b-button>
-        <b-button v-if="optStep > 0" @click="optCancelRequest" variant="danger"><b-icon-x-circle-fill /></b-button>
+        <b-button v-if="optStep > 0" @click="stopOptimization" variant="danger"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
 
     </b-col>
@@ -113,7 +113,7 @@ Vue.component('evaluator-app', {
                 <label class="mr-sm-2">Fixed Keys</label>
                 <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
               </b-form>
-              <config-file :initial-content="optParamsStr" @saved="updateOptParams">
+              <config-file :initial-content="saOptParamsStr" @saved="updateOptParams">
             </b-tab>
 
           </b-tabs>
@@ -152,6 +152,7 @@ Vue.component('evaluator-app', {
             inputLayoutRaw: null,
             showInputValidState: false,
             wasm: null,
+            rawWorker: null,
             worker: null,
             ngramProviderInitialized: false,
             evaluatorInitialized: false,
@@ -245,18 +246,21 @@ Vue.component('evaluator-app', {
         this.saOptParamsStr = sa_opt_params
 
         this.wasm = await import("evolve-keyboard-layout-wasm")
-
-        this.worker = Comlink.wrap(new Worker('worker.js'))
-        await this.worker.init()
-
-        await this.initNgramProvider()
-        await this.initLayoutEvaluator()
+        this.createWorkers();
 
         // reduce initial value of this.loading
         this.loading -= 1
     },
 
     methods: {
+        async createWorkers() {
+            this.rawWorker = new Worker('worker.js')
+            this.worker = Comlink.wrap(this.rawWorker)
+            await this.worker.init()
+            await this.initNgramProvider()
+            await this.initLayoutEvaluator()
+        },
+
         randomInput(fix) {
             let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
             if (fix) {
@@ -369,8 +373,15 @@ Vue.component('evaluator-app', {
             await this.evaluateExisting()
         },
 
-        updateOptParams(optParamsStr) {
-            this.genOptParamsStr = optParamsStr
+        updateOptParams(newOptParamsStr) {
+            if (this.optMode === "simulated_annealing") {
+                this.saOptParamsStr = newOptParamsStr;
+            } else if (this.optMode === "genevo") {
+                this.genOptParamsStr = newOptParamsStr;
+
+            } else {
+                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+            }
         },
 
         async updateNgramProviderParams(ngramType, ngramData) {
@@ -415,6 +426,15 @@ Vue.component('evaluator-app', {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
         },
+        stopOptimization() {
+            if (this.optMode === "simulated_annealing") {
+                this.stopSaOptimization()
+            } else if (this.optMode === "genevo") {
+                this.stopGenevoOtimization()
+            } else {
+                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+            }
+        },
 
         async saOptimization() {
             console.info('started saOptimization with "' + this.inputLayout + '"')
@@ -426,32 +446,31 @@ Vue.component('evaluator-app', {
                 Comlink.proxy(this.updateOptTotalSteps),
                 Comlink.proxy(this.updateOptStep),
                 Comlink.proxy(this.newBestAlert),
-                Comlink.proxy(this.wantsToQuit),
             )
+            this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.optStep = 0
             console.log(layout)
         },
-
-        wantsToQuit() {
-            const wantsToQuit = this.optCancel;
-            console.log(wantsToQuit);
-            return wantsToQuit;
-        },
-
         updateOptTotalSteps(maxStepNr) {
             console.log("updateOptTotalSteps(maxStepNr) {")
             this.optTotalSteps = maxStepNr
         },
-
         updateOptStep(stepNr) {
             console.log("updateOptStep(stepNr) {")
             this.optStep = stepNr
         },
-
         newBestAlert(layout, cost) {
             console.log(`newBestAlert(layout, cost) {
                 ${layout}, ${cost}`)
             this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
+        },
+        stopSaOptimization() {
+            this.$bvToast.toast("Stopping optimization", { variant: "primary" })
+            this.rawWorker.terminate()
+            this.createWorkers().then(() => {
+                this.$bvToast.toast("Optimization finished", { variant: "primary" });
+                this.optStep = 0;
+            })
         },
 
         async genevoOtimization() {
@@ -493,10 +512,9 @@ Vue.component('evaluator-app', {
             this.optStep = 0
             this.optCancel = false
         },
-
-        optCancelRequest() {
-            this.optCancel = true
+        stopGenevoOtimization() {
             this.$bvToast.toast("Stopping optimization", { variant: "primary" })
+            this.optCancel = true
         },
     }
 })
@@ -606,7 +624,7 @@ Vue.component('ngram-config', {
             description,
         }
     },
-    created () {
+    created() {
         this.select()
     },
     computed: {

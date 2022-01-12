@@ -44,7 +44,7 @@ const evaluator = {
         )
     },
 
-    async saOptimize(layout, fixed_chars, optParams, initCallbacks, setMaxStepNr, setCurrentStepNr, notifyNewBest, checkForStopRequest) {
+    async saOptimize(layout, fixed_chars, optParams, initCallbacks, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
         // Needed to make the callbacks work in Firefox.
         // In other browsers (for example in Chromium or Midori), this isn't necessary.
         // In those browsers, the whole function can be turned into a syncronous one.
@@ -58,7 +58,6 @@ const evaluator = {
             setMaxStepNr,
             setCurrentStepNr,
             notifyNewBest,
-            checkForStopRequest,
         )
 
         return optLayout
