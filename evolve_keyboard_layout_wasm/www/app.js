@@ -377,10 +377,10 @@ Vue.component('evaluator-app', {
         updateOptParams(newOptParamsStr) {
             if (this.optMode === "simulated_annealing") {
                 this.saOptParamsStr = newOptParamsStr;
-                this.$bvToast.toast("Saved new optimization-parameters", { variant: "success" })
+                this.$bvToast.toast("Saved new optimization-parameters", { variant: "primary" })
             } else if (this.optMode === "genevo") {
                 this.genOptParamsStr = newOptParamsStr;
-                this.$bvToast.toast("Saved new optimization-parameters", { variant: "success" })
+                this.$bvToast.toast("Saved new optimization-parameters", { variant: "primary" })
             } else {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
@@ -475,7 +475,7 @@ Vue.component('evaluator-app', {
             this.optStep = stepNr
         },
         setNewBest(layout, cost) {
-            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "success" })
+            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "primary" })
             this.inputLayoutRaw = layout
         },
         stopSaOptimization() {
