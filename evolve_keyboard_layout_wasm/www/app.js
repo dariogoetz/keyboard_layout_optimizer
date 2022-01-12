@@ -598,7 +598,7 @@ Vue.component('ngram-config', {
           rows="10"
         >
         </b-form-textarea>
-        <b-button class="float-right" variant="primary" @click="save">Save</b-button>
+        <b-button class="float-right" variant="primary" @click="save">Analyze & Save</b-button>
       </div>
       <div v-else>
         <br>
@@ -651,7 +651,7 @@ Vue.component('config-file', {
     template: `
     <div>
       <codemirror v-model="content" :options="options"></codemirror>
-      <b-button class="float-right" variant="primary" @click="save">Save</b-button>
+      <b-button class="float-right" variant="primary" :disabled="oldContent===content" @click="save">Save</b-button>
     </div>
     `,
     props: {
@@ -659,6 +659,7 @@ Vue.component('config-file', {
     },
     data() {
         return {
+            oldContent: this.initialContent,
             content: this.initialContent,
             options: {
                 mode: 'yaml',
@@ -670,11 +671,13 @@ Vue.component('config-file', {
     },
     watch: {
         initialContent() {
+            this.oldContent = this.initialContent
             this.content = this.initialContent
         },
     },
     methods: {
         save() {
+            this.oldContent = this.content
             this.$emit("saved", this.content)
         },
     },
