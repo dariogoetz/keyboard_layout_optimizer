@@ -375,9 +375,10 @@ Vue.component('evaluator-app', {
         updateOptParams(newOptParamsStr) {
             if (this.optMode === "simulated_annealing") {
                 this.saOptParamsStr = newOptParamsStr;
+                this.$bvToast.toast("Saved new optimization-parameters", { variant: "success" })
             } else if (this.optMode === "genevo") {
                 this.genOptParamsStr = newOptParamsStr;
-
+                this.$bvToast.toast("Saved new optimization-parameters", { variant: "success" })
             } else {
                 this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
             }
