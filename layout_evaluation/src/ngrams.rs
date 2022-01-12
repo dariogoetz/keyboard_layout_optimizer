@@ -5,7 +5,7 @@
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 use std::fs::{create_dir_all, File};
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 
 /// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
@@ -26,7 +26,8 @@ impl Unigrams {
     /// Collect unigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        text.chars()
+        let chars = text.chars().filter(|c| *c != '\r');
+        chars
             //.filter(|c| !c.is_whitespace())
             .for_each(|c| {
                 *grams.entry(c).or_insert(0.0) += 1.0;
@@ -105,11 +106,12 @@ impl Unigrams {
         let mut grams: Vec<(char, f64)> = self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
-        let mut file = File::create(&filename)
+        let file = File::create(&filename)
             .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        let mut buf_writer = BufWriter::new(file);
         grams.iter().for_each(|(c, w)| {
             let processed = process_special_characters_inverse(&c.to_string());
-            writeln!(&mut file, "{} {}", w, processed).unwrap();
+            writeln!(&mut buf_writer, "{} {}", w, processed).unwrap();
         });
 
         Ok(())
@@ -126,8 +128,10 @@ impl Bigrams {
     /// Collect bigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        text.chars()
-            .zip(text.chars().skip(1))
+        let chars = text.chars().filter(|c| *c != '\r');
+        chars
+            .clone()
+            .zip(chars.clone().skip(1))
             //.filter(|(c1, c2)| !c1.is_whitespace() && !c2.is_whitespace())
             .for_each(|c| {
                 *grams.entry(c).or_insert(0.0) += 1.0;
@@ -206,12 +210,13 @@ impl Bigrams {
             self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
-        let mut file = File::create(&filename)
+        let file = File::create(&filename)
             .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        let mut buf_writer = BufWriter::new(file);
         grams.iter().for_each(|((c1, c2), w)| {
             let processed1 = process_special_characters_inverse(&c1.to_string());
             let processed2 = process_special_characters_inverse(&c2.to_string());
-            writeln!(&mut file, "{} {}{}", w, processed1, processed2).unwrap();
+            writeln!(&mut buf_writer, "{} {}{}", w, processed1, processed2).unwrap();
         });
 
         Ok(())
@@ -228,9 +233,11 @@ impl Trigrams {
     /// Collect trigrams from given text.
     pub fn from_str(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
-        text.chars()
-            .zip(text.chars().skip(1))
-            .zip(text.chars().skip(2))
+        let chars = text.chars().filter(|c| *c != '\r');
+        chars
+            .clone()
+            .zip(chars.clone().skip(1))
+            .zip(chars.clone().skip(2))
             //.filter(|((c1, c2), c3)| {
             //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
             //})
@@ -312,14 +319,15 @@ impl Trigrams {
             self.grams.iter().map(|(c, w)| (*c, *w)).collect();
         grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
 
-        let mut file = File::create(&filename)
+        let file = File::create(&filename)
             .map_err(|e| format!("Unable to create file '{}': {}", p.to_str().unwrap(), e))?;
+        let mut buf_writer = BufWriter::new(file);
         grams.iter().for_each(|((c1, c2, c3), w)| {
             let processed1 = process_special_characters_inverse(&c1.to_string());
             let processed2 = process_special_characters_inverse(&c2.to_string());
             let processed3 = process_special_characters_inverse(&c3.to_string());
             writeln!(
-                &mut file,
+                &mut buf_writer,
                 "{} {}{}{}",
                 w, processed1, processed2, processed3
             )

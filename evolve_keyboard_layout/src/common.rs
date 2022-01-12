@@ -1,16 +1,13 @@
 use keyboard_layout::{
-    keyboard::{Keyboard, KeyboardYAML},
-    layout::Layout,
-    layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
+    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::NeoLayoutGenerator,
 };
 use layout_evaluation::{
-    evaluation::{Evaluator, MetricParameters},
-    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    config::EvaluationParameters,
+    evaluation::Evaluator,
+    ngram_mapper::on_demand_ngram_mapper::OnDemandNgramMapper,
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
-use anyhow::Result;
-use serde::Deserialize;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -18,40 +15,15 @@ use std::path::Path;
 use std::sync::Arc;
 use structopt::StructOpt;
 
-#[derive(Clone, Deserialize, Debug)]
-pub struct EvaluationParameters {
-    pub metrics: MetricParameters,
-    pub ngram_mapper: NgramMapperConfig,
-}
-
-impl EvaluationParameters {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let k: EvaluationParameters = serde_yaml::from_reader(f)?;
-        Ok(k)
-    }
-}
-
-#[derive(Deserialize, Debug)]
-pub struct LayoutConfig {
-    pub keyboard: KeyboardYAML,
-    pub base_layout: BaseLayoutYAML,
-}
-
-impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
-
-        Ok(cfg)
-    }
-}
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Path to ngram files
-    #[structopt(short, long, default_value = "corpus/arne_no_special")]
+    #[structopt(
+        short,
+        long,
+        default_value = "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
+    )]
     pub ngrams: String,
 
     /// Filename of evaluation configuration file to use
@@ -85,6 +57,25 @@ pub struct Options {
     /// Do not increase weight of common bigrams
     #[structopt(long)]
     pub no_increase_common_bigrams: bool,
+}
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "Keyboard layout publication")]
+pub struct PublishingOptions {
+    /// Publish found layout to webservice under this name
+    #[structopt(long)]
+    pub publish_as: Option<String>,
+
+    /// Publish found layout to webservice for this layout config
+    #[structopt(long, default_value = "standard")]
+    pub publish_layout_config: String,
+
+    /// Publish found layout to webservice at this url
+    #[structopt(
+        long,
+        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
+    )]
+    pub publish_to: String,
 }
 
 pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
@@ -171,11 +162,18 @@ pub fn append_to_file(layout: &Layout, filename: &str) {
 }
 
 /// Publishes the layout to a webservice.
-pub fn publish_to_webservice(layout: &Layout, publish_name: &str, publish_to: &str) {
+pub fn publish_to_webservice(
+    layout: &Layout,
+    publish_name: &str,
+    publish_to: &str,
+    publish_layout_config: &str,
+) {
     let client = reqwest::blocking::Client::new();
     let mut body = HashMap::new();
     body.insert("published_by", publish_name.to_string());
     body.insert("layout", layout.as_text());
+    body.insert("layout_config", publish_layout_config.to_string());
+
     let resp = client.post(publish_to).json(&body).send().ok();
     if let Some(resp) = resp {
         if resp.status().is_success() {

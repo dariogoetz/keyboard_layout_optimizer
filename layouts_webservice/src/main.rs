@@ -1,25 +1,25 @@
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
 use rocket::fairing::AdHoc;
 use rocket::fs::FileServer;
 
 use keyboard_layout::{
-    keyboard::{Keyboard, KeyboardYAML},
-    layout_generator::{BaseLayoutYAML, NeoLayoutGenerator},
+    config::LayoutConfig, keyboard::Keyboard, layout_generator::NeoLayoutGenerator,
 };
 use layout_evaluation::{
-    evaluation::{Evaluator, MetricParameters},
-    ngram_mapper::on_demand_ngram_mapper::{NgramMapperConfig, OnDemandNgramMapper},
+    config::EvaluationParameters,
+    evaluation::Evaluator,
+    ngram_mapper::on_demand_ngram_mapper::OnDemandNgramMapper,
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
-use anyhow::Result;
 use serde::Deserialize;
-use std::sync::Arc;
+use std::collections::HashMap;
 use std::path::Path;
+use std::sync::Arc;
 
 mod api;
-
 
 #[derive(Clone, Deserialize, Debug)]
 struct Options {
@@ -29,8 +29,11 @@ struct Options {
     /// Filename of evaluation configuration file to use
     pub eval_parameters: String,
 
-    /// Filename of layout configuration file to use
-    pub layout_config: String,
+    /// Identifiers and filenames of layout configuration file to use
+    pub layout_configs: Vec<(String, String)>,
+
+    /// Default layout config to use if unspecified
+    pub default_layout_config: String,
 
     /// Directory with static content to serve
     pub static_dir: String,
@@ -40,35 +43,6 @@ struct Options {
 
     /// CORS allowed origins
     pub allowed_cors_origins: String,
-}
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct EvaluationParameters {
-    pub metrics: MetricParameters,
-    pub ngram_mapper: NgramMapperConfig,
-}
-
-impl EvaluationParameters {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let k: EvaluationParameters = serde_yaml::from_reader(f)?;
-        Ok(k)
-    }
-}
-
-#[derive(Deserialize, Debug)]
-pub struct LayoutConfig {
-    pub keyboard: KeyboardYAML,
-    pub base_layout: BaseLayoutYAML,
-}
-
-impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
-        let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
-
-        Ok(cfg)
-    }
 }
 
 use async_trait::async_trait;
@@ -89,9 +63,7 @@ impl Fairing for Cors {
         }
     }
 
-    async fn on_response<'r>(&self,
-        _request: &'r Request<'_>,
-        response: &mut Response<'r>) {
+    async fn on_response<'r>(&self, _request: &'r Request<'_>, response: &mut Response<'r>) {
         response.set_header(Header::new(
             "Access-Control-Allow-Origin",
             self.options.allowed_cors_origins.to_owned(),
@@ -100,10 +72,7 @@ impl Fairing for Cors {
             "Access-Control-Allow-Methods",
             "GET, POST, PATCH, OPTIONS",
         ));
-        response.set_header(Header::new(
-            "Access-Control-Allow-Headers",
-            "*"
-        ));
+        response.set_header(Header::new("Access-Control-Allow-Headers", "*"));
     }
 }
 
@@ -114,43 +83,43 @@ fn rocket() -> _ {
 
     let options: Options = figment.extract().expect("config");
 
-    let layout_config = LayoutConfig::from_yaml(&options.layout_config).expect(&format!(
-        "Could not load config file '{}'",
-        &options.layout_config
-    ));
-    let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
-    let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
+    let mut layout_generators: HashMap<String, NeoLayoutGenerator> = HashMap::default();
+    for (config_id, layout_config) in &options.layout_configs {
+        let layout_config = LayoutConfig::from_yaml(&layout_config)
+            .expect(&format!("Could not load config file '{}'", &layout_config));
+
+        let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
+        let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
+        layout_generators.insert(config_id.to_owned(), layout_generator);
+    }
+
     let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
         "Could not read evaluation yaml file '{}'",
         &options.eval_parameters
     ));
     let p = Path::new(&options.ngrams).join("1-grams.txt");
-    let unigrams = Unigrams::from_file(&p.to_str().unwrap()).expect(&format!(
-        "Could not read 1-gramme file from '{:?}'.",
-        &p
-    ));
+    let unigrams = Unigrams::from_file(&p.to_str().unwrap())
+        .expect(&format!("Could not read 1-gramme file from '{:?}'.", &p));
     let p = Path::new(&options.ngrams).join("2-grams.txt");
-    let bigrams = Bigrams::from_file(&p.to_str().unwrap()).expect(&format!(
-        "Could not read 2-gramme file from '{:?}'.",
-        &p
-    ));
+    let bigrams = Bigrams::from_file(&p.to_str().unwrap())
+        .expect(&format!("Could not read 2-gramme file from '{:?}'.", &p));
     let p = Path::new(&options.ngrams).join("3-grams.txt");
-    let trigrams = Trigrams::from_file(&p.to_str().unwrap()).expect(&format!(
-        "Could not read 3-gramme file from '{:?}'.",
-        &p
-    ));
+    let trigrams = Trigrams::from_file(&p.to_str().unwrap())
+        .expect(&format!("Could not read 3-gramme file from '{:?}'.", &p));
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
-    let ngram_mapper = OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
+    let ngram_mapper =
+        OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
     let evaluator =
         Evaluator::default(Box::new(ngram_mapper)).default_metrics(&eval_params.metrics);
 
-
     rocket
         .manage(evaluator)
-        .manage(layout_generator)
+        .manage(layout_generators)
         .attach(AdHoc::config::<Options>())
         .attach(api::stage())
-        .attach(Cors { options: options.clone() })
+        .attach(Cors {
+            options: options.clone(),
+        })
         .mount("/", FileServer::from(&options.static_dir))
 }

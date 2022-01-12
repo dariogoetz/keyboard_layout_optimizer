@@ -11,6 +11,7 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
         'index.html',
+        'codemirror.css',
         '../../layouts_webservice/static/vue-components.js',
         '../../layouts_webservice/static/app.css',
     ])

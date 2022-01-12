@@ -38,20 +38,13 @@ struct Options {
     #[structopt(long)]
     append_solutions_to: Option<String>,
 
-    /// Publish found layout to webservice under this name
-    #[structopt(long)]
-    publish_as: Option<String>,
-
-    /// Publish found layout to webservice at this url
-    #[structopt(
-        long,
-        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
-    )]
-    publish_to: String,
-
     /// Repeat optimizations indefinitely
     #[structopt(long)]
     run_forever: bool,
+
+    /// Publishing options
+    #[structopt(flatten)]
+    publishing_options: common::PublishingOptions,
 }
 
 fn main() {
@@ -97,8 +90,13 @@ fn main() {
         }
 
         // Publish to webservice.
-        if let Some(publish_name) = &options.publish_as {
-            common::publish_to_webservice(&layout, publish_name, &options.publish_to);
+        if let Some(publish_name) = &options.publishing_options.publish_as {
+            common::publish_to_webservice(
+                &layout,
+                publish_name,
+                &options.publishing_options.publish_to,
+                &options.publishing_options.publish_layout_config,
+            );
         }
 
         if !options.run_forever {

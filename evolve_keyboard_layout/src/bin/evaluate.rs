@@ -25,8 +25,6 @@ impl From<EvaluationResult> for LayoutEvaluation {
     }
 }
 
-
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout optimization")]
 struct Options {
@@ -37,9 +35,9 @@ struct Options {
     #[structopt(long)]
     from_file: Option<String>,
 
-    /// Evaluation parameters
+    /// General parameters
     #[structopt(flatten)]
-    evaluation_parameters: common::Options,
+    general_parameters: common::Options,
 
     /// If to only output the results as JSON to stdout
     #[structopt(long)]
@@ -62,7 +60,7 @@ fn main() {
         env_logger::init();
     }
 
-    let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
+    let (layout_generator, evaluator) = common::init(&options.general_parameters);
 
     // collect layout strings to a vec
     let mut layout_strings = options.layout_str.to_vec();
@@ -101,7 +99,8 @@ fn main() {
 
     // print results
     if options.json {
-        let results: Vec<LayoutEvaluation> = results.into_iter().map(|(_, res)| res.into()).collect();
+        let results: Vec<LayoutEvaluation> =
+            results.into_iter().map(|(_, res)| res.into()).collect();
         println!("{}", serde_json::to_string(&results).unwrap());
     } else {
         for (layout, evaluation_result) in results {

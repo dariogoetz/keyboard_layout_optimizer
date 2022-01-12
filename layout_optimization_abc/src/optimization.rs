@@ -10,7 +10,6 @@ use std::sync::{mpsc::Receiver, Arc};
 use std::usize;
 
 use abc::{scaling, Candidate, Context, HiveBuilder};
-use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
@@ -74,10 +73,7 @@ impl Context for FitnessCalc {
 
         // only permutate indices of chars that are not fixed
         let indices = self.layout_generator.get_permutable_indices();
-        let mut permutated_indices = indices.to_vec();
-
-        // shuffle some (self.n_switches) permutable chars
-        permutated_indices.partial_shuffle(&mut thread_rng(), self.n_switches);
+        let permutated_indices = self.layout_generator.perform_n_swaps(&indices, self.n_switches);
 
         indices
             .iter()

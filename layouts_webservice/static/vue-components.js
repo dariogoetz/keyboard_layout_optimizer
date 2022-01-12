@@ -1,3 +1,11 @@
+const LAYOUT_CONFIGS = [
+    { key: 'standard', label: 'Standard', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+    { key: 'ortho', label: 'Ortho', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+    { key: 'moonlander', label: 'Moonlander', family: (s) => s.slice(11, 21), periodComma: (s) => s.slice(29, 31) },
+    { key: 'crkbd', label: 'Corne (crkbd)', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+]
+const DEFAULT_LAYOUT_CONFIG = 'standard'
+
 const COLORS = [
   '#4dc9f6',
   '#f67019',
@@ -215,25 +223,38 @@ Vue.component('layouts-table', {
     `,
     props: {
         url: { type: String, default: null },
+        layoutConfig: {type: String, default: DEFAULT_LAYOUT_CONFIG },
         bestInFamily: { type: Boolean, default: true },
         filter: { type: String, default: null },
         perPage: { type: Number, default: 500 },
     },
     data () {
+        let familyGen = {}
+        LAYOUT_CONFIGS.forEach((c) => {
+            familyGen[c.key] = c.family
+        })
+        let periodCommaGen = {}
+        LAYOUT_CONFIGS.forEach((c) => {
+            periodCommaGen[c.key] = c.periodComma
+        })
         return {
             layouts: [],
             currentPage: 1,
             filteredRows: 0,
+            familyGen,
+            periodCommaGen,
         }
 
     },
     computed: {
         rows () {
+            let familyGen = this.familyGen[this.layoutConfig]
+            let periodCommaGen = this.periodCommaGen[this.layoutConfig]
             let layouts = this.layouts
             if (this.bestInFamily) {
                 let familyMap = new Map()
                 this.layouts.forEach(layout => {
-                    let family = layout.layout.slice(12, 22)
+                    let family = familyGen(layout.layout)
                     let familyBest = familyMap.get(family)
                     if (familyBest === undefined || layout.total_cost < familyBest.total_cost) {
                         familyMap.set(family, layout)
@@ -243,13 +264,14 @@ Vue.component('layouts-table', {
             }
 
             const res = layouts.map((layout, i) => {
+                let family = familyGen(layout.layout)
                 const row = {
                     layout: layout.layout,
                     total_cost: layout.total_cost,
                     published_by: layout.published_by,
                     highlight: layout.highlight,
-                    family: layout.layout.slice(12, 22),
-                    periodComma: layout.layout.slice(29, 31) == ',.' ? 'standard' : 'unusual',
+                    periodComma: periodCommaGen(layout.layout) == ',.' ? 'standard' : 'unusual',
+                    family,
                 }
                 return row
             })
@@ -298,11 +320,18 @@ Vue.component('layouts-table', {
             this.rows.forEach(item => item.selected = false)
             this.$emit('details', [])
         },
+        layoutConfig () {
+            this.fetchLayouts()
+        },
     },
     methods: {
         fetchLayouts () {
             if (this.url === null) return null
-            return fetch(this.url)
+            let url = this.url
+            if (this.layoutConfig !== null) {
+                url = `${this.url}?layout_config=${this.layoutConfig}`
+            }
+            return fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     this.layouts = data
@@ -328,5 +357,35 @@ Vue.component('layouts-table', {
             this.currentPage = 1
         },
     }
+})
+
+Vue.component('keyboard-selector', {
+    template: `
+    <b-form inline>
+      <label class="mr-sm-2">Keyboard</label>
+      <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
+    </b-form>
+    `,
+    props: {
+        defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
+    },
+    data () {
+        let options = []
+        LAYOUT_CONFIGS.forEach(c => {
+            options.push({ value: c.key, text: c.label })
+        })
+        return {
+            selected: this.defaultSelection,
+            options,
+        }
+    },
+    created () {
+        this.emit()
+    },
+    methods: {
+        emit () {
+            this.$emit("selected", this.selected)
+        }
+    },
 })
 

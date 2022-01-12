@@ -9,7 +9,7 @@ struct Options {
     /// Read text from this file
     filename: String,
 
-    /// Directory name for resulting ngram frequency files
+    /// Name for resulting ngram frequencies (a directory at that path will be generated)
     out: String,
 }
 

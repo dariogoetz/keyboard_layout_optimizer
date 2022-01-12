@@ -1,6 +1,7 @@
 import config_standard_keyboard from '../../config/standard_keyboard.yml'
 import config_ortho from '../../config/ortho.yml'
 import config_moonlander from '../../config/moonlander.yml'
+import config_crkbd from '../../config/crkbd.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
 import gen_opt_params from '../../config/optimization_parameters_web.yml'
@@ -8,25 +9,30 @@ import sa_opt_params from '../../config/optimization_parameters_sa_web.yml'
 
 import Worker from "./worker.js"
 
+const LAYOUT_CONFIGS = {
+    standard: config_standard_keyboard,
+    ortho: config_ortho,
+    moonlander: config_moonlander,
+    crkbd: config_crkbd,
+}
+
 const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 
-const LAYOUT_CONFIGS = [
-    { key: 'standard', label: 'Standard', config: config_standard_keyboard },
-    { key: 'ortho', label: 'Ortho', config: config_ortho },
-    { key: 'moonlander', label: 'Moonlander', config: config_moonlander },
-]
-const DEFAULT_LAYOUT_CONFIG = 'standard'
-
 const NGRAMS = [
+    { key: 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4', label: 'Blend (deu/eng 60/40)', description: 'Ngram frequencies from various German and English corpora in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'deu_wiki_0.6_eng_wiki_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'deu_wiki_1m', label: 'Wikipedia (deu)', description: 'Ngram frequencies from German Wikipedia 2021. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'eng_wiki_1m', label: 'Wikipedia (eng)', description: 'Ngram frequencies from English Wikipedia 2016. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'deu_web_0.6_eng_web_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'deu_web_1m', label: 'Web-public (deu)', description: 'Ngram frequencies from German "Web-public 2019". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'eng_web_1m', label: 'Web-public (eng)', description: 'Ngram frequencies from English "Web-public 2018". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'deu_mixed_0.6_eng_news_typical_0.4', label: 'Mixed/News typical (deu/eng 60/40)', description: 'Ngram frequencies from German "Mixed Typical (2011)" and English "News Typical (2016)" in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'deu_mixed_1m', label: 'Mixed Typical (deu)', description: 'Ngram frequencies from German "Mixed 2011". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
     { key: 'eng_news_typical_1m', label: 'News Typical (eng)', description: 'Ngram frequencies from English "News Typical 2016". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+    { key: 'irc_neo', label: '#neo - IRC', description: 'Ngram frequencies from the #neo IRC channel. Mostly in German.' },
     { key: 'arne_no_special', label: 'ArneBab', description: 'Ngram frequencies used in ArneBabs optimizer. Sourced from <a href="https://hg.sr.ht/~arnebab/evolve-keyboard-layout">ArneBabs optimizer</a>.' },
 ]
-const DEFAULT_NGRAM = 'deu_wiki_0.6_eng_wiki_0.4'
+const DEFAULT_NGRAM = 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4'
 
 function setDifference(setA, setB) {
     var _difference = new Set(setA);
@@ -35,6 +41,8 @@ function setDifference(setA, setB) {
     }
     return _difference;
 }
+
+Vue.use(VueCodemirror)
 
 Vue.component('evaluator-app', {
     template: `
@@ -55,9 +63,11 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="setInput('k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj')">koy</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('kuü.ävgcljfßhieaodtrnsxyö,qbpwmz')">AdNW</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
+      <b-button class="mb-2" size="sm" @click="randomInput(true)">random (std)</b-button>
+      <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Layout" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
         <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
       </b-form>
@@ -82,31 +92,32 @@ Vue.component('evaluator-app', {
 
     </b-col>
 
-    <b-col xl="8" lg="6" style="height: 450px">
+    <b-col xl="8" lg="6">
       <h2>Settings</h2>
-      <b-tabs>
+        <b-overlay :show="optStep > 0" style="height: 420px">
+          <b-tabs>
+            <b-tab title="Evaluation">
+              <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
+            </b-tab>
 
-        <b-tab title="Evaluation">
-          <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
-        </b-tab>
+            <b-tab title="Ngrams">
+              <ngram-config @selected="updateNgramProviderParams"></ngram-config>
+            </b-tab>
 
-        <b-tab title="Ngrams">
-          <ngram-config @selected="updateNgramProviderParams"></ngram-config>
-        </b-tab>
+            <b-tab title="Keyboard">
+              <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
+            </b-tab>
 
-        <b-tab title="Keyboard">
-          <config-file :initial-content="layoutConfig" @saved="updateLayoutConfig">
-        </b-tab>
+            <b-tab title="Optimization">
+              <b-form inline @submit.stop.prevent @submit="evaluateInput">
+                <label class="mr-sm-2">Fixed Keys</label>
+                <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+              </b-form>
+              <config-file :initial-content="optParamsStr" @saved="updateOptParams">
+            </b-tab>
 
-        <b-tab title="Optimization">
-      <b-form inline @submit.stop.prevent @submit="evaluateInput">
-          <label class="mr-sm-2">Fixed Keys</label>
-          <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
-        </b-form>
-          <config-file :initial-content="genOptParamsStr" @saved="updateOptParams">
-        </b-tab>
-
-      </b-tabs>
+          </b-tabs>
+        </b-overlay>
     </b-col>
   </b-row>
 
@@ -114,7 +125,7 @@ Vue.component('evaluator-app', {
 
   <b-row>
     <b-col v-for="detail in details" xl="6">
-      <layout-button :layout="detail.layout" @remove="removeLayout"></layout-button>
+      <layout-button :layout="detail.layout" :layout-config="selectedLayoutConfig" @remove="removeLayout"></layout-button>
       <layout-details title="Details" :layout-details="detail"></layout-details>
     </b-col>
 
@@ -134,18 +145,18 @@ Vue.component('evaluator-app', {
         logscale: { type: Boolean, default: false },
     },
     data() {
-        let layoutConfigs = {}
-        LAYOUT_CONFIGS.forEach((c) => {
-            layoutConfigs[c.key] = c.config
-        })
+        // LAYOUT_CONFIGS is defined in "vue-components.js"
+        let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
         return {
             details: [],
             inputLayoutRaw: null,
             showInputValidState: false,
             wasm: null,
             worker: null,
-            ngramType: "prepared",
-            ngrams: "arne_no_special",
+            ngramProviderInitialized: false,
+            evaluatorInitialized: false,
+            ngramType: null,
+            ngrams: null,
             corpusText: null,
             evalParamsStr: null,
             optMode: 'simulated_annealing',
@@ -153,7 +164,7 @@ Vue.component('evaluator-app', {
             genOptParamsStr: null,
             saOptParamsStr: null,
             optParams: null,
-            selectedLayoutConfig: "standard",
+            selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
             optStep: 0,
@@ -246,6 +257,22 @@ Vue.component('evaluator-app', {
     },
 
     methods: {
+        randomInput(fix) {
+            let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
+            if (fix) {
+                array = 'zluaqwbdgyjßcrieomntshvxüäöpfk'.split('')
+
+            }
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            let res = array.join('')
+            if (fix) {
+                res = array.slice(0, array.length - 1).join('') + ',.' + array[array.length - 1]
+            }
+            this.inputLayoutRaw = res
+        },
         setInput(layout) {
             this.inputLayoutRaw = layout
         },
@@ -268,6 +295,9 @@ Vue.component('evaluator-app', {
         },
 
         async evaluateExisting() {
+            if (!this.evaluatorInitialized || this.worker === null) {
+                return
+            }
             let promises = []
             this.details.forEach((d) => {
                 let promise = this.evaluate(d.layout)
@@ -307,21 +337,27 @@ Vue.component('evaluator-app', {
         },
 
         async initNgramProvider() {
-            // this.$bvToast.toast(`(Re-)Generating Ngram Provider`, {variant: "primary"})
+            if (this.ngrams === null || this.worker === null) {
+                return
+            }
             this.loading += 1
             let data = this.ngrams
             if (this.ngramType === "from_text") {
                 data = this.corpusText
             }
             await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
+            this.ngramProviderInitialized = true
             this.loading -= 1
         },
 
         async initLayoutEvaluator() {
-            // this.$bvToast.toast(`(Re-)Generating Evaluator`, {variant: "primary"})
+            if (!this.ngramProviderInitialized || this.worker === null) {
+                return
+            }
             this.loading += 1
             await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
             this.permutableKeys = await this.worker.permutableKeys()
+            this.evaluatorInitialized = true
             this.loading -= 1
         },
 
@@ -481,6 +517,7 @@ Vue.component('layout-button', {
     `,
     props: {
         layout: { type: String, default: "", required: true },
+        layoutConfig: { type: String, required: true },
     },
     data() {
         return {
@@ -516,7 +553,7 @@ Vue.component('layout-button', {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName })
+                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName, layout_config: this.layoutConfig })
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
@@ -527,33 +564,6 @@ Vue.component('layout-button', {
             } catch (err) {
                 this.$bvToast.toast(`Error while publishing layout: ${err}`, { variant: 'danger' })
             }
-        }
-    },
-})
-
-Vue.component('keyboard-selector', {
-    template: `
-    <b-form inline>
-      <label class="mr-sm-2">Keyboard</label>
-      <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
-    </b-form>
-    `,
-    props: {
-        defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
-    },
-    data() {
-        let options = []
-        LAYOUT_CONFIGS.forEach(c => {
-            options.push({ value: c.key, text: c.label })
-        })
-        return {
-            selected: this.defaultSelection,
-            options,
-        }
-    },
-    methods: {
-        emit() {
-            this.$emit("selected", this.selected)
         }
     },
 })
@@ -587,7 +597,7 @@ Vue.component('ngram-config', {
             options.push({ value: c.key, text: c.label })
             description[c.key] = c.description
         })
-        options.push({ value: "from_text", text: "From Text" })
+        options.push({ value: 'from_text', text: 'From Text' })
 
         return {
             selected: this.defaultSelection,
@@ -596,6 +606,9 @@ Vue.component('ngram-config', {
             description,
         }
     },
+    created () {
+        this.select()
+    },
     computed: {
         detailsHTML() {
             return this.description[this.selected]
@@ -603,8 +616,10 @@ Vue.component('ngram-config', {
     },
     methods: {
         select() {
-            if (this.selected !== "from_text") {
-                this.$emit("selected", "prepared", this.selected)
+            if (this.selected === 'from_text') {
+                this.$emit('selected', 'from_text', this.text)
+            } else {
+                this.$emit('selected', 'prepared', this.selected)
             }
         },
         save() {
@@ -616,11 +631,7 @@ Vue.component('ngram-config', {
 Vue.component('config-file', {
     template: `
     <div>
-      <b-form-textarea
-        v-model="content"
-        rows="15"
-        style="font: 400 13px/18px 'DejaVuSansMonoBook', monospace;"
-      ></b-form-textarea>
+      <codemirror v-model="content" :options="options"></codemirror>
       <b-button class="float-right" variant="primary" @click="save">Save</b-button>
     </div>
     `,
@@ -629,7 +640,13 @@ Vue.component('config-file', {
     },
     data() {
         return {
-            content: this.initialContent
+            content: this.initialContent,
+            options: {
+                mode: 'yaml',
+                lineNumbers: true,
+                styleActiveLine: true,
+                autoRefresh: true,
+            }
         }
     },
     watch: {
