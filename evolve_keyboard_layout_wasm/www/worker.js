@@ -44,14 +44,14 @@ const evaluator = {
         )
     },
 
-    async saOptimize(layout, fixed_chars, optParams, initCallbacks, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
+    async saOptimize(layout, fixed_chars, optParamsStr, initCallbacks, setMaxStepNr, setCurrentStepNr, notifyNewBest) {
         // Needed to make the callbacks work in Firefox.
         // In other browsers (for example in Chromium or Midori), this isn't necessary.
         // In those browsers, the whole function can be turned into a syncronous one.
         await initCallbacks()
         let optLayout = this.wasm.sa_optimize(
             layout,
-            optParams,
+            optParamsStr,
             this.layoutEvaluator,
             fixed_chars,
             true,
@@ -63,10 +63,10 @@ const evaluator = {
         return optLayout
     },
 
-    initGenLayoutOptimizer(layout, fixed_chars, optParams) {
+    initGenLayoutOptimizer(layout, fixed_chars, optParamsStr) {
         this.layoutOptimizer = this.wasm.LayoutOptimizer.new(
             layout,
-            optParams,
+            optParamsStr,
             this.layoutEvaluator,
             fixed_chars,
             true,
