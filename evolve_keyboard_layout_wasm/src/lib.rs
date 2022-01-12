@@ -1,13 +1,14 @@
 mod utils;
 
 use argmin::prelude::{ArgminKV, Error, IterState, Observe};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{
     config::LayoutConfig,
     keyboard::Keyboard,
+    layout::Layout,
     layout_generator::NeoLayoutGenerator,
 };
 
