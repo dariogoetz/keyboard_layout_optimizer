@@ -62,6 +62,8 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="setInput('k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj')">koy</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('kuü.ävgcljfßhieaodtrnsxyö,qbpwmz')">AdNW</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qwfpgjluyüößarstdhneiozxcvbkm,.ä')">colemak</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qdrwbjfupüößashtgyneoizxmcvkl,.ä')">workman</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(true)">random (std)</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 
