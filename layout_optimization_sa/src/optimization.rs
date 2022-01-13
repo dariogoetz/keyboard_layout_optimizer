@@ -209,6 +209,12 @@ impl Observe<AnnealingStruct> for IterationObserver {
     }
 }
 
+/// Calculates the mean of a vec containing f64-values.
+fn mean(list: &[f64]) -> f64 {
+    let sum: f64 = list.iter().sum();
+    sum / (list.len() as f64)
+}
+
 /// Calculates the [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
 /// for the cost of some amount of Layouts, then returns it.
 ///
@@ -231,12 +237,9 @@ fn get_cost_sd(
         let layout = layout_generator.generate_layout(&current_layout);
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
-
         current_layout = layout_generator.perform_n_swaps(&current_layout, key_pair_switches);
     }
-
-    let sum: f64 = costs.iter().sum();
-    let average: f64 = sum / USED_NEIGHBORS as f64;
+    let average: f64 = mean(&costs);
 
     for cost in &costs {
         let difference = cost - average;
@@ -266,6 +269,18 @@ pub fn optimize(
         true => pm.get_permutable_indices(),
         false => pm.generate_random(),
     };
+
+    /* // Test 10_000 Layouts to get a good default initial temperature.
+    let mut init_temp_vec: Vec<f64> = vec![];
+    const TESTED_LAYOUT_NR: u8 = 100;
+    for i in 0..TESTED_LAYOUT_NR {
+        let l = pm.generate_random();
+        let init_temp = get_cost_sd(&l, Arc::new(evaluator.clone()), &pm, params.key_switches);
+        println!("init_temp {:>2}: {}", i, init_temp);
+        init_temp_vec.push(init_temp);
+    }
+    println!("Average init_temp: {}", mean(&init_temp_vec)); */
+
     let init_temp = match params.init_temp {
         Some(t) => t,
         None => {
