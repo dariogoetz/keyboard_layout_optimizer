@@ -458,7 +458,7 @@ Vue.component('evaluator-app', {
         },
 
         async saOptimization() {
-            let layout = await this.worker.saOptimize(
+            await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
                 this.saOptParamsStr,

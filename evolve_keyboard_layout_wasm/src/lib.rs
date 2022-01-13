@@ -330,7 +330,7 @@ pub fn sa_optimize(
     max_iters_callback: js_sys::Function,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
-) -> String {
+) {
     let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
         .map_err(|e| format!("Could not read optimization params: {:?}", e))
         .unwrap();
@@ -354,7 +354,7 @@ pub fn sa_optimize(
         new_best_callback,
     };
 
-    let result: Layout = sa_optimization::optimize(
+    let _: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         &parameters,
         layout_str,
@@ -366,5 +366,4 @@ pub fn sa_optimize(
         Some(Cache::new()),
         Some(Box::new(observer)),
     );
-    result.as_text()
 }

@@ -49,7 +49,7 @@ const evaluator = {
         // In other browsers (for example in Chromium or Midori), this isn't necessary.
         // In those browsers, the whole function can be turned into a syncronous one.
         await initCallbacks()
-        let optLayout = this.wasm.sa_optimize(
+        this.wasm.sa_optimize(
             layout,
             optParamsStr,
             this.layoutEvaluator,
@@ -59,8 +59,6 @@ const evaluator = {
             setCurrentStepNr,
             setNewBest,
         )
-
-        return optLayout
     },
 
     initGenLayoutOptimizer(layout, fixed_chars, optParamsStr) {
@@ -74,7 +72,6 @@ const evaluator = {
 
         return this.layoutOptimizer.parameters()
     },
-
     genOptimizationStep() {
         return this.layoutOptimizer.step()
     },
