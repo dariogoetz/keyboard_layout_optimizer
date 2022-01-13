@@ -121,9 +121,9 @@ impl Observe<AnnealingStruct> for BestObserver {
     ) -> Result<(), Error> {
         let best_layout = self.layout_generator.generate_string(&state.best_param);
         log::info!(
-            "{}: {} {} ({:>6.1})",
-            self.id,
-            "New best:".bold(),
+            "{} {} {} ({:>6.1})",
+            format!("{}:", self.id).yellow().bold(),
+            "New best:".green(),
             best_layout,
             state.best_cost,
         );
@@ -180,8 +180,8 @@ impl Observe<AnnealingStruct> for IterationObserver {
             }
         }
         let mut output = format!(
-            "{}: {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}",
-            self.id,
+            "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}",
+            format!("{}:", self.id).yellow().bold(),
             "n:".bold(),
             state.iter,
             "current:".bold(),
