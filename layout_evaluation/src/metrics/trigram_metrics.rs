@@ -61,12 +61,12 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                     if !trigram.0.is_fixed && !trigram.1.is_fixed && !trigram.2.is_fixed {
                         worst_nonfixed.push(
                             (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                            OrderedFloat(cost),
+                            OrderedFloat(cost.abs()),
                         );
                     }
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        OrderedFloat(cost),
+                        OrderedFloat(cost.abs()),
                     );
 
                     if worst.len() > N_WORST {

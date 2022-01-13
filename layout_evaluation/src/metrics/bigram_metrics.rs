@@ -55,9 +55,9 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
                 |(mut total_cost, mut worst, mut worst_nonfixed), (bigram, cost)| {
                     total_cost += cost;
 
-                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     if !bigram.0.is_fixed && !bigram.1.is_fixed {
-                        worst_nonfixed.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                        worst_nonfixed.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     }
 
                     if worst.len() > N_WORST {

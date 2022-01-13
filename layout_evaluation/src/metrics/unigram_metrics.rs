@@ -49,7 +49,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
                 (0.0, DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst), (unigram, cost)| {
                     total_cost += cost;
-                    worst.push(unigram.symbol, OrderedFloat(cost));
+                    worst.push(unigram.symbol, OrderedFloat(cost.abs()));
                     if worst.len() > N_WORST {
                         worst.pop_min();
                     }
