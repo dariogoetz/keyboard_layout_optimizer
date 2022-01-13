@@ -601,7 +601,7 @@ Vue.component('ngram-config', {
           autofocus
         >
         </b-form-textarea>
-        <b-button class="float-right" variant="primary" @click="save">Analyze & Save</b-button>
+        <b-button class="float-right" variant="primary" :disabled="text===oldText" @click="save">Analyze & Save</b-button>
       </div>
       <div v-else>
         <br>
@@ -624,6 +624,8 @@ Vue.component('ngram-config', {
         return {
             selected: this.defaultSelection,
             options,
+            initialLoad: true,
+            oldText: "",
             text: "",
             description,
         }
@@ -639,15 +641,23 @@ Vue.component('ngram-config', {
     methods: {
         select() {
             if (this.selected === 'from_text') {
-                this.$emit('selected', 'from_text', this.text)
+                this.emit('from_text', this.text)
             } else {
-                this.$emit('selected', 'prepared', this.selected)
+                this.emit('prepared', this.selected)
             }
         },
-        async save() {
-            await this.$emit("selected", this.selected, this.text)
-            this.$bvToast.toast("Updated n-grams", { variant: "primary" })
+        save() {
+            this.oldText = this.text
+            this.emit(this.selected, this.text)
         },
+        emit(ngramType, ngramData) {
+            if (!this.initialLoad) {
+                this.$bvToast.toast("Updated n-grams", { variant: "primary" })
+            } else {
+                this.initialLoad = false
+            }
+            this.$emit('selected', ngramType, ngramData)
+        }
     },
 })
 
