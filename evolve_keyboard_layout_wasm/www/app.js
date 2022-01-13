@@ -471,6 +471,7 @@ Vue.component('evaluator-app', {
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.optStep = 0
+            this.evaluateInput();
         },
         setOptTotalSteps(maxStepNr) {
             this.optTotalSteps = maxStepNr
@@ -516,6 +517,7 @@ Vue.component('evaluator-app', {
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.optStep = 0
             this.optCancel = false
+            this.evaluateInput();
         },
         stopGenevoOtimization() {
             this.$bvToast.toast("Stopping optimization", { variant: "primary" })
