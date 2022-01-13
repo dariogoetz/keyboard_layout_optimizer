@@ -67,7 +67,7 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0" autofocus></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
         <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
       </b-form>
@@ -532,7 +532,7 @@ Vue.component('layout-button', {
         </b-button-group>
         <b-modal v-model="showModal" title="Publish Layout" @ok="publish">
           <label class="mr-sm-2">Publish Name</label>
-          <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+          <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0" autofocus></b-form-input>
         </b-modal>
       </div>
     `,
@@ -598,6 +598,7 @@ Vue.component('ngram-config', {
           v-model="text"
           placeholder="Text to evaluate layouts on"
           rows="10"
+          autofocus
         >
         </b-form-textarea>
         <b-button class="float-right" variant="primary" @click="save">Analyze & Save</b-button>
