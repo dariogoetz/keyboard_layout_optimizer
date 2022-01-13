@@ -1,21 +1,17 @@
-### Initial temperature
-# Should be about 150. Commas are allowed (150.42).
-# Set to 0 (or a negative number) if a greedy algorithm is preferred.
-# If you want the optimizer to calculate the starting-temperature for you, use one of the following:
+# Initial temperature.
+# Set to 0 if a greedy algorithm is preferred.
+# If you want the optimizer to calculate the starting-temperature for you, set init_temp to null.
 # init_temp: null
-# init_temp: 
-# init_temp: ~
-init_temp: 150
+init_temp: 200
 
 # Swap out this many keys-pairs on every iteration.
-# For simulated annealing it's best to keep the variation between iterations
-# as small as possible. Thus, one single swap may be best.
+# In Simulated Annealing it's best to keep the variation between
+# iterations low. Thus, one single swap may be best.
 key_switches: 1
 
-### Parameters for the solver.
 # Stop if there was no accepted solution after this many iterations
 stall_accepted: 4000
 
-### Parameters for the [Executor].
-# Set maximum number of iterations (defaults to `std::u64::MAX`)
-max_iters: 500000
+# Set maximum number of iterations.
+# At first iterations might take a while, but eventually they will speed up due to caching.
+max_iters: 50000
