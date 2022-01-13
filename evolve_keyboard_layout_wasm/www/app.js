@@ -110,7 +110,7 @@ Vue.component('evaluator-app', {
 
             <b-tab title="Optimization">
               <b-form inline @submit.stop.prevent @submit="evaluateInput">
-                <optimization-selector class="mr-sm-2" :initial-content="optMode" @selected="selectOptimizationAlgorithm"></optimization-selector>
+                <optimization-selector class="mr-sm-2" @selected="selectOptimizationAlgorithm"></optimization-selector>
                 <label class="mr-sm-2">Fixed Keys</label>
                 <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
               </b-form>
@@ -162,7 +162,7 @@ Vue.component('evaluator-app', {
             ngrams: null,
             corpusText: null,
             evalParamsStr: null,
-            optMode: 'simulated_annealing',
+            optMode: null,
             permutableKeys: null,
             genOptParamsStr: null,
             saOptParamsStr: null,
@@ -418,7 +418,9 @@ Vue.component('evaluator-app', {
         },
 
         selectOptimizationAlgorithm(algorithmKey, algorithmLabel) {
-            this.$bvToast.toast(`Switched to ${algorithmLabel}`, { variant: "primary" })
+            if (this.optMode !== null) {
+                this.$bvToast.toast(`Switched to ${algorithmLabel}`, { variant: "primary" })
+            }
             this.optMode = algorithmKey;
         },
 

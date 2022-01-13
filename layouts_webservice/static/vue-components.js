@@ -10,6 +10,7 @@ const OPTIMIZATION_ALGORITHMS = [
     { key: 'simulated_annealing', label: "Simulated Annealing" },
     { key: 'genevo', label: 'Genetic Algorithm' }
 ]
+const DEFAULT_OPTIMIZATION_ALGORITHM = 'simulated_annealing'
 
 const COLORS = [
     '#4dc9f6',
@@ -402,7 +403,7 @@ Vue.component('optimization-selector', {
     </b-form>
     `,
     props: {
-        initialContent: { type: String, default: "" },
+        initialContent: { type: String, default: DEFAULT_OPTIMIZATION_ALGORITHM },
     },
     data() {
         let options = []
@@ -414,10 +415,8 @@ Vue.component('optimization-selector', {
             options,
         }
     },
-    watch: {
-        initialContent() {
-            this.selected = this.initialContent
-        },
+    created() {
+        this.emit()
     },
     methods: {
         emit() {
