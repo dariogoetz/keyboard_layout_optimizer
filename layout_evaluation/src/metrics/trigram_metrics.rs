@@ -7,6 +7,7 @@ pub mod irregularity;
 pub mod no_handswitch_in_trigram;
 pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
+pub mod rolls;
 
 const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;

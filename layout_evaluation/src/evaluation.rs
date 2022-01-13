@@ -54,12 +54,14 @@ pub struct MetricParameters {
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
     pub unbalancing_after_neighboring:
         WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
+    pub bigram_rolls: WeightedParams<bigram_metrics::rolls::Parameters>,
 
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
     pub no_handswitch_in_trigram:
         WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
     pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
     pub trigram_finger_repeats: WeightedParams<trigram_metrics::trigram_finger_repeats::Parameters>,
+    pub trigram_rolls: WeightedParams<trigram_metrics::rolls::Parameters>,
 }
 
 /// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -233,6 +235,16 @@ impl Evaluator {
             params.unbalancing_after_neighboring.normalization.clone(),
             params.unbalancing_after_neighboring.enabled,
         );
+        self.bigram_metric(
+            Box::new(
+                bigram_metrics::rolls::BigramRolls::new(
+                    &params.bigram_rolls.params,
+                ),
+            ),
+            params.bigram_rolls.weight,
+            params.bigram_rolls.normalization.clone(),
+            params.bigram_rolls.enabled,
+        );
 
         // trigram_metrics
         self.trigram_metric(
@@ -272,6 +284,16 @@ impl Evaluator {
             params.trigram_finger_repeats.weight,
             params.trigram_finger_repeats.normalization.clone(),
             params.trigram_finger_repeats.enabled,
+        );
+        self.trigram_metric(
+            Box::new(
+                trigram_metrics::rolls::TrigramRolls::new(
+                    &params.trigram_rolls.params,
+                ),
+            ),
+            params.trigram_rolls.weight,
+            params.trigram_rolls.normalization.clone(),
+            params.trigram_rolls.enabled,
         );
 
         self

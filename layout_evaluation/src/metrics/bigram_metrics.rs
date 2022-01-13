@@ -12,6 +12,7 @@ pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod unbalancing_after_neighboring;
+pub mod rolls;
 
 const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;

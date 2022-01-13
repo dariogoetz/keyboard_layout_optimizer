@@ -280,6 +280,19 @@ metrics:
     params:
       null: null
 
+  bigram_rolls:
+    enabled: false
+    weight: 100.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Multiply by this factor for each of the bigrams that have a lateral movement
+      factor_inward: 1.0
+      factor_outward: 0.2
+      exclude_rows: [3]
+
+
   # trigram metrics
 
   # The `irregularity` metric evaluates all bigram metrics that can be computed on individual
@@ -339,6 +352,18 @@ metrics:
     params:
       # Multiply by this factor for each of the bigrams that have a lateral movement
       factor_lateral_movement: 1.2
+
+  trigram_rolls:
+    enabled: false
+    weight: 10000.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Multiply by this factor for each of the bigrams that have a lateral movement
+      factor_inward: 1.0
+      factor_outward: 0.2
+      exclude_rows: [3]
 
 ngram_mapper:
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
