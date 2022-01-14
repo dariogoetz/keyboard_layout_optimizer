@@ -1,6 +1,7 @@
 mod utils;
 
 use argmin::prelude::{ArgminKV, Error, IterState, Observe};
+use instant::Instant;
 use serde::Serialize;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
@@ -294,6 +295,7 @@ impl LayoutOptimizer {
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
     layout_generator: PermutationLayoutGenerator,
+    last_update_call: Instant,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
 }
@@ -304,13 +306,14 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         state: &IterState<sa_optimization::AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
-        let iteration_nr = state.iter;
-        let this = JsValue::null();
-        if (iteration_nr % 10 == 0) && (iteration_nr > 0) {
-            let iter_js = JsValue::from(iteration_nr);
+        if (state.iter > 0) && (self.last_update_call.elapsed().as_millis() > 500) {
+            let this = JsValue::null();
+            self.last_update_call = Instant::now();
+            let iter_js = JsValue::from(state.iter);
             let _ = self.update_callback.call1(&this, &iter_js);
         }
         if state.is_best() && (&state.param != &state.prev_best_param) {
+            let this = JsValue::null();
             let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
             let cost_js = JsValue::from(state.cost);
             let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
@@ -349,6 +352,7 @@ pub fn sa_optimize(
             fixed_characters,
             &layout_evaluator.layout_generator,
         ),
+        last_update_call: Instant::now(),
         update_callback: update_callback.clone(),
         new_best_callback,
     };

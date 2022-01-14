@@ -17,6 +17,7 @@ layout_optimization = { path = "../layout_optimization" }
 layout_optimization_genevo = { path = "../layout_optimization_genevo" }
 layout_optimization_sa = { path = "../layout_optimization_sa" }
 
+instant = { version = "0.1.12", features = ["wasm-bindgen"] }
 js-sys = "*"
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "*"
