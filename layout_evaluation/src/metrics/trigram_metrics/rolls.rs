@@ -76,17 +76,18 @@ impl TrigramMetric for TrigramRolls {
             return Some(0.0)
         }
 
-        let inward1 = (k1.key.hand == Hand::Left && pos1.0 < pos2.0)
-            || (k1.key.hand == Hand::Right && pos1.0 > pos2.0);
+        // only allow rolls with keys that are directly next to each others
+        let inward1 = (k1.key.hand == Hand::Left && pos1.0 == pos2.0 - 1)
+            || (k1.key.hand == Hand::Right && pos1.0 == pos2.0 + 1);
 
-        let inward2 = (k2.key.hand == Hand::Left && pos2.0 < pos3.0)
-            || (k2.key.hand == Hand::Right && pos2.0 > pos3.0);
+        let inward2 = (k2.key.hand == Hand::Left && pos2.0 == pos3.0 - 1)
+            || (k2.key.hand == Hand::Right && pos2.0 == pos3.0 + 1);
 
-        let outward1 = (k1.key.hand == Hand::Left && pos1.0 > pos2.0)
-            || (k1.key.hand == Hand::Right && pos1.0 < pos2.0);
+        let outward1 = (k1.key.hand == Hand::Left && pos1.0 == pos2.0 + 1)
+            || (k1.key.hand == Hand::Right && pos1.0 == pos2.0 - 1);
 
-        let outward2 = (k2.key.hand == Hand::Left && pos2.0 > pos3.0)
-            || (k2.key.hand == Hand::Right && pos2.0 < pos3.0);
+        let outward2 = (k2.key.hand == Hand::Left && pos2.0 == pos3.0 + 1)
+            || (k2.key.hand == Hand::Right && pos2.0 == pos3.0 - 1);
 
         // both bigrams need to have the same direction
         let mut cost = if inward1 && inward2 {
