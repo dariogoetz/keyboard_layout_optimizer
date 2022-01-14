@@ -470,7 +470,6 @@ Vue.component('evaluator-app', {
                 Comlink.proxy(this.setNewBest),
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
-            this.optStep = 0
             this.evaluateInput();
         },
         setOptTotalSteps(maxStepNr) {

@@ -305,13 +305,12 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let iteration_nr = state.iter;
+        let this = JsValue::null();
         if (iteration_nr % 10 == 0) && (iteration_nr > 0) {
-            let this = JsValue::null();
             let iter_js = JsValue::from(iteration_nr);
             let _ = self.update_callback.call1(&this, &iter_js);
         }
-        if state.is_best() {
-            let this = JsValue::null();
+        if state.is_best() && (&state.param != &state.prev_best_param) {
             let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
             let cost_js = JsValue::from(state.cost);
             let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
@@ -350,7 +349,7 @@ pub fn sa_optimize(
             fixed_characters,
             &layout_evaluator.layout_generator,
         ),
-        update_callback,
+        update_callback: update_callback.clone(),
         new_best_callback,
     };
 
@@ -366,4 +365,6 @@ pub fn sa_optimize(
         Some(Cache::new()),
         Some(Box::new(observer)),
     );
+    let zero = JsValue::from(0);
+    let _ = update_callback.call1(&this, &zero);
 }
