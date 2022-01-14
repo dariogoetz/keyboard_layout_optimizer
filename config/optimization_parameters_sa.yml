@@ -1,7 +1,6 @@
 # Initial temperature.
 # Set to 0 if a greedy algorithm is preferred.
 # If you want the optimizer to calculate the starting-temperature for you, set init_temp to null.
-# init_temp: null
 init_temp: 200
 
 # Swap out this many keys-pairs on every iteration.
