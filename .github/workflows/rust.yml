@@ -60,13 +60,18 @@ jobs:
 
   heroku-webpage:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
       - name: Deploy to heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         if: github.event_name != 'pull_request'
-      with:
-        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-        heroku_app_name: "keyboard-layout-optimizer"
-        heroku_email: "dario.goetz@googlemail.com"
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "keyboard-layout-optimizer"
+          heroku_email: "dario.goetz@googlemail.com"
+
       - run: curl -X 'POST' -d "surfjudge2000" https://keyboard-layout-optimizer.herokuapp.com/api/reeval
