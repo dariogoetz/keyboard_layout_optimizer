@@ -10,7 +10,7 @@ use serde::Deserialize;
 pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going inwards
     pub factor_inward: f64,
-    /// Factor to apply to a trigram's weight if the roll is going inwards
+    /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
     pub exclude_rows: HashSet<isize>
