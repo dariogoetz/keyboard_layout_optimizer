@@ -1,4 +1,6 @@
+use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
+use std::time::Instant;
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
@@ -154,6 +156,7 @@ fn main() {
             } else {
                 log::info!("Starting optimization {}", i);
             }
+            let starting_time = Instant::now();
 
             // Perform the optimization.
             let layout = optimization::optimize(
@@ -170,10 +173,17 @@ fn main() {
             );
 
             // Plot some information regarding the layout.
-            println!("{}", layout.plot());
-            println!("{}", layout.plot_compact());
+            let opt_duration = starting_time.elapsed();
             let evaluation_result = evaluator.evaluate_layout(&layout);
-            println!("{}", evaluation_result);
+            println!(
+                "{} after {:?}\n\n{}\n\n{}\n{}\n{}",
+                "Final result".green().bold(),
+                opt_duration,
+                layout,
+                layout.plot_compact(),
+                layout.plot(),
+                evaluation_result
+            );
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {
