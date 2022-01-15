@@ -22,7 +22,7 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
-  webpage:
+  github-webpage:
     runs-on: ubuntu-latest
 
     steps:
@@ -57,3 +57,16 @@ jobs:
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: ./evolve_keyboard_layout_wasm/www/dist # The folder the action should deploy.
+
+  heroku-webpage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to heroku
+        uses: akhileshns/heroku-deploy@v3.12.12
+        if: github.event_name != 'pull_request'
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "keyboard-layout-optimizer"
+        heroku_email: "dario.goetz@googlemail.com"
+      - run: curl -X 'POST' -d "surfjudge2000" https://keyboard-layout-optimizer.herokuapp.com/api/reeval
