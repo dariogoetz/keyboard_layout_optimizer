@@ -1,3 +1,4 @@
+use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
@@ -149,15 +150,25 @@ fn main() {
         .enumerate()
         .par_bridge()
         .for_each(|(i, fix_from)| {
+            let process_id = format!("Process {:>3}", i);
             if start_from_layout {
-                log::info!("Starting optimization {} from {}", i, fix_from);
+                log::info!(
+                    "{} Starting optimization {} from {}",
+                    format!("{}:", process_id).yellow().bold(),
+                    i,
+                    fix_from
+                );
             } else {
-                log::info!("Starting optimization {}", i);
+                log::info!(
+                    "{} Starting optimization {}",
+                    format!("{}:", process_id).yellow().bold(),
+                    i
+                );
             }
 
             // Perform the optimization.
             let layout = optimization::optimize(
-                &format!("Process {:>3}", i),
+                &process_id,
                 &optimization_params,
                 &fix_from,
                 &options.fix.clone().unwrap_or_else(|| "".to_string()),
@@ -170,10 +181,16 @@ fn main() {
             );
 
             // Plot some information regarding the layout.
-            println!("{}", layout.plot());
-            println!("{}", layout.plot_compact());
             let evaluation_result = evaluator.evaluate_layout(&layout);
-            println!("{}", evaluation_result);
+            println!(
+                "{} {}\n\n{}\n\n{}\n{}\n{}",
+                format!("{}:", process_id).yellow().bold(),
+                "Final result:".green().bold(),
+                layout,
+                layout.plot_compact(),
+                layout.plot(),
+                evaluation_result
+            );
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {
