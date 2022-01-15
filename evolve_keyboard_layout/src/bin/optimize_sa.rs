@@ -1,6 +1,5 @@
 use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
-use std::time::Instant;
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
@@ -151,16 +150,25 @@ fn main() {
         .enumerate()
         .par_bridge()
         .for_each(|(i, fix_from)| {
+            let process_id = format!("Process {:>3}", i);
             if start_from_layout {
-                log::info!("Starting optimization {} from {}", i, fix_from);
+                log::info!(
+                    "{}: Starting optimization {} from {}",
+                    format!("{}:", process_id).yellow().bold(),
+                    i,
+                    fix_from
+                );
             } else {
-                log::info!("Starting optimization {}", i);
+                log::info!(
+                    "{}: Starting optimization {}",
+                    format!("{}:", process_id).yellow().bold(),
+                    i
+                );
             }
-            let starting_time = Instant::now();
 
             // Perform the optimization.
             let layout = optimization::optimize(
-                &format!("Process {:>3}", i),
+                &process_id,
                 &optimization_params,
                 &fix_from,
                 &options.fix.clone().unwrap_or_else(|| "".to_string()),
@@ -173,12 +181,11 @@ fn main() {
             );
 
             // Plot some information regarding the layout.
-            let opt_duration = starting_time.elapsed();
             let evaluation_result = evaluator.evaluate_layout(&layout);
             println!(
-                "{} after {:?}\n\n{}\n\n{}\n{}\n{}",
-                "Final result".green().bold(),
-                opt_duration,
+                "{} {}\n\n{}\n\n{}\n{}\n{}",
+                format!("{}:", process_id).yellow().bold(),
+                "Final result:".green().bold(),
                 layout,
                 layout.plot_compact(),
                 layout.plot(),
