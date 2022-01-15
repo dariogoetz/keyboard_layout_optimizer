@@ -78,7 +78,7 @@ metrics:
 
   # If the keys corresponding to a bigram are not symmetrical on left and right hand, a cost is
   # counted.
-  asymmetric_bigrams:
+  symmetric_handswitches:
     enabled: true
     weight: 1.0
     normalization:

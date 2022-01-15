@@ -42,7 +42,7 @@ pub struct MetricParameters {
     pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
     pub key_costs: WeightedParams<unigram_metrics::key_costs::Parameters>,
 
-    pub asymmetric_bigrams: WeightedParams<bigram_metrics::asymmetric_bigrams::Parameters>,
+    pub symmetric_handswitches: WeightedParams<bigram_metrics::symmetric_handswitches::Parameters>,
     pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
     pub finger_repeats_lateral: WeightedParams<bigram_metrics::finger_repeats_lateral::Parameters>,
     pub finger_repeats_top_bottom:
@@ -151,14 +151,6 @@ impl Evaluator {
 
         // bigram metrics
         self.bigram_metric(
-            Box::new(bigram_metrics::asymmetric_bigrams::AsymmetricBigrams::new(
-                &params.asymmetric_bigrams.params,
-            )),
-            params.asymmetric_bigrams.weight,
-            params.asymmetric_bigrams.normalization.clone(),
-            params.asymmetric_bigrams.enabled,
-        );
-        self.bigram_metric(
             Box::new(bigram_metrics::finger_repeats::FingerRepeats::new(
                 &params.finger_repeats.params,
             )),
@@ -234,6 +226,14 @@ impl Evaluator {
             params.unbalancing_after_neighboring.weight,
             params.unbalancing_after_neighboring.normalization.clone(),
             params.unbalancing_after_neighboring.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::symmetric_handswitches::SymmetricHandswitches::new(
+                &params.symmetric_handswitches.params,
+            )),
+            params.symmetric_handswitches.weight,
+            params.symmetric_handswitches.normalization.clone(),
+            params.symmetric_handswitches.enabled,
         );
         self.bigram_metric(
             Box::new(

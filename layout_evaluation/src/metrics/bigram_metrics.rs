@@ -3,7 +3,7 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
-pub mod asymmetric_bigrams;
+pub mod symmetric_handswitches;
 pub mod finger_repeats;
 pub mod finger_repeats_lateral;
 pub mod finger_repeats_top_bottom;
