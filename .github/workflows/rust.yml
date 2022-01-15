@@ -74,4 +74,4 @@ jobs:
           heroku_app_name: "keyboard-layout-optimizer"
           heroku_email: "dario.goetz@googlemail.com"
 
-      - run: curl -X 'POST' -d "surfjudge2000" https://keyboard-layout-optimizer.herokuapp.com/api/reeval
+      - run: curl -X 'POST' -d "${{secrets.HEROKU_APP_PASSWORD}}" https://keyboard-layout-optimizer.herokuapp.com/api/reeval
