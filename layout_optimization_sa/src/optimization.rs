@@ -305,7 +305,6 @@ pub fn optimize(
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
     let rng = Xoshiro256PlusPlus::from_entropy();
-
     let solver = SimulatedAnnealing::new(init_temp, rng)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
@@ -315,14 +314,15 @@ pub fn optimize(
         /////////////////////////
         // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
         .stall_accepted(params.stall_accepted);
+
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
     let mut executor = Executor::new(problem, solver, init_layout)
         .timer(false)
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters);
     match custom_observer {
+        // If a custom Observer was supplied, only use that Observer.
         Some(observer) => {
-            // If a custom Observer was supplied, only use that Observer.
             executor = executor.add_observer(observer, ObserverMode::Always);
         }
         // If no custom Observer was supplied, use the default setup.
