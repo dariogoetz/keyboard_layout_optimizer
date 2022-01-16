@@ -55,8 +55,20 @@
 /******/ 		"../pkg/evolve_keyboard_layout_wasm_bg.wasm": function() {
 /******/ 			return {
 /******/ 				"./evolve_keyboard_layout_wasm_bg.js": {
+/******/ 					"__wbindgen_object_drop_ref": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_drop_ref"](p0i32);
+/******/ 					},
+/******/ 					"__wbindgen_bigint_new": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_bigint_new"](p0i32,p1i32);
+/******/ 					},
 /******/ 					"__wbindgen_string_new": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_string_new"](p0i32,p1i32);
+/******/ 					},
+/******/ 					"__wbindgen_number_new": function(p0f64) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_number_new"](p0f64);
+/******/ 					},
+/******/ 					"__wbindgen_object_clone_ref": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_clone_ref"](p0i32);
 /******/ 					},
 /******/ 					"__wbindgen_json_parse": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_json_parse"](p0i32,p1i32);
@@ -70,8 +82,8 @@
 /******/ 					"__wbg_error_09919627ac0992f5": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_error_09919627ac0992f5"](p0i32,p1i32);
 /******/ 					},
-/******/ 					"__wbindgen_object_drop_ref": function(p0i32) {
-/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_drop_ref"](p0i32);
+/******/ 					"__wbg_now_559193109055ebad": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_now_559193109055ebad"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_getRandomValues_3e46aa268da0fed1": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_getRandomValues_3e46aa268da0fed1"](p0i32,p1i32);
@@ -106,8 +118,17 @@
 /******/ 					"__wbg_newnoargs_be86524d73f67598": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_newnoargs_be86524d73f67598"](p0i32,p1i32);
 /******/ 					},
+/******/ 					"__wbg_get_4d0f21c2f823742e": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_get_4d0f21c2f823742e"](p0i32,p1i32);
+/******/ 					},
 /******/ 					"__wbg_call_888d259a5fefc347": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_888d259a5fefc347"](p0i32,p1i32);
+/******/ 					},
+/******/ 					"__wbg_call_346669c262382ad7": function(p0i32,p1i32,p2i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_346669c262382ad7"](p0i32,p1i32,p2i32);
+/******/ 					},
+/******/ 					"__wbg_call_8a893cac80deeb51": function(p0i32,p1i32,p2i32,p3i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_8a893cac80deeb51"](p0i32,p1i32,p2i32,p3i32);
 /******/ 					},
 /******/ 					"__wbg_getTime_10d33f4f2959e5dd": function(p0i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_getTime_10d33f4f2959e5dd"](p0i32);
@@ -151,8 +172,8 @@
 /******/ 					"__wbg_subarray_8b658422a224f479": function(p0i32,p1i32,p2i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_subarray_8b658422a224f479"](p0i32,p1i32,p2i32);
 /******/ 					},
-/******/ 					"__wbindgen_object_clone_ref": function(p0i32) {
-/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_clone_ref"](p0i32);
+/******/ 					"__wbindgen_debug_string": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_debug_string"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_throw": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_throw"](p0i32,p1i32);
@@ -264,7 +285,7 @@
 /******/ 				promises.push(installedWasmModuleData);
 /******/ 			else {
 /******/ 				var importObject = wasmImportObjects[wasmModuleId]();
-/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/evolve_keyboard_layout_wasm_bg.wasm":"755369e5d0d2049ec9fe"}[wasmModuleId] + ".module.wasm");
+/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/evolve_keyboard_layout_wasm_bg.wasm":"99a13ec5cff62edfa590"}[wasmModuleId] + ".module.wasm");
 /******/ 				var promise;
 /******/ 				if(importObject instanceof Promise && typeof WebAssembly.compileStreaming === 'function') {
 /******/ 					promise = Promise.all([WebAssembly.compileStreaming(req), importObject]).then(function(items) {

@@ -25,8 +25,20 @@
 /******/ 		"../pkg/evolve_keyboard_layout_wasm_bg.wasm": function() {
 /******/ 			return {
 /******/ 				"./evolve_keyboard_layout_wasm_bg.js": {
+/******/ 					"__wbindgen_object_drop_ref": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_drop_ref"](p0i32);
+/******/ 					},
+/******/ 					"__wbindgen_bigint_new": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_bigint_new"](p0i32,p1i32);
+/******/ 					},
 /******/ 					"__wbindgen_string_new": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_string_new"](p0i32,p1i32);
+/******/ 					},
+/******/ 					"__wbindgen_number_new": function(p0f64) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_number_new"](p0f64);
+/******/ 					},
+/******/ 					"__wbindgen_object_clone_ref": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_clone_ref"](p0i32);
 /******/ 					},
 /******/ 					"__wbindgen_json_parse": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_json_parse"](p0i32,p1i32);
@@ -40,8 +52,8 @@
 /******/ 					"__wbg_error_09919627ac0992f5": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_error_09919627ac0992f5"](p0i32,p1i32);
 /******/ 					},
-/******/ 					"__wbindgen_object_drop_ref": function(p0i32) {
-/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_drop_ref"](p0i32);
+/******/ 					"__wbg_now_559193109055ebad": function(p0i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_now_559193109055ebad"](p0i32);
 /******/ 					},
 /******/ 					"__wbg_getRandomValues_3e46aa268da0fed1": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_getRandomValues_3e46aa268da0fed1"](p0i32,p1i32);
@@ -76,8 +88,17 @@
 /******/ 					"__wbg_newnoargs_be86524d73f67598": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_newnoargs_be86524d73f67598"](p0i32,p1i32);
 /******/ 					},
+/******/ 					"__wbg_get_4d0f21c2f823742e": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_get_4d0f21c2f823742e"](p0i32,p1i32);
+/******/ 					},
 /******/ 					"__wbg_call_888d259a5fefc347": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_888d259a5fefc347"](p0i32,p1i32);
+/******/ 					},
+/******/ 					"__wbg_call_346669c262382ad7": function(p0i32,p1i32,p2i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_346669c262382ad7"](p0i32,p1i32,p2i32);
+/******/ 					},
+/******/ 					"__wbg_call_8a893cac80deeb51": function(p0i32,p1i32,p2i32,p3i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_call_8a893cac80deeb51"](p0i32,p1i32,p2i32,p3i32);
 /******/ 					},
 /******/ 					"__wbg_getTime_10d33f4f2959e5dd": function(p0i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_getTime_10d33f4f2959e5dd"](p0i32);
@@ -121,8 +142,8 @@
 /******/ 					"__wbg_subarray_8b658422a224f479": function(p0i32,p1i32,p2i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbg_subarray_8b658422a224f479"](p0i32,p1i32,p2i32);
 /******/ 					},
-/******/ 					"__wbindgen_object_clone_ref": function(p0i32) {
-/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_object_clone_ref"](p0i32);
+/******/ 					"__wbindgen_debug_string": function(p0i32,p1i32) {
+/******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_debug_string"](p0i32,p1i32);
 /******/ 					},
 /******/ 					"__wbindgen_throw": function(p0i32,p1i32) {
 /******/ 						return installedModules["../pkg/evolve_keyboard_layout_wasm_bg.js"].exports["__wbindgen_throw"](p0i32,p1i32);
@@ -185,7 +206,7 @@
 /******/ 				promises.push(installedWasmModuleData);
 /******/ 			else {
 /******/ 				var importObject = wasmImportObjects[wasmModuleId]();
-/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/evolve_keyboard_layout_wasm_bg.wasm":"755369e5d0d2049ec9fe"}[wasmModuleId] + ".module.wasm");
+/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/evolve_keyboard_layout_wasm_bg.wasm":"99a13ec5cff62edfa590"}[wasmModuleId] + ".module.wasm");
 /******/ 				var promise;
 /******/ 				if(importObject instanceof Promise && typeof WebAssembly.compileStreaming === 'function') {
 /******/ 					promise = Promise.all([WebAssembly.compileStreaming(req), importObject]).then(function(items) {
@@ -309,7 +330,7 @@ eval("var map = {\n\t\"./arne/3-grams.txt\": [\n\t\t\"../../corpus/arne/3-grams.
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-eval("importScripts(\"https://unpkg.com/comlink/dist/umd/comlink.js\");\n\nconst evaluator = {\n\n    wasm: null,\n    ngramProvider: null,\n    layoutEvaluator: null,\n    layoutOptimizer: null,\n\n    init () {\n        return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! evolve-keyboard-layout-wasm */ \"../pkg/evolve_keyboard_layout_wasm.js\"))\n            .then((wasm) => {\n                this.wasm = wasm\n            })\n    },\n\n    async initNgramProvider (ngramType, evalParams, ngramData) {\n        if (ngramType === 'prepared') {\n            let unigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/1\\\\-grams\\\\.txt$\")(`./${ngramData}/1-grams.txt`)\n                .then((ngrams) => ngrams.default)\n            let bigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/2\\\\-grams\\\\.txt$\")(`./${ngramData}/2-grams.txt`)\n                .then((ngrams) => ngrams.default)\n            let trigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/3\\\\-grams\\\\.txt$\")(`./${ngramData}/3-grams.txt`)\n                .then((ngrams) => ngrams.default)\n\n            this.ngramProvider = this.wasm.NgramProvider.with_frequencies(\n                evalParams,\n                unigrams,\n                bigrams,\n                trigrams\n            )\n        } else if (ngramType === 'from_text') {\n            this.ngramProvider = this.wasm.NgramProvider.with_text(\n                evalParams,\n                ngramData\n            )\n        }\n    },\n\n    initLayoutEvaluator (layoutConfig, evalParams) {\n        this.layoutEvaluator = this.wasm.LayoutEvaluator.new(\n            layoutConfig,\n            evalParams,\n            this.ngramProvider,\n        )\n    },\n\n    initLayoutOptimizer (layout, fixed_chars, optParams) {\n        this.layoutOptimizer = this.wasm.LayoutOptimizer.new(\n            layout,\n            optParams,\n            this.layoutEvaluator,\n            fixed_chars,\n            true,\n        )\n\n        return this.layoutOptimizer.parameters()\n    },\n\n    optimizationStep () {\n        return this.layoutOptimizer.step()\n    },\n\n    evaluateLayout (layout) {\n        let res = this.layoutEvaluator.evaluate(layout)\n        res.layout = layout\n        return res\n    },\n\n    permutableKeys () {\n        return this.layoutEvaluator.permutable_keys()\n    }\n}\n\nComlink.expose(evaluator)\n\n\n\n//# sourceURL=webpack:///./worker.js?");
+eval("importScripts(\"https://unpkg.com/comlink/dist/umd/comlink.js\")\n\nconst evaluator = {\n    wasm: null,\n    ngramProvider: null,\n    layoutEvaluator: null,\n    layoutOptimizer: null,\n\n    init() {\n        return __webpack_require__.e(/*! import() */ 0).then(__webpack_require__.bind(null, /*! evolve-keyboard-layout-wasm */ \"../pkg/evolve_keyboard_layout_wasm.js\"))\n            .then((wasm) => {\n                this.wasm = wasm\n            })\n    },\n\n    async initNgramProvider(ngramType, evalParams, ngramData) {\n        if (ngramType === 'prepared') {\n            let unigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/1\\\\-grams\\\\.txt$\")(`./${ngramData}/1-grams.txt`)\n                .then((ngrams) => ngrams.default)\n            let bigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/2\\\\-grams\\\\.txt$\")(`./${ngramData}/2-grams.txt`)\n                .then((ngrams) => ngrams.default)\n            let trigrams = await __webpack_require__(\"../../corpus lazy recursive ^\\\\.\\\\/.*\\\\/3\\\\-grams\\\\.txt$\")(`./${ngramData}/3-grams.txt`)\n                .then((ngrams) => ngrams.default)\n\n            this.ngramProvider = this.wasm.NgramProvider.with_frequencies(\n                evalParams,\n                unigrams,\n                bigrams,\n                trigrams\n            )\n        } else if (ngramType === 'from_text') {\n            this.ngramProvider = this.wasm.NgramProvider.with_text(\n                evalParams,\n                ngramData\n            )\n        }\n    },\n\n    initLayoutEvaluator(layoutConfig, evalParams) {\n        this.layoutEvaluator = this.wasm.LayoutEvaluator.new(\n            layoutConfig,\n            evalParams,\n            this.ngramProvider,\n        )\n    },\n\n    async saOptimize(layout, fixed_chars, optParamsStr, initCallbacks, setCurrentStepNr, setNewBest) {\n        // Needed to make the callbacks work in Firefox.\n        // In other browsers (for example in Chromium or Midori), this isn't necessary.\n        // In those browsers, the whole function can be turned into a syncronous one.\n        await initCallbacks()\n        this.wasm.sa_optimize(\n            layout,\n            optParamsStr,\n            this.layoutEvaluator,\n            fixed_chars,\n            true,\n            setCurrentStepNr,\n            setNewBest,\n        )\n    },\n\n    initGenLayoutOptimizer(layout, fixed_chars, optParamsStr) {\n        this.layoutOptimizer = this.wasm.LayoutOptimizer.new(\n            layout,\n            optParamsStr,\n            this.layoutEvaluator,\n            fixed_chars,\n            true,\n        )\n\n        return this.layoutOptimizer.parameters()\n    },\n    genOptimizationStep() {\n        return this.layoutOptimizer.step()\n    },\n\n    evaluateLayout(layout) {\n        let res = this.layoutEvaluator.evaluate(layout)\n        res.layout = layout\n        return res\n    },\n\n    permutableKeys() {\n        return this.layoutEvaluator.permutable_keys()\n    },\n}\n\nComlink.expose(evaluator)\n\n\n\n//# sourceURL=webpack:///./worker.js?");
 
 /***/ })
 
