@@ -228,19 +228,19 @@ impl Evaluator {
             params.unbalancing_after_neighboring.enabled,
         );
         self.bigram_metric(
-            Box::new(bigram_metrics::symmetric_handswitches::SymmetricHandswitches::new(
-                &params.symmetric_handswitches.params,
-            )),
+            Box::new(
+                bigram_metrics::symmetric_handswitches::SymmetricHandswitches::new(
+                    &params.symmetric_handswitches.params,
+                ),
+            ),
             params.symmetric_handswitches.weight,
             params.symmetric_handswitches.normalization.clone(),
             params.symmetric_handswitches.enabled,
         );
         self.bigram_metric(
-            Box::new(
-                bigram_metrics::rolls::BigramRolls::new(
-                    &params.bigram_rolls.params,
-                ),
-            ),
+            Box::new(bigram_metrics::rolls::BigramRolls::new(
+                &params.bigram_rolls.params,
+            )),
             params.bigram_rolls.weight,
             params.bigram_rolls.normalization.clone(),
             params.bigram_rolls.enabled,
@@ -286,11 +286,9 @@ impl Evaluator {
             params.trigram_finger_repeats.enabled,
         );
         self.trigram_metric(
-            Box::new(
-                trigram_metrics::rolls::TrigramRolls::new(
-                    &params.trigram_rolls.params,
-                ),
-            ),
+            Box::new(trigram_metrics::rolls::TrigramRolls::new(
+                &params.trigram_rolls.params,
+            )),
             params.trigram_rolls.weight,
             params.trigram_rolls.normalization.clone(),
             params.trigram_rolls.enabled,

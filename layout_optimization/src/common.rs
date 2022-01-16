@@ -1,5 +1,4 @@
-use keyboard_layout::layout::Layout;
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
 use rand::{seq::SliceRandom, thread_rng};
 use rustc_hash::FxHashMap;
 use std::sync::{Arc, Mutex};
@@ -69,7 +68,7 @@ impl PermutationLayoutGenerator {
         let rng = &mut thread_rng();
 
         // Perform nr_switches switches
-        for _ in  0..nr_switches {
+        for _ in 0..nr_switches {
             let mut sw = vec.choose_multiple(rng, 2);
             let sw0 = sw.next().unwrap();
             let sw1 = sw.next().unwrap();
@@ -81,7 +80,6 @@ impl PermutationLayoutGenerator {
         indices
     }
 
-
     pub fn switch_n_keys(&self, permutation: &[usize], n_keys: usize) -> Vec<usize> {
         let mut indices: Vec<usize> = permutation.to_vec();
         let rng = &mut thread_rng();
@@ -92,7 +90,7 @@ impl PermutationLayoutGenerator {
         sw_to.shuffle(rng);
 
         // Perform nr_switches switches
-        for (from, to) in  sw_from.into_iter().zip(sw_to.into_iter()) {
+        for (from, to) in sw_from.into_iter().zip(sw_to.into_iter()) {
             indices[*to] = permutation[*from];
         }
 

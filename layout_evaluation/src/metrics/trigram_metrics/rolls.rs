@@ -2,7 +2,10 @@ use std::collections::HashSet;
 
 use super::TrigramMetric;
 
-use keyboard_layout::{layout::{LayerKey, Layout}, key::Hand};
+use keyboard_layout::{
+    key::Hand,
+    layout::{LayerKey, Layout},
+};
 
 use serde::Deserialize;
 
@@ -13,20 +16,18 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
-    pub exclude_rows: HashSet<isize>
+    pub exclude_rows: HashSet<isize>,
 }
 
 #[derive(Clone, Debug)]
 pub struct TrigramRolls {
     factor_inward: f64,
     factor_outward: f64,
-    exclude_rows: HashSet<isize>
+    exclude_rows: HashSet<isize>,
 }
 
 impl TrigramRolls {
-    pub fn new(
-        params: &Parameters,
-    ) -> Self {
+    pub fn new(params: &Parameters) -> Self {
         Self {
             factor_inward: params.factor_inward,
             factor_outward: params.factor_outward,
@@ -50,14 +51,13 @@ impl TrigramMetric for TrigramRolls {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-
         if k1.key.hand != k2.key.hand || k2.key.hand != k3.key.hand {
-            return Some(0.0)
+            return Some(0.0);
         };
 
         // finger repeats are not considered rolls
         if k1.key.finger == k2.key.finger || k2.key.finger == k3.key.finger {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         let pos1 = k1.key.matrix_position;
@@ -67,13 +67,14 @@ impl TrigramMetric for TrigramRolls {
         // exclude rolls with keys in exclude_rows
         if self.exclude_rows.contains(&pos1.1)
             || self.exclude_rows.contains(&pos2.1)
-            || self.exclude_rows.contains(&pos3.1) {
-            return Some(0.0)
+            || self.exclude_rows.contains(&pos3.1)
+        {
+            return Some(0.0);
         }
 
         // only consider rolls on same row
         if pos1.1 != pos2.1 || pos2.1 != pos3.1 {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         // only allow rolls with keys that are directly next to each others
@@ -91,14 +92,15 @@ impl TrigramMetric for TrigramRolls {
 
         // both bigrams need to have the same direction
         let mut cost = if inward1 && inward2 {
-            - self.factor_inward
+            -self.factor_inward
         } else if outward1 && outward2 {
-            - self.factor_outward
+            -self.factor_outward
         } else {
-            return Some(0.0)
+            return Some(0.0);
         };
 
-        cost /= (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing) * (1.0 + k3.key.unbalancing);
+        cost /=
+            (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing) * (1.0 + k3.key.unbalancing);
 
         // log::info!("trigram roll: {}{}{} -> {:4.3}",
         //     k1.symbol.to_string().escape_debug(),

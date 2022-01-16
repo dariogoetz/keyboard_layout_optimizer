@@ -2,7 +2,10 @@ use std::collections::HashSet;
 
 use super::BigramMetric;
 
-use keyboard_layout::{layout::{LayerKey, Layout}, key::Hand};
+use keyboard_layout::{
+    key::Hand,
+    layout::{LayerKey, Layout},
+};
 
 use serde::Deserialize;
 
@@ -13,20 +16,18 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
-    pub exclude_rows: HashSet<isize>
+    pub exclude_rows: HashSet<isize>,
 }
 
 #[derive(Clone, Debug)]
 pub struct BigramRolls {
     factor_inward: f64,
     factor_outward: f64,
-    exclude_rows: HashSet<isize>
+    exclude_rows: HashSet<isize>,
 }
 
 impl BigramRolls {
-    pub fn new(
-        params: &Parameters,
-    ) -> Self {
+    pub fn new(params: &Parameters) -> Self {
         Self {
             factor_inward: params.factor_inward,
             factor_outward: params.factor_outward,
@@ -49,28 +50,26 @@ impl BigramMetric for BigramRolls {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-
         if k1.key.hand != k2.key.hand {
-            return Some(0.0)
+            return Some(0.0);
         };
 
         // finger repeats are not considered rolls
         if k1.key.finger == k2.key.finger {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         let pos1 = k1.key.matrix_position;
         let pos2 = k2.key.matrix_position;
 
         // exclude rolls with keys in exclude_rows
-        if self.exclude_rows.contains(&pos1.1)
-            || self.exclude_rows.contains(&pos2.1) {
-            return Some(0.0)
+        if self.exclude_rows.contains(&pos1.1) || self.exclude_rows.contains(&pos2.1) {
+            return Some(0.0);
         }
 
         // only consider rolls on same row
         if pos1.1 != pos2.1 {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         let inward = (k1.key.hand == Hand::Left && pos1.0 < pos2.0)
@@ -81,11 +80,11 @@ impl BigramMetric for BigramRolls {
 
         // both bigrams need to have the same direction
         let mut cost = if inward {
-            - self.factor_inward
+            -self.factor_inward
         } else if outward {
-            - self.factor_outward
+            -self.factor_outward
         } else {
-            return Some(0.0)
+            return Some(0.0);
         };
 
         cost /= (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing);

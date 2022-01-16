@@ -3,7 +3,6 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
-pub mod symmetric_handswitches;
 pub mod finger_repeats;
 pub mod finger_repeats_lateral;
 pub mod finger_repeats_top_bottom;
@@ -11,8 +10,9 @@ pub mod line_changes;
 pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
-pub mod unbalancing_after_neighboring;
 pub mod rolls;
+pub mod symmetric_handswitches;
+pub mod unbalancing_after_neighboring;
 
 const SHOW_WORST: bool = true;
 const N_WORST: usize = 3;
@@ -58,7 +58,8 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
 
                     worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     if !bigram.0.is_fixed && !bigram.1.is_fixed {
-                        worst_nonfixed.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
+                        worst_nonfixed
+                            .push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     }
 
                     if worst.len() > N_WORST {

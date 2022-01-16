@@ -1,5 +1,4 @@
-use keyboard_layout::layout::Layout;
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
 use layout_evaluation::evaluation::Evaluator;
 
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
@@ -73,7 +72,9 @@ impl Context for FitnessCalc {
 
         // only permutate indices of chars that are not fixed
         let indices = self.layout_generator.get_permutable_indices();
-        let permutated_indices = self.layout_generator.perform_n_swaps(&indices, self.n_switches);
+        let permutated_indices = self
+            .layout_generator
+            .perform_n_swaps(&indices, self.n_switches);
 
         indices
             .iter()

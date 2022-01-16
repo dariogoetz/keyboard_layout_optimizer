@@ -1,5 +1,4 @@
-use keyboard_layout::layout::Layout;
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
 use layout_evaluation::evaluation::Evaluator;
 
 use layout_optimization::common::{Cache, PermutationLayoutGenerator};
