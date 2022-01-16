@@ -142,16 +142,14 @@ fn main() {
             let process_id = format!("Process {:>3}", i);
             if start_from_layout {
                 log::info!(
-                    "{} Starting optimization {} from {}",
+                    "{} Starting optimization from {}",
                     format!("{}:", process_id).yellow().bold(),
-                    i,
                     fix_from
                 );
             } else {
                 log::info!(
-                    "{} Starting optimization {}",
+                    "{} Starting optimization",
                     format!("{}:", process_id).yellow().bold(),
-                    i
                 );
             }
 

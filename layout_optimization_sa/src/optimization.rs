@@ -284,14 +284,21 @@ pub fn optimize(
     let init_temp = match params.init_temp {
         Some(t) => t,
         None => {
-            log::info!("{}: Calculating initial temperature.", process_name);
+            log::info!(
+                "{} Calculating initial temperature",
+                format!("{}:", process_name).yellow().bold(),
+            );
             let init_temp = get_cost_sd(
                 &init_layout,
                 Arc::new(evaluator.clone()),
                 &pm,
                 params.key_switches,
             );
-            log::info!("{}: Initial temperature = {}", process_name, init_temp);
+            log::info!(
+                "{} Initial temperature = {}",
+                format!("{}:", process_name).yellow().bold(),
+                init_temp,
+            );
             init_temp
         }
     };
@@ -349,10 +356,10 @@ pub fn optimize(
     }
 
     log::info!(
-        "{}: Starting optimization with: initial_temperature: {:.2}, {:?}",
-        process_name,
+        "{} Starting optimization with: initial_temperature: {:.2}, {:?}",
+        format!("{}:", process_name).yellow().bold(),
         init_temp,
-        params
+        params,
     );
     let res = executor.run().unwrap();
 
