@@ -1,8 +1,8 @@
 [package]
-name = "evolve_keyboard_layout_wasm"
-version = "0.1.0"
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
+name = "evolve_keyboard_layout_wasm"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -11,15 +11,19 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-keyboard_layout = { path="../keyboard_layout" }
-layout_evaluation = { path="../layout_evaluation" }
-layout_optimization= { path="../layout_optimization" }
-layout_optimization_genevo = { path="../layout_optimization_genevo" }
+keyboard_layout = { path = "../keyboard_layout" }
+layout_evaluation = { path = "../layout_evaluation" }
+layout_optimization = { path = "../layout_optimization" }
+layout_optimization_genevo = { path = "../layout_optimization_genevo" }
+layout_optimization_sa = { path = "../layout_optimization_sa" }
 
-serde = { version = "1.0", features= ["derive"] }
+instant = { version = "0.1.12", features = ["wasm-bindgen"] }
+js-sys = "*"
+serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "*"
 wasm-bindgen = { version = "*", features = ["serde-serialize"] }
 
+argmin = "0.5.0"
 genevo = { version = "0.7.0", features = ["wasm-bindgen"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

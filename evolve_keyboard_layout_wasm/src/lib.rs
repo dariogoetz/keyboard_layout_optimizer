@@ -1,13 +1,13 @@
 mod utils;
 
+use argmin::prelude::{ArgminKV, Error, IterState, Observe};
+use instant::Instant;
 use serde::Serialize;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{
-    config::LayoutConfig,
-    keyboard::Keyboard,
-    layout_generator::NeoLayoutGenerator,
+    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::NeoLayoutGenerator,
 };
 
 use layout_evaluation::{
@@ -18,8 +18,9 @@ use layout_evaluation::{
     results::EvaluationResult,
 };
 
-use layout_optimization::common;
-use layout_optimization_genevo::optimization;
+use layout_optimization::common::{Cache, PermutationLayoutGenerator};
+use layout_optimization_genevo::optimization as gen_optimization;
+use layout_optimization_sa::optimization as sa_optimization;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -30,6 +31,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern "C" {
     fn alert(s: &str);
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -197,10 +200,10 @@ impl LayoutEvaluator {
 #[wasm_bindgen]
 pub struct LayoutOptimizer {
     evaluator: Evaluator,
-    simulator: optimization::MySimulator,
-    permutation_layout_generator: common::PermutationLayoutGenerator,
+    simulator: gen_optimization::MySimulator,
+    permutation_layout_generator: PermutationLayoutGenerator,
     all_time_best: Option<(usize, Vec<usize>)>,
-    parameters: optimization::Parameters,
+    parameters: gen_optimization::Parameters,
 }
 
 #[wasm_bindgen]
@@ -214,10 +217,11 @@ impl LayoutOptimizer {
     ) -> Result<LayoutOptimizer, JsValue> {
         utils::set_panic_hook();
 
-        let parameters: optimization::Parameters = serde_yaml::from_str(optimization_params_str)
-            .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
+        let parameters: gen_optimization::Parameters =
+            serde_yaml::from_str(optimization_params_str)
+                .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
-        let (simulator, permutation_layout_generator) = optimization::init_optimization(
+        let (simulator, permutation_layout_generator) = gen_optimization::init_optimization(
             &parameters,
             &layout_evaluator.evaluator,
             layout_str,
@@ -286,4 +290,98 @@ impl LayoutOptimizer {
             }
         }
     }
+}
+
+/// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
+struct SaObserver {
+    layout_generator: PermutationLayoutGenerator,
+    last_update_call: Instant,
+    update_callback: js_sys::Function,
+    new_best_callback: js_sys::Function,
+}
+
+impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
+    fn observe_iter(
+        &mut self,
+        state: &IterState<sa_optimization::AnnealingStruct>,
+        kv: &ArgminKV,
+    ) -> Result<(), Error> {
+        if (state.iter > 0) && (self.last_update_call.elapsed().as_millis() > 500) {
+            self.last_update_call = Instant::now();
+            let this = JsValue::null();
+            let iter_js = JsValue::from(state.iter);
+            let mut t_string = String::from("Not found.");
+            for (key, value) in &kv.kv {
+                if *key == "t" {
+                    let t_num: f32 = value.parse().unwrap();
+                    let t_long_str = format!("{:.3}", t_num);
+                    t_string = format!("{:.5}", t_long_str);
+                }
+            }
+            let t_js = JsValue::from(t_string);
+            let _ = self.update_callback.call2(&this, &iter_js, &t_js);
+        }
+        if state.is_best() && (&state.param != &state.prev_best_param) {
+            let this = JsValue::null();
+            let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
+            let cost_js = JsValue::from(state.cost);
+            let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
+        }
+        Ok(())
+    }
+}
+
+#[wasm_bindgen]
+pub fn sa_optimize(
+    layout_str: &str,
+    optimization_params_str: &str,
+    layout_evaluator: &LayoutEvaluator,
+    fixed_characters: &str,
+    start_with_layout: bool,
+    update_callback: js_sys::Function,
+    new_best_callback: js_sys::Function,
+) {
+    let mut parameters: sa_optimization::Parameters = serde_yaml::from_str(optimization_params_str)
+        .map_err(|e| format!("Could not read optimization params: {:?}", e))
+        .unwrap();
+    // Make sure the initial temperature is greater than zero.
+    parameters.correct_init_temp();
+
+    // Display the maximum amount of iterations on the website.
+    let this = JsValue::null();
+    let zero = JsValue::from(0);
+    let init_temp = JsValue::from(match parameters.init_temp {
+        Some(t) => {
+            let t_long_str = format!("{:.3}", t);
+            format!("{:.5}", t_long_str)
+        }
+        None => "Calculating...".to_string(),
+    });
+    let _ = update_callback.call2(&this, &zero, &init_temp);
+
+    let observer = SaObserver {
+        layout_generator: PermutationLayoutGenerator::new(
+            layout_str,
+            fixed_characters,
+            &layout_evaluator.layout_generator,
+        ),
+        last_update_call: Instant::now(),
+        update_callback: update_callback.clone(),
+        new_best_callback,
+    };
+
+    let _: Layout = sa_optimization::optimize(
+        /* Thread_name: */ "Web optimization",
+        &parameters,
+        layout_str,
+        fixed_characters,
+        &layout_evaluator.layout_generator,
+        start_with_layout,
+        &layout_evaluator.evaluator,
+        /* log_everything: */ false,
+        Some(Cache::new()),
+        Some(Box::new(observer)),
+    );
+    let minus_one = JsValue::from(-1);
+    let _ = update_callback.call1(&this, &minus_one);
 }

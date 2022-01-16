@@ -110,11 +110,17 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
-        .expect(&format!(
+    let mut optimization_params =
+        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
+    if options.greedy {
+        optimization_params.init_temp = Some(f64::MIN_POSITIVE);
+    } else if options.init_temp.is_some() {
+        optimization_params.init_temp = options.init_temp;
+    }
+    optimization_params.correct_init_temp();
 
     let mut layouts: Vec<String> = options.start_layouts.to_vec();
     if layouts.is_empty() {
@@ -123,23 +129,6 @@ fn main() {
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
 
     let start_from_layout = !options.start_layouts.is_empty();
-
-    let init_temp: Option<f64>;
-    if options.greedy {
-        init_temp = Some(f64::MIN_POSITIVE);
-    } else {
-        init_temp = match options.init_temp {
-            Some(t) => {
-                if t > 0.0 {
-                    Some(t)
-                } else {
-                    println!("Please input an initial-temperature that is bigger than 0.");
-                    None
-                }
-            }
-            None => None,
-        };
-    }
 
     let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
@@ -175,9 +164,9 @@ fn main() {
                 &layout_generator,
                 start_from_layout,
                 &evaluator,
-                init_temp,
                 options.log_everything,
                 cache.clone(),
+                None,
             );
 
             // Plot some information regarding the layout.
