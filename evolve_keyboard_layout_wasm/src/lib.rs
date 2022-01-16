@@ -304,13 +304,22 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
     fn observe_iter(
         &mut self,
         state: &IterState<sa_optimization::AnnealingStruct>,
-        _kv: &ArgminKV,
+        kv: &ArgminKV,
     ) -> Result<(), Error> {
         if (state.iter > 0) && (self.last_update_call.elapsed().as_millis() > 500) {
-            let this = JsValue::null();
             self.last_update_call = Instant::now();
+            let this = JsValue::null();
             let iter_js = JsValue::from(state.iter);
-            let _ = self.update_callback.call1(&this, &iter_js);
+            let mut t_string = String::from("Not found.");
+            for (key, value) in &kv.kv {
+                if *key == "t" {
+                    let t_num: f32 = value.parse().unwrap();
+                    let t_long_str = format!("{:.3}", t_num);
+                    t_string = format!("{:.5}", t_long_str);
+                }
+            }
+            let t_js = JsValue::from(t_string);
+            let _ = self.update_callback.call2(&this, &iter_js, &t_js);
         }
         if state.is_best() && (&state.param != &state.prev_best_param) {
             let this = JsValue::null();
@@ -329,7 +338,6 @@ pub fn sa_optimize(
     layout_evaluator: &LayoutEvaluator,
     fixed_characters: &str,
     start_with_layout: bool,
-    max_iters_callback: js_sys::Function,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
 ) {
@@ -341,10 +349,15 @@ pub fn sa_optimize(
 
     // Display the maximum amount of iterations on the website.
     let this = JsValue::null();
-    let max_iters_js = JsValue::from(parameters.max_iters);
-    let _ = max_iters_callback.call1(&this, &max_iters_js);
     let one = JsValue::from(1);
-    let _ = update_callback.call1(&this, &one);
+    let init_temp = JsValue::from(match parameters.init_temp {
+        Some(t) => {
+            let t_long_str = format!("{:.3}", t);
+            format!("{:.5}", t_long_str)
+        }
+        None => "Calculating...".to_string(),
+    });
+    let _ = update_callback.call2(&this, &one, &init_temp);
 
     let observer = SaObserver {
         layout_generator: PermutationLayoutGenerator::new(

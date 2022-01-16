@@ -87,7 +87,10 @@ Vue.component('evaluator-app', {
         <b-button :disabled="optStep > 0 || loading > 0" @click="startOptimization" variant="secondary">
           <div v-if="optStep > 0 || loading > 0">
             <b-spinner small></b-spinner>
-            <span v-if="optStep > 0">Iteration {{optStep}}/{{optTotalSteps}}</span>
+            <span v-if="optStep > 0">
+                <span v-if="optMode==='simulated_annealing'">Iteration {{optStep}} // {{temperatureStr}}°</span>
+                <span v-if="optMode==='genevo'">Iteration {{optStep}}/{{optTotalSteps}}</span>
+            </span>
             <span v-else>Loading</span>
           </div>
           <div v-else>Optimize</div>
@@ -174,6 +177,7 @@ Vue.component('evaluator-app', {
             layoutConfigs,
             loading: 1,
             optStep: 0,
+            temperatureStr: "",
             optTotalSteps: 0,
             optFixed: ",.",
             optCancel: false,
@@ -464,18 +468,15 @@ Vue.component('evaluator-app', {
                 this.optFixed,
                 this.currentOptParams,
                 Comlink.proxy(() => { }),
-                Comlink.proxy(this.setOptTotalSteps),
-                Comlink.proxy(this.setOptStep),
+                Comlink.proxy(this.updateInfo),
                 Comlink.proxy(this.setNewBest),
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.evaluateInput();
         },
-        setOptTotalSteps(maxStepNr) {
-            this.optTotalSteps = maxStepNr
-        },
-        setOptStep(stepNr) {
+        updateInfo(stepNr, tStr) {
             this.optStep = stepNr
+            this.temperatureStr = tStr
         },
         setNewBest(layout, cost) {
             this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "primary" })
