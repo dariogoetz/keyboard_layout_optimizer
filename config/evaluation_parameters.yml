@@ -201,18 +201,18 @@ metrics:
         # all combinations with pinky will be added automatically
         #
         # symmetric ones will be added automatically
-        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2
-        [[3, 1], [2, 3]]: 1
-        [[3, 2], [2, 3]]: 0.3
-        [[4, 2], [3, 3]]: 0.2
-        [[2, 1], [3, 3]]: 0.2
-        [[2, 1], [4, 3]]: 0.1
+        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2 (not in row 3)
+        [[3, 1], [2, 3]]: 1      # QWERTZ: wy
+        [[3, 2], [2, 3]]: 0.3    # QWERTZ: sy
+        [[4, 2], [3, 3]]: 0.2    # QWERTZ: dx
+        [[2, 1], [3, 3]]: 0.2    # QWERTZ: qx
+        [[2, 1], [4, 3]]: 0.1    # QWERTZ: qc
 
-        [[11, 3], [7, 1]]: 0.1
-        [[2, 3], [6, 1]]: 0.1
+        [[11, 3], [7, 1]]: 0.1   # QWERTZ: -z
+        [[2, 3], [6, 1]]: 0.1    # QWERTZ: yt
 
-        [[2, 3], [5, 3]]: -0.01
-        [[8, 3], [11, 3]]: -0.01
+        [[2, 3], [5, 3]]: -0.01  # QWERTZ: yv
+        [[8, 3], [11, 3]]: -0.01 # QWERTZ: m-
 
   # Depending on which fingers of the same hand are used to hit the keys of a bigram, costs are
   # counted.
