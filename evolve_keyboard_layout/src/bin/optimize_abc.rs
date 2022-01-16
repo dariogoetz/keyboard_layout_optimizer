@@ -59,11 +59,13 @@ fn main() {
         !options.no_cache_results,
     ) {
         let layout = new_best.solution;
-        println!("{}", layout.plot());
-        println!("{}", layout.plot_compact());
-
         let evaluation_result = evaluator.evaluate_layout(&layout);
-        println!("{}", evaluation_result);
+        println!(
+            "{}\n{}\n{}",
+            layout.plot(),
+            layout.plot_compact(),
+            evaluation_result
+        );
 
         // Log solution to file.
         if let Some(filename) = &options.append_solutions_to {
