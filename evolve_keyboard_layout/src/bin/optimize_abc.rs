@@ -1,3 +1,4 @@
+use colored::Colorize;
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
@@ -59,11 +60,15 @@ fn main() {
         !options.no_cache_results,
     ) {
         let layout = new_best.solution;
-        println!("{}", layout.plot());
-        println!("{}", layout.plot_compact());
-
         let evaluation_result = evaluator.evaluate_layout(&layout);
-        println!("{}", evaluation_result);
+        println!(
+            "{}\n\n{}\n\n{}\n{}\n{}\n",
+            "New best layout:".yellow().bold(),
+            layout,
+            layout.plot_compact(),
+            layout.plot(),
+            evaluation_result
+        );
 
         // Log solution to file.
         if let Some(filename) = &options.append_solutions_to {
