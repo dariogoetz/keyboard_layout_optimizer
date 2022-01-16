@@ -16,6 +16,11 @@ const LAYOUT_CONFIGS = {
     crkbd: config_crkbd,
 }
 
+const OPTIMIZATION_ALGORITHM_PARAMS = {
+    "genevo": gen_opt_params,
+    "simulated_annealing": sa_opt_params,
+}
+
 const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 
 const NGRAMS = [
@@ -114,8 +119,7 @@ Vue.component('evaluator-app', {
                 <label class="mr-sm-2">Fixed Keys</label>
                 <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
               </b-form>
-              <config-file v-if="optMode==='simulated_annealing'" :initial-content="saOptParamsStr" @saved="updateOptParams"></config-file>
-              <config-file v-if="optMode==='genevo'" :initial-content="genOptParamsStr" @saved="updateOptParams"></config-file>
+              <config-file :initial-content="currentOptParams" @saved="updateOptParams">
             </b-tab>
 
           </b-tabs>
@@ -149,6 +153,7 @@ Vue.component('evaluator-app', {
     data() {
         // LAYOUT_CONFIGS is defined in "vue-components.js"
         let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
+        let optParams = Object.assign({}, OPTIMIZATION_ALGORITHM_PARAMS);
         return {
             details: [],
             inputLayoutRaw: null,
@@ -164,8 +169,7 @@ Vue.component('evaluator-app', {
             evalParamsStr: null,
             optMode: null,
             permutableKeys: null,
-            genOptParamsStr: null,
-            saOptParamsStr: null,
+            optParams,
             selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
@@ -191,6 +195,10 @@ Vue.component('evaluator-app', {
 
         layoutConfig() {
             return this.layoutConfigs[this.selectedLayoutConfig]
+        },
+
+        currentOptParams() {
+            return this.optParams[this.optMode]
         },
 
         invalidInputFeedback() {
@@ -243,8 +251,6 @@ Vue.component('evaluator-app', {
 
     async created() {
         this.evalParamsStr = eval_params
-        this.genOptParamsStr = gen_opt_params
-        this.saOptParamsStr = sa_opt_params
 
         this.wasm = await import("evolve-keyboard-layout-wasm")
         this.createWorkers();
@@ -376,15 +382,8 @@ Vue.component('evaluator-app', {
         },
 
         updateOptParams(newOptParamsStr) {
-            if (this.optMode === "simulated_annealing") {
-                this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
-                this.saOptParamsStr = newOptParamsStr;
-            } else if (this.optMode === "genevo") {
-                this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
-                this.genOptParamsStr = newOptParamsStr;
-            } else {
-                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
-            }
+            this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
+            this.optParams[this.optMode] = newOptParamsStr;
         },
 
         async updateNgramProviderParams(ngramType, ngramData) {
@@ -463,7 +462,7 @@ Vue.component('evaluator-app', {
             await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
-                this.saOptParamsStr,
+                this.currentOptParams,
                 Comlink.proxy(() => { }),
                 Comlink.proxy(this.setOptTotalSteps),
                 Comlink.proxy(this.setOptStep),
@@ -495,7 +494,7 @@ Vue.component('evaluator-app', {
             const optParams = await this.worker.initGenLayoutOptimizer(
                 this.inputLayout,
                 this.optFixed,
-                this.genOptParamsStr
+                this.currentOptParams
             )
             this.optTotalSteps = optParams.generation_limit
             this.optStep = 1
