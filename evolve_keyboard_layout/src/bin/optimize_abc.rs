@@ -1,3 +1,4 @@
+use colored::Colorize;
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
@@ -61,9 +62,11 @@ fn main() {
         let layout = new_best.solution;
         let evaluation_result = evaluator.evaluate_layout(&layout);
         println!(
-            "{}\n{}\n{}",
-            layout.plot(),
+            "{}\n\n{}\n\n{}\n{}\n{}\n",
+            "New best layout:".yellow().bold(),
+            layout,
             layout.plot_compact(),
+            layout.plot(),
             evaluation_result
         );
 
