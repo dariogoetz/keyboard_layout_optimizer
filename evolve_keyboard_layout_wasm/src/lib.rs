@@ -349,7 +349,7 @@ pub fn sa_optimize(
 
     // Display the maximum amount of iterations on the website.
     let this = JsValue::null();
-    let one = JsValue::from(1);
+    let zero = JsValue::from(0);
     let init_temp = JsValue::from(match parameters.init_temp {
         Some(t) => {
             let t_long_str = format!("{:.3}", t);
@@ -357,7 +357,7 @@ pub fn sa_optimize(
         }
         None => "Calculating...".to_string(),
     });
-    let _ = update_callback.call2(&this, &one, &init_temp);
+    let _ = update_callback.call2(&this, &zero, &init_temp);
 
     let observer = SaObserver {
         layout_generator: PermutationLayoutGenerator::new(
@@ -382,6 +382,6 @@ pub fn sa_optimize(
         Some(Cache::new()),
         Some(Box::new(observer)),
     );
-    let zero = JsValue::from(0);
-    let _ = update_callback.call1(&this, &zero);
+    let minus_one = JsValue::from(-1);
+    let _ = update_callback.call1(&this, &minus_one);
 }

@@ -84,10 +84,10 @@ Vue.component('evaluator-app', {
       </b-button>
 
       <b-button-group class="float-right">
-        <b-button :disabled="optStep > 0 || loading > 0" @click="startOptimization" variant="secondary">
-          <div v-if="optStep > 0 || loading > 0">
+        <b-button :disabled="optStep >= 0 || loading > 0" @click="startOptimization" variant="secondary">
+          <div v-if="optStep >= 0 || loading > 0">
             <b-spinner small></b-spinner>
-            <span v-if="optStep > 0">
+            <span v-if="optStep >= 0">
                 <span v-if="optMode==='simulated_annealing'">Iteration {{optStep}} // {{temperatureStr}}°</span>
                 <span v-if="optMode==='genevo'">Iteration {{optStep}}/{{optTotalSteps}}</span>
             </span>
@@ -95,14 +95,14 @@ Vue.component('evaluator-app', {
           </div>
           <div v-else>Optimize</div>
         </b-button>
-        <b-button v-if="optStep > 0" @click="stopOptimization" variant="danger"><b-icon-x-circle-fill /></b-button>
+        <b-button v-if="optStep >= 0" @click="stopOptimization" variant="danger"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
 
     </b-col>
 
     <b-col xl="8" lg="6">
       <h2>Settings</h2>
-        <b-overlay :show="optStep > 0" style="height: 420px">
+        <b-overlay :show="optStep >= 0" style="height: 420px">
           <b-tabs>
             <b-tab title="Evaluation">
               <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
@@ -176,7 +176,7 @@ Vue.component('evaluator-app', {
             selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
-            optStep: 0,
+            optStep: -1,
             temperatureStr: "",
             optTotalSteps: 0,
             optFixed: ",.",
@@ -438,7 +438,7 @@ Vue.component('evaluator-app', {
                 await this.evaluate(this.inputLayout)
                 this.showInputValidState = false
             } catch (err) {
-                this.optStep = 0
+                this.optStep = -1
                 this.optCancel = false
                 return
             }
@@ -487,7 +487,7 @@ Vue.component('evaluator-app', {
             this.rawWorker.terminate()
             this.createWorkers().then((_data) => {
                 this.$bvToast.toast("Optimization finished", { variant: "primary" });
-                this.optStep = 0;
+                this.optStep = -1;
             })
         },
 
@@ -514,7 +514,7 @@ Vue.component('evaluator-app', {
             } while (res !== null && !this.optCancel)
 
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
-            this.optStep = 0
+            this.optStep = -1
             this.optCancel = false
             this.evaluateInput();
         },
