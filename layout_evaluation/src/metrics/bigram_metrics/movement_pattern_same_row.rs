@@ -10,36 +10,36 @@ use keyboard_layout::{
 use serde::Deserialize;
 
 #[derive(Copy, Clone, Deserialize, Debug)]
-pub struct FingerSwitchFactors {
+pub struct FingerSwitchCost {
     pub from: (Hand, Finger),
     pub to: (Hand, Finger),
-    pub factor: f64,
+    pub cost: f64,
 }
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     /// Rows to exclude for finger rolls
     pub exclude_rows: HashSet<isize>,
-    /// Finger-specific factors
-    pub finger_switch_factors: Vec<FingerSwitchFactors>,
+    /// Finger-specific costs
+    pub finger_switch_costs: Vec<FingerSwitchCost>,
 }
 
 #[derive(Clone, Debug)]
 pub struct MovementPatternSameRow {
     exclude_rows: HashSet<isize>,
-    finger_switch_factors: HandFingerMap<HandFingerMap<f64>>,
+    finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
 }
 
 impl MovementPatternSameRow {
     pub fn new(params: &Parameters) -> Self {
-        let mut finger_switch_factors = HandFingerMap::with_default(HandFingerMap::with_default(0.0));
-        params.finger_switch_factors.iter().for_each(|fsc| {
-            let m = finger_switch_factors.get_mut(&fsc.from.0, &fsc.from.1);
-            m.set(&fsc.to.0, &fsc.to.1, fsc.factor);
+        let mut finger_switch_costs = HandFingerMap::with_default(HandFingerMap::with_default(0.0));
+        params.finger_switch_costs.iter().for_each(|fsc| {
+            let m = finger_switch_costs.get_mut(&fsc.from.0, &fsc.from.1);
+            m.set(&fsc.to.0, &fsc.to.1, fsc.cost);
         });
         Self {
             exclude_rows: params.exclude_rows.clone(),
-            finger_switch_factors,
+            finger_switch_costs,
         }
     }
 }
@@ -71,8 +71,8 @@ impl BigramMetric for MovementPatternSameRow {
             return Some(0.0);
         }
 
-        // apply finger-specific factors
-        let cost = *self.finger_switch_factors.get(&k1.key.hand, &k1.key.finger).get(&k2.key.hand, &k2.key.finger);
+        // apply finger-specific costs
+        let cost = *self.finger_switch_costs.get(&k1.key.hand, &k1.key.finger).get(&k2.key.hand, &k2.key.finger);
 
         Some(-cost * weight)
     }
