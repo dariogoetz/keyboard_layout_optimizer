@@ -50,11 +50,11 @@ pub struct MetricParameters {
     pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
     pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
     pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
+    pub movement_pattern_same_row: WeightedParams<bigram_metrics::movement_pattern_same_row::Parameters>,
     pub no_handswitch_after_unbalancing_key:
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
     pub unbalancing_after_neighboring:
         WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
-    pub bigram_rolls: WeightedParams<bigram_metrics::rolls::Parameters>,
 
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
     pub no_handswitch_in_trigram:
@@ -205,6 +205,14 @@ impl Evaluator {
             params.movement_pattern.enabled,
         );
         self.bigram_metric(
+            Box::new(bigram_metrics::movement_pattern_same_row::MovementPatternSameRow::new(
+                &params.movement_pattern_same_row.params,
+            )),
+            params.movement_pattern_same_row.weight,
+            params.movement_pattern_same_row.normalization.clone(),
+            params.movement_pattern_same_row.enabled,
+        );
+        self.bigram_metric(
             Box::new(
                 bigram_metrics::no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey::new(
                     &params.no_handswitch_after_unbalancing_key.params,
@@ -236,14 +244,6 @@ impl Evaluator {
             params.symmetric_handswitches.weight,
             params.symmetric_handswitches.normalization.clone(),
             params.symmetric_handswitches.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::rolls::BigramRolls::new(
-                &params.bigram_rolls.params,
-            )),
-            params.bigram_rolls.weight,
-            params.bigram_rolls.normalization.clone(),
-            params.bigram_rolls.enabled,
         );
 
         // trigram_metrics

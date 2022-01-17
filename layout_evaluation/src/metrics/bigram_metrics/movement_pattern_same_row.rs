@@ -25,12 +25,12 @@ pub struct Parameters {
 }
 
 #[derive(Clone, Debug)]
-pub struct BigramRolls {
+pub struct MovementPatternSameRow {
     exclude_rows: HashSet<isize>,
     finger_switch_factors: HandFingerMap<HandFingerMap<f64>>,
 }
 
-impl BigramRolls {
+impl MovementPatternSameRow {
     pub fn new(params: &Parameters) -> Self {
         let mut finger_switch_factors = HandFingerMap::with_default(HandFingerMap::with_default(0.0));
         params.finger_switch_factors.iter().for_each(|fsc| {
@@ -44,9 +44,9 @@ impl BigramRolls {
     }
 }
 
-impl BigramMetric for BigramRolls {
+impl BigramMetric for MovementPatternSameRow {
     fn name(&self) -> &str {
-        "Bigram Rolls"
+        "Movement Pattern (same row)"
     }
 
     #[inline(always)]
@@ -58,15 +58,6 @@ impl BigramMetric for BigramRolls {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        if k1.key.hand != k2.key.hand {
-            return Some(0.0);
-        };
-
-        // finger repeats are not considered rolls
-        if k1.key.finger == k2.key.finger {
-            return Some(0.0);
-        }
-
         let pos1 = k1.key.matrix_position;
         let pos2 = k2.key.matrix_position;
 
