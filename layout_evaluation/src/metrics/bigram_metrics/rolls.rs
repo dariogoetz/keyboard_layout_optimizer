@@ -3,35 +3,43 @@ use std::collections::HashSet;
 use super::BigramMetric;
 
 use keyboard_layout::{
-    key::Hand,
+    key::{Finger, Hand, HandFingerMap},
     layout::{LayerKey, Layout},
 };
 
 use serde::Deserialize;
 
+#[derive(Copy, Clone, Deserialize, Debug)]
+pub struct FingerSwitchFactors {
+    pub from: (Hand, Finger),
+    pub to: (Hand, Finger),
+    pub factor: f64,
+}
+
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    /// Factor to apply to a trigram's weight if the roll is going inwards
-    pub factor_inward: f64,
-    /// Factor to apply to a trigram's weight if the roll is going outwards
-    pub factor_outward: f64,
     /// Rows to exclude for finger rolls
     pub exclude_rows: HashSet<isize>,
+    /// Finger-specific factors
+    pub finger_switch_factors: Vec<FingerSwitchFactors>,
 }
 
 #[derive(Clone, Debug)]
 pub struct BigramRolls {
-    factor_inward: f64,
-    factor_outward: f64,
     exclude_rows: HashSet<isize>,
+    finger_switch_factors: HandFingerMap<HandFingerMap<f64>>,
 }
 
 impl BigramRolls {
     pub fn new(params: &Parameters) -> Self {
+        let mut finger_switch_factors = HandFingerMap::with_default(HandFingerMap::with_default(0.0));
+        params.finger_switch_factors.iter().for_each(|fsc| {
+            let m = finger_switch_factors.get_mut(&fsc.from.0, &fsc.from.1);
+            m.set(&fsc.to.0, &fsc.to.1, fsc.factor);
+        });
         Self {
-            factor_inward: params.factor_inward,
-            factor_outward: params.factor_outward,
             exclude_rows: params.exclude_rows.clone(),
+            finger_switch_factors,
         }
     }
 }
@@ -72,29 +80,9 @@ impl BigramMetric for BigramRolls {
             return Some(0.0);
         }
 
-        let inward = (k1.key.hand == Hand::Left && pos1.0 < pos2.0)
-            || (k1.key.hand == Hand::Right && pos1.0 > pos2.0);
+        // apply finger-specific factors
+        let cost = *self.finger_switch_factors.get(&k1.key.hand, &k1.key.finger).get(&k2.key.hand, &k2.key.finger);
 
-        let outward = (k1.key.hand == Hand::Left && pos1.0 > pos2.0)
-            || (k1.key.hand == Hand::Right && pos1.0 < pos2.0);
-
-        // both bigrams need to have the same direction
-        let mut cost = if inward {
-            -self.factor_inward
-        } else if outward {
-            -self.factor_outward
-        } else {
-            return Some(0.0);
-        };
-
-        cost /= (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing);
-
-        // log::info!("bigram roll: {}{} -> {:4.3}",
-        //     k1.symbol.to_string().escape_debug(),
-        //     k2.symbol.to_string().escape_debug(),
-        //     cost.abs() * weight
-        // );
-
-        Some(cost * weight)
+        Some(-cost * weight)
     }
 }

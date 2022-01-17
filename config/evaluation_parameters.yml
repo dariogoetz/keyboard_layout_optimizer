@@ -288,10 +288,43 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      # Multiply by this factor for each of the bigrams that have a lateral movement
-      factor_inward: 1.0
-      factor_outward: 0.2
       exclude_rows: [3]
+
+      # from: Finger for first symbol of the bigram
+      # to: Finger for second symbol of the bigram
+      # factor: Factor to apply for such a movement
+      finger_switch_factors:
+        - { from: [Left, Pinky],   to: [Left, Ring],    factor: 0.1 }
+        - { from: [Left, Pinky],   to: [Left, Middle],  factor: 0.4 }
+        - { from: [Left, Pinky],   to: [Left, Pointer],  factor: 1 }
+
+        - { from: [Left, Ring],    to: [Left, Pinky],   factor: 0 }
+        - { from: [Left, Ring],    to: [Left, Middle],  factor: 0.6 }
+        - { from: [Left, Ring],    to: [Left, Pointer], factor: 0.8 }
+
+        - { from: [Left, Middle],  to: [Left, Pinky],   factor: 0.2 }
+        - { from: [Left, Middle],  to: [Left, Ring],    factor: 0.1 }
+        - { from: [Left, Middle],  to: [Left, Pointer], factor: 1.5 }
+
+        - { from: [Left, Pointer], to: [Left, Pinky],   factor: 1 }
+        - { from: [Left, Pointer], to: [Left, Ring],    factor: 1 }
+        - { from: [Left, Pointer], to: [Left, Middle],  factor: 1 }
+
+        - { from: [Right, Pinky],   to: [Right, Ring],    factor: 0.1 }
+        - { from: [Right, Pinky],   to: [Right, Middle],  factor: 0.4 }
+        - { from: [Right, Pinky],   to: [Right, Pointer],  factor: 1 }
+
+        - { from: [Right, Ring],    to: [Right, Pinky],   factor: 0 }
+        - { from: [Right, Ring],    to: [Right, Middle],  factor: 0.6 }
+        - { from: [Right, Ring],    to: [Right, Pointer], factor: 0.8 }
+
+        - { from: [Right, Middle],  to: [Right, Pinky],   factor: 0.2 }
+        - { from: [Right, Middle],  to: [Right, Ring],    factor: 0.1 }
+        - { from: [Right, Middle],  to: [Right, Pointer], factor: 1.5 }
+
+        - { from: [Right, Pointer], to: [Right, Pinky],   factor: 1 }
+        - { from: [Right, Pointer], to: [Right, Ring],    factor: 1 }
+        - { from: [Right, Pointer], to: [Right, Middle],  factor: 1 }
 
 
   # trigram metrics

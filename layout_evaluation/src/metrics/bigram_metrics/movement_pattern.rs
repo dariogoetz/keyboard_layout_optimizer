@@ -20,6 +20,7 @@ pub struct FingerSwitchCost {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    /// Cost associated with bigrams from a finger to another one
     pub finger_switch_costs: Vec<FingerSwitchCost>,
 }
 
