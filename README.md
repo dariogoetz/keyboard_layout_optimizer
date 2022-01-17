@@ -102,7 +102,8 @@ And for the Neo base layout:
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
 ### Layout Optimization Binary
-The optimize-binaries (`optimize_abc.rs`, `optimize_genetic.rs`, `optimize_sa.rs`) can run without any commandline parameters. In that case, they starts with a single random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the Neo2 layout).
+The available optimize-binaries include `optimize_abc.rs`, `optimize_genetic.rs`, and `optimize_sa.rs`.
+If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
 Optional commandline parameters can be explored with the `-h` option.
 
 Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
@@ -113,6 +114,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 
 #### Artificial Bee Colony (`optimize_abc.rs`)
 Currently, a few of the options available in the other binaries are not yet implemented for Artificial Bee Colony optimization.
+
 Example of an optimization (starting from a random layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_abc -f ",."
@@ -126,11 +128,12 @@ RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg f
 
 #### Simulated Annealing (`optimize_sa.rs`)
 Currently, this algorithm seems to produce the best results. An explanation for how it works can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing).
+
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
-In contrast to other binaries, with this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (tarting from Bone, Neo, and KOY):
+In contrast to other binaries, with this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (starting from Bone, Neo, and KOY):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
