@@ -127,7 +127,8 @@ RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg f
 ```
 
 #### Simulated Annealing (`optimize_sa.rs`)
-<!-- Currently, this algorithm seems to produce the best results. -->Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate. An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
+<!-- Currently, this algorithm seems to produce the best results. -->
+Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate. An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
