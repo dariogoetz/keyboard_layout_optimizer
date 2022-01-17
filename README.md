@@ -14,7 +14,7 @@ The corresponding webserver's implementation is located in the `layouts_webservi
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
 - evaluation based on prepared unigrams, bigrams, and trigrams or a text
 - fast evaluation (~100ms per layout for standard corpus)
-- layout optimization using various algorithms
+- layout optimization using [various algorithms](#layout-optimization-binary)
 - accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
@@ -80,7 +80,7 @@ There are various optional parameters that can be explored using the `-h` option
 #### Configuration
 Many aspects of the evaluation can be configured in the yaml files `standard_keyboard.yml` and `evaluation_parameters.yml`.
 
-`standard_keyboard.yml`
+##### `standard_keyboard.yml`
 This file contains "physical" properties of the keyboard and information about the Neo layout that serves as an underlying base for the variants to evaluate. It covers for the keyboard:
 - key positions
 - key to hand mapping
@@ -96,7 +96,7 @@ And for the Neo base layout:
 - modifiers to be used to access each layer
 - cost associated to accessing each layer
 
-`evaluation_parameters.yml`
+##### `evaluation_parameters.yml`
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
 ### Layout Optimization Binary
@@ -111,7 +111,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 ```
 
 #### Artificial Bee Colony (`optimize_abc.rs`)
-Currently, a few of the options available in the other binaries are not yet implemented for Artificial Bee Colony optimization.
+Currently, a few of the options available in the other binaries are not yet implemented for this optimization.
 
 Example of an optimization (starting from a random layout, fixing "," and "."):
 ``` sh
@@ -119,19 +119,21 @@ RUST_LOG=INFO ./target/release/optimize_abc -f ",."
 ```
 
 #### Genetic Algorithm (`optimize_genetic.rs`)
-Implemented using the [genevo](https://github.com/innoave/genevo/) crate. Example (starting from Bone layout, fixing "," and "."):
+Implemented using the [genevo](https://github.com/innoave/genevo/) crate. 
+
+Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
 #### Simulated Annealing (`optimize_sa.rs`)
-<!-- Currently, this algorithm seems to produce the best results. -->An explanation of the theory behind Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/). Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate.
+<!-- Currently, this algorithm seems to produce the best results. -->Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate. An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
-In contrast to other binaries, with this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (starting from Bone, Neo, and KOY):
+In contrast to other binaries, using this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (starting from Bone, Neo, and KOY):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
