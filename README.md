@@ -105,6 +105,12 @@ This file contains configuration parameters for all available evaluation metrics
 The optimize-binaries (`optimize_abc.rs`, `optimize_genetic.rs`, `optimize_sa.rs`) can run without any commandline parameters. In that case, they starts with a single random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the Neo2 layout).
 Optional commandline parameters can be explored with the `-h` option.
 
+Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
+
+``` sh
+RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
+```
+
 #### Artificial Bee Colony (`optimize_abc.rs`)
 Currently, a few of the options available in the other binaries are not yet implemented for Artificial Bee Colony optimization.
 Example of an optimization (starting from a random layout, fixing "," and "."):
@@ -127,12 +133,6 @@ RUST_LOG=INFO ./target/release/optimize_sa -s "jduax phlmwqß ctieo bnrsg fvüä
 In contrast to other binaries, with this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (tarting from Bone, Neo, and KOY):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
-```
-
-Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
-
-``` sh
-RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
 ```
 
 #### Configuration
