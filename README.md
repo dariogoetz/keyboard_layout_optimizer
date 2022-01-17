@@ -119,8 +119,6 @@ RUST_LOG=INFO ./target/release/optimize_abc -f ",."
 ```
 
 #### Genetic Algorithm (`optimize_genetic.rs`)
-Implemented using the [genevo](https://github.com/innoave/genevo/) crate. 
-
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
@@ -128,7 +126,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg f
 
 #### Simulated Annealing (`optimize_sa.rs`)
 <!-- Currently, this algorithm seems to produce the best results. -->
-Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate. An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
+An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
