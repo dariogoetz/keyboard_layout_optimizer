@@ -389,7 +389,7 @@ metrics:
 
   trigram_rolls:
     enabled: false
-    weight: 5000.0
+    weight: 25000.0
     normalization:
       type: weight_found
       value: 1.0
