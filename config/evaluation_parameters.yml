@@ -189,7 +189,7 @@ metrics:
   # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
     enabled: true
-    weight: 1050.0
+    weight: 4200.0
     normalization:
       type: weight_found
       value: 1.0
@@ -218,7 +218,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 50.0
+    weight: 300.0
     normalization:
       type: weight_found
       value: 1.0
@@ -269,38 +269,38 @@ metrics:
       # from: Finger for first symbol of the bigram
       # to: Finger for second symbol of the bigram
       # factor: Factor to apply for such a movement
-      finger_switch_factors:
-        - { from: [Left, Pinky],   to: [Left, Ring],    factor: 0.1 }
-        - { from: [Left, Pinky],   to: [Left, Middle],  factor: 0.5 }
-        - { from: [Left, Pinky],   to: [Left, Pointer],  factor: 1 }
+      finger_switch_costs:
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 0.1 }
+        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 0.5 }
+        - { from: [Left, Pinky],   to: [Left, Pointer],  cost: 1 }
 
-        - { from: [Left, Ring],    to: [Left, Pinky],   factor: 0 }
-        - { from: [Left, Ring],    to: [Left, Middle],  factor: 0.4 }
-        - { from: [Left, Ring],    to: [Left, Pointer], factor: 0.8 }
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 0 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 0.4 }
+        - { from: [Left, Ring],    to: [Left, Pointer], cost: 0.8 }
 
-        - { from: [Left, Middle],  to: [Left, Pinky],   factor: 0.2 }
-        - { from: [Left, Middle],  to: [Left, Ring],    factor: 0.1 }
-        - { from: [Left, Middle],  to: [Left, Pointer], factor: 1.5 }
+        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 0.2 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 0.1 }
+        - { from: [Left, Middle],  to: [Left, Pointer], cost: 1.5 }
 
-        - { from: [Left, Pointer], to: [Left, Pinky],   factor: 1 }
-        - { from: [Left, Pointer], to: [Left, Ring],    factor: 1 }
-        - { from: [Left, Pointer], to: [Left, Middle],  factor: 1.1 }
+        - { from: [Left, Pointer], to: [Left, Pinky],   cost: 1 }
+        - { from: [Left, Pointer], to: [Left, Ring],    cost: 1 }
+        - { from: [Left, Pointer], to: [Left, Middle],  cost: 1.1 }
 
-        - { from: [Right, Pinky],   to: [Right, Ring],    factor: 0.1 }
-        - { from: [Right, Pinky],   to: [Right, Middle],  factor: 0.5 }
-        - { from: [Right, Pinky],   to: [Right, Pointer],  factor: 1 }
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 0.1 }
+        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 0.5 }
+        - { from: [Right, Pinky],   to: [Right, Pointer],  cost: 1 }
 
-        - { from: [Right, Ring],    to: [Right, Pinky],   factor: 0 }
-        - { from: [Right, Ring],    to: [Right, Middle],  factor: 0.4 }
-        - { from: [Right, Ring],    to: [Right, Pointer], factor: 0.8 }
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 0 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 0.4 }
+        - { from: [Right, Ring],    to: [Right, Pointer], cost: 0.8 }
 
-        - { from: [Right, Middle],  to: [Right, Pinky],   factor: 0.2 }
-        - { from: [Right, Middle],  to: [Right, Ring],    factor: 0.1 }
-        - { from: [Right, Middle],  to: [Right, Pointer], factor: 1.5 }
+        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 0.2 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 0.1 }
+        - { from: [Right, Middle],  to: [Right, Pointer], cost: 1.5 }
 
-        - { from: [Right, Pointer], to: [Right, Pinky],   factor: 1 }
-        - { from: [Right, Pointer], to: [Right, Ring],    factor: 1 }
-        - { from: [Right, Pointer], to: [Right, Middle],  factor: 1.1 }
+        - { from: [Right, Pointer], to: [Right, Pinky],   cost: 1 }
+        - { from: [Right, Pointer], to: [Right, Ring],    cost: 1 }
+        - { from: [Right, Pointer], to: [Right, Middle],  cost: 1.1 }
 
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted. If the second key is unbalancing as well, an additional cost
@@ -389,7 +389,7 @@ metrics:
 
   trigram_rolls:
     enabled: false
-    weight: 5000.0
+    weight: 25000.0
     normalization:
       type: weight_found
       value: 1.0
