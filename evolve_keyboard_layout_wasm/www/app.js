@@ -4,7 +4,7 @@ import config_moonlander from '../../config/moonlander.yml'
 import config_crkbd from '../../config/crkbd.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
-import gen_opt_params from '../../config/optimization_parameters_genetic_web.yml'
+import genevo_opt_params from '../../config/optimization_parameters_genetic_web.yml'
 import sa_opt_params from '../../config/optimization_parameters_sa_web.yml'
 
 import Worker from "./worker.js"
@@ -17,7 +17,7 @@ const LAYOUT_CONFIGS = {
 }
 
 const OPTIMIZATION_ALGORITHM_PARAMS = {
-    "genevo": gen_opt_params,
+    "genevo": genevo_opt_params,
     "simulated_annealing": sa_opt_params,
 }
 
