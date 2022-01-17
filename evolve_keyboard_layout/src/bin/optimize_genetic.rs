@@ -19,7 +19,11 @@ struct Options {
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[structopt(short, long, default_value = "config/optimization_parameters.yml")]
+    #[structopt(
+        short,
+        long,
+        default_value = "config/optimization_parameters_genetic.yml"
+    )]
     optimization_parameters: String,
 
     /// Start optimization from this layout (keys from left to right, top to bottom)

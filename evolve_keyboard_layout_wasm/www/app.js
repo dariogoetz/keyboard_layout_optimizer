@@ -4,7 +4,7 @@ import config_moonlander from '../../config/moonlander.yml'
 import config_crkbd from '../../config/crkbd.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
-import gen_opt_params from '../../config/optimization_parameters_web.yml'
+import gen_opt_params from '../../config/optimization_parameters_genetic_web.yml'
 import sa_opt_params from '../../config/optimization_parameters_sa_web.yml'
 
 import Worker from "./worker.js"

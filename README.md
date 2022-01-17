@@ -136,7 +136,12 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 ```
 
 #### Configuration
-The parameters of the optimization process can be configured in the file `optimization_parameters.yml`. This includes sizes of the population, number of generations to evaluate, mutation and insertion rates, and the selection ratio.
+The parameters of the corresponding optimization process can be configured in the files:
+* `optimization_parameters_abc.yml`
+* `optimization_parameters_genetic.yml`
+* `optimization_parameters_sa.yml`
+
+They can be found inside the config-directory.
 
 ## Structure
 The project includes several binaries within the `evolve_keyboard_layout` crate:
