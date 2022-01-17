@@ -5,8 +5,6 @@ It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permuta
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams. 
 
-The optimization is implemented using the [genevo](https://github.com/innoave/genevo) crate. 
-
 ## Results
 Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
 
@@ -121,13 +119,13 @@ RUST_LOG=INFO ./target/release/optimize_abc -f ",."
 ```
 
 #### Genetic Algorithm (`optimize_genetic.rs`)
-Example (starting from Bone layout, fixing "," and "."):
+Implemented using the [genevo](https://github.com/innoave/genevo/) crate. Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
 #### Simulated Annealing (`optimize_sa.rs`)
-Currently, this algorithm seems to produce the best results. An explanation for how it works can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing).
+<!-- Currently, this algorithm seems to produce the best results. -->An explanation of the theory behind Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/). Implemented using the [argmin](https://github.com/argmin-rs/argmin/) crate.
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
