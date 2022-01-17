@@ -14,7 +14,7 @@ The corresponding webserver's implementation is located in the `layouts_webservi
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
 - evaluation based on prepared unigrams, bigrams, and trigrams or a text
 - fast evaluation (~100ms per layout for standard corpus)
-- layout optimization using a genetic algorithm
+- layout optimization using various algorithms
 - accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
