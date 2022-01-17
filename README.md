@@ -14,7 +14,7 @@ The corresponding webserver's implementation is located in the `layouts_webservi
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
 - evaluation based on prepared unigrams, bigrams, and trigrams or a text
 - fast evaluation (~100ms per layout for standard corpus)
-- layout optimization using [various algorithms](#layout-optimization-binary)
+- layout optimization using [various algorithms](#optimization-algorithms)
 - accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
@@ -110,7 +110,8 @@ Example for a never ending search (appends solutions to a file `found_solutions.
 RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
 ```
 
-#### Artificial Bee Colony (`optimize_abc.rs`)
+#### Optimization Algorithms
+##### Artificial Bee Colony (`optimize_abc.rs`)
 Currently, a few of the options available in the other binaries are not yet implemented for this optimization.
 
 Example of an optimization (starting from a random layout, fixing "," and "."):
@@ -118,13 +119,13 @@ Example of an optimization (starting from a random layout, fixing "," and "."):
 RUST_LOG=INFO ./target/release/optimize_abc -f ",."
 ```
 
-#### Genetic Algorithm (`optimize_genetic.rs`)
+##### Genetic Algorithm (`optimize_genetic.rs`)
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
-#### Simulated Annealing (`optimize_sa.rs`)
+##### Simulated Annealing (`optimize_sa.rs`)
 <!-- Currently, this algorithm seems to produce the best results. -->
 An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
 
