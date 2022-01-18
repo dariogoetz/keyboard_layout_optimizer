@@ -80,7 +80,7 @@ Vue.component('evaluator-app', {
       </b-form>
       <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig" :permutableKeys="permutableKeys"></layout-plot>
 
-      <b-button :disabled="loading > 0" @click="evaluateInput" variant="primary">
+      <b-button :disabled="loading > 0 || saOptimizationOngoing" @click="evaluateInput" variant="primary">
         <div v-if="loading > 0"><b-spinner small></b-spinner> Loading</div>
         <div v-else>Evaluate</div>
       </b-button>
@@ -178,6 +178,7 @@ Vue.component('evaluator-app', {
             selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
+            saOptimizationOngoing: false,
             optStep: -1,
             temperatureStr: "",
             optTotalSteps: 0,
@@ -434,7 +435,7 @@ Vue.component('evaluator-app', {
         },
 
         async startOptimization() {
-            // check if given layout_str is valid
+            // Check if given layout_str is valid
             try {
                 this.showInputValidState = true
                 await this.evaluate(this.inputLayout)
@@ -465,6 +466,7 @@ Vue.component('evaluator-app', {
         },
 
         async saOptimization() {
+            this.saOptimizationOngoing = true
             await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
@@ -475,6 +477,7 @@ Vue.component('evaluator-app', {
             )
             this.$bvToast.toast("Optimization finished", { variant: "primary" })
             this.evaluateInput();
+            this.saOptimizationOngoing = false
         },
         updateInfo(stepNr, tStr) {
             this.optStep = stepNr
@@ -490,6 +493,7 @@ Vue.component('evaluator-app', {
             this.createWorkers().then((_data) => {
                 this.$bvToast.toast("Optimization finished", { variant: "primary" });
                 this.optStep = -1;
+                this.saOptimizationOngoing = false
             })
         },
 
