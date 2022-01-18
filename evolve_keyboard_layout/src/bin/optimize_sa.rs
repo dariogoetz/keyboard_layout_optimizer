@@ -3,7 +3,7 @@ use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
-use layout_optimization::common::Cache;
+use layout_evaluation::cache::Cache;
 use layout_optimization_sa::optimization;
 
 #[derive(StructOpt, Debug)]

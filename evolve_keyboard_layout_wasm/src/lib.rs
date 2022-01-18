@@ -11,6 +11,7 @@ use keyboard_layout::{
 };
 
 use layout_evaluation::{
+    cache::Cache,
     config::EvaluationParameters,
     evaluation::Evaluator,
     ngram_mapper::on_demand_ngram_mapper::OnDemandNgramMapper,
@@ -18,7 +19,7 @@ use layout_evaluation::{
     results::EvaluationResult,
 };
 
-use layout_optimization::common::{Cache, PermutationLayoutGenerator};
+use layout_optimization::common::PermutationLayoutGenerator;
 use layout_optimization_genevo::optimization as gen_optimization;
 use layout_optimization_sa::optimization as sa_optimization;
 
