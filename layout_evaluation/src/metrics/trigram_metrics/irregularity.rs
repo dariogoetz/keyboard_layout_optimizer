@@ -64,7 +64,7 @@ impl TrigramMetric for Irregularity {
 
                 (cost1, cost2)
             })
-            .filter(|(c1, c2)| *c1 > 0.0 && *c2 > 0.0)
+            .filter(|(c1, c2)| *c1 >= 0.0 && *c2 >= 0.0)
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
 
         Some((1.0 + costs.0) * (1.0 + costs.1))
