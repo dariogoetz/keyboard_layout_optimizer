@@ -179,7 +179,7 @@ impl Observe<AnnealingStruct> for IterationObserver {
             }
         }
         let mut output = format!(
-            "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}",
+            "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}°",
             format!("{}:", self.id).yellow().bold(),
             "n:".bold(),
             state.iter,
@@ -294,7 +294,7 @@ pub fn optimize(
                 params.key_switches,
             );
             log::info!(
-                "{} Initial temperature = {}",
+                "{} Initial temperature = {}°",
                 format!("{}:", process_name).yellow().bold(),
                 init_temp,
             );
@@ -355,7 +355,7 @@ pub fn optimize(
     }
 
     log::info!(
-        "{} Starting optimization with: initial_temperature: {:.2}, {:?}",
+        "{} Starting optimization with: initial_temperature: {:.2}°, {:?}",
         format!("{}:", process_name).yellow().bold(),
         init_temp,
         params,
