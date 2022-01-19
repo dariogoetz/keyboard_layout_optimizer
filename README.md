@@ -156,4 +156,4 @@ The project includes several binaries within the `evolve_keyboard_layout` crate:
 The binaries rely on three library crates providing relevant data structures and algorithms:
 1. `keyboard_layout` - Provides a representation of keys, keyboards, and layouts and a layout generator that generates layout objects from given strings.
 1. `layout_evaluation` - Provides functionalities for reading, generating, and processing ngram data and datastructures and traits for evaluating several metrics.
-1. `layout_optimization` - Provides a connection to the genevo optimization algorithms by implementing a specialized genetic algorithm based on the evaluator in `layout_evaluation`.
+1. `layout_optimization` - Provides a connection to the optimization algorithms. Based on the evaluator in `layout_evaluation`.
