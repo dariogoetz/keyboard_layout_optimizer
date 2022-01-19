@@ -13,9 +13,7 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 use serde::Deserialize;
-
-const SHOW_WORST: bool = true;
-const N_WORST: usize = 3;
+use std::env;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {}
@@ -80,6 +78,9 @@ impl TrigramMetric for Irregularity {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let show_worst: bool = env::var("SHOW_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
+        let n_worst: usize = env::var("N_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+
         // NOTE: ArneBab's solution does not involve all bigram metrics (the asymmetric bigrams metric is missing)
 
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
@@ -96,7 +97,7 @@ impl TrigramMetric for Irregularity {
             res.map(|c| (trigram, c))
         });
 
-        let (total_cost, msg) = if SHOW_WORST {
+        let (total_cost, msg) = if show_worst {
             let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
                 (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst, mut worst_nonfixed), (trigram, cost)| {
@@ -113,10 +114,10 @@ impl TrigramMetric for Irregularity {
                         OrderedFloat(cost.abs()),
                     );
 
-                    if worst.len() > N_WORST {
+                    if worst.len() > n_worst {
                         worst.pop_min();
                     }
-                    if worst_nonfixed.len() > N_WORST {
+                    if worst_nonfixed.len() > n_worst {
                         worst_nonfixed.pop_min();
                     }
 
