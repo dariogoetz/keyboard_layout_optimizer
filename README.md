@@ -3,7 +3,7 @@
 Neo variant layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
 It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permutations of the base layer, where layers 2, 5, and 6 follow the permutation and layers 3 and 4 remain unchanged.
 
-At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams. 
+At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams.
 
 ## Results
 Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
@@ -150,8 +150,8 @@ They can be found inside the config-directory.
 The project includes several binaries within the `evolve_keyboard_layout` crate:
 1. `plot` - Plots the six layers of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
-1. `optimize` - Starts an optimization heuristic to find a good layout
-1. `evaluate-random` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
+1. `optimize_genetic` - Starts an optimization heuristic to find a good layout
+1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
 
 The binaries rely on three library crates providing relevant data structures and algorithms:
 1. `keyboard_layout` - Provides a representation of keys, keyboards, and layouts and a layout generator that generates layout objects from given strings.
