@@ -1,6 +1,6 @@
 self["webpackChunk"]([42],{
 
-/***/ "../../corpus/irc_neo/3-grams.txt":
+/***/ "../../../corpus/irc_neo/3-grams.txt":
 /*!********************************************************************************************************!*\
   !*** /home/runner/work/keyboard_layout_optimizer/keyboard_layout_optimizer/corpus/irc_neo/3-grams.txt ***!
   \********************************************************************************************************/

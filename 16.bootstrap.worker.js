@@ -1,6 +1,6 @@
 self["webpackChunk"]([16],{
 
-/***/ "../../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4/1-grams.txt":
+/***/ "../../../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4/1-grams.txt":
 /*!*****************************************************************************************************************************************************!*\
   !*** /home/runner/work/keyboard_layout_optimizer/keyboard_layout_optimizer/corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4/1-grams.txt ***!
   \*****************************************************************************************************************************************************/

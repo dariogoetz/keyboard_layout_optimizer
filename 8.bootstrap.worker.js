@@ -1,6 +1,6 @@
 self["webpackChunk"]([8],{
 
-/***/ "../../corpus/arne_no_special/2-grams.txt":
+/***/ "../../../corpus/arne_no_special/2-grams.txt":
 /*!****************************************************************************************************************!*\
   !*** /home/runner/work/keyboard_layout_optimizer/keyboard_layout_optimizer/corpus/arne_no_special/2-grams.txt ***!
   \****************************************************************************************************************/
