@@ -28,5 +28,5 @@ serde = { version = "^1.0", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"
 
-keyboard_layout = { path = "../keyboard_layout" }
-layout_evaluation = { path = "../layout_evaluation" }
+keyboard_layout = { path = "../../keyboard_layout" }
+layout_evaluation = { path = "../../layout_evaluation" }
