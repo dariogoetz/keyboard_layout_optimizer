@@ -19,8 +19,8 @@ use layout_evaluation::{
     results::EvaluationResult,
 };
 
-use layout_optimization::common::PermutationLayoutGenerator;
-use layout_optimization_genevo::optimization as gen_optimization;
+use layout_optimization_common::PermutationLayoutGenerator;
+use layout_optimization_genetic::optimization as gen_optimization;
 use layout_optimization_sa::optimization as sa_optimization;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
