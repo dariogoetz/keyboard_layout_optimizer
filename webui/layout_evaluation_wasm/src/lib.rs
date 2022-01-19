@@ -247,6 +247,7 @@ impl LayoutOptimizer {
     }
 
     pub fn step(&mut self) -> Result<JsValue, JsValue> {
+
         let result = self.simulator.step();
         match result {
             Ok(SimResult::Intermediate(step)) => {
