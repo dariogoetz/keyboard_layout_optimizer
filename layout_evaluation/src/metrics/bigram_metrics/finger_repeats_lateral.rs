@@ -5,8 +5,10 @@
 
 use super::BigramMetric;
 
-use keyboard_layout::key::Finger;
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::{
+    key::Finger,
+    layout::{LayerKey, Layout},
+};
 
 use serde::Deserialize;
 

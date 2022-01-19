@@ -31,8 +31,6 @@
 //! former ones and modifers always come before their base key. The number of generated trigrams from a single
 //! trigram can be large (tens of trigrams) if multiple symbols of the trigram are accessed using multiple modifiers.
 
-use keyboard_layout::layout::{LayerKey, Layout};
-
 mod common;
 
 pub mod bigram_mapper;
@@ -41,7 +39,7 @@ pub mod unigram_mapper;
 
 pub mod on_demand_ngram_mapper;
 
-use keyboard_layout::layout::LayerKeyIndex;
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better

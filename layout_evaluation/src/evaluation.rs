@@ -42,7 +42,7 @@ pub struct MetricParameters {
     pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
     pub key_costs: WeightedParams<unigram_metrics::key_costs::Parameters>,
 
-    pub asymmetric_bigrams: WeightedParams<bigram_metrics::asymmetric_bigrams::Parameters>,
+    pub symmetric_handswitches: WeightedParams<bigram_metrics::symmetric_handswitches::Parameters>,
     pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
     pub finger_repeats_lateral: WeightedParams<bigram_metrics::finger_repeats_lateral::Parameters>,
     pub finger_repeats_top_bottom:
@@ -50,6 +50,7 @@ pub struct MetricParameters {
     pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
     pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
     pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
+    pub movement_pattern_same_row: WeightedParams<bigram_metrics::movement_pattern_same_row::Parameters>,
     pub no_handswitch_after_unbalancing_key:
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
     pub unbalancing_after_neighboring:
@@ -60,6 +61,7 @@ pub struct MetricParameters {
         WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
     pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
     pub trigram_finger_repeats: WeightedParams<trigram_metrics::trigram_finger_repeats::Parameters>,
+    pub trigram_rolls: WeightedParams<trigram_metrics::rolls::Parameters>,
 }
 
 /// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -149,14 +151,6 @@ impl Evaluator {
 
         // bigram metrics
         self.bigram_metric(
-            Box::new(bigram_metrics::asymmetric_bigrams::AsymmetricBigrams::new(
-                &params.asymmetric_bigrams.params,
-            )),
-            params.asymmetric_bigrams.weight,
-            params.asymmetric_bigrams.normalization.clone(),
-            params.asymmetric_bigrams.enabled,
-        );
-        self.bigram_metric(
             Box::new(bigram_metrics::finger_repeats::FingerRepeats::new(
                 &params.finger_repeats.params,
             )),
@@ -211,6 +205,14 @@ impl Evaluator {
             params.movement_pattern.enabled,
         );
         self.bigram_metric(
+            Box::new(bigram_metrics::movement_pattern_same_row::MovementPatternSameRow::new(
+                &params.movement_pattern_same_row.params,
+            )),
+            params.movement_pattern_same_row.weight,
+            params.movement_pattern_same_row.normalization.clone(),
+            params.movement_pattern_same_row.enabled,
+        );
+        self.bigram_metric(
             Box::new(
                 bigram_metrics::no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey::new(
                     &params.no_handswitch_after_unbalancing_key.params,
@@ -232,6 +234,16 @@ impl Evaluator {
             params.unbalancing_after_neighboring.weight,
             params.unbalancing_after_neighboring.normalization.clone(),
             params.unbalancing_after_neighboring.enabled,
+        );
+        self.bigram_metric(
+            Box::new(
+                bigram_metrics::symmetric_handswitches::SymmetricHandswitches::new(
+                    &params.symmetric_handswitches.params,
+                ),
+            ),
+            params.symmetric_handswitches.weight,
+            params.symmetric_handswitches.normalization.clone(),
+            params.symmetric_handswitches.enabled,
         );
 
         // trigram_metrics
@@ -272,6 +284,14 @@ impl Evaluator {
             params.trigram_finger_repeats.weight,
             params.trigram_finger_repeats.normalization.clone(),
             params.trigram_finger_repeats.enabled,
+        );
+        self.trigram_metric(
+            Box::new(trigram_metrics::rolls::TrigramRolls::new(
+                &params.trigram_rolls.params,
+            )),
+            params.trigram_rolls.weight,
+            params.trigram_rolls.normalization.clone(),
+            params.trigram_rolls.enabled,
         );
 
         self

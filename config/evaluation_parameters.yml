@@ -78,7 +78,7 @@ metrics:
 
   # If the keys corresponding to a bigram are not symmetrical on left and right hand, a cost is
   # counted.
-  asymmetric_bigrams:
+  symmetric_handswitches:
     enabled: true
     weight: 1.0
     normalization:
@@ -195,29 +195,30 @@ metrics:
       value: 1.0
     params:
       # key positions as matrix positions and the corresponding costs
+      # the format is [column, row]
       # [from_position, to_position]: weight
       matrix_positions:
         # all combinations with pinky will be added automatically
         #
         # symmetric ones will be added automatically
-        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2
-        [[1, 3], [3, 2]]: 1
-        [[2, 3], [3, 2]]: 0.3
-        [[2, 4], [3, 3]]: 0.2
-        [[1, 2], [3, 3]]: 0.2
-        [[1, 2], [3, 4]]: 0.1
+        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2 (not in row 3)
+        [[3, 1], [2, 3]]: 1      # QWERTZ: wy
+        [[3, 2], [2, 3]]: 0.3    # QWERTZ: sy
+        [[4, 2], [3, 3]]: 0.2    # QWERTZ: dx
+        [[2, 1], [3, 3]]: 0.2    # QWERTZ: qx
+        [[2, 1], [4, 3]]: 0.1    # QWERTZ: qc
 
-        [[3, 11], [1, 7]]: 0.1
-        [[3, 2], [1, 6]]: 0.1
+        [[17, 3], [13, 1]]: 0.1   # QWERTZ: -z
+        [[2, 3], [6, 1]]: 0.1    # QWERTZ: yt
 
-        [[3, 2], [3, 5]]: -0.01
-        [[3, 8], [3, 11]]: -0.01
+        [[2, 3], [5, 3]]: -0.01  # QWERTZ: yv
+        [[14, 3], [17, 3]]: -0.01 # QWERTZ: m-
 
   # Depending on which fingers of the same hand are used to hit the keys of a bigram, costs are
   # counted.
   movement_pattern:
     enabled: true
-    weight: 50.0
+    weight: 100.0
     normalization:
       type: weight_found
       value: 1.0
@@ -256,6 +257,52 @@ metrics:
         - { from: [Right, Pointer], to: [Right, Ring],    cost: 0.3 }
         - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
 
+  movement_pattern_same_row:
+    enabled: true
+    weight: 200.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      exclude_rows: [3]
+      exclude_unbalancing: true
+
+      # from: Finger for first symbol of the bigram
+      # to: Finger for second symbol of the bigram
+      # factor: Factor to apply for such a movement
+      finger_switch_costs:
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 0.1 }
+        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 0.5 }
+        - { from: [Left, Pinky],   to: [Left, Pointer],  cost: 1 }
+
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 0 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 0.4 }
+        - { from: [Left, Ring],    to: [Left, Pointer], cost: 0.8 }
+
+        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 0.2 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 0.1 }
+        - { from: [Left, Middle],  to: [Left, Pointer], cost: 1.5 }
+
+        - { from: [Left, Pointer], to: [Left, Pinky],   cost: 1 }
+        - { from: [Left, Pointer], to: [Left, Ring],    cost: 1 }
+        - { from: [Left, Pointer], to: [Left, Middle],  cost: 1.1 }
+
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 0.1 }
+        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 0.5 }
+        - { from: [Right, Pinky],   to: [Right, Pointer],  cost: 1 }
+
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 0 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 0.4 }
+        - { from: [Right, Ring],    to: [Right, Pointer], cost: 0.8 }
+
+        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 0.2 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 0.1 }
+        - { from: [Right, Middle],  to: [Right, Pointer], cost: 1.5 }
+
+        - { from: [Right, Pointer], to: [Right, Pinky],   cost: 1 }
+        - { from: [Right, Pointer], to: [Right, Ring],    cost: 1 }
+        - { from: [Right, Pointer], to: [Right, Middle],  cost: 1.1 }
+
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted. If the second key is unbalancing as well, an additional cost
   # depending on the distance to the first key is added.
@@ -279,6 +326,7 @@ metrics:
       value: 1.0
     params:
       null: null
+
 
   # trigram metrics
 
@@ -339,6 +387,18 @@ metrics:
     params:
       # Multiply by this factor for each of the bigrams that have a lateral movement
       factor_lateral_movement: 1.2
+
+  trigram_rolls:
+    enabled: false
+    weight: 25000.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Multiply by this factor for each of the bigrams that have a lateral movement
+      factor_inward: 1.0
+      factor_outward: 0.2
+      exclude_rows: [3]
 
 ngram_mapper:
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers

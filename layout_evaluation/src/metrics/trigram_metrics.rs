@@ -3,13 +3,14 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
+use std::env;
+
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
+pub mod rolls;
 pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
 
-const SHOW_WORST: bool = true;
-const N_WORST: usize = 3;
 
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
@@ -38,6 +39,9 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let show_worst: bool = env::var("SHOW_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
+        let n_worst: usize = env::var("N_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = trigrams.iter().filter_map(|(trigram, weight)| {
             let res = self.individual_cost(
@@ -52,7 +56,7 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
             res.map(|c| (trigram, c))
         });
 
-        let (total_cost, msg) = if SHOW_WORST {
+        let (total_cost, msg) = if show_worst {
             let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
                 (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst, mut worst_nonfixed), (trigram, cost)| {
@@ -61,18 +65,18 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
                     if !trigram.0.is_fixed && !trigram.1.is_fixed && !trigram.2.is_fixed {
                         worst_nonfixed.push(
                             (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                            OrderedFloat(cost),
+                            OrderedFloat(cost.abs()),
                         );
                     }
                     worst.push(
                         (trigram.0.symbol, trigram.1.symbol, trigram.2.symbol),
-                        OrderedFloat(cost),
+                        OrderedFloat(cost.abs()),
                     );
 
-                    if worst.len() > N_WORST {
+                    if worst.len() > n_worst {
                         worst.pop_min();
                     }
-                    if worst_nonfixed.len() > N_WORST {
+                    if worst_nonfixed.len() > n_worst {
                         worst_nonfixed.pop_min();
                     }
 

@@ -27,6 +27,7 @@ impl ManualBigramPenalty {
     pub fn new(params: &Parameters) -> Self {
         let mut matrix_positions = params.matrix_positions.clone();
 
+        // add the reversed bigrams as well
         matrix_positions.extend(
             params
                 .matrix_positions

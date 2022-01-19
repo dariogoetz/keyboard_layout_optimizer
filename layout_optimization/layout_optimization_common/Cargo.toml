@@ -2,14 +2,14 @@
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
-name = "layout_optimization"
+name = "layout_optimization_common"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-keyboard_layout = { path = "../keyboard_layout" }
-layout_evaluation = { path = "../layout_evaluation" }
+keyboard_layout = { path = "../../keyboard_layout" }
+layout_evaluation = { path = "../../layout_evaluation" }
 
-rand = "*"
+rand = "0.8.4"
 rustc-hash = "1.1.0"

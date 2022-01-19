@@ -6,16 +6,22 @@ const LAYOUT_CONFIGS = [
 ]
 const DEFAULT_LAYOUT_CONFIG = 'standard'
 
+const OPTIMIZATION_ALGORITHMS = [
+    { key: 'simulated_annealing', label: "Simulated Annealing" },
+    { key: 'genevo', label: 'Genetic Algorithm' }
+]
+const DEFAULT_OPTIMIZATION_ALGORITHM = 'simulated_annealing'
+
 const COLORS = [
-  '#4dc9f6',
-  '#f67019',
-  '#f53794',
-  '#537bc4',
-  '#acc236',
-  '#166a8f',
-  '#00a950',
-  '#58595b',
-  '#8549ba'
+    '#4dc9f6',
+    '#f67019',
+    '#f53794',
+    '#537bc4',
+    '#acc236',
+    '#166a8f',
+    '#00a950',
+    '#58595b',
+    '#8549ba'
 ];
 
 Vue.component('layout-barplot', {
@@ -25,12 +31,12 @@ Vue.component('layout-barplot', {
         relative: { type: Boolean, default: true },
         logscale: { type: Boolean, default: false }
     },
-    data () {
+    data() {
         return {
         }
     },
     computed: {
-        chartData () {
+        chartData() {
             const datasets = []
             const n_datasets = this.layoutDetails.length
             let labels = ["Total"]
@@ -94,7 +100,7 @@ Vue.component('layout-barplot', {
                 datasets: datasets
             }
         },
-        options () {
+        options() {
             const options = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -115,25 +121,25 @@ Vue.component('layout-barplot', {
             return options
         },
     },
-    mounted () {
+    mounted() {
         this.renderChart(this.chartData, this.options)
     },
     watch: {
-        layoutDetails () {
+        layoutDetails() {
             this.render()
         },
-        relative () {
+        relative() {
             this.render()
         },
-        logscale () {
+        logscale() {
             this.render()
         },
-        chartData () {
+        chartData() {
             this.render()
         }
     },
     methods: {
-        render () {
+        render() {
             this.renderChart(this.chartData, this.options)
         }
     }
@@ -155,36 +161,36 @@ Vue.component('layout-details', {
         layoutDetails: { type: Object, default: null },
         title: { type: String, default: null },
     },
-    data () {
+    data() {
         return {
         }
     },
     watch: {
-        layoutDetails () {},
+        layoutDetails() { },
     },
     computed: {
-        plot () {
+        plot() {
             if (this.layoutDetails === null) return ""
             const p = this.layoutDetails.plot.replaceAll("\n", "<br>")
             return p
         },
-        printed () {
+        printed() {
             if (this.layoutDetails === null) return ""
             const p = this.layoutDetails.printed.replaceAll("\n", "<br>")
             return p
         },
-        totalCost () {
+        totalCost() {
             if (this.layoutDetails === null) return ""
             return this.layoutDetails.total_cost.toFixed(2)
         },
-        headline () {
+        headline() {
             if (this.title === null) return ""
             return this.title
         },
-        leadline () {
+        leadline() {
             if (this.layoutDetails === null) return ""
             if (!this.layoutDetails.published_by) return this.layoutDetails.layout
-            return `${ this.layoutDetails.layout } (${ this.layoutDetails.published_by })`
+            return `${this.layoutDetails.layout} (${this.layoutDetails.published_by})`
         },
     },
 })
@@ -223,12 +229,12 @@ Vue.component('layouts-table', {
     `,
     props: {
         url: { type: String, default: null },
-        layoutConfig: {type: String, default: DEFAULT_LAYOUT_CONFIG },
+        layoutConfig: { type: String, default: DEFAULT_LAYOUT_CONFIG },
         bestInFamily: { type: Boolean, default: true },
         filter: { type: String, default: null },
         perPage: { type: Number, default: 500 },
     },
-    data () {
+    data() {
         let familyGen = {}
         LAYOUT_CONFIGS.forEach((c) => {
             familyGen[c.key] = c.family
@@ -247,7 +253,7 @@ Vue.component('layouts-table', {
 
     },
     computed: {
-        rows () {
+        rows() {
             let familyGen = this.familyGen[this.layoutConfig]
             let periodCommaGen = this.periodCommaGen[this.layoutConfig]
             let layouts = this.layouts
@@ -277,7 +283,7 @@ Vue.component('layouts-table', {
             })
             return res
         },
-        fields () {
+        fields() {
             return [
                 {
                     key: 'published_by',
@@ -312,20 +318,20 @@ Vue.component('layouts-table', {
             ]
         },
     },
-    created () {
+    created() {
         this.fetchLayouts()
     },
     watch: {
-        bestInFamily () {
+        bestInFamily() {
             this.rows.forEach(item => item.selected = false)
             this.$emit('details', [])
         },
-        layoutConfig () {
+        layoutConfig() {
             this.fetchLayouts()
         },
     },
     methods: {
-        fetchLayouts () {
+        fetchLayouts() {
             if (this.url === null) return null
             let url = this.url
             if (this.layoutConfig !== null) {
@@ -338,12 +344,12 @@ Vue.component('layouts-table', {
                     this.filteredRows = data.length
                 })
         },
-        rowClass (item, type) {
+        rowClass(item, type) {
             if (!item || type !== 'row') return
             if (item.selected) return 'table-secondary'
             if (item.highlight) return 'table-primary'
         },
-        onRowClicked (item) {
+        onRowClicked(item) {
             if (item.selected) {
                 this.$set(item, 'selected', false)
             } else {
@@ -352,7 +358,7 @@ Vue.component('layouts-table', {
             let selection = this.rows.filter(item => item.selected).sort((a, b) => a.total_cost - b.total_cost)
             this.$emit("details", selection)
         },
-        onFiltered (items) {
+        onFiltered(items) {
             this.filteredRows = items.length
             this.currentPage = 1
         },
@@ -369,7 +375,7 @@ Vue.component('keyboard-selector', {
     props: {
         defaultSelection: { type: String, default: DEFAULT_LAYOUT_CONFIG },
     },
-    data () {
+    data() {
         let options = []
         LAYOUT_CONFIGS.forEach(c => {
             options.push({ value: c.key, text: c.label })
@@ -379,12 +385,48 @@ Vue.component('keyboard-selector', {
             options,
         }
     },
-    created () {
+    created() {
         this.emit()
     },
     methods: {
-        emit () {
+        emit() {
             this.$emit("selected", this.selected)
+        }
+    },
+})
+
+Vue.component('optimization-selector', {
+    template: `
+    <b-form inline>
+      <label class="mr-sm-2">Algorithm</label>
+      <b-form-select v-model="selected" :options="options" @change="emit"></b-form-select>
+    </b-form>
+    `,
+    props: {
+        initialContent: { type: String, default: DEFAULT_OPTIMIZATION_ALGORITHM },
+    },
+    data() {
+        let options = []
+        OPTIMIZATION_ALGORITHMS.forEach(a => {
+            options.push({ value: a.key, text: a.label })
+        })
+        return {
+            selected: this.initialContent,
+            options,
+        }
+    },
+    created() {
+        this.emit()
+    },
+    methods: {
+        emit() {
+            let algorithmLabel = "";
+            OPTIMIZATION_ALGORITHMS.forEach(a => {
+                if (a.key === this.selected) {
+                    algorithmLabel = a.label
+                }
+            })
+            this.$emit("selected", this.selected, algorithmLabel)
         }
     },
 })

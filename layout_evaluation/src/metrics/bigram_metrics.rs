@@ -3,18 +3,18 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
-pub mod asymmetric_bigrams;
+use std::env;
+
 pub mod finger_repeats;
 pub mod finger_repeats_lateral;
 pub mod finger_repeats_top_bottom;
 pub mod line_changes;
 pub mod manual_bigram_penalty;
 pub mod movement_pattern;
+pub mod movement_pattern_same_row;
 pub mod no_handswitch_after_unbalancing_key;
+pub mod symmetric_handswitches;
 pub mod unbalancing_after_neighboring;
-
-const SHOW_WORST: bool = true;
-const N_WORST: usize = 3;
 
 /// BigramMetric is a trait for metrics that iterates over weighted bigrams.
 pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
@@ -42,6 +42,9 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
+        let show_worst: bool = env::var("SHOW_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
+        let n_worst: usize = env::var("N_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = bigrams.iter().filter_map(|(bigram, weight)| {
             let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
@@ -49,21 +52,22 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
             res.map(|c| (bigram, c))
         });
 
-        let (total_cost, msg) = if SHOW_WORST {
+        let (total_cost, msg) = if show_worst {
             let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
                 (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
                 |(mut total_cost, mut worst, mut worst_nonfixed), (bigram, cost)| {
                     total_cost += cost;
 
-                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     if !bigram.0.is_fixed && !bigram.1.is_fixed {
-                        worst_nonfixed.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost));
+                        worst_nonfixed
+                            .push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
                     }
 
-                    if worst.len() > N_WORST {
+                    if worst.len() > n_worst {
                         worst.pop_min();
                     }
-                    if worst_nonfixed.len() > N_WORST {
+                    if worst_nonfixed.len() > n_worst {
                         worst_nonfixed.pop_min();
                     }
 

@@ -1,20 +1,19 @@
-importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
+importScripts("https://unpkg.com/comlink/dist/umd/comlink.js")
 
 const evaluator = {
-
     wasm: null,
     ngramProvider: null,
     layoutEvaluator: null,
     layoutOptimizer: null,
 
-    init () {
+    init() {
         return import("evolve-keyboard-layout-wasm")
             .then((wasm) => {
                 this.wasm = wasm
             })
     },
 
-    async initNgramProvider (ngramType, evalParams, ngramData) {
+    async initNgramProvider(ngramType, evalParams, ngramData) {
         if (ngramType === 'prepared') {
             let unigrams = await import(`../../corpus/${ngramData}/1-grams.txt`)
                 .then((ngrams) => ngrams.default)
@@ -37,7 +36,7 @@ const evaluator = {
         }
     },
 
-    initLayoutEvaluator (layoutConfig, evalParams) {
+    initLayoutEvaluator(layoutConfig, evalParams) {
         this.layoutEvaluator = this.wasm.LayoutEvaluator.new(
             layoutConfig,
             evalParams,
@@ -45,10 +44,26 @@ const evaluator = {
         )
     },
 
-    initLayoutOptimizer (layout, fixed_chars, optParams) {
+    async saOptimize(layout, fixed_chars, optParamsStr, initCallbacks, setCurrentStepNr, setNewBest) {
+        // Needed to make the callbacks work in Firefox.
+        // In other browsers (for example in Chromium or Midori), this isn't necessary.
+        // In those browsers, the whole function can be turned into a syncronous one.
+        await initCallbacks()
+        this.wasm.sa_optimize(
+            layout,
+            optParamsStr,
+            this.layoutEvaluator,
+            fixed_chars,
+            true,
+            setCurrentStepNr,
+            setNewBest,
+        )
+    },
+
+    initGenLayoutOptimizer(layout, fixed_chars, optParamsStr) {
         this.layoutOptimizer = this.wasm.LayoutOptimizer.new(
             layout,
-            optParams,
+            optParamsStr,
             this.layoutEvaluator,
             fixed_chars,
             true,
@@ -56,20 +71,19 @@ const evaluator = {
 
         return this.layoutOptimizer.parameters()
     },
-
-    optimizationStep () {
+    genOptimizationStep() {
         return this.layoutOptimizer.step()
     },
 
-    evaluateLayout (layout) {
+    evaluateLayout(layout) {
         let res = this.layoutEvaluator.evaluate(layout)
         res.layout = layout
         return res
     },
 
-    permutableKeys () {
+    permutableKeys() {
         return this.layoutEvaluator.permutable_keys()
-    }
+    },
 }
 
 Comlink.expose(evaluator)

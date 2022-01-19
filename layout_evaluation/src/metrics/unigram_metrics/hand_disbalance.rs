@@ -3,8 +3,10 @@
 
 use super::UnigramMetric;
 
-use keyboard_layout::key::{Finger, Hand, HandMap};
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::{
+    key::{Finger, Hand, HandMap},
+    layout::{LayerKey, Layout},
+};
 
 use serde::Deserialize;
 

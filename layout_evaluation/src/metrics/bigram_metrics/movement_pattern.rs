@@ -4,8 +4,10 @@
 
 use super::BigramMetric;
 
-use keyboard_layout::key::{Finger, Hand, HandFingerMap};
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::{
+    key::{Finger, Hand, HandFingerMap},
+    layout::{LayerKey, Layout},
+};
 
 use serde::Deserialize;
 
@@ -18,6 +20,7 @@ pub struct FingerSwitchCost {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    /// Cost associated with bigrams from a finger to another one
     pub finger_switch_costs: Vec<FingerSwitchCost>,
 }
 

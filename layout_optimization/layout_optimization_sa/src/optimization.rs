@@ -1,21 +1,24 @@
-use keyboard_layout::layout::Layout;
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
-use layout_evaluation::evaluation::Evaluator;
+use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
+use layout_evaluation::{cache::Cache, evaluation::Evaluator};
 
-use layout_optimization::common::{Cache, PermutationLayoutGenerator};
+use layout_optimization_common::PermutationLayoutGenerator;
 
 use anyhow::Result;
 use colored::Colorize;
+use rand_xoshiro::{rand_core::SeedableRng, Xoshiro256PlusPlus};
 use serde::Deserialize;
 use std::sync::Arc;
-use rand::prelude::*;
-use rand_xoshiro::Xoshiro256PlusPlus;
 
-use argmin::prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode};
-use argmin::solver::simulatedannealing::{SATempFunc, SimulatedAnnealing};
+use argmin::{
+    prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode},
+    solver::simulatedannealing::{SATempFunc, SimulatedAnnealing},
+};
 
 #[derive(Deserialize, Debug)]
 pub struct Parameters {
+    /// Initial temperature. Gets eventually lowered down to (almost) zero during optimization.
+    pub init_temp: Option<f64>,
+
     /// In each modification of the layout, swap this many key-pairs.
     pub key_switches: usize,
 
@@ -31,6 +34,7 @@ pub struct Parameters {
 impl Default for Parameters {
     fn default() -> Self {
         Parameters {
+            init_temp: Some(150.0),
             key_switches: 1,
             // Parameters for the solver.
             stall_accepted: 5000,
@@ -45,16 +49,28 @@ impl Parameters {
         let f = std::fs::File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
     }
+    /// Makes sure that [self.init_temp] is greater than zero.
+    /// => Negative values and zero get turned into `f64::MIN_POSITIVE`.
+    pub fn correct_init_temp(&mut self) {
+        if let Some(init_temp) = self.init_temp {
+            let corrected_init_temp = if init_temp <= 0.0 {
+                f64::MIN_POSITIVE
+            } else {
+                init_temp
+            };
+            self.init_temp = Some(corrected_init_temp);
+        }
+    }
 }
 
-struct AnnealingStruct<'a> {
+pub struct AnnealingStruct {
     evaluator: Arc<Evaluator>,
-    layout_generator: &'a PermutationLayoutGenerator,
+    layout_generator: PermutationLayoutGenerator,
     key_switches: usize,
     result_cache: Option<Cache<f64>>,
 }
 
-impl ArgminOp for AnnealingStruct<'_> {
+impl ArgminOp for AnnealingStruct {
     type Param = Vec<usize>;
     type Output = f64;
     type Hessian = ();
@@ -63,13 +79,20 @@ impl ArgminOp for AnnealingStruct<'_> {
 
     /// Evaluate param (= the layout-vector).
     fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
-        let l = self.layout_generator.generate_layout(param);
-        let layout_str = self.layout_generator.generate_string(param);
+        let evaluate_layout_str = |layout_str: &str| -> f64 {
+            let l = self
+                .layout_generator
+                .layout_generator
+                .generate(layout_str)
+                .unwrap();
+            self.evaluator.evaluate_layout(&l).total_cost()
+        };
+
+        let layout_string = self.layout_generator.generate_string(param);
         let evaluation_result = match &self.result_cache {
-            Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
-                self.evaluator.evaluate_layout(&l).total_cost()
-            }),
-            None => self.evaluator.evaluate_layout(&l).total_cost(),
+            Some(result_cache) => result_cache
+                .get_or_insert_with(&layout_string, || evaluate_layout_str(&layout_string)),
+            None => evaluate_layout_str(&layout_string),
         };
 
         Ok(evaluation_result)
@@ -79,7 +102,7 @@ impl ArgminOp for AnnealingStruct<'_> {
     fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
         Ok(self
             .layout_generator
-            .switch_n_keys(&param, self.key_switches))
+            .perform_n_swaps(&param, self.key_switches))
     }
 }
 
@@ -89,25 +112,32 @@ struct BestObserver {
     layout_generator: PermutationLayoutGenerator,
 }
 
-impl Observe<AnnealingStruct<'_>> for BestObserver {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
-    }
-
+impl Observe<AnnealingStruct> for BestObserver {
     fn observe_iter(
         &mut self,
-        state: &IterState<AnnealingStruct<'_>>,
+        state: &IterState<AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
         let best_layout = self.layout_generator.generate_string(&state.best_param);
         log::info!(
-            "{}: {} {} ({:>6.1})",
-            self.id,
-            "New best:".bold(),
+            "{} {} {} ({:>6.1})",
+            format!("{}:", self.id).yellow().bold(),
+            "New best:".green(),
             best_layout,
             state.best_cost,
         );
         Ok(())
+    }
+}
+
+/// Necessary to avoid errors when importing a [custom_observer] to `optimize()`.
+impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
+    fn observe_iter(
+        &mut self,
+        state: &IterState<AnnealingStruct>,
+        kv: &ArgminKV,
+    ) -> Result<(), Error> {
+        (*self).as_mut().observe_iter(state, kv)
     }
 }
 
@@ -118,14 +148,10 @@ struct IterationObserver {
     log_everything: bool,
 }
 
-impl Observe<AnnealingStruct<'_>> for IterationObserver {
-    fn observe_init(&self, _name: &str, _kv: &ArgminKV) -> Result<(), Error> {
-        Ok(())
-    }
-
+impl Observe<AnnealingStruct> for IterationObserver {
     fn observe_iter(
         &mut self,
-        state: &IterState<AnnealingStruct<'_>>,
+        state: &IterState<AnnealingStruct>,
         kv: &ArgminKV,
     ) -> Result<(), Error> {
         let layout = self.layout_generator.generate_string(&state.param);
@@ -153,8 +179,8 @@ impl Observe<AnnealingStruct<'_>> for IterationObserver {
             }
         }
         let mut output = format!(
-            "{}: {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}",
-            self.id,
+            "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}°",
+            format!("{}:", self.id).yellow().bold(),
             "n:".bold(),
             state.iter,
             "current:".bold(),
@@ -182,6 +208,12 @@ impl Observe<AnnealingStruct<'_>> for IterationObserver {
     }
 }
 
+/// Calculates the mean of a vec containing f64-values.
+fn mean(list: &[f64]) -> f64 {
+    let sum: f64 = list.iter().sum();
+    sum / (list.len() as f64)
+}
+
 /// Calculates the [Standard Deviation](https://en.wikipedia.org/wiki/Standard_deviation)
 /// for the cost of some amount of Layouts, then returns it.
 ///
@@ -204,12 +236,9 @@ fn get_cost_sd(
         let layout = layout_generator.generate_layout(&current_layout);
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
-
-        current_layout = layout_generator.switch_n_keys(&current_layout, key_pair_switches);
+        current_layout = layout_generator.perform_n_swaps(&current_layout, key_pair_switches);
     }
-
-    let sum: f64 = costs.iter().sum();
-    let average: f64 = sum / USED_NEIGHBORS as f64;
+    let average: f64 = mean(&costs);
 
     for cost in &costs {
         let difference = cost - average;
@@ -229,9 +258,9 @@ pub fn optimize(
     layout_generator: &NeoLayoutGenerator,
     start_with_layout: bool,
     evaluator: &Evaluator,
-    optional_init_temp: Option<f64>,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
+    custom_observer: Option<Box<dyn Observe<AnnealingStruct>>>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
@@ -239,34 +268,49 @@ pub fn optimize(
         true => pm.get_permutable_indices(),
         false => pm.generate_random(),
     };
-    let init_temp = match optional_init_temp {
-        Some(t) => {
-            println!("\nWARNING: Currently, the options `--greedy` and `--init-temp` are bugged. The very first modification always gets accepted.\nFor more information, visit this GitHub-issue: https://github.com/argmin-rs/argmin/issues/150\n");
-            std::thread::sleep(std::time::Duration::from_secs(7));
-            t
-        }
+
+    /* // Test 10_000 Layouts to get a good default initial temperature.
+    let mut init_temp_vec: Vec<f64> = vec![];
+    const TESTED_LAYOUT_NR: u8 = 100;
+    for i in 0..TESTED_LAYOUT_NR {
+        let l = pm.generate_random();
+        let init_temp = get_cost_sd(&l, Arc::new(evaluator.clone()), &pm, params.key_switches);
+        println!("init_temp {:>2}: {}", i, init_temp);
+        init_temp_vec.push(init_temp);
+    }
+    println!("Average init_temp: {}", mean(&init_temp_vec)); */
+
+    let init_temp = match params.init_temp {
+        Some(t) => t,
         None => {
-            log::info!("{}: Calculating initial temperature.", process_name);
+            log::info!(
+                "{} Calculating initial temperature",
+                format!("{}:", process_name).yellow().bold(),
+            );
             let init_temp = get_cost_sd(
                 &init_layout,
                 Arc::new(evaluator.clone()),
                 &pm,
                 params.key_switches,
             );
-            println!("{}: Initial temperature = {}", process_name, init_temp);
+            log::info!(
+                "{} Initial temperature = {}°",
+                format!("{}:", process_name).yellow().bold(),
+                init_temp,
+            );
             init_temp
         }
     };
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
-        layout_generator: &pm,
+        layout_generator: pm.clone(),
         key_switches: params.key_switches,
         result_cache,
     };
 
-    let rng = Xoshiro256PlusPlus::from_entropy();
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
+    let rng = Xoshiro256PlusPlus::from_entropy();
     let solver = SimulatedAnnealing::new(init_temp, rng)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
@@ -277,36 +321,46 @@ pub fn optimize(
         // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
         .stall_accepted(params.stall_accepted);
 
-    let best_observer = BestObserver {
-        id: process_name.to_string(),
-        layout_generator: pm.clone(),
-    };
-    let iter_observer = IterationObserver {
-        id: process_name.to_string(),
-        layout_generator: pm.clone(),
-        log_everything,
-    };
-    let iter_observer_mode = if log_everything {
-        ObserverMode::Always
-    } else {
-        ObserverMode::Every(100)
-    };
+    // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
+    let mut executor = Executor::new(problem, solver, init_layout)
+        .timer(false)
+        // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
+        .max_iters(params.max_iters);
+    match custom_observer {
+        // If a custom Observer was supplied, only use that Observer.
+        Some(observer) => {
+            executor = executor.add_observer(observer, ObserverMode::Always);
+        }
+        // If no custom Observer was supplied, use the default setup.
+        None => {
+            let best_observer = BestObserver {
+                id: process_name.to_string(),
+                layout_generator: pm.clone(),
+            };
+            let iter_observer = IterationObserver {
+                id: process_name.to_string(),
+                layout_generator: pm.clone(),
+                log_everything,
+            };
+            let iter_observer_mode = if log_everything {
+                ObserverMode::Always
+            } else {
+                ObserverMode::Every(100)
+            };
+            // Optional: Attach a observer
+            executor = executor
+                .add_observer(best_observer, ObserverMode::NewBest)
+                .add_observer(iter_observer, iter_observer_mode);
+        }
+    }
 
     log::info!(
-        "{}: Starting optimization with: initial_temperature: {:.2}, {:?}",
-        process_name,
+        "{} Starting optimization with: initial_temperature: {:.2}°, {:?}",
+        format!("{}:", process_name).yellow().bold(),
         init_temp,
-        params
+        params,
     );
-    // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
-    let res = Executor::new(problem, solver, init_layout)
-        // Optional: Attach a observer
-        .add_observer(best_observer, ObserverMode::NewBest)
-        .add_observer(iter_observer, iter_observer_mode)
-        // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
-        .max_iters(params.max_iters)
-        .run()
-        .unwrap();
+    let res = executor.run().unwrap();
 
     let best_layout_param = res.state().get_best_param();
     pm.generate_layout(&best_layout_param)

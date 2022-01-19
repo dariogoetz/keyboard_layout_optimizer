@@ -1,8 +1,5 @@
-use keyboard_layout::layout::Layout;
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
 use rand::{seq::SliceRandom, thread_rng};
-use rustc_hash::FxHashMap;
-use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
 pub struct PermutationLayoutGenerator {
@@ -63,11 +60,38 @@ impl PermutationLayoutGenerator {
 
     /// Takes in a Layout, switches [nr_switches] keys in that layout, then returns it.
     /// Layout, in this case, is a [Vec<usize>].
-    pub fn switch_n_keys(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
+    pub fn perform_n_swaps(&self, permutation: &[usize], nr_switches: usize) -> Vec<usize> {
         let mut indices: Vec<usize> = permutation.to_vec();
+        let vec: Vec<usize> = (0..permutation.len()).collect();
+        let rng = &mut thread_rng();
 
-        // Shuffle some (self.n_switches) permutable chars
-        indices.partial_shuffle(&mut thread_rng(), nr_switches);
+        // Perform nr_switches switches
+        for _ in 0..nr_switches {
+            let mut sw = vec.choose_multiple(rng, 2);
+            let sw0 = sw.next().unwrap();
+            let sw1 = sw.next().unwrap();
+            let tmp = indices[*sw0];
+            indices[*sw0] = indices[*sw1];
+            indices[*sw1] = tmp;
+        }
+
+        indices
+    }
+
+    pub fn switch_n_keys(&self, permutation: &[usize], n_keys: usize) -> Vec<usize> {
+        let mut indices: Vec<usize> = permutation.to_vec();
+        let rng = &mut thread_rng();
+
+        let vec: Vec<usize> = (0..permutation.len()).collect();
+        let sw_from: Vec<&usize> = vec.choose_multiple(rng, n_keys).collect();
+        let mut sw_to = sw_from.to_vec();
+        sw_to.shuffle(rng);
+
+        // Perform nr_switches switches
+        for (from, to) in sw_from.into_iter().zip(sw_to.into_iter()) {
+            indices[*to] = permutation[*from];
+        }
+
         indices
     }
 
@@ -81,31 +105,11 @@ impl PermutationLayoutGenerator {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct Cache<T: Clone> {
-    cache: Arc<Mutex<FxHashMap<String, T>>>,
-}
 
-impl<T: Clone> Cache<T> {
-    pub fn new() -> Self {
-        Self {
-            cache: Arc::new(Mutex::new(FxHashMap::default())),
-        }
-    }
-
-    pub fn get_or_insert_with<F: Fn() -> T>(&self, elem: &str, f: F) -> T {
-        let cache_val;
-        {
-            let cache = self.cache.lock().unwrap();
-            cache_val = cache.get(elem).cloned();
-        }
-        cache_val.unwrap_or_else(|| {
-            let res = f();
-            {
-                let mut cache = self.cache.lock().unwrap();
-                cache.insert(elem.to_owned(), res.clone());
-            }
-            res
-        })
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
     }
 }

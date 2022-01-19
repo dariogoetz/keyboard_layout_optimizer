@@ -1,8 +1,9 @@
+use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
-use layout_optimization::common::Cache;
+use layout_evaluation::cache::Cache;
 use layout_optimization_sa::optimization;
 
 #[derive(StructOpt, Debug)]
@@ -109,11 +110,17 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
-        .expect(&format!(
+    let mut optimization_params =
+        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
             "Could not read optimization parameters from {}.",
             &options.optimization_parameters,
         ));
+    if options.greedy {
+        optimization_params.init_temp = Some(f64::MIN_POSITIVE);
+    } else if options.init_temp.is_some() {
+        optimization_params.init_temp = options.init_temp;
+    }
+    optimization_params.correct_init_temp();
 
     let mut layouts: Vec<String> = options.start_layouts.to_vec();
     if layouts.is_empty() {
@@ -122,23 +129,6 @@ fn main() {
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
 
     let start_from_layout = !options.start_layouts.is_empty();
-
-    let init_temp: Option<f64>;
-    if options.greedy {
-        init_temp = Some(f64::MIN_POSITIVE);
-    } else {
-        init_temp = match options.init_temp {
-            Some(t) => {
-                if t > 0.0 {
-                    Some(t)
-                } else {
-                    println!("Please input an initial-temperature that is bigger than 0.");
-                    None
-                }
-            }
-            None => None,
-        };
-    }
 
     let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
@@ -149,31 +139,45 @@ fn main() {
         .enumerate()
         .par_bridge()
         .for_each(|(i, fix_from)| {
+            let process_id = format!("Process {:>3}", i);
             if start_from_layout {
-                log::info!("Starting optimization {} from {}", i, fix_from);
+                log::info!(
+                    "{} Starting optimization from {}",
+                    format!("{}:", process_id).yellow().bold(),
+                    fix_from
+                );
             } else {
-                log::info!("Starting optimization {}", i);
+                log::info!(
+                    "{} Starting optimization",
+                    format!("{}:", process_id).yellow().bold(),
+                );
             }
 
             // Perform the optimization.
             let layout = optimization::optimize(
-                &format!("Process {:>3}", i),
+                &process_id,
                 &optimization_params,
                 &fix_from,
                 &options.fix.clone().unwrap_or_else(|| "".to_string()),
                 &layout_generator,
                 start_from_layout,
                 &evaluator,
-                init_temp,
                 options.log_everything,
                 cache.clone(),
+                None,
             );
 
             // Plot some information regarding the layout.
-            println!("{}", layout.plot());
-            println!("{}", layout.plot_compact());
             let evaluation_result = evaluator.evaluate_layout(&layout);
-            println!("{}", evaluation_result);
+            println!(
+                "{} {}\n\n{}\n\n{}\n{}\n{}",
+                format!("{}:", process_id).yellow().bold(),
+                "Final result:".green().bold(),
+                layout,
+                layout.plot_compact(),
+                layout.plot(),
+                evaluation_result
+            );
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {

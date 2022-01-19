@@ -2,21 +2,20 @@
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
-name = "layout_optimization_sa"
+name = "layout_optimization_genetic"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-keyboard_layout = { path = "../keyboard_layout" }
-layout_evaluation = { path = "../layout_evaluation" }
-layout_optimization = { path = "../layout_optimization" }
+keyboard_layout = { path = "../../keyboard_layout" }
+layout_evaluation = { path = "../../layout_evaluation" }
+layout_optimization_common = { path = "../layout_optimization_common" }
 
 anyhow = "1.0.45"
-argmin = "0.5.0"
-rand_xoshiro = { version = "0.6.0", features = ["serde1"] }
-colored = "2.0.0"
+colored = "*"
 env_logger = "*"
+genevo = "0.7.0"
 log = "*"
 rand = "0.8.4"
 rustc-hash = "1.1.0"

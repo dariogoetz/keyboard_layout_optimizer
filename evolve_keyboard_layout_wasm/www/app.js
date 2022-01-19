@@ -4,7 +4,8 @@ import config_moonlander from '../../config/moonlander.yml'
 import config_crkbd from '../../config/crkbd.yml'
 
 import eval_params from '../../config/evaluation_parameters.yml'
-import opt_params from '../../config/optimization_parameters_web.yml'
+import gen_opt_params from '../../config/optimization_parameters_web.yml'
+import sa_opt_params from '../../config/optimization_parameters_sa_web.yml'
 
 import Worker from "./worker.js"
 
@@ -13,6 +14,11 @@ const LAYOUT_CONFIGS = {
     ortho: config_ortho,
     moonlander: config_moonlander,
     crkbd: config_crkbd,
+}
+
+const OPTIMIZATION_ALGORITHM_PARAMS = {
+    "genevo": gen_opt_params,
+    "simulated_annealing": sa_opt_params,
 }
 
 const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
@@ -62,38 +68,43 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="setInput('k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj')">koy</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('kuü.ävgcljfßhieaodtrnsxyö,qbpwmz')">AdNW</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qwfpgjluyüößarstdhneiozxcvbkm,.ä')">colemak</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qdrwbjfupüößashtgyneoizxmcvkl,.ä')">workman</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(true)">random (std)</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 
       <b-form inline @submit.stop.prevent @submit="evaluateInput">
-        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+        <b-form-input v-model="inputLayoutRaw" :state="inputLayoutValid" placeholder="Enter Keyboard Layout..." class="mb-2 mr-sm-2 mb-sm-0" autofocus></b-form-input>
         <keyboard-selector @selected="selectLayoutConfigType"></keyboard-selector>
         <b-form-invalid-feedback>{{invalidInputFeedback}}</b-form-invalid-feedback>
       </b-form>
       <layout-plot :layout-string="inputLayout" :wasm="wasm" :layout-config="layoutConfig" :permutableKeys="permutableKeys"></layout-plot>
 
-      <b-button :disabled="loading > 0" @click="evaluateInput" variant="primary">
+      <b-button :disabled="loading > 0 || saOptimizationOngoing" @click="evaluateInput" variant="primary">
         <div v-if="loading > 0"><b-spinner small></b-spinner> Loading</div>
         <div v-else>Evaluate</div>
       </b-button>
 
       <b-button-group class="float-right">
-        <b-button :disabled="optStep > 0 || loading > 0" @click="optimizeInput" variant="secondary">
-          <div v-if="optStep > 0 || loading > 0">
+        <b-button :disabled="optStep >= 0 || loading > 0" @click="startOptimization" variant="secondary">
+          <div v-if="optStep >= 0 || loading > 0">
             <b-spinner small></b-spinner>
-            <span v-if="optStep > 0">Iteration {{optStep}}/{{optTotalSteps}}</span>
+            <span v-if="optStep >= 0">
+                <span v-if="optMode==='simulated_annealing'">Iteration {{optStep}} // {{temperatureStr}}°</span>
+                <span v-if="optMode==='genevo'">Iteration {{optStep}}/{{optTotalSteps}}</span>
+            </span>
             <span v-else>Loading</span>
           </div>
           <div v-else>Optimize</div>
         </b-button>
-        <b-button v-if="optStep > 0" @click="optCancelRequest" variant="danger"><b-icon-x-circle-fill /></b-button>
+        <b-button v-if="optStep >= 0" @click="stopOptimization" variant="danger"><b-icon-x-circle-fill /></b-button>
       </b-button-group>
 
     </b-col>
 
     <b-col xl="8" lg="6">
       <h2>Settings</h2>
-        <b-overlay :show="optStep > 0" style="height: 420px">
+        <b-overlay :show="optStep >= 0" style="height: 420px">
           <b-tabs>
             <b-tab title="Evaluation">
               <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
@@ -109,10 +120,11 @@ Vue.component('evaluator-app', {
 
             <b-tab title="Optimization">
               <b-form inline @submit.stop.prevent @submit="evaluateInput">
+                <optimization-selector class="mr-sm-2" @selected="selectOptimizationAlgorithm"></optimization-selector>
                 <label class="mr-sm-2">Fixed Keys</label>
                 <b-form-input v-model="optFixed" placeholder="Fixed Keys" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
               </b-form>
-              <config-file :initial-content="optParamsStr" @saved="updateOptParams">
+              <config-file :initial-content="currentOptParams" @saved="updateOptParams">
             </b-tab>
 
           </b-tabs>
@@ -124,7 +136,7 @@ Vue.component('evaluator-app', {
 
   <b-row>
     <b-col v-for="detail in details" xl="6">
-      <layout-button :layout="detail.layout" @remove="removeLayout"></layout-button>
+      <layout-button :layout="detail.layout" :layout-config="selectedLayoutConfig" @remove="removeLayout"></layout-button>
       <layout-details title="Details" :layout-details="detail"></layout-details>
     </b-col>
 
@@ -143,14 +155,16 @@ Vue.component('evaluator-app', {
         relative: { type: Boolean, default: false },
         logscale: { type: Boolean, default: false },
     },
-    data () {
+    data() {
         // LAYOUT_CONFIGS is defined in "vue-components.js"
         let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
+        let optParams = Object.assign({}, OPTIMIZATION_ALGORITHM_PARAMS);
         return {
             details: [],
             inputLayoutRaw: null,
             showInputValidState: false,
             wasm: null,
+            rawWorker: null,
             worker: null,
             ngramProviderInitialized: false,
             evaluatorInitialized: false,
@@ -158,37 +172,43 @@ Vue.component('evaluator-app', {
             ngrams: null,
             corpusText: null,
             evalParamsStr: null,
+            optMode: null,
             permutableKeys: null,
-            optParamsStr: null,
-            optParams: null,
+            optParams,
             selectedLayoutConfig: null,
             layoutConfigs,
             loading: 1,
-            optStep: 0,
+            saOptimizationOngoing: false,
+            optStep: -1,
+            temperatureStr: "",
             optTotalSteps: 0,
             optFixed: ",.",
             optCancel: false,
         }
     },
     computed: {
-        chartStyles () {
+        chartStyles() {
             return {
                 height: "600px",
                 position: "relative"
             }
         },
 
-        inputLayout () {
+        inputLayout() {
             let layoutString = (this.inputLayoutRaw || "").replace(" ", "")
             layoutString = layoutString.toLowerCase()
             return layoutString
         },
 
-        layoutConfig () {
+        layoutConfig() {
             return this.layoutConfigs[this.selectedLayoutConfig]
         },
 
-        invalidInputFeedback () {
+        currentOptParams() {
+            return this.optParams[this.optMode]
+        },
+
+        invalidInputFeedback() {
             let permutableKeys = new Set(this.permutableKeys)
             let givenKeys = new Set()
             let duplicates = new Set()
@@ -224,7 +244,7 @@ Vue.component('evaluator-app', {
             return msg
         },
 
-        inputLayoutValid () {
+        inputLayoutValid() {
             if (!this.showInputValidState) {
                 return null
             } else if (this.invalidInputFeedback === null) {
@@ -236,23 +256,25 @@ Vue.component('evaluator-app', {
 
     },
 
-    async created () {
+    async created() {
         this.evalParamsStr = eval_params
-        this.optParamsStr = opt_params
 
         this.wasm = await import("evolve-keyboard-layout-wasm")
-
-        this.worker = Comlink.wrap(new Worker('worker.js'))
-        await this.worker.init()
-
-        await this.initNgramProvider()
-        await this.initLayoutEvaluator()
+        this.createWorkers();
 
         // reduce initial value of this.loading
         this.loading -= 1
     },
 
     methods: {
+        async createWorkers() {
+            this.rawWorker = new Worker('worker.js')
+            this.worker = Comlink.wrap(this.rawWorker)
+            await this.worker.init()
+            await this.initNgramProvider()
+            await this.initLayoutEvaluator()
+        },
+
         randomInput(fix) {
             let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
             if (fix) {
@@ -269,15 +291,15 @@ Vue.component('evaluator-app', {
             }
             this.inputLayoutRaw = res
         },
-        setInput (layout) {
+        setInput(layout) {
             this.inputLayoutRaw = layout
         },
-        async evaluateInput () {
+        async evaluateInput() {
             this.showInputValidState = true
             // check if the current layout is already available in this.details
             let existing = this.details.filter((d) => d.layout == this.inputLayout)
             if (existing.length > 0) {
-                this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, {variant: "primary"})
+                this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, { variant: "primary" })
                 this.showInputValidState = false
             } else {
                 try {
@@ -290,7 +312,7 @@ Vue.component('evaluator-app', {
             }
         },
 
-        async evaluateExisting () {
+        async evaluateExisting() {
             if (!this.evaluatorInitialized || this.worker === null) {
                 return
             }
@@ -308,15 +330,15 @@ Vue.component('evaluator-app', {
             }
         },
 
-        async evaluate (layout) {
+        async evaluate(layout) {
             let promise = new Promise(async (resolve, reject) => {
 
                 if (this.inputLayoutValid !== null && !this.inputLayoutValid) {
-                    this.$bvToast.toast("Could not evaluate Layout: " + this.invalidInputFeedback, {variant: "danger"})
+                    this.$bvToast.toast("Could not evaluate Layout: " + this.invalidInputFeedback, { variant: "danger" })
                     return
                 }
 
-                this.$bvToast.toast(`Evaluating layout "${layout}"`, {variant: "primary"})
+                this.$bvToast.toast(`Evaluating layout "${layout}"`, { variant: "primary" })
                 this.loading += 1
                 try {
                     let res = await this.worker.evaluateLayout(layout)
@@ -324,7 +346,7 @@ Vue.component('evaluator-app', {
                     this.loading -= 1
                     resolve(res)
                 } catch (err) {
-                    this.$bvToast.toast(`Could not generate a valid layout: ${err}`, {variant: "danger"})
+                    this.$bvToast.toast(`Could not generate a valid layout: ${err}`, { variant: "danger" })
                     this.loading -= 1
                     reject(err)
                 }
@@ -332,7 +354,7 @@ Vue.component('evaluator-app', {
             return promise
         },
 
-        async initNgramProvider () {
+        async initNgramProvider() {
             if (this.ngrams === null || this.worker === null) {
                 return
             }
@@ -346,7 +368,7 @@ Vue.component('evaluator-app', {
             this.loading -= 1
         },
 
-        async initLayoutEvaluator () {
+        async initLayoutEvaluator() {
             if (!this.ngramProviderInitialized || this.worker === null) {
                 return
             }
@@ -357,7 +379,8 @@ Vue.component('evaluator-app', {
             this.loading -= 1
         },
 
-        async updateEvalParams (evalParamsStr) {
+        async updateEvalParams(evalParamsStr) {
+            this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
             this.evalParamsStr = evalParamsStr
 
             await this.initNgramProvider()
@@ -365,11 +388,12 @@ Vue.component('evaluator-app', {
             await this.evaluateExisting()
         },
 
-        updateOptParams (optParamsStr) {
-            this.optParamsStr = optParamsStr
+        updateOptParams(newOptParamsStr) {
+            this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
+            this.optParams[this.optMode] = newOptParamsStr;
         },
 
-        async updateNgramProviderParams (ngramType, ngramData) {
+        async updateNgramProviderParams(ngramType, ngramData) {
             this.ngramType = ngramType
 
             if (ngramType === "from_text") {
@@ -383,7 +407,8 @@ Vue.component('evaluator-app', {
             await this.evaluateExisting()
         },
 
-        async updateLayoutConfig (layoutConfig) {
+        async updateLayoutConfig(layoutConfig) {
+            this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
             this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
             await this.initLayoutEvaluator()
@@ -391,60 +416,117 @@ Vue.component('evaluator-app', {
 
         },
 
-        async selectLayoutConfigType (selectedLayoutConfig) {
+        async selectLayoutConfigType(selectedLayoutConfig) {
             this.selectedLayoutConfig = selectedLayoutConfig
 
             await this.initLayoutEvaluator()
             await this.evaluateExisting()
         },
 
-        removeLayout (layout) {
+        selectOptimizationAlgorithm(algorithmKey, algorithmLabel) {
+            if (this.optMode !== null) {
+                this.$bvToast.toast(`Switched to ${algorithmLabel}`, { variant: "primary" })
+            }
+            this.optMode = algorithmKey;
+        },
+
+        removeLayout(layout) {
             this.details = this.details.filter((d) => d.layout !== layout)
         },
 
-        async optimizeInput () {
-            // check if given layout_str is valid
+        async startOptimization() {
+            // Check if given layout_str is valid
             try {
                 this.showInputValidState = true
                 await this.evaluate(this.inputLayout)
                 this.showInputValidState = false
             } catch (err) {
-                this.optStep = 0
+                this.optStep = -1
                 this.optCancel = false
                 return
             }
+            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
 
-            this.optParams = await this.worker.initLayoutOptimizer(
+            if (this.optMode === "simulated_annealing") {
+                this.saOptimization()
+            } else if (this.optMode === "genevo") {
+                this.genevoOtimization()
+            } else {
+                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+            }
+        },
+        stopOptimization() {
+            if (this.optMode === "simulated_annealing") {
+                this.stopSaOptimization()
+            } else if (this.optMode === "genevo") {
+                this.stopGenevoOtimization()
+            } else {
+                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+            }
+        },
+
+        async saOptimization() {
+            this.saOptimizationOngoing = true
+            await this.worker.saOptimize(
                 this.inputLayout,
                 this.optFixed,
-                this.optParamsStr
+                this.currentOptParams,
+                Comlink.proxy(() => { }),
+                Comlink.proxy(this.updateInfo),
+                Comlink.proxy(this.setNewBest),
             )
+            this.$bvToast.toast("Optimization finished", { variant: "primary" })
+            this.evaluateInput();
+            this.saOptimizationOngoing = false
+        },
+        updateInfo(stepNr, tStr) {
+            this.optStep = stepNr
+            this.temperatureStr = tStr
+        },
+        setNewBest(layout, cost) {
+            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "primary" })
+            this.inputLayoutRaw = layout
+        },
+        stopSaOptimization() {
+            this.$bvToast.toast("Stopping optimization", { variant: "primary" })
+            this.rawWorker.terminate()
+            this.createWorkers().then((_data) => {
+                this.$bvToast.toast("Optimization finished", { variant: "primary" });
+                this.optStep = -1;
+                this.saOptimizationOngoing = false
+            })
+        },
 
-            this.optTotalSteps = this.optParams.generation_limit
+        async genevoOtimization() {
+            const optParams = await this.worker.initGenLayoutOptimizer(
+                this.inputLayout,
+                this.optFixed,
+                this.currentOptParams
+            )
+            this.optTotalSteps = optParams.generation_limit
             this.optStep = 1
             this.optCancel = false
 
-            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, {variant: "primary"})
             let res
             do {
-                res = await this.worker.optimizationStep()
+                res = await this.worker.genOptimizationStep()
                 if (res !== null) {
                     if (res.layout !== this.inputLayout) {
-                        this.$bvToast.toast(`New layout found: ${res.layout}`, {variant: "primary"})
+                        this.$bvToast.toast(`New layout found: ${res.layout}`, { variant: "primary" })
                         this.inputLayoutRaw = res.layout
                     }
                     this.optStep += 1
                 }
             } while (res !== null && !this.optCancel)
 
-            this.$bvToast.toast("Optimization finished", {variant: "primary"})
-            this.optStep = 0
+            this.$bvToast.toast("Optimization finished", { variant: "primary" })
+            this.optStep = -1
             this.optCancel = false
+            this.evaluateInput();
         },
-
-        optCancelRequest () {
+        stopGenevoOtimization() {
+            this.$bvToast.toast("Stopping optimization", { variant: "primary" })
             this.optCancel = true
-            this.$bvToast.toast("Stopping optimization", {variant: "primary"})
         },
     }
 })
@@ -459,14 +541,15 @@ Vue.component('layout-button', {
         </b-button-group>
         <b-modal v-model="showModal" title="Publish Layout" @ok="publish">
           <label class="mr-sm-2">Publish Name</label>
-          <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0"></b-form-input>
+          <b-form-input v-model="publishName" :state="nameState" placeholder="Name to publish result under" class="mb-2 mr-sm-2 mb-sm-0" autofocus></b-form-input>
         </b-modal>
       </div>
     `,
     props: {
         layout: { type: String, default: "", required: true },
+        layoutConfig: { type: String, required: true },
     },
-    data () {
+    data() {
         return {
             publishName: null,
             showNameState: false,
@@ -474,7 +557,7 @@ Vue.component('layout-button', {
         }
     },
     computed: {
-        nameState () {
+        nameState() {
             if (!this.showNameState) {
                 return null
             } else if (this.publishName === null || this.publishName.length === 0) {
@@ -485,10 +568,10 @@ Vue.component('layout-button', {
         },
     },
     methods: {
-        remove () {
+        remove() {
             this.$emit("remove", this.layout)
         },
-        async publish (bvModalEvt) {
+        async publish(bvModalEvt) {
             this.showNameState = true
             if (!this.nameState) {
                 bvModalEvt.preventDefault()
@@ -498,18 +581,18 @@ Vue.component('layout-button', {
                 let res = await fetch(PUBLISH_URL, {
                     method: "POST",
                     headers: {
-                      'Content-Type': 'application/json'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName })
+                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName, layout_config: this.layoutConfig })
                 })
                 let resData = await res.json()
                 if (resData.published_by !== this.publishName) {
-                    this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'warning'})
+                    this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'warning' })
                 } else {
-                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, {variant: 'primary'})
+                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'primary' })
                 }
             } catch (err) {
-                this.$bvToast.toast(`Error while publishing layout: ${err}`, {variant: 'danger'})
+                this.$bvToast.toast(`Error while publishing layout: ${err}`, { variant: 'danger' })
             }
         }
     },
@@ -524,9 +607,10 @@ Vue.component('ngram-config', {
           v-model="text"
           placeholder="Text to evaluate layouts on"
           rows="10"
+          autofocus
         >
         </b-form-textarea>
-        <b-button class="float-right" variant="primary" @click="save">Save</b-button>
+        <b-button class="float-right" variant="primary" :disabled="text===oldText" @click="save">Analyze & Save</b-button>
       </div>
       <div v-else>
         <br>
@@ -537,11 +621,11 @@ Vue.component('ngram-config', {
     props: {
         defaultSelection: { type: String, default: DEFAULT_NGRAM },
     },
-    data () {
+    data() {
         let options = []
         let description = {}
         NGRAMS.forEach(c => {
-            options.push({value: c.key, text: c.label})
+            options.push({ value: c.key, text: c.label })
             description[c.key] = c.description
         })
         options.push({ value: 'from_text', text: 'From Text' })
@@ -549,29 +633,40 @@ Vue.component('ngram-config', {
         return {
             selected: this.defaultSelection,
             options,
+            initialLoad: true,
+            oldText: "",
             text: "",
             description,
         }
     },
-    created () {
+    created() {
         this.select()
     },
     computed: {
-        detailsHTML () {
+        detailsHTML() {
             return this.description[this.selected]
         },
     },
     methods: {
-        select () {
+        select() {
             if (this.selected === 'from_text') {
-                this.$emit('selected', 'from_text', this.text)
+                this.emit('from_text', this.text)
             } else {
-                this.$emit('selected', 'prepared', this.selected)
+                this.emit('prepared', this.selected)
             }
         },
-        save () {
-            this.$emit("selected", this.selected, this.text)
+        save() {
+            this.oldText = this.text
+            this.emit(this.selected, this.text)
         },
+        emit(ngramType, ngramData) {
+            if (!this.initialLoad) {
+                this.$bvToast.toast("Updated n-grams", { variant: "primary" })
+            } else {
+                this.initialLoad = false
+            }
+            this.$emit('selected', ngramType, ngramData)
+        }
     },
 })
 
@@ -579,14 +674,15 @@ Vue.component('config-file', {
     template: `
     <div>
       <codemirror v-model="content" :options="options"></codemirror>
-      <b-button class="float-right" variant="primary" @click="save">Save</b-button>
+      <b-button class="float-right" variant="primary" :disabled="oldContent===content" @click="save">Save</b-button>
     </div>
     `,
     props: {
         initialContent: { type: String, default: "" },
     },
-    data () {
+    data() {
         return {
+            oldContent: this.initialContent,
             content: this.initialContent,
             options: {
                 mode: 'yaml',
@@ -597,12 +693,14 @@ Vue.component('config-file', {
         }
     },
     watch: {
-        initialContent () {
+        initialContent() {
+            this.oldContent = this.initialContent
             this.content = this.initialContent
         },
     },
     methods: {
-        save () {
+        save() {
+            this.oldContent = this.content
             this.$emit("saved", this.content)
         },
     },
@@ -620,40 +718,40 @@ Vue.component('layout-plot', {
         layoutConfig: { type: Object, default: null },
         permutableKeys: { type: Array, default: null },
     },
-    data () {
+    data() {
         return {
             plotString: null,
             layoutPlotter: null,
         }
     },
     watch: {
-        layoutString () {
+        layoutString() {
             this.plot()
         },
-        wasm () {
+        wasm() {
             this.update()
         },
-        layoutConfig () {
+        layoutConfig() {
             this.update()
         },
-        permutableKeys () {
+        permutableKeys() {
             this.update()
         },
     },
-    mounted () {
+    mounted() {
         this.update()
     },
     methods: {
-        update () {
+        update() {
             if (this.wasm === null || this.layoutConfig === null || this.permutableKeys === null) return
             try {
                 this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
             } catch (err) {
-                this.$bvToast.toast(`Error plotting the layout: ${err}`, {variant: 'danger'})
+                this.$bvToast.toast(`Error plotting the layout: ${err}`, { variant: 'danger' })
             }
             this.plot()
         },
-        plot () {
+        plot() {
             if (this.layoutPlotter === null) return ""
 
             const nMissing = this.permutableKeys.length - this.layoutString.length
