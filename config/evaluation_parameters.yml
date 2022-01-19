@@ -218,7 +218,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 300.0
+    weight: 100.0
     normalization:
       type: weight_found
       value: 1.0
@@ -259,7 +259,7 @@ metrics:
 
   movement_pattern_same_row:
     enabled: true
-    weight: 400.0
+    weight: 200.0
     normalization:
       type: weight_found
       value: 1.0
