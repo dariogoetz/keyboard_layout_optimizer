@@ -37,7 +37,7 @@ jobs:
 
       - name: Build WASM
         run: wasm-pack build --release
-        working-directory: ./evolve_keyboard_layout_wasm
+        working-directory: ./webui/layout_evaluation_wasm
 
       - uses: actions/setup-node@v2
         with:
@@ -45,18 +45,18 @@ jobs:
 
       - name: Install node packages
         run: npm install
-        working-directory: ./evolve_keyboard_layout_wasm/www
+        working-directory: ./webui/layout_evaluation_wasm/www
 
       - name: Build Webpage
         run: npm run build
-        working-directory: ./evolve_keyboard_layout_wasm/www
+        working-directory: ./webui/layout_evaluation_wasm/www
 
       - name: Deploy to github pages
         uses: JamesIves/github-pages-deploy-action@4.1.7
         if: github.event_name != 'pull_request'
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: ./evolve_keyboard_layout_wasm/www/dist # The folder the action should deploy.
+          folder: ./webui/layout_evaluation_wasm/www/dist # The folder the action should deploy.
 
   heroku-webpage:
     runs-on: ubuntu-latest

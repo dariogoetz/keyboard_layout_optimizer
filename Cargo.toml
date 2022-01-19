@@ -7,10 +7,9 @@ members = [
     "layout_optimization/layout_optimization_sa",
     "layout_optimization/layout_optimization_abc",
     "evolve_keyboard_layout",
-    # "layouts_webservice",
 ]
 
 exclude = [
-    "layouts_webservice",  # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
-    "evolve_keyboard_layout_wasm",
+    "webui/layouts_webservice",  # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
+    "webui/layout_evaluation_wasm",
 ]

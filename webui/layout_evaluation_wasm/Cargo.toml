@@ -1,7 +1,7 @@
 [package]
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
-name = "evolve_keyboard_layout_wasm"
+name = "layout_evaluation_wasm"
 version = "0.1.0"
 
 [lib]
@@ -11,11 +11,11 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-keyboard_layout = { path = "../keyboard_layout" }
-layout_evaluation = { path = "../layout_evaluation" }
-layout_optimization_common = { path = "../layout_optimization/layout_optimization_common" }
-layout_optimization_genetic = { path = "../layout_optimization/layout_optimization_genetic" }
-layout_optimization_sa = { path = "../layout_optimization/layout_optimization_sa" }
+keyboard_layout = { path = "../../keyboard_layout" }
+layout_evaluation = { path = "../../layout_evaluation" }
+layout_optimization_common = { path = "../../layout_optimization/layout_optimization_common" }
+layout_optimization_genetic = { path = "../../layout_optimization/layout_optimization_genetic" }
+layout_optimization_sa = { path = "../../layout_optimization/layout_optimization_sa" }
 
 instant = { version = "0.1.12", features = ["wasm-bindgen"] }
 js-sys = "*"
