@@ -1,5 +1,5 @@
 use keyboard_layout::layout::Layout;
-use layout_evaluation::results::EvaluationResult;
+use layout_evaluation::{cache::Cache, results::EvaluationResult};
 use serde::Serialize;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -76,6 +76,8 @@ fn main() {
         }
     }
 
+    let result_cache: Cache<EvaluationResult> = Cache::new();
+
     // evaluate layouts
     let mut results: Vec<(Layout, EvaluationResult)> = layout_strings
         .par_iter()
@@ -87,7 +89,7 @@ fn main() {
                     panic!("{:?}", e);
                 }
             };
-            let evaluation_result = evaluator.evaluate_layout(&layout);
+            let evaluation_result = result_cache.get_or_insert_with(&layout_str, || evaluator.evaluate_layout(&layout));
             (layout, evaluation_result)
         })
         .collect();
