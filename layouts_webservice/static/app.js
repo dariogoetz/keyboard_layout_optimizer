@@ -20,7 +20,6 @@ Vue.component('layouts-app', {
     <b-col xl="6">
       <b-form inline>
         <b-form-checkbox v-model="relative"inline>relative barplot</b-form-checkbox>
-        <b-form-checkbox v-if="!relative" v-model="logscale" inline>logarithmic scale</b-form-checkbox>
       </b-form>
       <layout-barplot :layout-details="details" :relative="relative" :logscale="logscale && !relative" :styles="chartStyles"></layout-barplot>
     </b-col>
