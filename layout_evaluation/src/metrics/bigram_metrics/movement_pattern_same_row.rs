@@ -20,6 +20,8 @@ pub struct FingerSwitchCost {
 pub struct Parameters {
     /// Rows to exclude for finger rolls
     pub exclude_rows: HashSet<isize>,
+    /// If to exclude bigrams containing keys with a positive "unbalancing" value
+    pub exclude_unbalancing: bool,
     /// Finger-specific costs
     pub finger_switch_costs: Vec<FingerSwitchCost>,
 }
@@ -27,6 +29,7 @@ pub struct Parameters {
 #[derive(Clone, Debug)]
 pub struct MovementPatternSameRow {
     exclude_rows: HashSet<isize>,
+    exclude_unbalancing: bool,
     finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
 }
 
@@ -39,6 +42,7 @@ impl MovementPatternSameRow {
         });
         Self {
             exclude_rows: params.exclude_rows.clone(),
+            exclude_unbalancing: params.exclude_unbalancing,
             finger_switch_costs,
         }
     }
@@ -69,6 +73,11 @@ impl BigramMetric for MovementPatternSameRow {
         // only consider rolls on same row
         if pos1.1 != pos2.1 {
             return Some(0.0);
+        }
+
+        // exclude unbalancing keys, if required
+        if self.exclude_unbalancing && (k1.key.unbalancing > 0.0 || k2.key.unbalancing > 0.0) {
+            return Some(0.0)
         }
 
         // apply finger-specific costs
