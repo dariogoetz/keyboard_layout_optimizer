@@ -150,10 +150,16 @@ They can be found inside the config-directory.
 The project includes several binaries within the `evolve_keyboard_layout` crate:
 1. `plot` - Plots the six layers of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
-1. `optimize_genetic` - Starts an optimization heuristic to find a good layout
+1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
+1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
+1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
 1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
 
 The binaries rely on three library crates providing relevant data structures and algorithms:
 1. `keyboard_layout` - Provides a representation of keys, keyboards, and layouts and a layout generator that generates layout objects from given strings.
 1. `layout_evaluation` - Provides functionalities for reading, generating, and processing ngram data and datastructures and traits for evaluating several metrics.
-1. `layout_optimization` - Provides a connection to the optimization algorithms. Based on the evaluator in `layout_evaluation`.
+1. `layout_optimization` - Provides optimization functionality. Based on the evaluator in `layout_evaluation`.
+
+Additionally, two web-UIs can be generated in the `webui` directory:
+1. `evaluation_wasm` - A static page providing layout evaluation and optimization functionality based on WASM.
+1. `layouts_webservice` - A webserver managing a database for collecting layouts and serving a frontend for exploring and comparing them.
