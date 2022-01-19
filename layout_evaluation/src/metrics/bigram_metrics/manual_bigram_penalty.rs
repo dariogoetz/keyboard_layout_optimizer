@@ -1,14 +1,9 @@
 //! The bigram metric `ManualBigramPenalty` incurrs costs if the bigram is mapped
 //! to one of a list of configurable "bad" key pairs (in terms of key locations).
-//! In addition to the configurable key pairs, all key pairs from pinky to pinky
-//! of the same hand are considered bad with a factor of one.
 
 use super::BigramMetric;
 
-use keyboard_layout::{
-    key::Finger,
-    layout::{LayerKey, Layout},
-};
+use keyboard_layout::layout::{LayerKey, Layout};
 
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
@@ -60,14 +55,6 @@ impl BigramMetric for ManualBigramPenalty {
 
         if let Some(val) = self.matrix_positions.get(&((x1, y1), (x2, y2))) {
             return Some(weight * *val);
-        }
-
-        // add manual penalty for all pinky finger repeats
-        if k1.key.hand == k2.key.hand
-            && k1.key.finger == Finger::Pinky
-            && k2.key.finger == Finger::Pinky
-        {
-            return Some(weight);
         }
 
         return Some(0.0);
