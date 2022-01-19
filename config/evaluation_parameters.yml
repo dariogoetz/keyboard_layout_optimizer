@@ -189,7 +189,7 @@ metrics:
   # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
     enabled: true
-    weight: 1050.0
+    weight: 2100.0
     normalization:
       type: weight_found
       value: 1.0
@@ -198,8 +198,6 @@ metrics:
       # the format is [column, row]
       # [from_position, to_position]: weight
       matrix_positions:
-        # all combinations with pinky will be added automatically
-        #
         # symmetric ones will be added automatically
         # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2 (not in row 3)
         [[3, 1], [2, 3]]: 1      # QWERTZ: wy
@@ -213,6 +211,15 @@ metrics:
 
         [[2, 3], [5, 3]]: -0.01  # QWERTZ: yv
         [[14, 3], [17, 3]]: -0.01 # QWERTZ: m-
+
+        # Finger repeats on same key
+        # pinkies
+        [[2, 1], [2, 1]]: 0.5
+        [[2, 2], [2, 2]]: 0.3
+        [[2, 3], [2, 3]]: 0.5
+        [[17, 1], [17, 1]]: 0.5
+        [[17, 2], [17, 2]]: 0.3
+        [[17, 3], [17, 3]]: 0.5
 
   # Depending on which fingers of the same hand are used to hit the keys of a bigram, costs are
   # counted.
