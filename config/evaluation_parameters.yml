@@ -1,7 +1,7 @@
 metrics:
   # layout metrics
 
-  # Specified symbols shall be located within the leftmost 5 columns of the left hand
+  # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
     enabled: true
     weight: 0.35
@@ -12,6 +12,7 @@ metrics:
       # symbols that shall be considered "shortcut keys"
       shortcut_chars: cvxz
       cost: 1.0
+      within_n_leftmost_cols: 5
 
   # Symbols of specified groups shall have the same relative location to each others
   asymmetric_keys:
