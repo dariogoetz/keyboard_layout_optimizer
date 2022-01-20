@@ -14,7 +14,7 @@ keyboard:
     - [      [ 0.5,4],         [   2,4],   [   3,4],                                       [   7,4],                                        [   11,4],   [ 12.5,4],   [   13,4],    [   14,4]]
 
   hands:
-    - [Left,    Left, Left, Left, Left, Left, Left,  Right, Right, Right, Right, Right, Right, Right]
+    - [Left,    Left, Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
     - [Left,         Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
     - [Left,           Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right, Right]
     - [Left,    Left,    Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right]
