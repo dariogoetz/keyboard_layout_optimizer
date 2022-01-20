@@ -272,7 +272,8 @@ metrics:
       value: 1.0
     params:
       exclude_rows: [3]
-      exclude_unbalancing: true
+      exclude_unbalancing: false
+      exclude_lateral_finger_movement: true
 
       # from: Finger for first symbol of the bigram
       # to: Finger for second symbol of the bigram

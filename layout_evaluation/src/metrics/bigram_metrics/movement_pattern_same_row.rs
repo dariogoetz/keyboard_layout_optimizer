@@ -7,6 +7,7 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
+use std::convert::TryInto;
 use serde::Deserialize;
 
 #[derive(Copy, Clone, Deserialize, Debug)]
@@ -22,6 +23,8 @@ pub struct Parameters {
     pub exclude_rows: HashSet<isize>,
     /// If to exclude bigrams containing keys with a positive "unbalancing" value
     pub exclude_unbalancing: bool,
+    // If to exclude bigrams containing a lateral finger movement
+    pub exclude_lateral_finger_movement: bool,
     /// Finger-specific costs
     pub finger_switch_costs: Vec<FingerSwitchCost>,
 }
@@ -30,6 +33,7 @@ pub struct Parameters {
 pub struct MovementPatternSameRow {
     exclude_rows: HashSet<isize>,
     exclude_unbalancing: bool,
+    exclude_lateral_finger_movement: bool,
     finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
 }
 
@@ -43,6 +47,7 @@ impl MovementPatternSameRow {
         Self {
             exclude_rows: params.exclude_rows.clone(),
             exclude_unbalancing: params.exclude_unbalancing,
+            exclude_lateral_finger_movement: params.exclude_lateral_finger_movement,
             finger_switch_costs,
         }
     }
@@ -73,6 +78,11 @@ impl BigramMetric for MovementPatternSameRow {
         // only consider rolls on same row
         if pos1.1 != pos2.1 {
             return Some(0.0);
+        }
+
+        // no roll on lateral finger movements
+        if k1.key.finger.distance(&k2.key.finger) < (pos1.0 - pos2.0).abs().try_into().unwrap() {
+            return Some(0.0)
         }
 
         // exclude unbalancing keys, if required
