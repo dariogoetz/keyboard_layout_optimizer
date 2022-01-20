@@ -81,7 +81,7 @@ impl BigramMetric for MovementPatternSameRow {
         }
 
         // no roll on lateral finger movements
-        if k1.key.finger.distance(&k2.key.finger) < (pos1.0 - pos2.0).abs().try_into().unwrap() {
+        if self.exclude_lateral_finger_movement && k1.key.finger.distance(&k2.key.finger) < (pos1.0 - pos2.0).abs().try_into().unwrap() {
             return Some(0.0)
         }
 
