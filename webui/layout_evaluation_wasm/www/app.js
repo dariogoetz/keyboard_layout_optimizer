@@ -362,9 +362,15 @@ Vue.component('evaluator-app', {
             if (this.ngramType === "from_text") {
                 data = this.corpusText
             }
-            await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
-            this.ngramProviderInitialized = true
-            this.loading -= 1
+            try {
+                await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
+                this.ngramProviderInitialized = true
+                this.loading -= 1
+            } catch (err) {
+                this.$bvToast.toast(`Could not initialize ngram provider: ${err}`, { variant: "danger" })
+                this.loading -= 1
+                throw err
+            }
         },
 
         async initLayoutEvaluator() {
@@ -372,19 +378,29 @@ Vue.component('evaluator-app', {
                 return
             }
             this.loading += 1
-            await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
-            this.permutableKeys = await this.worker.permutableKeys()
-            this.evaluatorInitialized = true
-            this.loading -= 1
+            try {
+                await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
+                this.permutableKeys = await this.worker.permutableKeys()
+                this.evaluatorInitialized = true
+                this.loading -= 1
+            } catch (err) {
+                this.$bvToast.toast(`Could not initialize layout evaluator: ${err}`, { variant: "danger" })
+                this.loading -= 1
+                throw err
+            }
         },
 
         async updateEvalParams(evalParamsStr) {
-            this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
             this.evalParamsStr = evalParamsStr
 
-            await this.initNgramProvider()
-            await this.initLayoutEvaluator()
-            await this.evaluateExisting()
+            try {
+                await this.initNgramProvider()
+                await this.initLayoutEvaluator()
+                await this.evaluateExisting()
+                this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
+            } catch (err) {
+                this.$bvToast.toast("Did not update evaluation parameters", { variant: "danger" })
+            }
         },
 
         updateOptParams(newOptParamsStr) {
@@ -401,25 +417,38 @@ Vue.component('evaluator-app', {
                 this.ngrams = ngramData
             }
 
-            await this.initNgramProvider()
-            await this.initLayoutEvaluator()
-            await this.evaluateExisting()
+            try {
+                await this.initNgramProvider()
+                await this.initLayoutEvaluator()
+                await this.evaluateExisting()
+                this.$bvToast.toast("Saved ngram parameters", { variant: "primary" })
+            } catch (err) {
+                this.$bvToast.toast("Did not update ngram parameters", { variant: "danger" })
+            }
         },
 
         async updateLayoutConfig(layoutConfig) {
-            this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
             this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
 
-            await this.initLayoutEvaluator()
-            await this.evaluateExisting()
-
+            try {
+                await this.initLayoutEvaluator()
+                await this.evaluateExisting()
+                this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
+            } catch (err) {
+                this.$bvToast.toast("Did not update layout configuration", { variant: "danger" })
+            }
         },
 
         async selectLayoutConfigType(selectedLayoutConfig) {
             this.selectedLayoutConfig = selectedLayoutConfig
 
-            await this.initLayoutEvaluator()
-            await this.evaluateExisting()
+            try {
+                await this.initLayoutEvaluator()
+                await this.evaluateExisting()
+                this.$bvToast.toast(`Switched to layout configuration ${selectedLayoutConfig}`, { variant: "primary" })
+            } catch (err) {
+                this.$bvToast.toast(`Did not switch to layout configuration ${selectedLayoutConfig}`, { variant: "danger" })
+            }
         },
 
         selectOptimizationAlgorithm(algorithmKey, algorithmLabel) {
@@ -660,7 +689,7 @@ Vue.component('ngram-config', {
         },
         emit(ngramType, ngramData) {
             if (!this.initialLoad) {
-                this.$bvToast.toast("Updated n-grams", { variant: "primary" })
+                this.$bvToast.toast("Updated ngrams", { variant: "primary" })
             } else {
                 this.initialLoad = false
             }
