@@ -5,8 +5,6 @@ It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permuta
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams.
 
-The optimization is implemented using the [genevo](https://github.com/innoave/genevo) crate.
-
 ## Results
 Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
 
@@ -16,7 +14,7 @@ The corresponding webserver's implementation is located in the `layouts_webservi
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
 - evaluation based on prepared unigrams, bigrams, and trigrams or a text
 - fast evaluation (~100ms per layout for standard corpus)
-- layout optimization using a genetic algorithm
+- layout optimization using [various algorithms](#optimization-algorithms)
 - accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
@@ -82,7 +80,7 @@ There are various optional parameters that can be explored using the `-h` option
 #### Configuration
 Many aspects of the evaluation can be configured in the yaml files `standard_keyboard.yml` and `evaluation_parameters.yml`.
 
-`standard_keyboard.yml`
+##### `standard_keyboard.yml`
 This file contains "physical" properties of the keyboard and information about the Neo layout that serves as an underlying base for the variants to evaluate. It covers for the keyboard:
 - key positions
 - key to hand mapping
@@ -98,34 +96,69 @@ And for the Neo base layout:
 - modifiers to be used to access each layer
 - cost associated to accessing each layer
 
-`evaluation_parameters.yml`
+##### `evaluation_parameters.yml`
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
 ### Layout Optimization Binary
-The `optimize` binary can run without any commandline parameter. In that case, it starts with a collection of random layouts and optimizes from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the Neo2 layout). Optional commandline parameters can be explored with the `-h` option.
+The available optimize-binaries include `optimize_abc.rs`, `optimize_genetic.rs`, and `optimize_sa.rs`.
+If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
+Optional commandline parameters can be explored with the `-h` option.
 
+Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
+
+``` sh
+RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
+```
+
+#### Optimization Algorithms
+##### Artificial Bee Colony (`optimize_abc.rs`)
+Currently, a few of the options available in the other binaries are not yet implemented for this optimization.
+
+Example of an optimization (starting from a random layout, fixing "," and "."):
+``` sh
+RUST_LOG=INFO ./target/release/optimize_abc -f ",."
+```
+
+##### Genetic Algorithm (`optimize_genetic.rs`)
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
 ```
 
-Example for a never ending search for good layouts (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com):
+##### Simulated Annealing (`optimize_sa.rs`)
+An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
 
+Example (starting from Bone layout, fixing "," and "."):
 ``` sh
-RUST_LOG=INFO ./target/release/optimize_genetic -f ",." --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"
+RUST_LOG=INFO ./target/release/optimize_sa -s "jduax phlmwqß ctieo bnrsg fvüäö yz,.k" -f ",."
+```
+In contrast to other binaries, using this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (starting from Bone, Neo, and KOY):
+``` sh
+RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
 
 #### Configuration
-The parameters of the optimization process can be configured in the file `optimization_parameters.yml`. This includes sizes of the population, number of generations to evaluate, mutation and insertion rates, and the selection ratio.
+The parameters of the corresponding optimization process can be configured in the files:
+* `optimization_parameters_abc.yml`
+* `optimization_parameters_genetic.yml`
+* `optimization_parameters_sa.yml`
+
+They can be found inside the config-directory.
 
 ## Structure
 The project includes several binaries within the `evolve_keyboard_layout` crate:
 1. `plot` - Plots the six layers of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
-1. `optimize_genetic` - Starts an optimization heuristic to find a good layout
+1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
+1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
+1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
 1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
 
 The binaries rely on three library crates providing relevant data structures and algorithms:
 1. `keyboard_layout` - Provides a representation of keys, keyboards, and layouts and a layout generator that generates layout objects from given strings.
 1. `layout_evaluation` - Provides functionalities for reading, generating, and processing ngram data and datastructures and traits for evaluating several metrics.
-2. `layout_optimization` - Provides a connection to the genevo optimization algorithms by implementing a specialized genetic algorithm based on the evaluator in `layout_evaluation`.
+1. `layout_optimization` - Provides optimization functionality. Based on the evaluator in `layout_evaluation`.
+
+Additionally, two web-UIs can be generated in the `webui` directory:
+1. `evaluation_wasm` - A static page providing layout evaluation and optimization functionality based on WASM.
+1. `layouts_webservice` - A webserver managing a database for collecting layouts and serving a frontend for exploring and comparing them.

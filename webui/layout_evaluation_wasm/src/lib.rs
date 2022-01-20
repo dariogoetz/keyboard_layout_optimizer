@@ -1,6 +1,7 @@
 mod utils;
 
 use argmin::prelude::{ArgminKV, Error, IterState, Observe};
+use genevo::prelude::*;
 use instant::Instant;
 use serde::Serialize;
 use std::sync::Arc;
@@ -20,7 +21,7 @@ use layout_evaluation::{
 };
 
 use layout_optimization_common::PermutationLayoutGenerator;
-use layout_optimization_genetic::optimization as gen_optimization;
+use layout_optimization_genetic::optimization as genevo_optimization;
 use layout_optimization_sa::optimization as sa_optimization;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -201,10 +202,10 @@ impl LayoutEvaluator {
 #[wasm_bindgen]
 pub struct LayoutOptimizer {
     evaluator: Evaluator,
-    simulator: gen_optimization::MySimulator,
+    simulator: genevo_optimization::MySimulator,
     permutation_layout_generator: PermutationLayoutGenerator,
     all_time_best: Option<(usize, Vec<usize>)>,
-    parameters: gen_optimization::Parameters,
+    parameters: genevo_optimization::Parameters,
 }
 
 #[wasm_bindgen]
@@ -218,11 +219,11 @@ impl LayoutOptimizer {
     ) -> Result<LayoutOptimizer, JsValue> {
         utils::set_panic_hook();
 
-        let parameters: gen_optimization::Parameters =
+        let parameters: genevo_optimization::Parameters =
             serde_yaml::from_str(optimization_params_str)
                 .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
-        let (simulator, permutation_layout_generator) = gen_optimization::init_optimization(
+        let (simulator, permutation_layout_generator) = genevo_optimization::init_optimization(
             &parameters,
             &layout_evaluator.evaluator,
             layout_str,
@@ -246,7 +247,6 @@ impl LayoutOptimizer {
     }
 
     pub fn step(&mut self) -> Result<JsValue, JsValue> {
-        use genevo::prelude::*;
 
         let result = self.simulator.step();
         match result {

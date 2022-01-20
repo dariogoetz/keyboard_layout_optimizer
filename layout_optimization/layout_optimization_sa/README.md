@@ -1,0 +1,1 @@
+Implemented using the [argmin](https://github.com/argmin-rs/argmin) crate.

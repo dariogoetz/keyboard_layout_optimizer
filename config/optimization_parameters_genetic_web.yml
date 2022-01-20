@@ -1,4 +1,6 @@
+# Size of the population
 population_size: 100
+# Number of generations to evaluate
 generation_limit: 100
 num_individuals_per_parents: 2
 selection_ratio: 0.3
