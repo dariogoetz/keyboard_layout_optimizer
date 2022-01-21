@@ -118,11 +118,15 @@ impl Observe<AnnealingStruct> for BestObserver {
         state: &IterState<AnnealingStruct>,
         _kv: &ArgminKV,
     ) -> Result<(), Error> {
+        let reason = match state.iter {
+            0 => "Starting layout:".blue(),
+            _ => "New best:".green(),
+        };
         let best_layout = self.layout_generator.generate_string(&state.best_param);
         log::info!(
             "{} {} {} ({:>6.1})",
             format!("{}:", self.id).yellow().bold(),
-            "New best:".green(),
+            reason,
             best_layout,
             state.best_cost,
         );
@@ -154,56 +158,58 @@ impl Observe<AnnealingStruct> for IterationObserver {
         state: &IterState<AnnealingStruct>,
         kv: &ArgminKV,
     ) -> Result<(), Error> {
-        let layout = self.layout_generator.generate_string(&state.param);
-        let best_layout = self.layout_generator.generate_string(&state.best_param);
-        /* Structure of ArgminKV.kv: Vec<(&'static str, String)>
-        t: 111.38906945299198
-        new_be: true
-        acc: true
-        st_i_be: 0
-        st_i_ac: 0
-        ra_i_fi: 1
-        ra_i_be: 0
-        ra_i_ac: 0
-        ra_fi: false
-        ra_be: false
-        ra_ac: false
-        time: 0.533206799 */
-        let mut temperature = String::from("Not found.");
-        let mut accepted = "Not found";
-        for (key, value) in &kv.kv {
-            match *key {
-                "t" => temperature = format!("{:.5}", value),
-                "acc" => accepted = value,
-                _ => {}
+        if state.iter > 0 {
+            let layout = self.layout_generator.generate_string(&state.param);
+            let best_layout = self.layout_generator.generate_string(&state.best_param);
+            /* Structure of ArgminKV.kv: Vec<(&'static str, String)>
+            t: 111.38906945299198
+            new_be: true
+            acc: true
+            st_i_be: 0
+            st_i_ac: 0
+            ra_i_fi: 1
+            ra_i_be: 0
+            ra_i_ac: 0
+            ra_fi: false
+            ra_be: false
+            ra_ac: false
+            time: 0.533206799 */
+            let mut temperature = String::from("Not found.");
+            let mut accepted = "Not found";
+            for (key, value) in &kv.kv {
+                match *key {
+                    "t" => temperature = format!("{:.5}", value),
+                    "acc" => accepted = value,
+                    _ => {}
+                }
             }
+            let mut output = format!(
+                "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}°",
+                format!("{}:", self.id).yellow().bold(),
+                "n:".bold(),
+                state.iter,
+                "current:".bold(),
+                layout,
+                state.cost,
+                "best:".bold(),
+                best_layout,
+                state.best_cost,
+                "temp:".bold(),
+                temperature,
+            );
+            if self.log_everything {
+                let is_better = state.cost < state.prev_cost;
+                output.push_str(&format!(
+                    " {} {}{} {} {}",
+                    "better:".bold(),
+                    is_better,
+                    if is_better { " " } else { "" }, // Used to perserve alignment. {:.5} doesn't work.
+                    "acc:".bold(),
+                    accepted
+                ));
+            }
+            log::info!("{}", output);
         }
-        let mut output = format!(
-            "{} {} {:>3}, {} {} ({:>6.1}), {} {} ({:>6.1}), {} {}°",
-            format!("{}:", self.id).yellow().bold(),
-            "n:".bold(),
-            state.iter,
-            "current:".bold(),
-            layout,
-            state.cost,
-            "best:".bold(),
-            best_layout,
-            state.best_cost,
-            "temp:".bold(),
-            temperature,
-        );
-        if self.log_everything {
-            let is_better = state.cost < state.prev_cost;
-            output.push_str(&format!(
-                " {} {}{} {} {}",
-                "better:".bold(),
-                is_better,
-                if is_better { " " } else { "" }, // Used to perserve alignment. {:.5} doesn't work.
-                "acc:".bold(),
-                accepted
-            ));
-        }
-        log::info!("{}", output);
         Ok(())
     }
 }
@@ -220,7 +226,7 @@ fn mean(list: &[f64]) -> f64 {
 /// This value can then be used as the initial temperature in Simulated annealing.
 /// Reference: https://link.springer.com/content/pdf/10.1007/s10732-007-9012-8.pdf
 fn get_cost_sd(
-    initial_layout: &Vec<usize>,
+    initial_indices: &Vec<usize>,
     evaluator: Arc<Evaluator>,
     layout_generator: &PermutationLayoutGenerator,
     key_pair_switches: usize,
@@ -230,13 +236,13 @@ fn get_cost_sd(
     // Calculate initial temperature.
     let mut sd = 0.0;
     let mut costs: Vec<f64> = vec![];
-    let mut current_layout = initial_layout.clone();
+    let mut current_indices = initial_indices.clone();
 
     for _ in 0..USED_NEIGHBORS {
-        let layout = layout_generator.generate_layout(&current_layout);
+        let layout = layout_generator.generate_layout(&current_indices);
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
-        current_layout = layout_generator.perform_n_swaps(&current_layout, key_pair_switches);
+        current_indices = layout_generator.perform_n_swaps(&current_indices, key_pair_switches);
     }
     let average: f64 = mean(&costs);
 
@@ -264,7 +270,7 @@ pub fn optimize(
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
-    let init_layout = match start_with_layout {
+    let initial_indices = match start_with_layout {
         true => pm.get_permutable_indices(),
         false => pm.generate_random(),
     };
@@ -288,7 +294,7 @@ pub fn optimize(
                 format!("{}:", process_name).yellow().bold(),
             );
             let init_temp = get_cost_sd(
-                &init_layout,
+                &initial_indices,
                 Arc::new(evaluator.clone()),
                 &pm,
                 params.key_switches,
@@ -322,7 +328,7 @@ pub fn optimize(
         .stall_accepted(params.stall_accepted);
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
-    let mut executor = Executor::new(problem, solver, init_layout)
+    let mut executor = Executor::new(problem, solver, initial_indices)
         .timer(false)
         // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
         .max_iters(params.max_iters);
