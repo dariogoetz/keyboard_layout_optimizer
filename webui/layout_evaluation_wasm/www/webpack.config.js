@@ -10,10 +10,11 @@ module.exports = {
   mode: "development",
   plugins: [
     new CopyWebpackPlugin([
-        'index.html',
-        'codemirror.css',
-        '../../layouts_webservice/static/vue-components.js',
-        '../../layouts_webservice/static/app.css',
+      'index.html',
+      'codemirror.css',
+      '../../layouts_webservice/static/vue-components.js',
+      '../../layouts_webservice/static/app.css',
+      '../../layouts_webservice/static/icons/github.svg',
     ])
   ],
   module: {
