@@ -20,7 +20,7 @@ impl Default for Parameters {
     fn default() -> Self {
         Parameters {
             retries: 1000,
-            n_switches: 4,
+            n_switches: 1,
         }
     }
 }
