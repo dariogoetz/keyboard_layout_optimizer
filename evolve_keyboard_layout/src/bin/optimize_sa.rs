@@ -1,6 +1,5 @@
 use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
-use std::sync::Mutex;
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
@@ -139,7 +138,7 @@ fn main() {
         true => Some(Cache::new()),
         false => None,
     };
-    let all_results: Mutex<Vec<(String, f64)>> = Mutex::new(vec![]);
+    let result_cache: Cache<f64> = Cache::new();
 
     layout_iterator
         .enumerate()
@@ -185,27 +184,12 @@ fn main() {
                 evaluation_result
             );
             if options.run_forever {
+
                 // Simulated Annealing can produce a high number of layouts.
                 // To combat this chaos, an overview of all layouts found so far is shown after every cycle, if optimization is run_forever.
                 let current_layout = layout.as_text();
-                let mut all_results_mut = all_results.lock().unwrap();
-                if !all_results_mut.iter().any(|(l, _c)| l==&current_layout) {
-                    // Only add the layout if it didn't already exist.
-                    all_results_mut.push((layout.as_text(), evaluation_result.total_cost()));
-                    all_results_mut.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
-                }
-                output_string.push_str(
-                    &format!("\nFinal layouts found during this run, ordered from best (lowest cost) to worst (highest cost) ↓")
-                );
-
-                for (i, (string, cost)) in all_results_mut.iter().enumerate() {
-                    let result_line = format!("{} ({:.1})", string, cost);
-                    if string == &current_layout {
-                        output_string.push_str(&format!("\n{:>4} {} (current)", format!("{}.", i + 1),          result_line.bold()));
-                    } else {
-                        output_string.push_str(&format!("\n{:>4} {}", format!("{}.", i + 1), result_line),);
-                    }
-                }
+                result_cache.get_or_insert_with(&current_layout, || evaluation_result.total_cost());
+                output_string.push_str(&result_cache.print_highlighted(Some(&current_layout)));
             }
             println!("{}\n", output_string);
 

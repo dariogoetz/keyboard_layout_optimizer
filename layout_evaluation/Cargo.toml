@@ -11,6 +11,7 @@ version = "0.1.0"
 keyboard_layout = { path = "../keyboard_layout" }
 
 anyhow = "*"
+colored = "*"
 env_logger = "*"
 log = "*"
 ordered-float = "*"
