@@ -1,3 +1,36 @@
+h1 {
+  margin: 1rem 0 0
+}
+
 pre, code {
   font:400 13px/15px 'DejaVuSansMonoBook', monospace;
 }
+
+/* Style footer */
+html {
+  position: relative;
+  min-height: 100%;
+}
+#app {
+  margin: 0 0 3rem;
+}
+footer {
+  background-color: #e9ecef; /* Same color as bootstrap Jumbotrons */
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3rem;
+  width: 100%;
+  padding: 10px;
+  overflow: hidden;
+}
+footer a {
+  color: black;
+}
+footer a:hover {
+  color: black;
+  text-decoration: underline;
+}
+/* .footerLogo {
+    height: 1.5rem;
+} */
