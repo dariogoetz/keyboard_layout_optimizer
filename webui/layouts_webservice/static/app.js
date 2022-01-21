@@ -9,7 +9,7 @@ Vue.component('layouts-app', {
 
   <b-row>
     <b-col xl="6">
-      <b-form inline>
+      <b-form inline @submit.stop.prevent>
         <keyboard-selector @selected="keyboardSelected"></keyboard-selector>
         <b-form-input v-model="filter" debounce="500" placeholder="Filter" class="mb-2 mr-sm-2 mb-sm-0 ml-sm-2"></b-form-input>
         <b-form-checkbox v-model="bestInFamily" class="mb-2 mr-sm-2 mb-sm-0">only show best in family (clears selection)</b-form-checkbox>
