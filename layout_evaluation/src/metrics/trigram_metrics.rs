@@ -11,7 +11,6 @@ pub mod rolls;
 pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
 
-
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
     /// Return the name of the metric.
@@ -39,8 +38,14 @@ pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let show_worst: bool = env::var("SHOW_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
-        let n_worst: usize = env::var("N_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+        let show_worst: bool = env::var("SHOW_WORST")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(true);
+        let n_worst: usize = env::var("N_WORST")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(3);
 
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = trigrams.iter().filter_map(|(trigram, weight)| {

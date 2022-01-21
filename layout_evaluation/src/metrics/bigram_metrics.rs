@@ -42,8 +42,14 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let show_worst: bool = env::var("SHOW_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
-        let n_worst: usize = env::var("N_WORST").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+        let show_worst: bool = env::var("SHOW_WORST")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(true);
+        let n_worst: usize = env::var("N_WORST")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(3);
 
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = bigrams.iter().filter_map(|(bigram, weight)| {

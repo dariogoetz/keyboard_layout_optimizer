@@ -105,7 +105,6 @@ impl PermutationLayoutGenerator {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     #[test]

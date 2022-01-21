@@ -3,8 +3,8 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
-use std::usize;
 use std::env;
+use std::usize;
 
 pub mod finger_balance;
 pub mod hand_disbalance;
@@ -35,8 +35,14 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let show_worst: bool = env::var("show_worst").ok().and_then(|s| s.parse().ok()).unwrap_or(true);
-        let n_worst: usize = env::var("n_worst").ok().and_then(|s| s.parse().ok()).unwrap_or(3);
+        let show_worst: bool = env::var("show_worst")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(true);
+        let n_worst: usize = env::var("n_worst")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(3);
 
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = unigrams.iter().filter_map(|(unigram, weight)| {

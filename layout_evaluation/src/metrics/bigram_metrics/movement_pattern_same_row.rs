@@ -7,8 +7,8 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
-use std::convert::TryInto;
 use serde::Deserialize;
+use std::convert::TryInto;
 
 #[derive(Copy, Clone, Deserialize, Debug)]
 pub struct FingerSwitchCost {
@@ -81,17 +81,22 @@ impl BigramMetric for MovementPatternSameRow {
         }
 
         // no roll on lateral finger movements
-        if self.exclude_lateral_finger_movement && k1.key.finger.distance(&k2.key.finger) < (pos1.0 - pos2.0).abs().try_into().unwrap() {
-            return Some(0.0)
+        if self.exclude_lateral_finger_movement
+            && k1.key.finger.distance(&k2.key.finger) < (pos1.0 - pos2.0).abs().try_into().unwrap()
+        {
+            return Some(0.0);
         }
 
         // exclude unbalancing keys, if required
         if self.exclude_unbalancing && (k1.key.unbalancing > 0.0 || k2.key.unbalancing > 0.0) {
-            return Some(0.0)
+            return Some(0.0);
         }
 
         // apply finger-specific costs
-        let cost = *self.finger_switch_costs.get(&k1.key.hand, &k1.key.finger).get(&k2.key.hand, &k2.key.finger);
+        let cost = *self
+            .finger_switch_costs
+            .get(&k1.key.hand, &k1.key.finger)
+            .get(&k2.key.hand, &k2.key.finger);
 
         Some(-cost * weight)
     }
