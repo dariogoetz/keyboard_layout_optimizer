@@ -106,6 +106,10 @@ impl Iterator for LayoutIterator {
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
+
+    // disable storing worst ngrams for speed boost
+    std::env::set_var("SHOW_WORST", "false");
+
     let options = Options::from_args();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
