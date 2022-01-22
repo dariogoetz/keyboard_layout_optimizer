@@ -48,7 +48,7 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
             results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
 
             let mut output_string =
-                "Layouts found during this run, ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
+                "Layouts found during this run, ordered from best (lowest cost) to worst (highest cost):".to_string();
             for (i, (l, cost)) in results.into_iter().enumerate() {
                 if i >= SHOW_BEST {
                     output_string.push_str(&format!(

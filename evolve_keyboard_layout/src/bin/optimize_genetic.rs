@@ -1,6 +1,7 @@
 use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
+use layout_evaluation::cache::Cache;
 use layout_optimization_genetic::optimization;
 
 #[derive(StructOpt, Debug)]
@@ -55,8 +56,20 @@ fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
 
-    // disable storing worst ngrams for speed boost
+    // Disable storing worst ngrams for speed boost
     std::env::set_var("SHOW_WORST", "false");
+
+    let final_results: Cache<f64> = Cache::new();
+
+    // Handle Ctrl+C
+    let cloned_cache = final_results.clone();
+    ctrlc::set_handler(move || {
+        // Display a summary of the optimization.
+        println!("\n\n{}\n", cloned_cache.highlighted_fmt(None));
+        // Stop execution
+        std::process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
 
     let options = Options::from_args();
 
@@ -88,8 +101,10 @@ fn main() {
             options.start_layout.is_some(),
             !options.no_cache_results,
         );
-
         let evaluation_result = evaluator.evaluate_layout(&layout);
+        let _ =
+            final_results.get_or_insert_with(&layout.as_text(), || evaluation_result.total_cost());
+
         println!("{}", evaluation_result);
 
         // Log solution to file.
@@ -111,4 +126,5 @@ fn main() {
             break;
         }
     }
+    println!("\n{}\n", final_results.highlighted_fmt(None));
 }
