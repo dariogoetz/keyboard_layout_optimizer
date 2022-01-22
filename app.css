@@ -1,5 +1,5 @@
 h1 {
-  margin: 1rem 0 0
+  margin: 1rem 0 0;
 }
 
 pre, code {
@@ -11,10 +11,10 @@ html {
   position: relative;
   min-height: 100%;
 }
-#app {
+main {
   margin: 0 0 3rem;
 }
-footer {
+#footer {
   background-color: #e9ecef; /* Same color as bootstrap Jumbotrons */
   position: absolute;
   left: 0;
