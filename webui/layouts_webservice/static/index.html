@@ -1,54 +1,57 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/dejavu-sans-mono" type="text/css"/>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <!-- Load required Bootstrap and BootstrapVue CSS -->
-        <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
-        <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+  <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/dejavu-sans-mono" type="text/css" />
 
-        <!-- Load polyfills to support older browsers -->
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+  <!-- Load required Bootstrap and BootstrapVue CSS -->
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
 
-        <!-- Load Vue followed by BootstrapVue -->
-        <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
-        <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+  <!-- Load polyfills to support older browsers -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"
+    crossorigin="anonymous"></script>
 
-        <!-- Load the following for BootstrapVueIcons support -->
-        <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
+  <!-- Load Vue followed by BootstrapVue -->
+  <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
 
-        <!-- Load vue-chart.js files -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-        <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <!-- Load the following for BootstrapVueIcons support -->
+  <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
 
-        <link type="text/css" rel="stylesheet" href="app.css" />
-        <title>Keyboard Layout Optimizer - Layout Comparison</title>
-    </head>
+  <!-- Load vue-chart.js files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
 
-    <body>
-      <div id="app">
-        <layouts-app>
+  <link type="text/css" rel="stylesheet" href="app.css" />
+  <title>Keyboard Layout Optimizer - Layout Comparison</title>
+</head>
+
+<body>
+  <div id="app">
+    <layouts-app>
+  </div>
+
+  <script src="vue-components.js"></script>
+  <script src="app.js"></script>
+</body>
+
+<footer>
+  <div class="container">
+    <div class="row content-justify-center">
+      <div class="col align-self-center" style="text-align: center;">
+        <a href="https://github.com/dariogoetz/keyboard_layout_optimizer">GitHub <img src="icons/github.svg"></a>
       </div>
-
-      <script src="vue-components.js"></script>
-      <script src="app.js"></script>
-    </body>
-
-    <footer>
-      <div class="container">
-        <div class="row content-justify-center">
-          <div class="col align-self-center" style="text-align: center;">
-            <a href="https://github.com/dariogoetz/keyboard_layout_optimizer">GitHub <img src="icons/github.svg"></a>
-          </div>
-          <!-- <div class="col-auto align-self-center">
+      <!-- <div class="col-auto align-self-center">
                       <img src="images/favicon.png" alt="Logo of the website." class="footerLogo">
                   </div> -->
-          <div class="col align-self-center" style="text-align: center;">
-            <a href="https://dariogoetz.github.io/keyboard_layout_optimizer/">Optimize/Evaluate</a>
-          </div>
-        </div>
+      <div class="col align-self-center" style="text-align: center;">
+        <a href="https://dariogoetz.github.io/keyboard_layout_optimizer/">Optimize/Evaluate</a>
       </div>
-    </footer>
+    </div>
+  </div>
+</footer>
+
 </html>

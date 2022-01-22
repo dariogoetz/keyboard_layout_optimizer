@@ -1,70 +1,73 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/dejavu-sans-mono" type="text/css"/>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Load required Bootstrap and BootstrapVue CSS -->
-    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
-    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+  <link rel="stylesheet" media="screen" href="https://fontlibrary.org//face/dejavu-sans-mono" type="text/css" />
 
-    <!-- Load polyfills to support older browsers -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+  <!-- Load required Bootstrap and BootstrapVue CSS -->
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap@4.6.1/dist/css/bootstrap.min.css" />
+  <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
 
-    <!-- Load Vue followed by BootstrapVue -->
-    <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+  <!-- Load polyfills to support older browsers -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"
+    crossorigin="anonymous"></script>
 
-    <!-- Load the following for BootstrapVueIcons support -->
-    <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
+  <!-- Load Vue followed by BootstrapVue -->
+  <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
 
-    <!-- Load vue-chart.js files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
-    <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <!-- Load the following for BootstrapVueIcons support -->
+  <script src="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
 
-    <!-- Load comlink for web worker communication -->
-    <script src="https://unpkg.com/comlink/dist/umd/comlink.js"></script>
+  <!-- Load vue-chart.js files -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
 
-    <!-- codemirror: code highlighting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue-codemirror@4.0.0/dist/vue-codemirror.js"></script>
+  <!-- Load comlink for web worker communication -->
+  <script src="https://unpkg.com/comlink/dist/umd/comlink.js"></script>
 
-    <!-- codemirror addons -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/selection/active-line.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/display/autorefresh.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/mode/yaml/yaml.min.js"></script>
+  <!-- codemirror: code highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue-codemirror@4.0.0/dist/vue-codemirror.js"></script>
 
-    <link type="text/css" rel="stylesheet" href="app.css" />
-    <link type="text/css" rel="stylesheet" href="codemirror.css" />
+  <!-- codemirror addons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/display/autorefresh.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/mode/yaml/yaml.min.js"></script>
 
-    <title>Keyboard Layout Evaluator</title>
-  </head>
-  
-  <body>
-    <div id="app">
-      <evaluator-app></evaluator-app>
-    </div>
-    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
-    <script src="vue-components.js"></script>
-    <script src="./bootstrap.js"></script>
-  </body>
+  <link type="text/css" rel="stylesheet" href="app.css" />
+  <link type="text/css" rel="stylesheet" href="codemirror.css" />
 
-  <footer>
-    <div class="container">
-      <div class="row content-justify-center">
-        <div class="col align-self-center" style="text-align: center;">
-          <a href="https://github.com/dariogoetz/keyboard_layout_optimizer">GitHub <img src="github.svg"></a>
-        </div>
-        <!-- <div class="col-auto align-self-center">
+  <title>Keyboard Layout Evaluator</title>
+</head>
+
+<body>
+  <div id="app">
+    <evaluator-app></evaluator-app>
+  </div>
+  <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+  <script src="vue-components.js"></script>
+  <script src="./bootstrap.js"></script>
+</body>
+
+<footer>
+  <div class="container">
+    <div class="row content-justify-center">
+      <div class="col align-self-center" style="text-align: center;">
+        <a href="https://github.com/dariogoetz/keyboard_layout_optimizer">GitHub <img src="github.svg"></a>
+      </div>
+      <!-- <div class="col-auto align-self-center">
                     <img src="images/favicon.png" alt="Logo of the website." class="footerLogo">
                 </div> -->
-        <div class="col align-self-center" style="text-align: center;">
-          <a href="https://keyboard-layout-optimizer.herokuapp.com/">Layout-Database</a>
-        </div>
+      <div class="col align-self-center" style="text-align: center;">
+        <a href="https://keyboard-layout-optimizer.herokuapp.com/">Layout-Database</a>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
+
 </html>
