@@ -12,13 +12,14 @@ default-run = "evaluate"
 [dependencies]
 keyboard_layout = { path = "../keyboard_layout" }
 layout_evaluation = { path = "../layout_evaluation" }
-layout_optimization_common = { path = "../layout_optimization/layout_optimization_common" }
 layout_optimization_abc = { path = "../layout_optimization/layout_optimization_abc" }
+layout_optimization_common = { path = "../layout_optimization/layout_optimization_common" }
 layout_optimization_genetic = { path = "../layout_optimization/layout_optimization_genetic" }
 layout_optimization_sa = { path = "../layout_optimization/layout_optimization_sa" }
 
 anyhow = "*"
 colored = "2.0.0"
+ctrlc = "3.2.1"
 dotenv = "*"
 env_logger = "*"
 log = "*"

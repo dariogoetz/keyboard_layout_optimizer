@@ -107,8 +107,20 @@ fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
 
-    // disable storing worst ngrams for speed boost
+    // Disable storing worst ngrams for speed boost
     std::env::set_var("SHOW_WORST", "false");
+
+    let final_results: Cache<f64> = Cache::new();
+
+    // Handle Ctrl+C
+    let cloned_cache = final_results.clone();
+    ctrlc::set_handler(move || {
+        // Display a summary of the optimization.
+        println!("\n\n{}\n", cloned_cache.highlighted_fmt(None));
+        // Stop execution
+        std::process::exit(0);
+    })
+    .expect("Error setting Ctrl-C handler");
 
     let options = Options::from_args();
 
@@ -131,14 +143,12 @@ fn main() {
         layouts = vec![options.fix_from.clone()];
     }
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
-
     let start_from_layout = !options.start_layouts.is_empty();
 
     let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
         false => None,
     };
-    let result_cache: Cache<f64> = Cache::new();
 
     layout_iterator
         .enumerate()
@@ -171,10 +181,12 @@ fn main() {
                 cache.clone(),
                 None,
             );
+            let evaluation_result = evaluator.evaluate_layout(&layout);
+            let _ = final_results
+                .get_or_insert_with(&layout.as_text(), || evaluation_result.total_cost());
 
             // Plot some information regarding the layout.
-            let evaluation_result = evaluator.evaluate_layout(&layout);
-            let mut output_string = format!(
+            println!(
                 "{} {}\n\n{}\n\n{}\n{}\n{}",
                 format!("{}:", process_id).yellow().bold(),
                 "Final result:".green().bold(),
@@ -183,18 +195,6 @@ fn main() {
                 layout.plot(),
                 evaluation_result
             );
-            if options.run_forever {
-                // Simulated Annealing can produce a high number of layouts.
-                // To combat this chaos, an overview of all layouts found so far is shown after every cycle, if optimization is run_forever.
-                let current_layout = layout.as_text();
-                let _ = result_cache
-                    .get_or_insert_with(&current_layout, || evaluation_result.total_cost());
-                output_string.push_str(&format!(
-                    "\n{}",
-                    result_cache.highlighted_fmt(Some(&current_layout)),
-                ));
-            }
-            println!("{}\n", output_string);
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {
@@ -211,4 +211,5 @@ fn main() {
                 );
             }
         });
+    println!("\n{}\n", final_results.highlighted_fmt(None));
 }

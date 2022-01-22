@@ -36,43 +36,46 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>) -> String {
         const SHOW_BEST: usize = 30;
         let enumeration_length = SHOW_BEST.to_string().chars().count() + 1;
-
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
             results = cache.iter().map(|(s, c)| (s.clone(), c.clone())).collect();
         }
-        results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
 
-        let mut output_string =
-            "Layouts ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
-        for (i, (l, cost)) in results.into_iter().enumerate() {
-            if i >= SHOW_BEST {
-                output_string.push_str(&format!(
-                    "\n⋮⋮⋮\nOnly the best {} layouts are displayed.",
-                    SHOW_BEST,
-                ));
-                break;
+        if results.is_empty() {
+            String::new()
+        } else {
+            results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
+
+            let mut output_string =
+                "Layouts found during this run, ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
+            for (i, (l, cost)) in results.into_iter().enumerate() {
+                if i >= SHOW_BEST {
+                    output_string.push_str(&format!(
+                        "\n⋮⋮⋮\nOnly the best {} layouts are displayed.",
+                        SHOW_BEST,
+                    ));
+                    break;
+                }
+                let result_line = format!("{} ({:.1})", l, cost);
+                if current_layout_str.is_some() && current_layout_str.unwrap() == l {
+                    output_string.push_str(&format!(
+                        "\n{:>width$} {} (current)",
+                        format!("{}.", i + 1),
+                        result_line.bold(),
+                        width = enumeration_length,
+                    ));
+                } else {
+                    output_string.push_str(&format!(
+                        "\n{:>width$} {}",
+                        format!("{}.", i + 1),
+                        result_line,
+                        width = enumeration_length,
+                    ));
+                }
             }
-            let result_line = format!("{} ({:.1})", l, cost);
-            if current_layout_str.is_some() && current_layout_str.unwrap() == l {
-                output_string.push_str(&format!(
-                    "\n{:>width$} {} (current)",
-                    format!("{}.", i + 1),
-                    result_line.bold(),
-                    width = enumeration_length,
-                ));
-            } else {
-                output_string.push_str(&format!(
-                    "\n{:>width$} {}",
-                    format!("{}.", i + 1),
-                    result_line,
-                    width = enumeration_length,
-                ));
-            }
+            output_string
         }
-
-        output_string
     }
 }
 
