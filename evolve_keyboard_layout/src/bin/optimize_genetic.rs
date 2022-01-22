@@ -62,10 +62,10 @@ fn main() {
     let final_results: Cache<f64> = Cache::new();
 
     // Handle Ctrl+C
-    let cloned_cache = final_results.clone();
+    let cloned_final_results = final_results.clone();
     ctrlc::set_handler(move || {
         // Display a summary of the optimization.
-        println!("\n\n{}\n", cloned_cache.highlighted_fmt(None));
+        println!("\n\n{}\n", cloned_final_results);
         // Stop execution
         std::process::exit(0);
     })
@@ -126,5 +126,5 @@ fn main() {
             break;
         }
     }
-    println!("\n{}\n", final_results.highlighted_fmt(None));
+    println!("\n{}\n", final_results);
 }
