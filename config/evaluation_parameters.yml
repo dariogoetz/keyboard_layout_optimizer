@@ -28,7 +28,7 @@ metrics:
       similar_letters:
         - ["auo", "äüö"]
         - ["auo", "äüö"]
-        - ["gbd", "kpt"]
+        # - ["gbd", "kpt"]
         # - ["gbdw", "kptf"]
         # - ["sfdn", "tpbm"]
 
