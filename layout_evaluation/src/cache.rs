@@ -34,6 +34,9 @@ impl<T: Clone> Cache<T> {
 
 impl<T: Clone + Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>) -> String {
+        const SHOW_BEST: usize = 30;
+        let enumeration_length = SHOW_BEST.to_string().chars().count() + 1;
+
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
@@ -44,15 +47,28 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
         let mut output_string =
             "Layouts ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
         for (i, (l, cost)) in results.into_iter().enumerate() {
+            if i >= SHOW_BEST {
+                output_string.push_str(&format!(
+                    "\n⋮⋮⋮\nOnly the best {} layouts are displayed.",
+                    SHOW_BEST,
+                ));
+                break;
+            }
             let result_line = format!("{} ({:.1})", l, cost);
             if current_layout_str.is_some() && current_layout_str.unwrap() == l {
                 output_string.push_str(&format!(
-                    "\n{:>4} {} (current)",
+                    "\n{:>width$} {} (current)",
                     format!("{}.", i + 1),
-                    result_line.bold()
+                    result_line.bold(),
+                    width = enumeration_length,
                 ));
             } else {
-                output_string.push_str(&format!("\n{:>4} {}", format!("{}.", i + 1), result_line));
+                output_string.push_str(&format!(
+                    "\n{:>width$} {}",
+                    format!("{}.", i + 1),
+                    result_line,
+                    width = enumeration_length,
+                ));
             }
         }
 

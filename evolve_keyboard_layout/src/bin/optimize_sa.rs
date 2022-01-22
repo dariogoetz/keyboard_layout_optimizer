@@ -189,7 +189,10 @@ fn main() {
                 let current_layout = layout.as_text();
                 let _ = result_cache
                     .get_or_insert_with(&current_layout, || evaluation_result.total_cost());
-                output_string.push_str(&result_cache.highlighted_fmt(Some(&current_layout)));
+                output_string.push_str(&format!(
+                    "\n{}",
+                    result_cache.highlighted_fmt(Some(&current_layout)),
+                ));
             }
             println!("{}\n", output_string);
 
