@@ -1,7 +1,7 @@
-use rustc_hash::FxHashMap;
-use std::sync::{Arc, Mutex};
-use std::fmt::Display;
 use colored::Colorize;
+use rustc_hash::FxHashMap;
+use std::fmt::Display;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug)]
 pub struct Cache<T: Clone> {
@@ -33,22 +33,24 @@ impl<T: Clone> Cache<T> {
 }
 
 impl<T: Clone + Display + PartialOrd> Cache<T> {
-
-    pub fn print_highlighted(&self, layout_str: Option<&str>) -> String {
-
+    pub fn highlighted_fmt(&self, current_layout_str: Option<&str>) -> String {
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
             results = cache.iter().map(|(s, c)| (s.clone(), c.clone())).collect();
         }
-
         results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
 
-        let mut output_string = "Layouts ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
+        let mut output_string =
+            "Layouts ordered from best (lowest cost) to worst (highest cost) ↓".to_string();
         for (i, (l, cost)) in results.into_iter().enumerate() {
             let result_line = format!("{} ({:.1})", l, cost);
-            if layout_str.is_some() && layout_str.unwrap() == l {
-                output_string.push_str(&format!("\n{:>4} {} (current)", format!("{}.", i + 1), result_line.bold()));
+            if current_layout_str.is_some() && current_layout_str.unwrap() == l {
+                output_string.push_str(&format!(
+                    "\n{:>4} {} (current)",
+                    format!("{}.", i + 1),
+                    result_line.bold()
+                ));
             } else {
                 output_string.push_str(&format!("\n{:>4} {}", format!("{}.", i + 1), result_line));
             }
@@ -60,6 +62,6 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
 
 impl<T: Clone + Display + PartialOrd> std::fmt::Display for Cache<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.print_highlighted(None))
+        writeln!(f, "{}", self.highlighted_fmt(None))
     }
 }

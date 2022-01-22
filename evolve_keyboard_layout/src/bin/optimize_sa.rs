@@ -184,12 +184,12 @@ fn main() {
                 evaluation_result
             );
             if options.run_forever {
-
                 // Simulated Annealing can produce a high number of layouts.
                 // To combat this chaos, an overview of all layouts found so far is shown after every cycle, if optimization is run_forever.
                 let current_layout = layout.as_text();
-                result_cache.get_or_insert_with(&current_layout, || evaluation_result.total_cost());
-                output_string.push_str(&result_cache.print_highlighted(Some(&current_layout)));
+                let _ = result_cache
+                    .get_or_insert_with(&current_layout, || evaluation_result.total_cost());
+                output_string.push_str(&result_cache.highlighted_fmt(Some(&current_layout)));
             }
             println!("{}\n", output_string);
 
