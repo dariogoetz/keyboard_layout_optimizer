@@ -34,7 +34,6 @@ impl<T: Clone> Cache<T> {
 
 impl<T: Clone + Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>, max_entries: usize) -> String {
-        let enumeration_length = max_entries.to_string().chars().count();
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
@@ -45,9 +44,10 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
             String::new()
         } else {
             results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
-
+            let enumeration_length = max_entries.to_string().chars().count();
             let mut output_string =
                 "Optimized layouts found during this run, ordered from best (lowest cost) to worst (highest cost):".to_string();
+
             for (i, (l, cost)) in results.into_iter().enumerate() {
                 if i >= max_entries {
                     output_string.push_str(&format!(
