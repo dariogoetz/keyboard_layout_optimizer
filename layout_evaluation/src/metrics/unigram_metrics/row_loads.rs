@@ -5,12 +5,12 @@
 use super::UnigramMetric;
 
 use keyboard_layout::{
-    layout::{LayerKey, Layout},
     key::Finger,
+    layout::{LayerKey, Layout},
 };
 
-use serde::Deserialize;
 use rustc_hash::FxHashMap;
+use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {}
@@ -47,8 +47,8 @@ impl UnigramMetric for RowLoads {
 
         let mut messages = Vec::new();
 
-        row_load.into_iter().for_each(|(row, load)|{
-            let msg = format!("Row {}: {:>.3}%", row, 100.0 * load / total_weight);
+        row_load.into_iter().for_each(|(row, load)| {
+            let msg = format!("Row {}: {:>.1}%", row, 100.0 * load / total_weight);
             messages.push(msg);
         });
 
