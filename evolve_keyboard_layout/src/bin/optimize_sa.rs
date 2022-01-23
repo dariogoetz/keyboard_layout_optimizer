@@ -187,13 +187,14 @@ fn main() {
 
             // Plot some information regarding the layout.
             println!(
-                "{} {}\n\n{}\n\n{}\n{}\n{}",
+                "{} {}\n\n{}\n\n{}\n{}\n{}\n\n{}\n",
                 format!("{}:", process_id).yellow().bold(),
                 "Final result:".green().bold(),
                 layout,
                 layout.plot_compact(),
                 layout.plot(),
-                evaluation_result
+                evaluation_result,
+                final_results.highlighted_fmt(Some(&layout.as_text()), 10),
             );
 
             // Log solution to file.
@@ -211,5 +212,4 @@ fn main() {
                 );
             }
         });
-    println!("\n{}\n", final_results);
 }

@@ -105,7 +105,11 @@ fn main() {
         let _ =
             final_results.get_or_insert_with(&layout.as_text(), || evaluation_result.total_cost());
 
-        println!("{}", evaluation_result);
+        println!(
+            "{}\n\n{}\n",
+            evaluation_result,
+            final_results.highlighted_fmt(Some(&layout.as_text()), 10)
+        );
 
         // Log solution to file.
         if let Some(filename) = &options.append_solutions_to {
@@ -126,5 +130,4 @@ fn main() {
             break;
         }
     }
-    println!("\n{}\n", final_results);
 }

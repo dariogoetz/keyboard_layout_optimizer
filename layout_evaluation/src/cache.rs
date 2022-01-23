@@ -33,9 +33,8 @@ impl<T: Clone> Cache<T> {
 }
 
 impl<T: Clone + Display + PartialOrd> Cache<T> {
-    pub fn highlighted_fmt(&self, current_layout_str: Option<&str>) -> String {
-        const SHOW_BEST: usize = 30;
-        let enumeration_length = SHOW_BEST.to_string().chars().count() + 1;
+    pub fn highlighted_fmt(&self, current_layout_str: Option<&str>, max_entries: usize) -> String {
+        let enumeration_length = max_entries.to_string().chars().count() + 1;
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
@@ -48,12 +47,12 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
             results.sort_by(|(_, c1), (_, c2)| c1.partial_cmp(c2).unwrap());
 
             let mut output_string =
-                "Layouts found during this run, ordered from best (lowest cost) to worst (highest cost):".to_string();
+                "Optimized layouts found during this run, ordered from best (lowest cost) to worst (highest cost):".to_string();
             for (i, (l, cost)) in results.into_iter().enumerate() {
-                if i >= SHOW_BEST {
+                if i >= max_entries {
                     output_string.push_str(&format!(
                         "\n⋮⋮⋮\nOnly the best {} layouts are displayed.",
-                        SHOW_BEST,
+                        max_entries,
                     ));
                     break;
                 }
@@ -81,6 +80,6 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
 
 impl<T: Clone + Display + PartialOrd> std::fmt::Display for Cache<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "{}", self.highlighted_fmt(None))
+        writeln!(f, "{}", self.highlighted_fmt(None, 30))
     }
 }
