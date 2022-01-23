@@ -40,6 +40,7 @@ pub struct MetricParameters {
 
     pub finger_balance: WeightedParams<unigram_metrics::finger_balance::Parameters>,
     pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
+    pub row_loads: WeightedParams<unigram_metrics::row_loads::Parameters>,
     pub key_costs: WeightedParams<unigram_metrics::key_costs::Parameters>,
 
     pub symmetric_handswitches: WeightedParams<bigram_metrics::symmetric_handswitches::Parameters>,
@@ -140,6 +141,14 @@ impl Evaluator {
             params.hand_disbalance.weight,
             params.hand_disbalance.normalization.clone(),
             params.hand_disbalance.enabled,
+        );
+        self.unigram_metric(
+            Box::new(unigram_metrics::row_loads::RowLoads::new(
+                &params.row_loads.params,
+            )),
+            params.row_loads.weight,
+            params.row_loads.normalization.clone(),
+            params.row_loads.enabled,
         );
         self.unigram_metric(
             Box::new(unigram_metrics::key_costs::KeyCost::new(

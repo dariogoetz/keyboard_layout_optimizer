@@ -9,6 +9,7 @@ use std::usize;
 pub mod finger_balance;
 pub mod hand_disbalance;
 pub mod key_costs;
+pub mod row_loads;
 
 /// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
 pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
