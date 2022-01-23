@@ -34,7 +34,7 @@ impl<T: Clone> Cache<T> {
 
 impl<T: Clone + Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>, max_entries: usize) -> String {
-        let enumeration_length = max_entries.to_string().chars().count() + 1;
+        let enumeration_length = max_entries.to_string().chars().count();
         let mut results: Vec<(String, T)>;
         {
             let cache = self.cache.lock().unwrap();
@@ -59,15 +59,15 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
                 let result_line = format!("{} ({:.1})", l, cost);
                 if current_layout_str.is_some() && current_layout_str.unwrap() == l {
                     output_string.push_str(&format!(
-                        "\n{:>width$} {} (current)",
-                        format!("{}.", i + 1),
+                        "\n{:>width$}. {} (current)",
+                        i + 1,
                         result_line.bold(),
                         width = enumeration_length,
                     ));
                 } else {
                     output_string.push_str(&format!(
-                        "\n{:>width$} {}",
-                        format!("{}.", i + 1),
+                        "\n{:>width$}. {}",
+                        i + 1,
                         result_line,
                         width = enumeration_length,
                     ));
