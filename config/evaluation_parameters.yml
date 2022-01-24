@@ -241,6 +241,11 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # reduce costs by this factor if both symbols of the bigram are on the same row
+      # the factor is given per row
+      # (first element corresponds to row with matrix_position 0, usually number row)
+      same_row_reduction_factor: [] #[0, 0.6, 0.8, 0]
+
       # from: Finger for first symbol of the bigram
       # to: Finger for second symbol of the bigram
       # cost: Cost to count for such a movement

@@ -22,11 +22,14 @@ pub struct FingerSwitchCost {
 pub struct Parameters {
     /// Cost associated with bigrams from a finger to another one
     pub finger_switch_costs: Vec<FingerSwitchCost>,
+    /// Reduce penalties for bigrams on the same row by this factor
+    pub same_row_reduction_factor: Vec<f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct MovementPattern {
     finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
+    same_row_reduction_factor: Vec<f64>,
 }
 
 impl MovementPattern {
@@ -39,6 +42,7 @@ impl MovementPattern {
 
         Self {
             finger_switch_costs,
+            same_row_reduction_factor: params.same_row_reduction_factor.to_vec(),
         }
     }
 }
@@ -57,12 +61,21 @@ impl BigramMetric for MovementPattern {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        Some(
-            weight
-                * *self
-                    .finger_switch_costs
-                    .get(&k1.key.hand, &k1.key.finger)
-                    .get(&k2.key.hand, &k2.key.finger),
-        )
+        let mut cost = weight
+            * *self
+                .finger_switch_costs
+                .get(&k1.key.hand, &k1.key.finger)
+                .get(&k2.key.hand, &k2.key.finger);
+
+        // if both keys are on the same row, they might be reduced in cost
+        if k1.key.matrix_position.1 == k2.key.matrix_position.1 {
+            let reduction_factor = self
+                .same_row_reduction_factor
+                .get(k1.key.matrix_position.1 as usize)
+                .unwrap_or(&0.0);
+            cost *= 1.0 - reduction_factor;
+        }
+
+        Some(cost)
     }
 }
