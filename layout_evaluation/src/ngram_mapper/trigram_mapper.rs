@@ -8,7 +8,7 @@ use crate::ngrams::Trigrams;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndices, f64) {
+fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout, exclude_line_breaks: bool) -> (TrigramIndices, f64) {
     let mut not_found_weight = 0.0;
     let mut trigram_keys = Vec::with_capacity(trigrams.grams.len());
 
@@ -18,6 +18,7 @@ fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout) -> (TrigramIndic
         //.filter(|((c1, c2, c3), _weight)| {
         //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
         //})
+        .filter(|((c1, c2, _c3), _weight)| !exclude_line_breaks || (*c1 != '\n' && *c2 != '\n'))
         .for_each(|((c1, c2, c3), weight)| {
             let key1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,
@@ -66,8 +67,8 @@ impl OnDemandTrigramMapper {
     }
 
     /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
-    pub fn layerkey_indices(&self, layout: &Layout) -> (TrigramIndices, f64, f64) {
-        let (mut trigram_keys, not_found_weight) = mapped_trigrams(&self.trigrams, layout);
+    pub fn layerkey_indices(&self, layout: &Layout, exclude_line_breaks: bool) -> (TrigramIndices, f64, f64) {
+        let (mut trigram_keys, not_found_weight) = mapped_trigrams(&self.trigrams, layout, exclude_line_breaks);
 
         if self.split_modifiers.enabled {
             trigram_keys = self.split_trigram_modifiers(&trigram_keys, layout);

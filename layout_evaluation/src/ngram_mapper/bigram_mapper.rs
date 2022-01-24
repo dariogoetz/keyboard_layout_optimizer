@@ -139,7 +139,7 @@ pub fn add_secondary_bigrams_from_trigrams(
     bigram_keys.extend(m);
 }
 
-fn layerkey_indices(bigrams: &Bigrams, layout: &Layout) -> (BigramIndices, f64) {
+fn layerkey_indices(bigrams: &Bigrams, layout: &Layout, exclude_line_breaks: bool) -> (BigramIndices, f64) {
     let mut not_found_weight = 0.0;
     let mut bigram_keys = Vec::with_capacity(bigrams.grams.len());
 
@@ -147,6 +147,7 @@ fn layerkey_indices(bigrams: &Bigrams, layout: &Layout) -> (BigramIndices, f64) 
         .grams
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
+        .filter(|((c1, _c2), _weight)| !exclude_line_breaks || *c1 != '\n')
         .for_each(|((c1, c2), weight)| {
             let layerkey1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,
@@ -186,9 +187,9 @@ impl OnDemandBigramMapper {
     }
 
     /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
-    pub fn layerkey_indices(&self, layout: &Layout) -> (BigramIndices, f64, f64) {
+    pub fn layerkey_indices(&self, layout: &Layout, exclude_line_breaks: bool) -> (BigramIndices, f64, f64) {
         // println!("Before split: {:?}", self.bigrams.grams.get(&('l', 'r')));
-        let (mut bigram_keys, not_found_weight) = layerkey_indices(&self.bigrams, layout);
+        let (mut bigram_keys, not_found_weight) = layerkey_indices(&self.bigrams, layout, exclude_line_breaks);
 
         if self.split_modifiers.enabled {
             bigram_keys = self.split_bigram_modifiers(&bigram_keys, layout);
