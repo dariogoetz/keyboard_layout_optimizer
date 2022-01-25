@@ -427,7 +427,7 @@ metrics:
 ngram_mapper:
   # Exclude any ngram in which "\n" is contained as not the last symbol
   # This encodes a mental pause that usually comes with hitting the "Enter" key
-  exclude_line_breaks: false
+  exclude_line_breaks: true
 
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
   # required to activate the layer
