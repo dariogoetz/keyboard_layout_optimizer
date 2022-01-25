@@ -80,12 +80,13 @@ fn main() {
         }
 
         // Publish to webservice.
-        if let Some(publish_name) = &options.publishing_options.publish_as {
+        let o = &options.publishing_options;
+        if o.publish_as.is_some() && evaluation_result.total_cost() < o.publish_if_cost_below {
             common::publish_to_webservice(
                 &layout,
-                publish_name,
-                &options.publishing_options.publish_to,
-                &options.publishing_options.publish_layout_config,
+                o.publish_as.as_ref().unwrap(),
+                &o.publish_to,
+                &o.publish_layout_config,
             );
         }
     }

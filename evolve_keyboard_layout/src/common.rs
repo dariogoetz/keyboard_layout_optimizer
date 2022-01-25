@@ -66,6 +66,10 @@ pub struct PublishingOptions {
     #[structopt(long)]
     pub publish_as: Option<String>,
 
+    /// Publish the layout only if its cost is lower (better) than this value
+    #[structopt(long, default_value = "inf")]
+    pub publish_if_cost_below: f64,
+
     /// Publish found layout to webservice for this layout config
     #[structopt(long, default_value = "standard")]
     pub publish_layout_config: String,
