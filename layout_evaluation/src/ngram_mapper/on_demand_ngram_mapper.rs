@@ -98,8 +98,9 @@ impl NgramMapper for OnDemandNgramMapper {
 
         // map trigrams before bigrams because secondary bigrams from trigrams map be added
         // map char-based trigrams to LayerKeyIndex
-        let (trigram_key_indices, trigrams_found, trigrams_not_found) =
-            self.trigram_mapper.layerkey_indices(layout, self.config.exclude_line_breaks);
+        let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
+            .trigram_mapper
+            .layerkey_indices(layout, self.config.exclude_line_breaks);
         // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
         let trigram_key_indices = groupby_sum(&trigram_key_indices);
         // map LayerKeyIndex to &LayerKey
@@ -115,8 +116,9 @@ impl NgramMapper for OnDemandNgramMapper {
             .collect();
 
         // map char-based bigrams to LayerKeyIndex
-        let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) =
-            self.bigram_mapper.layerkey_indices(layout, self.config.exclude_line_breaks);
+        let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
+            .bigram_mapper
+            .layerkey_indices(layout, self.config.exclude_line_breaks);
 
         // (if enabled) add bigrams consisting of first and third trigram symbols to vec of bigrams
         bigram_mapper::add_secondary_bigrams_from_trigrams(

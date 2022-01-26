@@ -8,7 +8,11 @@ use crate::ngrams::Trigrams;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-fn mapped_trigrams<'s>(trigrams: &Trigrams, layout: &'s Layout, exclude_line_breaks: bool) -> (TrigramIndices, f64) {
+fn mapped_trigrams<'s>(
+    trigrams: &Trigrams,
+    layout: &'s Layout,
+    exclude_line_breaks: bool,
+) -> (TrigramIndices, f64) {
     let mut not_found_weight = 0.0;
     let mut trigram_keys = Vec::with_capacity(trigrams.grams.len());
 
@@ -67,8 +71,13 @@ impl OnDemandTrigramMapper {
     }
 
     /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
-    pub fn layerkey_indices(&self, layout: &Layout, exclude_line_breaks: bool) -> (TrigramIndices, f64, f64) {
-        let (mut trigram_keys, not_found_weight) = mapped_trigrams(&self.trigrams, layout, exclude_line_breaks);
+    pub fn layerkey_indices(
+        &self,
+        layout: &Layout,
+        exclude_line_breaks: bool,
+    ) -> (TrigramIndices, f64, f64) {
+        let (mut trigram_keys, not_found_weight) =
+            mapped_trigrams(&self.trigrams, layout, exclude_line_breaks);
 
         if self.split_modifiers.enabled {
             trigram_keys = self.split_trigram_modifiers(&trigram_keys, layout);
