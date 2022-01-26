@@ -8,18 +8,18 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
+use clap::Parser;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::Path;
 use std::sync::Arc;
-use structopt::StructOpt;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout evaluation")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout evaluation")]
 pub struct Options {
     /// Path to ngram files
-    #[structopt(
+    #[clap(
         short,
         long,
         default_value = "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
@@ -27,59 +27,58 @@ pub struct Options {
     pub ngrams: String,
 
     /// Filename of evaluation configuration file to use
-    #[structopt(short, long, default_value = "config/evaluation_parameters.yml")]
+    #[clap(short, long, default_value = "config/evaluation_parameters.yml")]
     pub eval_parameters: String,
 
     /// Filename of layout configuration file to use
-    #[structopt(short, long, default_value = "config/standard_keyboard.yml")]
+    #[clap(short, long, default_value = "config/standard_keyboard.yml")]
     pub layout_config: String,
 
     /// Filename of corpus file to use instead of ngram files
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub corpus: Option<String>,
 
     /// Evaluate given text instead of corpus file or ngram files
-    #[structopt(short, long)]
+    #[clap(short, long)]
     pub text: Option<String>,
 
     /// Only consider the top ngrams up to the given fraction
-    #[structopt(long)]
+    #[clap(long)]
     pub tops: Option<f64>,
 
     /// Do not split modifiers
-    #[structopt(long)]
+    #[clap(long)]
     pub no_split_modifiers: bool,
 
     /// Do not add secondary bigrams from trigrams
-    #[structopt(long)]
+    #[clap(long)]
     pub no_add_secondary_bigrams: bool,
 
     /// Do not increase weight of common bigrams
-    #[structopt(long)]
+    #[clap(long)]
     pub no_increase_common_bigrams: bool,
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout publication")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout publication")]
 pub struct PublishingOptions {
     /// Publish found layout to webservice under this name.
-    /// THIS OPTION IS REQUIRED IF YOU WANT TO PUBLISH YOUR LAYOUT(S), REGARDLESS OF ANY OTHER PARAMETERS!
-    #[structopt(long)]
+    /// This option is required if you want to publish your layout(s)!
+    #[clap(long)]
     pub publish_as: Option<String>,
 
     /// Publish the layout only if its cost is lower (better) than this value
-    #[structopt(long, default_value = "inf", requires = "publish-as")]
-    pub publish_if_cost_below: f64,
+    #[clap(long, requires = "publish-as")]
+    pub publish_if_cost_below: Option<f64>,
 
     /// Publish found layout to webservice for this layout config
-    #[structopt(long, default_value = "standard", requires = "publish-as")]
+    #[clap(long, default_value = "standard")]
     pub publish_layout_config: String,
 
     /// Publish found layout to webservice at this url
-    #[structopt(
+    #[clap(
         long,
-        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api",
-        requires = "publish-as"
+        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
     )]
     pub publish_to: String,
 }

@@ -1,7 +1,7 @@
+use clap::Parser;
 use rustc_hash::FxHashMap;
 use std::path::Path;
 use std::str::FromStr;
-use structopt::StructOpt;
 
 use layout_evaluation::ngrams::{Bigrams, Trigrams, Unigrams};
 
@@ -21,8 +21,8 @@ impl FromStr for WeightedComponent {
     }
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Ngram frequency merge")]
+#[derive(Parser, Debug)]
+#[clap(name = "Ngram frequency merge")]
 struct Options {
     /// Pairs of weight and ngram frequency directory in the form path:weight
     components: Vec<WeightedComponent>,
@@ -46,7 +46,7 @@ fn add<T: Clone + Eq + std::hash::Hash>(
 
 fn main() {
     dotenv::dotenv().ok();
-    let options = Options::from_args();
+    let options = Options::parse();
     env_logger::init();
 
     let mut res_unigrams = FxHashMap::default();

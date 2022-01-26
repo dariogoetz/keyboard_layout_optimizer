@@ -1,25 +1,25 @@
-use structopt::StructOpt;
+use clap::Parser;
 
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
 use evolve_keyboard_layout::common;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Random keyboard layout evaluation")]
+#[derive(Parser, Debug)]
+#[clap(name = "Random keyboard layout evaluation")]
 struct Options {
     /// Evaluation parameters
-    #[structopt(flatten)]
+    #[clap(flatten)]
     evaluation_parameters: common::Options,
 
     /// Number of samples
-    #[structopt(short, long, default_value = "1000")]
+    #[clap(short, long, default_value = "1000")]
     number_of_samples: usize,
 }
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
-    let options = Options::from_args();
+    let options = Options::parse();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 

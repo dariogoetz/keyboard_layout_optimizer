@@ -1,38 +1,38 @@
+use clap::Parser;
 use colored::Colorize;
-use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
 use layout_optimization_abc::optimization;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout optimization")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout optimization")]
 struct Options {
     /// Evaluation parameters
-    #[structopt(flatten)]
+    #[clap(flatten)]
     evaluation_parameters: common::Options,
 
     /// Do not optimize those keys (wrt. --start-layout or --fix-from)
-    #[structopt(short, long)]
+    #[clap(short, long)]
     fix: Option<String>,
 
     /// Fix the keys from this layout (will be overwritten by --start-layout)
-    #[structopt(long, default_value = "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j")]
+    #[clap(long, default_value = "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j")]
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[structopt(short, long, default_value = "config/optimization_parameters_abc.yml")]
+    #[clap(short, long, default_value = "config/optimization_parameters_abc.yml")]
     optimization_parameters: String,
 
     /// Do not cache intermediate results
-    #[structopt(long)]
+    #[clap(long)]
     no_cache_results: bool,
 
     /// Append found layouts to file
-    #[structopt(long)]
+    #[clap(long)]
     append_solutions_to: Option<String>,
 
     /// Publishing options
-    #[structopt(flatten)]
+    #[clap(flatten)]
     publishing_options: common::PublishingOptions,
 }
 
@@ -43,7 +43,7 @@ fn main() {
     // disable storing worst ngrams for speed boost
     std::env::set_var("SHOW_WORST", "false");
 
-    let options = Options::from_args();
+    let options = Options::parse();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
@@ -81,7 +81,9 @@ fn main() {
 
         // Publish to webservice.
         let o = &options.publishing_options;
-        if o.publish_as.is_some() && evaluation_result.total_cost() < o.publish_if_cost_below {
+        if o.publish_as.is_some()
+            && evaluation_result.total_cost() < o.publish_if_cost_below.unwrap_or(f64::INFINITY)
+        {
             common::publish_to_webservice(
                 &layout,
                 o.publish_as.as_ref().unwrap(),

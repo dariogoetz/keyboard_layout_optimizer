@@ -1,22 +1,22 @@
-use structopt::StructOpt;
+use clap::Parser;
 
 use evolve_keyboard_layout::common;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout ptimization")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout ptimization")]
 struct Options {
     /// Layout keys from left to right, top to bottom
     layout_str: String,
 
     /// Filename of layout configuration file to use
-    #[structopt(short, long, default_value = "config/standard_keyboard.yml")]
+    #[clap(short, long, default_value = "config/standard_keyboard.yml")]
     layout_config: String,
 }
 
 fn main() {
     dotenv::dotenv().ok();
     env_logger::init();
-    let options = Options::from_args();
+    let options = Options::parse();
 
     let layout_generator = common::init_layout_generator(&options.layout_config);
 

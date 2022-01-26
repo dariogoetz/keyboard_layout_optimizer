@@ -1,10 +1,10 @@
+use clap::Parser;
 use std::path::Path;
-use structopt::StructOpt;
 
 use layout_evaluation::ngrams::{Bigrams, Trigrams, Unigrams};
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Ngram frequency generator")]
+#[derive(Parser, Debug)]
+#[clap(name = "Ngram frequency generator")]
 struct Options {
     /// Read text from this file
     filename: String,
@@ -15,7 +15,7 @@ struct Options {
 
 fn main() {
     dotenv::dotenv().ok();
-    let options = Options::from_args();
+    let options = Options::parse();
     env_logger::init();
 
     let text = std::fs::read_to_string(&options.filename).expect(&format!(

@@ -1,9 +1,9 @@
+use clap::Parser;
 use keyboard_layout::layout::Layout;
 use layout_evaluation::{cache::Cache, results::EvaluationResult};
 use serde::Serialize;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use structopt::StructOpt;
 
 use rayon::prelude::*;
 
@@ -25,36 +25,36 @@ impl From<EvaluationResult> for LayoutEvaluation {
     }
 }
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout optimization")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout optimization")]
 struct Options {
     /// List of Layout keys from left to right, top to bottom
     layout_str: Vec<String>,
 
     /// Read layouts from file and append to command line layouts
-    #[structopt(long)]
+    #[clap(long)]
     from_file: Option<String>,
 
     /// General parameters
-    #[structopt(flatten)]
+    #[clap(flatten)]
     general_parameters: common::Options,
 
     /// If to only output the results as JSON to stdout
-    #[structopt(long)]
+    #[clap(long)]
     json: bool,
 
     /// Print only total costs
-    #[structopt(long)]
+    #[clap(long)]
     only_total_costs: bool,
 
     /// Sort results by total costs
-    #[structopt(long)]
+    #[clap(long)]
     sort: bool,
 }
 
 fn main() {
     dotenv::dotenv().ok();
-    let options = Options::from_args();
+    let options = Options::parse();
     if !options.json {
         // if the "json" option is set, we do not want any other log messages
         env_logger::init();

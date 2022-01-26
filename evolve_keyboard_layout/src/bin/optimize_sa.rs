@@ -1,60 +1,60 @@
+use clap::Parser;
 use colored::Colorize;
 use rayon::iter::{ParallelBridge, ParallelIterator};
-use structopt::StructOpt;
 
 use evolve_keyboard_layout::common;
 use layout_evaluation::cache::Cache;
 use layout_optimization_sa::optimization;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "Keyboard layout optimization")]
+#[derive(Parser, Debug)]
+#[clap(name = "Keyboard layout optimization")]
 struct Options {
     /// Evaluation parameters
-    #[structopt(flatten)]
+    #[clap(flatten)]
     evaluation_parameters: common::Options,
 
     /// Do not optimize those keys (wrt. --start-layout or --fix-from)
-    #[structopt(short, long)]
+    #[clap(short, long)]
     fix: Option<String>,
 
     /// Fix the keys from this layout (will be overwritten by --start-layout)
-    #[structopt(long, default_value = "xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j")]
+    #[clap(long, default_value = "xvlcwkhgfqßuiaeosnrtdyüöäpzbm,.j")]
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[structopt(short, long, default_value = "config/optimization_parameters_sa.yml")]
+    #[clap(short, long, default_value = "config/optimization_parameters_sa.yml")]
     optimization_parameters: String,
 
     /// Start optimization from this layout (keys from left to right, top to bottom)
-    #[structopt(short, long)]
+    #[clap(short, long)]
     start_layouts: Vec<String>,
 
     /// Do not cache intermediate results
-    #[structopt(long)]
+    #[clap(long)]
     no_cache_results: bool,
 
     /// Set the initial temperature (Will be overwritten by --greedy)
-    #[structopt(long)]
+    #[clap(long)]
     init_temp: Option<f64>,
 
     /// Set the init_temp to 0.0, turning the Simulated Annealing algorithm into a greedy one
-    #[structopt(short, long)]
+    #[clap(short, long)]
     greedy: bool,
 
     /// If used, log every single iteration instead of every 100th.
-    #[structopt(long)]
+    #[clap(long)]
     log_everything: bool,
 
     /// Append found layouts to file
-    #[structopt(long)]
+    #[clap(long)]
     append_solutions_to: Option<String>,
 
     /// Repeat optimizations indefinitely
-    #[structopt(long)]
+    #[clap(long)]
     run_forever: bool,
 
     /// Publishing options
-    #[structopt(flatten)]
+    #[clap(flatten)]
     publishing_options: common::PublishingOptions,
 }
 
@@ -122,7 +122,7 @@ fn main() {
     })
     .expect("Error setting Ctrl-C handler");
 
-    let options = Options::from_args();
+    let options = Options::parse();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
@@ -204,7 +204,7 @@ fn main() {
 
             // Publish to webservice.
             let o = &options.publishing_options;
-            if o.publish_as.is_some() && cost < o.publish_if_cost_below {
+            if o.publish_as.is_some() && cost < o.publish_if_cost_below.unwrap_or(f64::INFINITY) {
                 common::publish_to_webservice(
                     &layout,
                     o.publish_as.as_ref().unwrap(),
