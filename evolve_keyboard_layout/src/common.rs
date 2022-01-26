@@ -62,22 +62,24 @@ pub struct Options {
 #[derive(StructOpt, Debug)]
 #[structopt(name = "Keyboard layout publication")]
 pub struct PublishingOptions {
-    /// Publish found layout to webservice under this name
+    /// Publish found layout to webservice under this name.
+    /// THIS OPTION IS REQUIRED IF YOU WANT TO PUBLISH YOUR LAYOUT(S), REGARDLESS OF ANY OTHER PARAMETERS!
     #[structopt(long)]
     pub publish_as: Option<String>,
 
     /// Publish the layout only if its cost is lower (better) than this value
-    #[structopt(long, default_value = "inf")]
+    #[structopt(long, default_value = "inf", requires = "publish-as")]
     pub publish_if_cost_below: f64,
 
     /// Publish found layout to webservice for this layout config
-    #[structopt(long, default_value = "standard")]
+    #[structopt(long, default_value = "standard", requires = "publish-as")]
     pub publish_layout_config: String,
 
     /// Publish found layout to webservice at this url
     #[structopt(
         long,
-        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
+        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api",
+        requires = "publish-as"
     )]
     pub publish_to: String,
 }
