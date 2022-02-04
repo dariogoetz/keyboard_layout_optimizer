@@ -47,10 +47,10 @@ metrics:
         [Left, Pinky]: 1.0
         [Left, Ring]: 1.6
         [Left, Middle]: 2.0
-        [Left, Pointer]: 2.0
+        [Left, Pointer]: 2.5
         [Left, Thumb]: 2.0
         [Right, Thumb]: 2.0
-        [Right, Pointer]: 2.0
+        [Right, Pointer]: 2.5
         [Right, Middle]: 2.0
         [Right, Ring]: 1.6
         [Right, Pinky]: 1.0
