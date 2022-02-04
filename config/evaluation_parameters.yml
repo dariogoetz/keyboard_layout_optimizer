@@ -10,7 +10,7 @@ metrics:
       value: 1.0
     params:
       # symbols that shall be considered "shortcut keys"
-      shortcut_chars: cvxz
+      shortcut_chars: cvx
       cost: 1.0
       within_n_leftmost_cols: 5
 
