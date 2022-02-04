@@ -109,6 +109,7 @@ fn main() {
         for (layout, evaluation_result) in results {
             if !options.only_total_costs {
                 println!("Layout (layer 1):\n{}", layout.plot_layer(0));
+                println!("Layout string (layer 1):\n{}\n", layout);
                 println!("Layout compact (layer 1):\n{}", layout.plot_compact());
                 println!("{}", evaluation_result);
             } else {
