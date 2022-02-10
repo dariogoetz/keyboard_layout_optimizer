@@ -371,7 +371,7 @@ metrics:
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
     enabled: true
-    weight: 465.0
+    weight: 650.0
     normalization:
       type: weight_found
       value: 1.0
