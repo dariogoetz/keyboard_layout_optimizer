@@ -5,10 +5,16 @@ It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permuta
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams.
 
-## Results
+## Webapp - Evaluation and Optimization
+There is a webapp providing (a significant subset of) the evaluation and optimization functionalities at https://dariogoetz.github.io/keyboard_layout_optimizer.
+
+The corresponding webapp implementation is located in the `webui/layout_evaluation_wasm` crate.
+
+## Webapp - Result Exploration
+
 Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
 
-The corresponding webserver's implementation is located in the `layouts_webservice` crate.
+The corresponding webserver's implementation is located in the `webui/layouts_webservice` crate.
 
 ## Features
 - evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
