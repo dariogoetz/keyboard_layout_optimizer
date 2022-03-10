@@ -48,8 +48,7 @@ impl LayoutMetric for SimilarLetters {
             let neighbor_vertically = key1.matrix_position.0 == key2.matrix_position.0
                 && (key1.matrix_position.1 - key2.matrix_position.1).abs() == 1;
 
-            if neighbor_horizontally ^ neighbor_vertically {
-                // ^ is the XOR operator. If the keys border in both directions (i.e. if the position is diagonal), do not enter this `if`.
+            if neighbor_horizontally || neighbor_vertically {
                 cost_to_add = 0.0;
             } else if key1.matrix_position.0 == key2.matrix_position.0 {
                 cost_to_add = 0.5;
