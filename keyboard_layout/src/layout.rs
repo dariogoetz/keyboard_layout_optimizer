@@ -106,6 +106,7 @@ impl Layout {
                 let indices: Vec<LayerKeyIndex> = layer_chars
                     .iter()
                     .enumerate()
+                    .take(modifiers.len() + 1)  // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
                         let layerkey = LayerKey::new(
                             layer_id,
