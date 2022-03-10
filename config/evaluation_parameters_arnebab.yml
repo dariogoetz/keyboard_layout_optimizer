@@ -14,6 +14,25 @@ metrics:
       cost: 1.0
       within_n_leftmost_cols: 5
 
+
+  # Pairs of keys that shall be placed in related positions to each other.
+  similar_letters:
+    enabled: false
+    weight: 5.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      # List of pairs of letters that shall be placed in related positions to each other.
+      similar_letters:
+        - ["a", "ä"]
+        - ["o", "ö"]
+        - ["u", "ü"]
+        - ["g", "k"]
+        - ["p", "b"]
+        - ["d", "t"]
+        - ["m", "n"]
+
   # Symbols of specified groups shall have the same relative location to each others
   asymmetric_keys:
     enabled: true
