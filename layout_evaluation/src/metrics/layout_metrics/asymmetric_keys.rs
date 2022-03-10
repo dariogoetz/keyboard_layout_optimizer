@@ -31,6 +31,8 @@ impl AsymmetricKeys {
     }
 }
 
+/// Compares how many values of [data] are not equal to other values of [data].
+/// More differences result in a higher cost.
 fn costs<T: PartialEq>(data: &[T]) -> f64 {
     if data.is_empty() {
         return 0.0;
