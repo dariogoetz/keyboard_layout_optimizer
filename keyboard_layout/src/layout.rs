@@ -35,7 +35,8 @@ pub struct LayerKey {
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
     pub is_modifier: bool,
-    key_index: KeyIndex, // is used for determining corresponding base layer key
+    /// Is used for determining corresponding base layer key
+    key_index: KeyIndex,
 }
 
 impl LayerKey {
@@ -51,11 +52,11 @@ impl LayerKey {
         Self {
             layer,
             key,
-            key_index,
             symbol,
             modifiers,
             is_fixed,
             is_modifier,
+            key_index,
         }
     }
 }
