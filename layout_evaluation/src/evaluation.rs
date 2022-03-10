@@ -35,6 +35,7 @@ pub struct WeightedParams<T> {
 /// This is usually read from a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
+    pub similar_letters: WeightedParams<layout_metrics::similar_letters::Parameters>,
     pub asymmetric_keys: WeightedParams<layout_metrics::asymmetric_keys::Parameters>,
     pub shortcut_keys: WeightedParams<layout_metrics::shortcut_keys::Parameters>,
 
@@ -108,6 +109,14 @@ impl Evaluator {
     /// Add all "default" metrics to the evaluator.
     pub fn default_metrics(mut self, params: &MetricParameters) -> Self {
         // layout metrics
+        self.layout_metric(
+            Box::new(layout_metrics::similar_letters::SimilarLetters::new(
+                &params.similar_letters.params,
+            )),
+            params.similar_letters.weight,
+            params.similar_letters.normalization.clone(),
+            params.similar_letters.enabled,
+        );
         self.layout_metric(
             Box::new(layout_metrics::asymmetric_keys::AsymmetricKeys::new(
                 &params.asymmetric_keys.params,

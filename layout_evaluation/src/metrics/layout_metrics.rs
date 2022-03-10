@@ -3,6 +3,7 @@ use keyboard_layout::layout::Layout;
 
 pub mod asymmetric_keys;
 pub mod shortcut_keys;
+pub mod similar_letters;
 
 /// LayoutMetric is a trait for metrics that depends only on the layout.
 pub trait LayoutMetric: Send + Sync + LayoutMetricClone + std::fmt::Debug {

@@ -6,9 +6,9 @@ use std::collections::HashMap;
 /// Row and columnar location on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct MatrixPosition(
-    /// Column
+    /// Index of column
     pub isize,
-    /// Row
+    /// Index of row
     pub isize,
 );
 
