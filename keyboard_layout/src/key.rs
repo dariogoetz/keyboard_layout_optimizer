@@ -5,7 +5,12 @@ use std::collections::HashMap;
 
 /// Row and columnar location on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
-pub struct MatrixPosition(pub isize, pub isize);
+pub struct MatrixPosition(
+    /// Index of column
+    pub isize,
+    /// Index of row
+    pub isize,
+);
 
 impl MatrixPosition {
     /// Euclidean distance to another row/column position on the keyboard

@@ -1,4 +1,6 @@
-//! The layout metric `AsymmetricKeys` matches the relative locations of configurable pairs of
+//! Used to be called `AsymmetricKeys` in earlier versions of this optimizer.
+//!
+//! The layout metric `SimilarLetterGroups` matches the relative locations of configurable pairs of
 //! groups of keys against each other, e.g. "aou" and "äöü". If each key has the same relative
 //! location to its counterpart as the others the costs are zero.
 //! Otherwise, a cost is given for each inconsistency in
@@ -15,22 +17,24 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub similar_letters: Vec<(String, String)>,
+    pub letter_group_pairs: Vec<(String, String)>,
 }
 
 #[derive(Clone, Debug)]
-pub struct AsymmetricKeys {
-    similar_letters: Vec<(String, String)>,
+pub struct SimilarLetterGroups {
+    letter_group_pairs: Vec<(String, String)>,
 }
 
-impl AsymmetricKeys {
+impl SimilarLetterGroups {
     pub fn new(params: &Parameters) -> Self {
         Self {
-            similar_letters: params.similar_letters.to_vec(),
+            letter_group_pairs: params.letter_group_pairs.to_vec(),
         }
     }
 }
 
+/// Compares how many values of [data] are not equal to other values of [data].
+/// More differences result in a higher cost.
 fn costs<T: PartialEq>(data: &[T]) -> f64 {
     if data.is_empty() {
         return 0.0;
@@ -49,15 +53,15 @@ fn costs<T: PartialEq>(data: &[T]) -> f64 {
     ((cost / n) as f64).ln_1p()
 }
 
-impl LayoutMetric for AsymmetricKeys {
+impl LayoutMetric for SimilarLetterGroups {
     fn name(&self) -> &str {
-        "Asymmetric Keys"
+        "Similar Letter-Groups"
     }
 
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>) {
         let mut cost = 0.0;
 
-        for (s1, s2) in &self.similar_letters {
+        for (s1, s2) in &self.letter_group_pairs {
             let chars1: Vec<char> = s1.chars().collect();
             let chars2: Vec<char> = s2.chars().collect();
 

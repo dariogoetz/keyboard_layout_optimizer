@@ -14,10 +14,29 @@ metrics:
       cost: 1.0
       within_n_leftmost_cols: 5
 
-  # Symbols of specified groups shall have the same relative location to each others
-  asymmetric_keys:
+  # Pairs of keys that shall be placed in related positions to each other
+  similar_letters:
     enabled: true
-    weight: 5.0
+    weight: 3.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      # List of pairs of letters that shall be placed in related positions to each other
+      letter_pairs:
+        - ["a", "ä"]
+        - ["o", "ö"]
+        - ["u", "ü"]
+        - ["g", "k"]
+        - ["p", "b"]
+        - ["d", "t"]
+        - ["m", "n"]
+
+  # Symbols of specified groups shall have the same relative location to each others.
+  # Used to be called `asymmetric_keys`.
+  similar_letter_groups:
+    enabled: true
+    weight: 10.0
     normalization:
       type: fixed
       value: 1.0
@@ -25,9 +44,9 @@ metrics:
       # List of pairs of symbol groups for which the keys shall have the same relative position
       # e.g. ["auo", "äüö"] means that the relative location of a -> ä shall be identical to u -> ü
       # and o -> ö. Otherwise, a cost is counted.
-      similar_letters:
+      letter_group_pairs:
         - ["auo", "äüö"]
-        - ["auo", "äüö"]
+        # - ["auo", "äüö"]
         # - ["gbd", "kpt"]
         # - ["gbdw", "kptf"]
         # - ["sfdn", "tpbm"]

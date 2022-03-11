@@ -35,8 +35,9 @@ pub struct WeightedParams<T> {
 /// This is usually read from a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
-    pub asymmetric_keys: WeightedParams<layout_metrics::asymmetric_keys::Parameters>,
     pub shortcut_keys: WeightedParams<layout_metrics::shortcut_keys::Parameters>,
+    pub similar_letters: WeightedParams<layout_metrics::similar_letters::Parameters>,
+    pub similar_letter_groups: WeightedParams<layout_metrics::similar_letter_groups::Parameters>,
 
     pub finger_balance: WeightedParams<unigram_metrics::finger_balance::Parameters>,
     pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
@@ -109,20 +110,30 @@ impl Evaluator {
     pub fn default_metrics(mut self, params: &MetricParameters) -> Self {
         // layout metrics
         self.layout_metric(
-            Box::new(layout_metrics::asymmetric_keys::AsymmetricKeys::new(
-                &params.asymmetric_keys.params,
-            )),
-            params.asymmetric_keys.weight,
-            params.asymmetric_keys.normalization.clone(),
-            params.asymmetric_keys.enabled,
-        );
-        self.layout_metric(
             Box::new(layout_metrics::shortcut_keys::ShortcutKeys::new(
                 &params.shortcut_keys.params,
             )),
             params.shortcut_keys.weight,
             params.shortcut_keys.normalization.clone(),
             params.shortcut_keys.enabled,
+        );
+        self.layout_metric(
+            Box::new(layout_metrics::similar_letters::SimilarLetters::new(
+                &params.similar_letters.params,
+            )),
+            params.similar_letters.weight,
+            params.similar_letters.normalization.clone(),
+            params.similar_letters.enabled,
+        );
+        self.layout_metric(
+            Box::new(
+                layout_metrics::similar_letter_groups::SimilarLetterGroups::new(
+                    &params.similar_letter_groups.params,
+                ),
+            ),
+            params.similar_letter_groups.weight,
+            params.similar_letter_groups.normalization.clone(),
+            params.similar_letter_groups.enabled,
         );
 
         // unigram metrics
