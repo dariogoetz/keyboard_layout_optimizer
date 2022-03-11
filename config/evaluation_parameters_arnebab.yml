@@ -18,7 +18,7 @@ metrics:
   # Pairs of keys that shall be placed in related positions to each other.
   similar_letters:
     enabled: false
-    weight: 5.0
+    weight: 3.0
     normalization:
       type: fixed
       value: 1.0
