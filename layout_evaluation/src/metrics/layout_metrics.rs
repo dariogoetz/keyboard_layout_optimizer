@@ -1,8 +1,8 @@
 //! The `metrics` module provides a trait for layout metrics.
 use keyboard_layout::layout::Layout;
 
-pub mod asymmetric_keys;
 pub mod shortcut_keys;
+pub mod similar_letter_groups;
 pub mod similar_letters;
 
 /// LayoutMetric is a trait for metrics that depends only on the layout.

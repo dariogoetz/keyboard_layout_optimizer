@@ -34,7 +34,7 @@ metrics:
         - ["m", "n"]
 
   # Symbols of specified groups shall have the same relative location to each others
-  asymmetric_keys:
+  similar_letter_groups:
     enabled: true
     weight: 5.0
     normalization:
@@ -44,7 +44,7 @@ metrics:
       # List of pairs of symbol groups for which the keys shall have the same relative position
       # e.g. ["auo", "äüö"] means that the relative location of a -> ä shall be identical to u -> ü
       # and o -> ö. Otherwise, a cost is counted.
-      similar_letters:
+      letter_group_pairs:
         - ["auo", "äüö"]
         - ["auo", "äüö"]
         - ["gbd", "kpt"]

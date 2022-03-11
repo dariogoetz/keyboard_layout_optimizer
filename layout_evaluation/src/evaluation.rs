@@ -36,7 +36,7 @@ pub struct WeightedParams<T> {
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
     pub similar_letters: WeightedParams<layout_metrics::similar_letters::Parameters>,
-    pub asymmetric_keys: WeightedParams<layout_metrics::asymmetric_keys::Parameters>,
+    pub similar_letter_groups: WeightedParams<layout_metrics::similar_letter_groups::Parameters>,
     pub shortcut_keys: WeightedParams<layout_metrics::shortcut_keys::Parameters>,
 
     pub finger_balance: WeightedParams<unigram_metrics::finger_balance::Parameters>,
@@ -118,12 +118,14 @@ impl Evaluator {
             params.similar_letters.enabled,
         );
         self.layout_metric(
-            Box::new(layout_metrics::asymmetric_keys::AsymmetricKeys::new(
-                &params.asymmetric_keys.params,
-            )),
-            params.asymmetric_keys.weight,
-            params.asymmetric_keys.normalization.clone(),
-            params.asymmetric_keys.enabled,
+            Box::new(
+                layout_metrics::similar_letter_groups::SimilarLetterGroups::new(
+                    &params.similar_letter_groups.params,
+                ),
+            ),
+            params.similar_letter_groups.weight,
+            params.similar_letter_groups.normalization.clone(),
+            params.similar_letter_groups.enabled,
         );
         self.layout_metric(
             Box::new(layout_metrics::shortcut_keys::ShortcutKeys::new(
