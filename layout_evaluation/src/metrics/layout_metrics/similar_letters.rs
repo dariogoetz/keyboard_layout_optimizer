@@ -3,8 +3,8 @@
 //! The keys' positioning is rated the following way:
 //! - 0% cost if they are on the same key, but on different layers
 //! - 0% cost if they are next to each other (not diagonal, though)
-//! - 50% cost if they are in the same column but not touching (e.g. bottom row to top row)
-//! - 50% cost if they have symmetric positions
+//! - 20% cost if they are in the same column but are not touching (e.g. bottom row to top row)
+//! - 20% cost if they have symmetric positions
 //! - 100% cost if none of the criteria apply
 
 use super::LayoutMetric;
@@ -59,10 +59,10 @@ impl LayoutMetric for SimilarLetters {
                 cost_to_add = 0.0;
             } else if key1.matrix_position.0 == key2.matrix_position.0 && on_same_layer {
                 // If in same column
-                cost_to_add = 0.5;
+                cost_to_add = 0.2;
             } else if key1.symmetry_index == key2.symmetry_index && on_same_layer {
-                // If on symmetrical position
-                cost_to_add = 0.5;
+                // If on symmetrical positions
+                cost_to_add = 0.2;
             } else {
                 cost_to_add = 1.0;
             }
