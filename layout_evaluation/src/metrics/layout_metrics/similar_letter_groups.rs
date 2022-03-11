@@ -55,7 +55,7 @@ fn costs<T: PartialEq>(data: &[T]) -> f64 {
 
 impl LayoutMetric for SimilarLetterGroups {
     fn name(&self) -> &str {
-        "Asymmetric Keys"
+        "Similar Letter-Groups"
     }
 
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>) {
