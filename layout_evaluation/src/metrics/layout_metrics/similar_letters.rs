@@ -41,20 +41,27 @@ impl LayoutMetric for SimilarLetters {
 
         for (c1, c2) in &self.letter_pairs {
             let cost_to_add;
-            let key1 = &layout.get_layerkey_for_symbol(c1).unwrap().key;
-            let key2 = &layout.get_layerkey_for_symbol(c2).unwrap().key;
+            let layerkey1 = layout.get_layerkey_for_symbol(c1).unwrap();
+            let layerkey2 = layout.get_layerkey_for_symbol(c2).unwrap();
+            let key1 = &layerkey1.key;
+            let key2 = &layerkey2.key;
 
+            let on_same_layer = layerkey1.layer == layerkey2.layer;
             let neighbor_horizontally = key1.matrix_position.1 == key2.matrix_position.1
-                && ((key1.matrix_position.0 - key2.matrix_position.0).abs() == 1);
+                && (key1.matrix_position.0 - key2.matrix_position.0).abs() == 1
+                && on_same_layer;
             let neighbor_vertically = key1.matrix_position.0 == key2.matrix_position.0
-                && (key1.matrix_position.1 - key2.matrix_position.1).abs() == 1;
+                && (key1.matrix_position.1 - key2.matrix_position.1).abs() == 1
+                && on_same_layer;
             let on_same_key = key1.matrix_position == key2.matrix_position;
 
             if neighbor_horizontally || neighbor_vertically || on_same_key {
                 cost_to_add = 0.0;
-            } else if key1.matrix_position.0 == key2.matrix_position.0 {
+            } else if key1.matrix_position.0 == key2.matrix_position.0 && on_same_layer {
+                // If in same column
                 cost_to_add = 0.5;
-            } else if key1.symmetry_index == key2.symmetry_index {
+            } else if key1.symmetry_index == key2.symmetry_index && on_same_layer {
+                // If on symmetrical position
                 cost_to_add = 0.5;
             } else {
                 cost_to_add = 1.0;
