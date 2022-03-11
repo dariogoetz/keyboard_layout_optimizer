@@ -23,7 +23,7 @@ metrics:
       value: 1.0
     params:
       # List of pairs of letters that shall be placed in related positions to each other.
-      similar_letters:
+      letter_pairs:
         - ["a", "ä"]
         - ["o", "ö"]
         - ["u", "ü"]

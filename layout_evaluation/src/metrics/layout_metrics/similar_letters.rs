@@ -14,18 +14,18 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub similar_letters: Vec<(char, char)>,
+    pub letter_pairs: Vec<(char, char)>,
 }
 
 #[derive(Clone, Debug)]
 pub struct SimilarLetters {
-    similar_letters: Vec<(char, char)>,
+    letter_pairs: Vec<(char, char)>,
 }
 
 impl SimilarLetters {
     pub fn new(params: &Parameters) -> Self {
         Self {
-            similar_letters: params.similar_letters.to_vec(),
+            letter_pairs: params.letter_pairs.to_vec(),
         }
     }
 }
@@ -38,7 +38,7 @@ impl LayoutMetric for SimilarLetters {
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>) {
         let mut cost = 0.0;
 
-        for (c1, c2) in &self.similar_letters {
+        for (c1, c2) in &self.letter_pairs {
             let cost_to_add;
             let key1 = &layout.get_layerkey_for_symbol(c1).unwrap().key;
             let key2 = &layout.get_layerkey_for_symbol(c2).unwrap().key;
