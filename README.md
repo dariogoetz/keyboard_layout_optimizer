@@ -25,7 +25,8 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 
 ## Metrics
 - **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
-- **asymmetric keys** - Which keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?
+- **similar letters** - Which keys are similar (in some sense), but lie in unsimilar locations (e.g. "a" - "ä" or "b" - "p")?
+- **similar letter-groups** - Used to be called "asymmetric keys". Which groups of keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?
 - **key costs** - How do the letter frequencies relate to the "cost" associated to the keys?
 - **hand disbalance** - Are left and right hands similarly loaded?
 - **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
