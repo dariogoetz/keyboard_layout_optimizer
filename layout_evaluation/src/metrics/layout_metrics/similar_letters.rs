@@ -1,6 +1,7 @@
 //! The layout metric `SimilarLetters` checks configurable pairs of keys
 //! for sensible placement. (e.g. "aä", "bp", or "mn")
 //! The keys' positioning is rated the following way:
+//! - 0% cost if they are on the same key, but on different layers
 //! - 0% cost if they are next to each other (not diagonal, though)
 //! - 50% cost if they are in the same column but not touching (e.g. bottom row to top row)
 //! - 50% cost if they have symmetric positions
@@ -47,8 +48,9 @@ impl LayoutMetric for SimilarLetters {
                 && ((key1.matrix_position.0 - key2.matrix_position.0).abs() == 1);
             let neighbor_vertically = key1.matrix_position.0 == key2.matrix_position.0
                 && (key1.matrix_position.1 - key2.matrix_position.1).abs() == 1;
+            let on_same_key = key1.matrix_position == key2.matrix_position;
 
-            if neighbor_horizontally || neighbor_vertically {
+            if neighbor_horizontally || neighbor_vertically || on_same_key {
                 cost_to_add = 0.0;
             } else if key1.matrix_position.0 == key2.matrix_position.0 {
                 cost_to_add = 0.5;
