@@ -23,7 +23,7 @@ metrics:
       value: 1.0
     params:
       letter_pairs_ratings:
-        # The cost for not complying with any of the criteria is 1.0.
+        # The cost for not complying with any of the criteria is 1.0
         - same_key_cost: 0.0
           neighboring_cost: 0.0
           same_column_cost: 0.0
@@ -47,7 +47,7 @@ metrics:
   # Used to be called `asymmetric_keys`.
   similar_letter_groups:
     enabled: true
-    weight: 5.0
+    weight: 10.0
     normalization:
       type: fixed
       value: 1.0
