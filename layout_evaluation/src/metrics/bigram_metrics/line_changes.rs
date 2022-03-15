@@ -15,12 +15,12 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::collections::hash_map::HashMap;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    finger_lengths: HashMap<Hand, HashMap<Finger, f64>>,
+    finger_lengths: FxHashMap<Hand, FxHashMap<Finger, f64>>,
     short_up_to_long_or_long_down_to_short_reduction: f64,
     short_down_to_long_or_long_up_to_short_increase: f64,
     count_row_changes_between_hands: bool,

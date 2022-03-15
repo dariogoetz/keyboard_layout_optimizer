@@ -14,8 +14,8 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -83,7 +83,7 @@ fn rocket() -> _ {
 
     let options: Options = figment.extract().expect("config");
 
-    let mut layout_generators: HashMap<String, NeoLayoutGenerator> = HashMap::default();
+    let mut layout_generators: FxHashMap<String, NeoLayoutGenerator> = FxHashMap::default();
     for (config_id, layout_config) in &options.layout_configs {
         let layout_config = LayoutConfig::from_yaml(&layout_config)
             .expect(&format!("Could not load config file '{}'", &layout_config));

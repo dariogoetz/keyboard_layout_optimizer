@@ -9,7 +9,7 @@ use layout_evaluation::{
 };
 
 use clap::Parser;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use std::path::Path;
@@ -174,7 +174,7 @@ pub fn publish_to_webservice(
     publish_layout_config: &str,
 ) {
     let client = reqwest::blocking::Client::new();
-    let mut body = HashMap::new();
+    let mut body = FxHashMap::default();
     body.insert("published_by", publish_name.to_string());
     body.insert("layout", layout.as_text());
     body.insert("layout_config", publish_layout_config.to_string());

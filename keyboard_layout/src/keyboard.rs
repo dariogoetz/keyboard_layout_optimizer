@@ -3,8 +3,8 @@
 use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 
 use anyhow::Result;
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::collections::HashMap;
 
 /// The index of a `Key` in the `keys` vec of a `Keyboard
 pub type KeyIndex = u16;
@@ -87,7 +87,7 @@ impl Keyboard {
     pub fn plot(&self, key_labels: &[&str]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: HashMap<usize, String> = key_labels
+        let labels: FxHashMap<usize, String> = key_labels
             .iter()
             .map(|c| c.to_string())
             .enumerate()
@@ -99,7 +99,7 @@ impl Keyboard {
     pub fn plot_compact(&self, key_labels: &[&str]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: HashMap<usize, &str> = key_labels.iter().cloned().enumerate().collect();
+        let labels: FxHashMap<usize, &str> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template_short, &labels)
             .unwrap()
     }
