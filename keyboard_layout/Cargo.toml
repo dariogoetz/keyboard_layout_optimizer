@@ -16,6 +16,6 @@ serde_yaml = "*"
 handlebars = "*"
 thiserror = "*"
 
-rustc-hash = "*"
+rustc-hash = "1.1.0"
 
 log = "*"
