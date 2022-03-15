@@ -313,7 +313,8 @@ Vue.component('layouts-table', {
                 {
                     key: 'highlight',
                     label: 'Well-known',
-                    sortable: true
+                    sortable: true,
+                    sortDirection: 'desc'
                 }
             ]
         },
