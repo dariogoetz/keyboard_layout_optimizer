@@ -47,6 +47,7 @@ impl LayoutMetric for SimilarLetters {
 
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>) {
         let mut cost = 0.0;
+        let mut bad_pairs: Vec<String> = Vec::new();
 
         for params in &self.letter_pairs_ratings {
             for (c1, c2) in &params.letter_pairs {
@@ -77,6 +78,7 @@ impl LayoutMetric for SimilarLetters {
                     cost_to_add = params.symmetric_cost;
                 } else {
                     cost_to_add = 1.0;
+                    bad_pairs.push(format!("{}{}", c1, c2));
                 }
                 cost += cost_to_add;
 
@@ -91,6 +93,19 @@ impl LayoutMetric for SimilarLetters {
             }
         }
 
-        (cost, None)
+        let message = if !bad_pairs.is_empty() {
+            let mut bad_pairs_string = String::new();
+            for (i, pair) in bad_pairs.iter().enumerate() {
+                if i > 0 {
+                    bad_pairs_string.push_str(", ");
+                }
+                bad_pairs_string.push_str(pair);
+            }
+            Some(format!("Poorly placed pairs: {}", bad_pairs_string,))
+        } else {
+            None
+        };
+
+        (cost, message)
     }
 }
