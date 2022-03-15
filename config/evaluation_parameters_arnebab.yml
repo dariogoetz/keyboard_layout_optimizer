@@ -24,14 +24,7 @@ metrics:
       value: 1.0
     params:
       # List of pairs of letters that shall be placed in related positions to each other
-      letter_pairs:
-        - ["a", "ä"]
-        - ["o", "ö"]
-        - ["u", "ü"]
-        - ["g", "k"]
-        - ["p", "b"]
-        - ["d", "t"]
-        - ["m", "n"]
+      letter_pairs_ratings: []
 
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.

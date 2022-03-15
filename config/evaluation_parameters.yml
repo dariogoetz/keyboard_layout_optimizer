@@ -22,15 +22,26 @@ metrics:
       type: fixed
       value: 1.0
     params:
-      # List of pairs of letters that shall be placed in related positions to each other
-      letter_pairs:
-        - ["a", "ä"]
-        - ["o", "ö"]
-        - ["u", "ü"]
-        - ["g", "k"]
-        - ["p", "b"]
-        - ["d", "t"]
-        - ["m", "n"]
+      letter_pairs_ratings:
+        # The cost for not complying with any of the criteria is 1.0.
+        - same_key_cost: 0.0
+          neighboring_cost: 0.0
+          same_column_cost: 0.0
+          symmetric_cost: 0.4
+          letter_pairs:
+            # List of pairs of letters that shall be placed in related positions to each other
+            - ["a", "ä"]
+            - ["o", "ö"]
+            - ["u", "ü"]
+        - same_key_cost: 0.5
+          neighboring_cost: 0.5
+          same_column_cost: 0.8
+          symmetric_cost: 0.7
+          letter_pairs:
+            - ["g", "k"]
+            - ["p", "b"]
+            - ["d", "t"]
+            - ["m", "n"]
 
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
