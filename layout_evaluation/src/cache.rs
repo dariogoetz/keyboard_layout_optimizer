@@ -1,7 +1,8 @@
 use colored::Colorize;
+use parking_lot::Mutex;
 use rustc_hash::FxHashMap;
 use std::fmt::Display;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub struct Cache<T: Clone> {
@@ -24,13 +25,13 @@ impl<T: Clone> Cache<T> {
     pub fn get_or_insert_with<F: Fn() -> T>(&self, elem: &str, f: F) -> T {
         let cache_val;
         {
-            let cache = self.cache.lock().unwrap();
+            let cache = self.cache.lock();
             cache_val = cache.get(elem).cloned();
         }
         cache_val.unwrap_or_else(|| {
             let res = f();
             {
-                let mut cache = self.cache.lock().unwrap();
+                let mut cache = self.cache.lock();
                 cache.insert(elem.to_owned(), res.clone());
             }
             res
@@ -42,7 +43,7 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>, max_entries: usize) -> String {
         let mut results: Vec<(String, T)>;
         {
-            let cache = self.cache.lock().unwrap();
+            let cache = self.cache.lock();
             results = cache.iter().map(|(s, c)| (s.clone(), c.clone())).collect();
         }
 
