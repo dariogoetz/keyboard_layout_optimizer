@@ -18,20 +18,20 @@ layout_optimization_genetic = { path = "../layout_optimization/layout_optimizati
 layout_optimization_sa = { path = "../layout_optimization/layout_optimization_sa" }
 
 anyhow = "*"
-colored = "2.0.0"
-ctrlc = "3.2.1"
+colored = "^2.0.0"
+ctrlc = "^3.2.1"
 dotenv = "*"
 env_logger = "*"
 log = "*"
 rand = "*"
-rayon = "1.5.1"
-reqwest = { version = "0.11", features = ["blocking", "json"] }
+rayon = "^1.5.1"
+reqwest = { version = "^0.11", features = ["blocking", "json"] }
 
 # for a MUSL build use the following line instead
 # reqwest = { version = "0.11", features = ["blocking", "json", "rustls-tls"], default-features = false }
 
-clap = { version = "3.0.0", features = ["derive"] }
-rustc-hash = "1.1.0"
+clap = { version = "^3.0.0", features = ["derive"] }
+rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 serde_yaml = "*"
