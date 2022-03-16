@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 use super::BigramMetric;
 
@@ -20,7 +20,7 @@ pub struct FingerSwitchCost {
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     /// Rows to exclude for finger rolls
-    pub exclude_rows: HashSet<isize>,
+    pub exclude_rows: FxHashSet<isize>,
     /// If to exclude bigrams containing keys with a positive "unbalancing" value
     pub exclude_unbalancing: bool,
     // If to exclude bigrams containing a lateral finger movement
@@ -31,7 +31,7 @@ pub struct Parameters {
 
 #[derive(Clone, Debug)]
 pub struct MovementPatternSameRow {
-    exclude_rows: HashSet<isize>,
+    exclude_rows: FxHashSet<isize>,
     exclude_unbalancing: bool,
     exclude_lateral_finger_movement: bool,
     finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
@@ -70,11 +70,6 @@ impl BigramMetric for MovementPatternSameRow {
         let pos1 = k1.key.matrix_position;
         let pos2 = k2.key.matrix_position;
 
-        // exclude rolls with keys in exclude_rows
-        if self.exclude_rows.contains(&pos1.1) || self.exclude_rows.contains(&pos2.1) {
-            return Some(0.0);
-        }
-
         // only consider rolls on same row
         if pos1.1 != pos2.1 {
             return Some(0.0);
@@ -89,6 +84,11 @@ impl BigramMetric for MovementPatternSameRow {
 
         // exclude unbalancing keys, if required
         if self.exclude_unbalancing && (k1.key.unbalancing > 0.0 || k2.key.unbalancing > 0.0) {
+            return Some(0.0);
+        }
+
+        // exclude rolls with keys in exclude_rows
+        if self.exclude_rows.contains(&pos1.1) || self.exclude_rows.contains(&pos2.1) {
             return Some(0.0);
         }
 

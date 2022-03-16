@@ -59,16 +59,16 @@ impl TrigramMetric for SecondaryBigrams {
         total_weight: f64,
         layout: &Layout,
     ) -> Option<f64> {
+        if k1 == k3 && k1.is_modifier {
+            return Some(0.0);
+        }
+
         if self.exclude_containing.contains(&k1.symbol)
             || self.exclude_containing.contains(&k2.symbol)
             || self.exclude_containing.contains(&k3.symbol)
         {
             return Some(0.0);
         };
-
-        if k1 == k3 && k1.is_modifier {
-            return Some(0.0);
-        }
 
         let factor = if k1.key.hand == k2.key.hand && k2.key.hand == k3.key.hand {
             self.factor_no_handswitch
