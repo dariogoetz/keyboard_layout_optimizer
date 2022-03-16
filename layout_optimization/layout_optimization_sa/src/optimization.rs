@@ -102,7 +102,7 @@ impl ArgminOp for AnnealingStruct {
     fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
         Ok(self
             .layout_generator
-            .perform_n_swaps(&param, self.key_switches))
+            .perform_n_swaps(param, self.key_switches))
     }
 }
 
@@ -226,7 +226,7 @@ fn mean(list: &[f64]) -> f64 {
 /// This value can then be used as the initial temperature in Simulated annealing.
 /// Reference: https://link.springer.com/content/pdf/10.1007/s10732-007-9012-8.pdf
 fn get_cost_sd(
-    initial_indices: &Vec<usize>,
+    initial_indices: &[usize],
     evaluator: Arc<Evaluator>,
     layout_generator: &PermutationLayoutGenerator,
     key_pair_switches: usize,
@@ -236,7 +236,7 @@ fn get_cost_sd(
     // Calculate initial temperature.
     let mut sd = 0.0;
     let mut costs: Vec<f64> = vec![];
-    let mut current_indices = initial_indices.clone();
+    let mut current_indices = initial_indices.to_owned();
 
     for _ in 0..USED_NEIGHBORS {
         let layout = layout_generator.generate_layout(&current_indices);

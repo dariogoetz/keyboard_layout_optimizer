@@ -63,9 +63,9 @@ impl OnDemandNgramMapper {
 
     /// Generate a `OnDemandNgramMapper` with a given corpus (text). Generates corresponding ngrams automatically.
     pub fn with_corpus(text: &str, config: NgramMapperConfig) -> Self {
-        let unigrams = Unigrams::from_str(text).expect("Could not generate unigrams from text.");
-        let bigrams = Bigrams::from_str(text).expect("Could not generate bigrams from text.");
-        let trigrams = Trigrams::from_str(text).expect("Could not generate trigrams from text.");
+        let unigrams = Unigrams::from_text(text).expect("Could not generate unigrams from text.");
+        let bigrams = Bigrams::from_text(text).expect("Could not generate bigrams from text.");
+        let trigrams = Trigrams::from_text(text).expect("Could not generate trigrams from text.");
 
         Self {
             unigram_mapper: OnDemandUnigramMapper::new(unigrams, config.split_modifiers.clone()),
@@ -94,7 +94,7 @@ impl NgramMapper for OnDemandNgramMapper {
         // sum duplicates in unigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
         let unigram_key_indices = groupby_sum(&unigram_key_indices);
         // map LayerKeyIndex to &LayerKey
-        let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, &layout);
+        let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, layout);
 
         // map trigrams before bigrams because secondary bigrams from trigrams map be added
         // map char-based trigrams to LayerKeyIndex
@@ -104,7 +104,7 @@ impl NgramMapper for OnDemandNgramMapper {
         // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
         let trigram_key_indices = groupby_sum(&trigram_key_indices);
         // map LayerKeyIndex to &LayerKey
-        let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, &layout);
+        let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
 
         // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
         // --> remove
@@ -139,7 +139,7 @@ impl NgramMapper for OnDemandNgramMapper {
         // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
         let bigrams_found = bigram_key_indices.iter().map(|(_, w)| w).sum();
         // map LayerKeyIndex to &LayerKey
-        let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, &layout);
+        let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, layout);
 
         // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
         let bigrams = bigrams

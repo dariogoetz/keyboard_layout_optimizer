@@ -72,7 +72,7 @@ impl UnigramMetric for FingerBalance {
             .iter()
             .filter(|((_hand, finger), _intended_load)| *finger != Finger::Thumb)
             .map(|((hand, finger), intended_load)| {
-                let load = finger_loads.get(&hand, &finger) / total_weight;
+                let load = finger_loads.get(hand, finger) / total_weight;
                 log::trace!(
                     "Finger: {:>13}, Intended: {:>5.2}, Load: {:>5.2}, Fraction: {:>.4}",
                     format!("{:?} {:?}", hand, finger),

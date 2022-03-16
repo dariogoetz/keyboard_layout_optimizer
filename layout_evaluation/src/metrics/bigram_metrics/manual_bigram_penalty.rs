@@ -8,14 +8,17 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
+/// A tuple, structured the following way: (Column, Row)
+type Position = (u8, u8);
+
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub matrix_positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
+    pub matrix_positions: FxHashMap<(Position, Position), f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct ManualBigramPenalty {
-    matrix_positions: FxHashMap<((u8, u8), (u8, u8)), f64>,
+    matrix_positions: FxHashMap<(Position, Position), f64>,
 }
 
 impl ManualBigramPenalty {
@@ -57,6 +60,6 @@ impl BigramMetric for ManualBigramPenalty {
             return Some(weight * *val);
         }
 
-        return Some(0.0);
+        Some(0.0)
     }
 }

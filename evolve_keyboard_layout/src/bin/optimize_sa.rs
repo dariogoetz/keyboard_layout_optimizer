@@ -80,7 +80,7 @@ impl Iterator for LayoutIterator {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let res = if self.i < self.layouts.len() {
+        if self.i < self.layouts.len() {
             // There are still elements left to give
             let res = self.layouts[self.i].clone();
             self.i += 1;
@@ -97,9 +97,7 @@ impl Iterator for LayoutIterator {
                 // Finish iteration
                 None
             }
-        };
-
-        res
+        }
     }
 }
 
@@ -126,11 +124,15 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let mut optimization_params =
-        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
+    let mut optimization_params = optimization::Parameters::from_yaml(
+        &options.optimization_parameters,
+    )
+    .unwrap_or_else(|_| {
+        panic!(
             "Could not read optimization parameters from {}.",
-            &options.optimization_parameters,
-        ));
+            &options.optimization_parameters
+        )
+    });
     if options.greedy {
         optimization_params.init_temp = Some(f64::MIN_POSITIVE);
     } else if options.init_temp.is_some() {

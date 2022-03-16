@@ -24,7 +24,7 @@ fn process_special_characters_inverse(s: &str) -> String {
 
 impl Unigrams {
     /// Collect unigrams from given text.
-    pub fn from_str(text: &str) -> Result<Self> {
+    pub fn from_text(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars
@@ -126,7 +126,7 @@ pub struct Bigrams {
 
 impl Bigrams {
     /// Collect bigrams from given text.
-    pub fn from_str(text: &str) -> Result<Self> {
+    pub fn from_text(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars
@@ -231,7 +231,7 @@ pub struct Trigrams {
 
 impl Trigrams {
     /// Collect trigrams from given text.
-    pub fn from_str(text: &str) -> Result<Self> {
+    pub fn from_text(text: &str) -> Result<Self> {
         let mut grams = FxHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars

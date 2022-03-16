@@ -4,7 +4,7 @@ use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
 /// Row and columnar location on the keyboard
-#[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Copy, Default, Deserialize, PartialEq, Debug)]
 pub struct MatrixPosition(
     /// Index of column
     pub isize,
@@ -17,12 +17,6 @@ impl MatrixPosition {
     pub fn distance(&self, other: &MatrixPosition) -> f64 {
         (0.5 * (self.0 as f64 - other.0 as f64).powi(2) + (self.1 as f64 - other.1 as f64).powi(2))
             .sqrt()
-    }
-}
-
-impl Default for MatrixPosition {
-    fn default() -> Self {
-        MatrixPosition(0, 0)
     }
 }
 

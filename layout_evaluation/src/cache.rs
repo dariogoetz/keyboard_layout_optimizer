@@ -8,6 +8,12 @@ pub struct Cache<T: Clone> {
     cache: Arc<Mutex<FxHashMap<String, T>>>,
 }
 
+impl<T: Clone> Default for Cache<T> {
+    fn default() -> Self {
+        Cache::new()
+    }
+}
+
 impl<T: Clone> Cache<T> {
     pub fn new() -> Self {
         Self {

@@ -89,12 +89,10 @@ impl LayoutMetric for SimilarLetterGroups {
                 column_distances.push(column_distance);
 
                 let v_dist = key2.matrix_position.1 - key1.matrix_position.1;
-                let v_direction = if v_dist == 0 {
-                    0
-                } else if v_dist < 0 {
-                    -1
-                } else {
-                    1
+                let v_direction = match v_dist {
+                    0 => 0,
+                    d if d < 0 => -1,
+                    _ => 1,
                 };
                 v_directions.push(v_direction);
             }

@@ -75,11 +75,15 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let mut optimization_params =
-        optimization::Parameters::from_yaml(&options.optimization_parameters).expect(&format!(
+    let mut optimization_params = optimization::Parameters::from_yaml(
+        &options.optimization_parameters,
+    )
+    .unwrap_or_else(|_| {
+        panic!(
             "Could not read optimization parameters from {}.",
-            &options.optimization_parameters,
-        ));
+            &options.optimization_parameters
+        )
+    });
 
     if let Some(generation_limit) = options.generation_limit {
         optimization_params.generation_limit = generation_limit

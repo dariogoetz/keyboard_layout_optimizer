@@ -12,7 +12,7 @@ impl FromStr for WeightedComponent {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let components: Vec<&str> = s.splitn(2, ":").collect();
+        let components: Vec<&str> = s.splitn(2, ':').collect();
 
         let path = components[0].to_string();
         let weight = f64::from_str(components[1]).unwrap();
@@ -61,8 +61,8 @@ fn main() {
         log::info!("Processing {}...", component.1);
 
         let p = Path::new(&component.1).join("1-grams.txt");
-        let unigrams = Unigrams::from_file(&p.to_str().unwrap())
-            .expect(&format!("Could not read 1-gramme file from '{:?}'.", &p));
+        let unigrams = Unigrams::from_file(p.to_str().unwrap())
+            .unwrap_or_else(|_| panic!("Could not read 1-gramme file from '{:?}'.", &p));
 
         let unigrams_total = unigrams.total_weight();
 
@@ -75,8 +75,8 @@ fn main() {
         );
 
         let p = Path::new(&component.1).join("2-grams.txt");
-        let bigrams = Bigrams::from_file(&p.to_str().unwrap())
-            .expect(&format!("Could not read 2-gramme file from '{:?}'.", &p));
+        let bigrams = Bigrams::from_file(p.to_str().unwrap())
+            .unwrap_or_else(|_| panic!("Could not read 2-gramme file from '{:?}'.", &p));
 
         let bigrams_total = bigrams.total_weight();
 
@@ -89,8 +89,8 @@ fn main() {
         );
 
         let p = Path::new(&component.1).join("3-grams.txt");
-        let trigrams = Trigrams::from_file(&p.to_str().unwrap())
-            .expect(&format!("Could not read 3-gramme file from '{:?}'.", &p));
+        let trigrams = Trigrams::from_file(p.to_str().unwrap())
+            .unwrap_or_else(|_| panic!("Could not read 3-gramme file from '{:?}'.", &p));
 
         let trigrams_total = trigrams.total_weight();
 

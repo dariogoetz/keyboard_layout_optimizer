@@ -92,10 +92,7 @@ impl<'a> Iterator for TakeTwoLayerKey<'a> {
             }
         }
 
-        if self.state_outer.is_none() {
-            // outer loop ended -> no more elements
-            return None;
-        }
+        self.state_outer?; // if outer loop ended -> no more elements -> return None
 
         match self.inner_variant {
             0 => {
@@ -204,19 +201,13 @@ impl<'a> Iterator for TakeThreeLayerKey<'a> {
             // or middle iterator ended -> advance outer loop and reinit middle one
             self.state_outer = self.iter_outer.as_mut().unwrap().next().cloned();
 
-            if self.state_outer.is_none() {
-                // outer iterator ended -> no more elements
-                return None;
-            }
+            self.state_outer?; // if outer iterator ended -> no more elements -> return None
 
             // the middle iterator is a clone of the outer (plus one skip, which happened in the line above)
             self.iter_middle = Some(self.iter_outer.as_ref().cloned().unwrap());
             self.state_middle = self.iter_middle.as_mut().unwrap().next().cloned();
 
-            if self.state_middle.is_none() {
-                // middle loop ended right after being initialized -> nothing left to do
-                return None;
-            }
+            self.state_middle?; // if middle loop ended right after being initialized -> nothing left to do  -> return None
         }
 
         if self.state_inner.is_none() {

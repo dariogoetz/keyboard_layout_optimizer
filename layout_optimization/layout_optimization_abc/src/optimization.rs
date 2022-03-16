@@ -54,12 +54,12 @@ impl Context for FitnessCalc {
         let evaluation_result = match &self.result_cache {
             Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
                 self.evaluator
-                    .evaluate_layout(&solution)
+                    .evaluate_layout(solution)
                     .optimization_score()
             }),
             None => self
                 .evaluator
-                .evaluate_layout(&solution)
+                .evaluate_layout(solution)
                 .optimization_score(),
         };
         evaluation_result as f64
@@ -110,7 +110,7 @@ pub fn optimize(
 
     let core = FitnessCalc {
         evaluator: Arc::new(evaluator.clone()),
-        layout_generator: pm.clone(),
+        layout_generator: pm,
         result_cache,
         n_switches: params.n_switches,
     };

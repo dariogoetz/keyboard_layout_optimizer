@@ -25,32 +25,31 @@ pub struct NGramConfig {
 }
 
 pub fn evaluate_bench(c: &mut Criterion) {
-    let layout_config = LayoutConfig::from_yaml(LAYOUT_CONFIG).expect(&format!(
-        "Could not load config file 'standard_keyboard.yml'",
-    ));
+    let layout_config = LayoutConfig::from_yaml(LAYOUT_CONFIG)
+        .unwrap_or_else(|_| panic!("Could not load config file 'standard_keyboard.yml'"));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
-    let eval_params = EvaluationParameters::from_yaml(EVALUATION_PARAMETERS).expect(&format!(
-        "Could not read evaluation yaml file 'evaluation_parameters.yml'"
-    ));
+    let eval_params = EvaluationParameters::from_yaml(EVALUATION_PARAMETERS).unwrap_or_else(|_| {
+        panic!("Could not read evaluation yaml file 'evaluation_parameters.yml'")
+    });
 
     let p = Path::new(NGRAMS).join("1-grams.txt");
     log::info!("Reading unigram file: '{:?}'", p);
-    let unigrams = Unigrams::from_file(&p.to_str().unwrap())
-        .expect(&format!("Could not read 1-gramme file from '{:?}'.", p));
+    let unigrams = Unigrams::from_file(p.to_str().unwrap())
+        .unwrap_or_else(|_| panic!("Could not read 1-gramme file from '{:?}'.", p));
 
     let p = Path::new(NGRAMS).join("2-grams.txt");
     log::info!("Reading bigram file: '{:?}'", p);
-    let bigrams = Bigrams::from_file(&p.to_str().unwrap())
-        .expect(&format!("Could not read 2-gramme file from '{:?}'.", p));
+    let bigrams = Bigrams::from_file(p.to_str().unwrap())
+        .unwrap_or_else(|_| panic!("Could not read 2-gramme file from '{:?}'.", p));
 
     let p = Path::new(NGRAMS).join("3-grams.txt");
     log::info!("Reading trigram file: '{:?}'", p);
-    let trigrams = Trigrams::from_file(&p.to_str().unwrap())
-        .expect(&format!("Could not read 3-gramme file from '{:?}'.", p));
+    let trigrams = Trigrams::from_file(p.to_str().unwrap())
+        .unwrap_or_else(|_| panic!("Could not read 3-gramme file from '{:?}'.", p));
 
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
 

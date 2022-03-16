@@ -18,22 +18,20 @@ fn main() {
     let options = Options::parse();
     env_logger::init();
 
-    let text = std::fs::read_to_string(&options.filename).expect(&format!(
-        "Could not read corpus file from {}.",
-        options.filename
-    ));
+    let text = std::fs::read_to_string(&options.filename)
+        .unwrap_or_else(|_| panic!("Could not read corpus file from {}.", options.filename));
 
     let d = Path::new(&options.out);
 
-    let unigrams = Unigrams::from_str(&text).expect("Could not generate unigrams from text.");
+    let unigrams = Unigrams::from_text(&text).expect("Could not generate unigrams from text.");
     let p = d.join("1-grams.txt");
     unigrams.save_frequencies(&p).unwrap();
 
-    let bigrams = Bigrams::from_str(&text).expect("Could not generate bigrams from text.");
+    let bigrams = Bigrams::from_text(&text).expect("Could not generate bigrams from text.");
     let p = d.join("2-grams.txt");
     bigrams.save_frequencies(&p).unwrap();
 
-    let trigrams = Trigrams::from_str(&text).expect("Could not generate trigrams from text.");
+    let trigrams = Trigrams::from_text(&text).expect("Could not generate trigrams from text.");
     let p = d.join("3-grams.txt");
     trigrams.save_frequencies(&p).unwrap();
 }

@@ -92,7 +92,7 @@ pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
 
 pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
     let layout_config = LayoutConfig::from_yaml(layout_config)
-        .expect(&format!("Could not load config file {}", layout_config));
+        .unwrap_or_else(|_| panic!("Could not load config file {}", layout_config));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
@@ -100,15 +100,18 @@ pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
 }
 
 pub fn init_evaluator(options: &Options) -> Evaluator {
-    let eval_params = EvaluationParameters::from_yaml(&options.eval_parameters).expect(&format!(
-        "Could not read evaluation yaml file {}",
-        options.eval_parameters
-    ));
+    let eval_params =
+        EvaluationParameters::from_yaml(&options.eval_parameters).unwrap_or_else(|_| {
+            panic!(
+                "Could not read evaluation yaml file {}",
+                options.eval_parameters
+            )
+        });
 
     let text = options.text.as_ref().cloned().or_else(|| {
         options.corpus.as_ref().map(|corpus_file| {
             std::fs::read_to_string(&corpus_file)
-                .expect(&format!("Could not read corpus file from {}.", corpus_file))
+                .unwrap_or_else(|_| panic!("Could not read corpus file from {}.", corpus_file))
         })
     });
 
@@ -128,16 +131,16 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
         None => {
             let p = Path::new(&options.ngrams).join("1-grams.txt");
             log::info!("Reading unigram file: '{:?}'", p);
-            let mut unigrams = Unigrams::from_file(&p.to_str().unwrap())
-                .expect(&format!("Could not read 1-gramme file from '{:?}'.", &p));
+            let mut unigrams = Unigrams::from_file(p.to_str().unwrap())
+                .unwrap_or_else(|_| panic!("Could not read 1-gramme file from '{:?}'.", &p));
             let p = Path::new(&options.ngrams).join("2-grams.txt");
             log::info!("Reading bigram file: '{:?}'", p);
-            let mut bigrams = Bigrams::from_file(&p.to_str().unwrap())
-                .expect(&format!("Could not read 2-gramme file from '{:?}'.", &p));
+            let mut bigrams = Bigrams::from_file(p.to_str().unwrap())
+                .unwrap_or_else(|_| panic!("Could not read 2-gramme file from '{:?}'.", &p));
             let p = Path::new(&options.ngrams).join("3-grams.txt");
             log::info!("Reading trigram file: '{:?}'", p);
-            let mut trigrams = Trigrams::from_file(&p.to_str().unwrap())
-                .expect(&format!("Could not read 3-gramme file from '{:?}'.", &p));
+            let mut trigrams = Trigrams::from_file(p.to_str().unwrap())
+                .unwrap_or_else(|_| panic!("Could not read 3-gramme file from '{:?}'.", &p));
 
             if let Some(tops) = options.tops {
                 unigrams = unigrams.tops(tops);

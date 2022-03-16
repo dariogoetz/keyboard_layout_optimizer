@@ -63,14 +63,14 @@ impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
         let l = self.layout_generator.generate_layout(genome);
         let layout_str = self.layout_generator.generate_string(genome);
-        let evaluation_result = match &self.result_cache {
+
+        // Get & return the evaluation-result
+        match &self.result_cache {
             Some(result_cache) => result_cache.get_or_insert_with(&layout_str, || {
                 self.evaluator.evaluate_layout(&l).optimization_score()
             }),
             None => self.evaluator.evaluate_layout(&l).optimization_score(),
-        };
-
-        evaluation_result
+        }
     }
 
     fn average(&self, fitness_values: &[usize]) -> usize {

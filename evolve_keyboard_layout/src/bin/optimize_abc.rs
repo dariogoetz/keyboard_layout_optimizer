@@ -48,10 +48,12 @@ fn main() {
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
-        .expect(&format!(
-            "Could not read optimization parameters from {}.",
-            &options.optimization_parameters,
-        ));
+        .unwrap_or_else(|_| {
+            panic!(
+                "Could not read optimization parameters from {}.",
+                &options.optimization_parameters
+            )
+        });
 
     let fix_from = options.fix_from.to_string();
 

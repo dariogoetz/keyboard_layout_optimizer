@@ -70,9 +70,7 @@ impl PermutationLayoutGenerator {
             let mut sw = vec.choose_multiple(rng, 2);
             let sw0 = sw.next().unwrap();
             let sw1 = sw.next().unwrap();
-            let tmp = indices[*sw0];
-            indices[*sw0] = indices[*sw1];
-            indices[*sw1] = tmp;
+            indices.swap(*sw0, *sw1);
         }
 
         indices

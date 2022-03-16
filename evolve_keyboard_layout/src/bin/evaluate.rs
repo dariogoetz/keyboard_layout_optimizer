@@ -90,7 +90,7 @@ fn main() {
                 }
             };
             let evaluation_result =
-                result_cache.get_or_insert_with(&layout_str, || evaluator.evaluate_layout(&layout));
+                result_cache.get_or_insert_with(layout_str, || evaluator.evaluate_layout(&layout));
             (layout, evaluation_result)
         })
         .collect();

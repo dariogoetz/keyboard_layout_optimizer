@@ -107,7 +107,7 @@ impl Layout {
                 let indices: Vec<LayerKeyIndex> = layer_chars
                     .iter()
                     .enumerate()
-                    .take(modifiers.len() + 1)  // only consider layers for which a modifier is available
+                    .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
                         let layerkey = LayerKey::new(
                             layer_id,
@@ -147,7 +147,7 @@ impl Layout {
                     // flag this layerkey as modifier
                     layerkeys[mod_idx as usize].is_modifier = true;
                 }
-                resolved_mods_per_hand.insert(hand.clone(), resolved_mods);
+                resolved_mods_per_hand.insert(*hand, resolved_mods);
             }
             mod_map.push(resolved_mods_per_hand);
         }

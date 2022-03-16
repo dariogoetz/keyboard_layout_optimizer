@@ -125,7 +125,7 @@ impl NeoLayoutGenerator {
 
                 let key_idx = self
                     .permutable_key_map
-                    .get(&given_char)
+                    .get(given_char)
                     .ok_or(format!(
                         "Unsupported symbol in given layout keys: '{}'",
                         given_char
@@ -184,8 +184,8 @@ impl NeoLayoutGenerator {
         let mut unsupported_chars: Vec<char> = char_set.difference(&layout_set).cloned().collect();
         let mut missing_chars: Vec<char> = layout_set.difference(&char_set).cloned().collect();
 
-        unsupported_chars.sort();
-        missing_chars.sort();
+        unsupported_chars.sort_unstable();
+        missing_chars.sort_unstable();
 
         if !unsupported_chars.is_empty() {
             return Err(LayoutError::UnsupportedChars(unsupported_chars.iter().collect()).into());

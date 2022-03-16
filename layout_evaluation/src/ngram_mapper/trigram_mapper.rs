@@ -8,9 +8,9 @@ use crate::ngrams::Trigrams;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-fn mapped_trigrams<'s>(
+fn mapped_trigrams(
     trigrams: &Trigrams,
-    layout: &'s Layout,
+    layout: &Layout,
     exclude_line_breaks: bool,
 ) -> (TrigramIndices, f64) {
     let mut not_found_weight = 0.0;
