@@ -12,12 +12,12 @@ keyboard_layout = { path = "../../keyboard_layout" }
 layout_evaluation = { path = "../../layout_evaluation" }
 layout_optimization_common = { path = "../layout_optimization_common" }
 
-anyhow = "1.0.45"
+anyhow = "^1.0.45"
 colored = "*"
 env_logger = "*"
-genevo = "0.7.0"
+genevo = "^0.7.0"
 log = "*"
-rand = "0.8.4"
-rustc-hash = "1.1.0"
+rand = "^0.8.4"
+rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
-serde_yaml = "0.8.21"
+serde_yaml = "^0.8.21"

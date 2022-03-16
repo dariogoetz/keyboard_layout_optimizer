@@ -15,7 +15,7 @@ rocket_db_pools = { path = "Rocket/contrib/db_pools/lib/", features = [
 ] }
 # rocket_db_pools = { version = "0.1.0-rc", features = ["sqlx_postgres"] }
 
-sqlx = { version = "0.5.1", default-features = false, features = [
+sqlx = { version = "^0.5.1", default-features = false, features = [
     "macros",
     "offline",
     "migrate",
@@ -24,7 +24,7 @@ sqlx = { version = "0.5.1", default-features = false, features = [
 
 anyhow = "*"
 async-trait = "*"
-rustc-hash = "1.1.0"
+rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"

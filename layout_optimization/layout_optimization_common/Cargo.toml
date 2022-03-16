@@ -11,5 +11,5 @@ version = "0.1.0"
 keyboard_layout = { path = "../../keyboard_layout" }
 layout_evaluation = { path = "../../layout_evaluation" }
 
-rand = "0.8.4"
-rustc-hash = "1.1.0"
+rand = "^0.8.4"
+rustc-hash = "^1.1.0"
