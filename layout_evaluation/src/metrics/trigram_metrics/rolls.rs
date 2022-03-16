@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use super::TrigramMetric;
 
 use keyboard_layout::{
@@ -7,6 +5,7 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
+use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -16,14 +15,14 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
-    pub exclude_rows: HashSet<isize>,
+    pub exclude_rows: FxHashSet<isize>,
 }
 
 #[derive(Clone, Debug)]
 pub struct TrigramRolls {
     factor_inward: f64,
     factor_outward: f64,
-    exclude_rows: HashSet<isize>,
+    exclude_rows: FxHashSet<isize>,
 }
 
 impl TrigramRolls {
