@@ -9,16 +9,16 @@ use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
 /// A tuple, structured the following way: (Column, Row)
-type Position = (u8, u8);
+type MatrixPosition = (u8, u8);
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub matrix_positions: FxHashMap<(Position, Position), f64>,
+    pub matrix_positions: FxHashMap<(MatrixPosition, MatrixPosition), f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct ManualBigramPenalty {
-    matrix_positions: FxHashMap<(Position, Position), f64>,
+    matrix_positions: FxHashMap<(MatrixPosition, MatrixPosition), f64>,
 }
 
 impl ManualBigramPenalty {
