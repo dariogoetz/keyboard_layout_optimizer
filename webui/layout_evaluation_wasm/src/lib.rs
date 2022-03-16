@@ -4,6 +4,7 @@ use argmin::prelude::{ArgminKV, Error, IterState, Observe};
 use genevo::prelude::*;
 use instant::Instant;
 use serde::Serialize;
+use std::str::FromStr;
 use std::sync::Arc;
 use wasm_bindgen::prelude::*;
 
@@ -247,7 +248,6 @@ impl LayoutOptimizer {
     }
 
     pub fn step(&mut self) -> Result<JsValue, JsValue> {
-
         let result = self.simulator.step();
         match result {
             Ok(SimResult::Intermediate(step)) => {
