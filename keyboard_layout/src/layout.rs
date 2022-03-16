@@ -214,8 +214,7 @@ impl Layout {
     pub fn get_layerkey_for_symbol(&self, c: &char) -> Option<&LayerKey> {
         self.key_map
             .get(c)
-            .cloned()
-            .map(|idx| self.get_layerkey(&idx))
+            .map(|idx| self.get_layerkey(idx))
     }
 
     /// Get the index of a `LayerKey` for a given symbol, if it can be generated with the layout
