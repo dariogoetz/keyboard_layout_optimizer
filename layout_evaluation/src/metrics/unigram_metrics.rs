@@ -4,7 +4,6 @@ use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
 use std::env;
-use std::usize;
 
 pub mod finger_balance;
 pub mod hand_disbalance;

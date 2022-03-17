@@ -7,7 +7,6 @@ use anyhow::Result;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use std::usize;
 
 use genevo::genetic::{Children, FitnessFunction, Parents};
 use genevo::operator::{prelude::*, CrossoverOp, GeneticOperator};

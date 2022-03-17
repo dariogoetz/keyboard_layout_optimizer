@@ -6,7 +6,6 @@ use layout_optimization_common::PermutationLayoutGenerator;
 use anyhow::Result;
 use serde::Deserialize;
 use std::sync::{mpsc::Receiver, Arc};
-use std::usize;
 
 use abc::{scaling, Candidate, Context, HiveBuilder};
 
