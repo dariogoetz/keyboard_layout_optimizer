@@ -30,7 +30,7 @@ pub enum LayoutError {
 pub struct BaseLayoutYAML {
     keys: Vec<Vec<Vec<String>>>,
     fixed_keys: Vec<Vec<bool>>,
-    fixed_layers: Vec<usize>,
+    fixed_layers: Vec<u8>,
     modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
     layer_costs: Vec<f64>,
 }
@@ -41,8 +41,8 @@ pub struct BaseLayoutYAML {
 pub struct NeoLayoutGenerator {
     keys: Vec<Vec<char>>,
     fixed_keys: Vec<bool>,
-    permutable_key_map: FxHashMap<char, usize>,
-    fixed_layers: Vec<usize>,
+    permutable_key_map: FxHashMap<char, u8>,
+    fixed_layers: Vec<u8>,
     modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
     layer_costs: Vec<f64>,
     keyboard: Arc<Keyboard>,
@@ -64,14 +64,14 @@ impl NeoLayoutGenerator {
             .collect();
         let fixed_keys: Vec<bool> = base.fixed_keys.iter().flatten().cloned().collect();
 
-        let mut permutable_key_map: FxHashMap<char, usize> = FxHashMap::default();
+        let mut permutable_key_map: FxHashMap<char, u8> = FxHashMap::default();
         keys.iter()
             .zip(fixed_keys.iter())
             .enumerate()
             .filter(|(_i, (_key_layers, fixed))| !*fixed)
             .for_each(|(i, (key_layers, _fixed))| {
                 if !key_layers.is_empty() {
-                    permutable_key_map.entry(key_layers[0]).or_insert(i);
+                    permutable_key_map.entry(key_layers[0]).or_insert(i as u8);
                 }
             });
 
@@ -131,12 +131,12 @@ impl NeoLayoutGenerator {
                     ))
                     .map_err(anyhow::Error::msg)?;
 
-                let given_key_layers = &self.keys[*key_idx];
+                let given_key_layers = &self.keys[*key_idx as usize];
                 given_key_layers
                     .iter()
                     .enumerate()
                     .for_each(|(layer_id, c)| {
-                        if !self.fixed_layers.contains(&layer_id) {
+                        if !self.fixed_layers.contains(&(layer_id as u8)) {
                             new_key_layers.push(*c);
                         } else {
                             new_key_layers.push(*key_layers.get(layer_id).unwrap_or(&'␡'));

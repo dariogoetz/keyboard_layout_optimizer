@@ -12,14 +12,14 @@ use serde::Deserialize;
 pub struct Parameters {
     pub shortcut_chars: String,
     pub cost: f64,
-    pub within_n_leftmost_cols: usize,
+    pub within_n_leftmost_cols: u8,
 }
 
 #[derive(Clone, Debug)]
 pub struct ShortcutKeys {
     shortcut_chars: Vec<char>,
     cost: f64,
-    within_n_leftmost_cols: usize,
+    within_n_leftmost_cols: u8,
 }
 
 impl ShortcutKeys {
@@ -44,7 +44,7 @@ impl LayoutMetric for ShortcutKeys {
             if let Some(k) = layout.get_layerkey_for_symbol(c) {
                 // NOTE: In ArneBab's solution, the top rows do not "skip a column" as we do.
                 // Therefore, a special case needs to be made for row 3, in contrast to here.
-                if k.key.matrix_position.0 > self.within_n_leftmost_cols as isize {
+                if k.key.matrix_position.0 > self.within_n_leftmost_cols {
                     cost += self.cost;
                     bad_keys.push(*c);
                     log::trace!(

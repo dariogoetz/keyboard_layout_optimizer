@@ -7,9 +7,9 @@ use serde::Deserialize;
 #[derive(Clone, Copy, Default, Deserialize, PartialEq, Debug)]
 pub struct MatrixPosition(
     /// Index of column
-    pub isize,
+    pub u8,
     /// Index of row
-    pub isize,
+    pub u8,
 );
 
 impl MatrixPosition {
@@ -22,7 +22,12 @@ impl MatrixPosition {
 
 /// 2D position on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
-pub struct Position(pub f64, pub f64);
+pub struct Position(
+    /// Horizontal positioning (~Column)
+    pub f64,
+    /// Vertical positioning (~Row)
+    pub f64,
+);
 
 impl Position {
     /// Euclidean distance to another row/column position on the keyboard
@@ -226,7 +231,7 @@ pub struct Key {
     pub position: Position,
 
     /// Symmetriy index: Two different keys with identical symmetry index are considered symmetrical
-    pub symmetry_index: usize,
+    pub symmetry_index: u8,
 
     /// Cost value specifying how uncomfortable it is to reach/press the key
     pub cost: f64,

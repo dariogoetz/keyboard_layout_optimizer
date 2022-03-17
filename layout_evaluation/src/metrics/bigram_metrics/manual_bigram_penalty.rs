@@ -51,10 +51,10 @@ impl BigramMetric for ManualBigramPenalty {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        let x1 = k1.key.matrix_position.0 as u8;
-        let y1 = k1.key.matrix_position.1 as u8;
-        let x2 = k2.key.matrix_position.0 as u8;
-        let y2 = k2.key.matrix_position.1 as u8;
+        let x1 = k1.key.matrix_position.0;
+        let y1 = k1.key.matrix_position.1;
+        let x2 = k2.key.matrix_position.0;
+        let y2 = k2.key.matrix_position.1;
 
         if let Some(val) = self.matrix_positions.get(&((x1, y1), (x2, y2))) {
             return Some(weight * *val);

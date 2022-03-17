@@ -103,7 +103,7 @@ impl BigramMetric for LineChanges {
         let unb1 = k1.key.unbalancing;
         let unb2 = k2.key.unbalancing;
 
-        let mut num_rows = (pos1.1 - pos2.1).abs() as f64;
+        let mut num_rows = (pos1.1 as i8 - pos2.1 as i8).abs() as f64;
         let upwards: bool = pos2.1 < pos1.1;
         let downwards: bool = pos2.1 > pos1.1;
 

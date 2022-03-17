@@ -35,7 +35,7 @@ impl UnigramMetric for RowLoads {
         _total_weight: Option<f64>,
         _layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut row_load: FxHashMap<isize, f64> = FxHashMap::default();
+        let mut row_load: FxHashMap<u8, f64> = FxHashMap::default();
         let mut total_weight = 0.0;
         unigrams
             .iter()

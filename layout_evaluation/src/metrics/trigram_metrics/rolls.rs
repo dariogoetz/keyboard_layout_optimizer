@@ -15,14 +15,14 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
-    pub exclude_rows: FxHashSet<isize>,
+    pub exclude_rows: FxHashSet<u8>,
 }
 
 #[derive(Clone, Debug)]
 pub struct TrigramRolls {
     factor_inward: f64,
     factor_outward: f64,
-    exclude_rows: FxHashSet<isize>,
+    exclude_rows: FxHashSet<u8>,
 }
 
 impl TrigramRolls {

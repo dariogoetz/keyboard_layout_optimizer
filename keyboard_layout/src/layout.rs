@@ -24,7 +24,7 @@ pub type LayerKeyIndex = u16;
 #[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
     /// Layer of the layout which the symbol belongs to
-    pub layer: usize,
+    pub layer: u8,
     /// Key to press for the symbol
     pub key: Key,
     /// Symbol belonging to a layout
@@ -41,7 +41,7 @@ pub struct LayerKey {
 
 impl LayerKey {
     pub fn new(
-        layer: usize,
+        layer: u8,
         key: Key,
         symbol: char,
         modifiers: Vec<LayerKeyIndex>,
@@ -110,7 +110,7 @@ impl Layout {
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
                         let layerkey = LayerKey::new(
-                            layer_id,
+                            layer_id as u8,
                             key.clone(),
                             *c,
                             Vec::new(),
@@ -153,9 +153,9 @@ impl Layout {
         }
 
         layerkeys.iter_mut().for_each(|k| {
-            let mods = if k.layer > 0 && k.layer < modifiers.len() + 1 {
+            let mods = if k.layer > 0 && k.layer < (modifiers.len() + 1) as u8 {
                 mod_map
-                    .get(k.layer - 1)
+                    .get((k.layer - 1) as usize)
                     .unwrap() // can not fail due to above check
                     .get(&k.key.hand.other())
                     .map(|mods| mods.to_vec())
@@ -187,8 +187,9 @@ impl Layout {
                 let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
                 // NOTE: In contrast to ArneBab's version, here the layer costs are not multiplied by 3
-                let entry_cost = entry_layerkey.key.cost + layer_costs[entry_layerkey.layer];
-                let new_cost = layerkey.key.cost + layer_costs[layerkey.layer];
+                let entry_cost =
+                    entry_layerkey.key.cost + layer_costs[entry_layerkey.layer as usize];
+                let new_cost = layerkey.key.cost + layer_costs[layerkey.layer as usize];
 
                 // if key already exists use the representation with lowest key cost
                 // if costs are identical, use lowest layer
@@ -212,9 +213,7 @@ impl Layout {
     /// Get a `LayerKey` for a given symbol, if it can be generated with the layout
     #[inline(always)]
     pub fn get_layerkey_for_symbol(&self, c: &char) -> Option<&LayerKey> {
-        self.key_map
-            .get(c)
-            .map(|idx| self.get_layerkey(idx))
+        self.key_map.get(c).map(|idx| self.get_layerkey(idx))
     }
 
     /// Get the index of a `LayerKey` for a given symbol, if it can be generated with the layout

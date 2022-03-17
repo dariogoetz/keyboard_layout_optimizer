@@ -7,7 +7,7 @@ use rustc_hash::FxHashMap;
 use serde::Deserialize;
 
 /// The index of a `Key` in the `keys` vec of a `Keyboard
-pub type KeyIndex = u16;
+pub type KeyIndex = u8;
 
 /// A struct representing a keyboard as a list of keys
 #[derive(Clone, Debug)]
@@ -28,7 +28,7 @@ pub struct KeyboardYAML {
     hands: Vec<Vec<Hand>>,
     fingers: Vec<Vec<Finger>>,
     key_costs: Vec<Vec<f64>>,
-    symmetries: Vec<Vec<usize>>,
+    symmetries: Vec<Vec<u8>>,
     unbalancing_positions: Vec<Vec<f64>>,
     plot_template: String,
     plot_template_short: String,
