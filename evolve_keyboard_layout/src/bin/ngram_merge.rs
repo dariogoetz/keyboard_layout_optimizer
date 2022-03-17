@@ -23,6 +23,7 @@ impl FromStr for WeightedComponent {
 
 #[derive(Parser, Debug)]
 #[clap(name = "Ngram frequency merge")]
+/// Merge multiple ngram frequency files with given weights into a new one
 struct Options {
     /// Pairs of weight and ngram frequency directory in the form path:weight
     components: Vec<WeightedComponent>,

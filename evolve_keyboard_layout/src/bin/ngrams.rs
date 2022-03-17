@@ -5,6 +5,7 @@ use layout_evaluation::ngrams::{Bigrams, Trigrams, Unigrams};
 
 #[derive(Parser, Debug)]
 #[clap(name = "Ngram frequency generator")]
+/// Generate ngram-frequency files from a given text file.
 struct Options {
     /// Read text from this file
     filename: String,
