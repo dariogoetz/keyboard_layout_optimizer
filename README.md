@@ -87,15 +87,6 @@ There are various optional parameters that can be explored using the `-h` option
 #### Configuration
 Many aspects of the evaluation can be configured in the yaml files `standard_keyboard.yml` and `evaluation_parameters.yml`.
 
-Alternatively to `standard_keyboard.yml`, there are variants for split/ortho keyboards
-(`ortho.yml` - a generic ortholinear split keyboard, `moonlander.yml` - the ZSA moonlander
-keyboard, `crkbd.yml` - the corne aka. crkbd split keyboard) and variants based on US and UK QWERTY
-base layouts instead of neo (`standard_keyboard_qwerty_uk.yml` and
-`standard_keyboard_qwerty_us.yml`).
-
-There is also an alternative evaluation config file named `evaluation_parameters_arnebab.yml` that aims to stay closer to ArneBab's original
-evaluator.
-
 ##### `standard_keyboard.yml`
 This file contains "physical" properties of the keyboard and information about the Neo layout that serves as an underlying base for the variants to evaluate. It covers for the keyboard:
 - key positions
@@ -112,8 +103,17 @@ And for the Neo base layout:
 - modifiers to be used to access each layer
 - cost associated to accessing each layer
 
+Alternatively to `standard_keyboard.yml`, there are variants for split/ortho keyboards
+(`ortho.yml` - a generic ortholinear split keyboard, `moonlander.yml` - the ZSA moonlander
+keyboard, `crkbd.yml` - the corne aka. crkbd split keyboard) and variants based on US and UK QWERTY
+base layouts instead of neo (`standard_keyboard_qwerty_uk.yml` and
+`standard_keyboard_qwerty_us.yml`).
+
 ##### `evaluation_parameters.yml`
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
+
+There is also an alternative evaluation config file named `evaluation_parameters_arnebab.yml` that aims to stay closer to ArneBab's original
+evaluator.
 
 ### Layout Optimization Binary
 The available optimize-binaries include `optimize_abc.rs`, `optimize_genetic.rs`, and `optimize_sa.rs`.
