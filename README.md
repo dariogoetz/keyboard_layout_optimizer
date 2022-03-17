@@ -141,7 +141,7 @@ RUST_LOG=INFO ./target/release/optimize_sa -s "jduax phlmwqß ctieo bnrsg fvüä
 ```
 In contrast to other binaries, using this algorithm you can optimize multiple starting-layouts simultaneously. Example of an optimization (starting from Bone, Neo, and KOY):
 ``` sh
-RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
+RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" -s "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" -s "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
 
 #### Configuration
