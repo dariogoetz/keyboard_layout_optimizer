@@ -106,7 +106,9 @@ fn main() {
     env_logger::init();
 
     // Disable storing worst ngrams for speed boost
-    std::env::set_var("SHOW_WORST", "false");
+    if std::env::var("SHOW_WORST").is_err() {
+        std::env::set_var("SHOW_WORST", "false");
+    };
 
     let final_results: Cache<f64> = Cache::new();
 
