@@ -176,7 +176,7 @@ optimization binaries.
 
 ## Structure
 The project includes several binaries within the `evolve_keyboard_layout` crate:
-1. `plot` - Plots six layers (neo-layouts have six layouts) of a specified layout
+1. `plot` - Plots six layers (neo-layouts have six layers) of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
 1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
