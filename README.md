@@ -87,6 +87,15 @@ There are various optional parameters that can be explored using the `-h` option
 #### Configuration
 Many aspects of the evaluation can be configured in the yaml files `standard_keyboard.yml` and `evaluation_parameters.yml`.
 
+Alternatively to `standard_keyboard.yml`, there are variants for split/ortho keyboards
+(`ortho.yml` - a generic ortholinear split keyboard, `moonlander.yml` - the ZSA moonlander
+keyboard, `crkbd.yml` - the corne aka. crkbd split keyboard) and variants based on US and UK QWERTY
+base layouts instead of neo (`standard_keyboard_qwerty_uk.yml` and
+`standard_keyboard_qwerty_us.yml`).
+
+There is also an alternative evaluation config file named `evaluation_parameters_arnebab.yml` that aims to stay closer to ArneBab's original
+evaluator.
+
 ##### `standard_keyboard.yml`
 This file contains "physical" properties of the keyboard and information about the Neo layout that serves as an underlying base for the variants to evaluate. It covers for the keyboard:
 - key positions
@@ -152,14 +161,30 @@ The parameters of the corresponding optimization process can be configured in th
 
 They can be found inside the config-directory.
 
+### Environment Variables
+The following environment variables can be set to influence the runtime behavior of the evaluation and
+optimization binaries.
+
+- `RAYON_NUM_THREADS`: Number of threads to use for parallel evaluation. Defaults to the number of
+  CPU cores.
+- `SHOW_WORST`: Determine those ngrams with highest share of the metrics' total costs. Setting this to
+  `false` can lead to around 30% increase in evaluation performance, but will leave some parts of
+  the result output empty (the actual evaluation scores remain identical). Defaults to `true` for
+  `evaluate` and to `false` for the optimization binaries.
+- `N_WORST`: The number of ngrams with highest share of the metrics' total costs to show in the
+  evaluation output. Higher values increase evaluation time. Defaults to `3`.
+
 ## Structure
 The project includes several binaries within the `evolve_keyboard_layout` crate:
-1. `plot` - Plots the six layers of a specified layout
+1. `plot` - Plots six layers (neo-layouts have six layouts) of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
 1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
 1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
 1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
+1. `ngrams` - Generates ngram-frequency files (used as standard input to the evaluation) from a
+   given text file
+1. `ngram_merge` - Merges multiple ngram-frequency files with given weights into a new one
 
 The binaries rely on three library crates providing relevant data structures and algorithms:
 1. `keyboard_layout` - Provides a representation of keys, keyboards, and layouts and a layout generator that generates layout objects from given strings.
