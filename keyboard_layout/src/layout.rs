@@ -254,20 +254,20 @@ impl Layout {
                     self.get_layerkey(&c[layer])
                         .symbol
                         .to_string()
-                        .replace(" ", "␣")
-                        .replace("\n", "\u{23ce}")
-                        .replace("\t", "\u{21e5}")
-                        .replace("", "\u{2327}")
-                        .replace("␡", " ")
+                        .replace(' ', "␣")
+                        .replace('\n', "\u{23ce}")
+                        .replace('\t', "\u{21e5}")
+                        .replace('', "\u{2327}")
+                        .replace('␡', " ")
                 } else if !c.is_empty() {
                     self.get_layerkey(&c[c.len() - 1])
                         .symbol
                         .to_string()
-                        .replace(" ", "␣")
-                        .replace("\n", "\u{23ce}")
-                        .replace("\t", "\u{21e5}")
-                        .replace("", "\u{2327}")
-                        .replace("␡", " ")
+                        .replace(' ', "␣")
+                        .replace('\n', "\u{23ce}")
+                        .replace('\t', "\u{21e5}")
+                        .replace('', "\u{2327}")
+                        .replace('␡', " ")
                 } else {
                     " ".to_string()
                 }

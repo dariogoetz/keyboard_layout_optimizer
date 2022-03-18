@@ -19,7 +19,7 @@ fn process_special_characters(s: &str) -> String {
 }
 
 fn process_special_characters_inverse(s: &str) -> String {
-    s.replace("\\", "\\\\").replace("\n", "\\n")
+    s.replace('\\', "\\\\").replace('\n', "\\n")
 }
 
 impl Unigrams {

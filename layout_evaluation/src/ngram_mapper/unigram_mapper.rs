@@ -78,7 +78,7 @@ impl OnDemandUnigramMapper {
     fn split_unigram_modifiers(unigrams: &UnigramIndices, layout: &Layout) -> UnigramIndices {
         unigrams
             .iter()
-            .map(|(k, w)| {
+            .flat_map(|(k, w)| {
                 let (base, mods) = layout.resolve_modifiers(k);
 
                 TakeOneLayerKey::new(base, &mods, *w).collect::<Vec<(LayerKeyIndex, f64)>>()
@@ -97,7 +97,6 @@ impl OnDemandUnigramMapper {
                 // );
                 // }
             })
-            .flatten()
             .collect()
     }
 }
