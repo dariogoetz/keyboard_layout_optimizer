@@ -22,7 +22,7 @@ struct Options {
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[clap(short, long, default_value = "config/optimization_parameters_sa.yml")]
+    #[clap(short, long, default_value = "config/optimization/sa.yml")]
     optimization_parameters: String,
 
     /// Start optimization from this layout (keys from left to right, top to bottom)

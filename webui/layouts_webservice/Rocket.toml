@@ -1,16 +1,28 @@
 [default]
-eval_parameters = "../../config/evaluation_parameters.yml"
-layout_configs = [
-    ["standard", "../../config/standard_keyboard.yml"],
-    ["ortho", "../../config/ortho.yml"],
-    ["moonlander", "../../config/moonlander.yml"],
-    ["crkbd", "../../config/crkbd.yml"]
-]
+allowed_cors_origins = "http://localhost:8080"
 default_layout_config = "standard"
-static_dir = "static"
+eval_parameters = "../../config/evaluation/default.yml"
+layout_configs = [
+    [
+        "standard",
+        "../../config/keyboard/standard.yml",
+    ],
+    [
+        "ortho",
+        "../../config/keyboard/ortho.yml",
+    ],
+    [
+        "moonlander",
+        "../../config/keyboard/moonlander.yml",
+    ],
+    [
+        "crkbd",
+        "../../config/keyboard/crkbd.yml",
+    ],
+]
 ngrams = "../../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
 secret = "super_duper_secret"
-allowed_cors_origins = "http://localhost:8080"
+static_dir = "static"
 
 [default.databases.sqlx]
 url = "postgres://postgres:super_secret@localhost:15432/postgres"

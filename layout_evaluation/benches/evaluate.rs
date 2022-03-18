@@ -14,8 +14,8 @@ use std::path::Path;
 use std::sync::Arc;
 
 const NGRAMS: &str = "../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4";
-const LAYOUT_CONFIG: &str = "../config/standard_keyboard.yml";
-const EVALUATION_PARAMETERS: &str = "../config/evaluation_parameters.yml";
+const LAYOUT_CONFIG: &str = "../config/keyboard/standard.yml";
+const EVALUATION_PARAMETERS: &str = "../config/evaluation/default.yml";
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct NGramConfig {
@@ -26,14 +26,14 @@ pub struct NGramConfig {
 
 pub fn evaluate_bench(c: &mut Criterion) {
     let layout_config = LayoutConfig::from_yaml(LAYOUT_CONFIG)
-        .unwrap_or_else(|_| panic!("Could not load config file 'standard_keyboard.yml'"));
+        .unwrap_or_else(|_| panic!("Could not load config file '/keyboard/standard.yml'"));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
     let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);
 
     let eval_params = EvaluationParameters::from_yaml(EVALUATION_PARAMETERS).unwrap_or_else(|_| {
-        panic!("Could not read evaluation yaml file 'evaluation_parameters.yml'")
+        panic!("Could not read evaluation yaml file '/evaluation/default.yml'")
     });
 
     let p = Path::new(NGRAMS).join("1-grams.txt");

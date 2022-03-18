@@ -27,11 +27,11 @@ pub struct Options {
     pub ngrams: String,
 
     /// Filename of evaluation configuration file to use
-    #[clap(short, long, default_value = "config/evaluation_parameters.yml")]
+    #[clap(short, long, default_value = "config/evaluation/default.yml")]
     pub eval_parameters: String,
 
     /// Filename of layout configuration file to use
-    #[clap(short, long, default_value = "config/standard_keyboard.yml")]
+    #[clap(short, long, default_value = "config/keyboard/standard.yml")]
     pub layout_config: String,
 
     /// Filename of corpus file to use instead of ngram files

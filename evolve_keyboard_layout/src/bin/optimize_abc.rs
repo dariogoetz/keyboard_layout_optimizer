@@ -20,7 +20,7 @@ struct Options {
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[clap(short, long, default_value = "config/optimization_parameters_abc.yml")]
+    #[clap(short, long, default_value = "config/optimization/abc.yml")]
     optimization_parameters: String,
 
     /// Do not cache intermediate results

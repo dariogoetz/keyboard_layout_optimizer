@@ -20,11 +20,7 @@ struct Options {
     fix_from: String,
 
     /// Filename of optimization configuration file
-    #[clap(
-        short,
-        long,
-        default_value = "config/optimization_parameters_genetic.yml"
-    )]
+    #[clap(short, long, default_value = "config/optimization/genetic.yml")]
     optimization_parameters: String,
 
     /// Start optimization from this layout (keys from left to right, top to bottom)

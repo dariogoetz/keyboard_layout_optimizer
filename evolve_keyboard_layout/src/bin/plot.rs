@@ -9,7 +9,7 @@ struct Options {
     layout_str: String,
 
     /// Filename of layout configuration file to use
-    #[clap(short, long, default_value = "config/standard_keyboard.yml")]
+    #[clap(short, long, default_value = "config/keyboard/standard.yml")]
     layout_config: String,
 }
 

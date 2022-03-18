@@ -68,7 +68,7 @@ Some binaries expect layouts as commandline arguments. These layouts are represe
 
 Whitespace is allowed and will be ignored.
 
-Only those keys shall be specified that are not marked as "fixed" in the layout configuration file "standard_keyboard.yml" (usually 32 keys).
+Only those keys shall be specified that are not marked as "fixed" in the layout configuration file "config/keyboard/standard.yml" (usually 32 keys).
 
 ### Layout Plot Binary
 The `plot` binary expects a layout representation as commandline argument.
@@ -91,9 +91,9 @@ RUST_LOG=INFO ./target/release/evaluate "jduax phlmwqß ctieo bnrsg fvüäö yz,
 There are various optional parameters that can be explored using the `-h` option, e.g. provide a text or file to be used as corpus.
 
 #### Configuration
-Many aspects of the evaluation can be configured in the yaml files `standard_keyboard.yml` and `evaluation_parameters.yml`.
+Many aspects of the evaluation can be configured in the yaml files `config/keyboard/standard.yml` and `config/evaluation/default.yml`.
 
-##### `standard_keyboard.yml`
+##### `config/keyboard/standard.yml`
 This file contains "physical" properties of the keyboard and information about the Neo layout that serves as an underlying base for the variants to evaluate. It covers for the keyboard:
 - key positions
 - key to hand mapping
@@ -109,16 +109,15 @@ And for the Neo base layout:
 - modifiers to be used to access each layer
 - cost associated to accessing each layer
 
-Alternatively to `standard_keyboard.yml`, there are variants for split/ortho keyboards
+Alternatively to `standard.yml`, there are variants for split/ortho keyboards
 (`ortho.yml` - a generic ortholinear split keyboard, `moonlander.yml` - the ZSA moonlander
 keyboard, `crkbd.yml` - the corne aka. crkbd split keyboard) and variants based on US and UK QWERTY
-base layouts instead of neo (`standard_keyboard_qwerty_uk.yml` and
-`standard_keyboard_qwerty_us.yml`).
+base layouts instead of neo (`standard_qwerty_uk.yml` and `standard_qwerty_us.yml`).
 
-##### `evaluation_parameters.yml`
+##### `config/evaluation/default.yml`
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
-There is also an alternative evaluation config file named `evaluation_parameters_arnebab.yml` that aims to stay closer to ArneBab's original
+There is also an alternative evaluation config file named `arnebab.yml` that aims to stay closer to ArneBab's original
 evaluator.
 
 ### Layout Optimization Binary
@@ -161,11 +160,11 @@ RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz
 
 #### Configuration
 The parameters of the corresponding optimization process can be configured in the files:
-* `optimization_parameters_abc.yml`
-* `optimization_parameters_genetic.yml`
-* `optimization_parameters_sa.yml`
+* `abc.yml`
+* `genetic.yml`
+* `sa.yml`
 
-They can be found inside the config-directory.
+They can be found inside the config-directory (`config/optimization/`).
 
 ### Environment Variables
 The following environment variables can be set to influence the runtime behavior of the evaluation and

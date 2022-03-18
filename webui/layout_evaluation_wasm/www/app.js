@@ -1,11 +1,11 @@
-import config_standard_keyboard from '../../../config/standard_keyboard.yml'
-import config_ortho from '../../../config/ortho.yml'
-import config_moonlander from '../../../config/moonlander.yml'
-import config_crkbd from '../../../config/crkbd.yml'
+import config_standard_keyboard from '../../../config/keyboard/standard.yml'
+import config_ortho from '../../../config/keyboard/ortho.yml'
+import config_moonlander from '../../../config/keyboard/moonlander.yml'
+import config_crkbd from '../../../config/keyboard/crkbd.yml'
 
-import eval_params from '../../../config/evaluation_parameters.yml'
-import genevo_opt_params from '../../../config/optimization_parameters_genetic_web.yml'
-import sa_opt_params from '../../../config/optimization_parameters_sa_web.yml'
+import eval_params from '../../../config/evaluation/default.yml'
+import genevo_opt_params from '../../../config/optimization/genetic_web.yml'
+import sa_opt_params from '../../../config/optimization/sa_web.yml'
 
 import Worker from "./worker.js"
 
