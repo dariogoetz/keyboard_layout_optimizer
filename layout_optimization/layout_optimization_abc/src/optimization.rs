@@ -5,7 +5,10 @@ use layout_optimization_common::PermutationLayoutGenerator;
 
 use anyhow::Result;
 use serde::Deserialize;
-use std::sync::{mpsc::Receiver, Arc};
+use std::{
+    sync::{mpsc::Receiver, Arc},
+    thread,
+};
 
 use abc::{scaling, Candidate, Context, HiveBuilder};
 
@@ -114,7 +117,7 @@ pub fn optimize(
         n_switches: params.n_switches,
     };
 
-    let ncpus = num_cpus::get();
+    let ncpus = thread::available_parallelism().unwrap().get();
     let hive = HiveBuilder::<FitnessCalc>::new(core, ncpus)
         .set_threads(ncpus)
         .set_retries(params.retries)

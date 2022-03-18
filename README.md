@@ -57,6 +57,12 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
    ```
 
 ## Usage
+### Rust Version
+The minimum Rust-version required is [`1.59.0`](https://blog.rust-lang.org/2022/02/24/Rust-1.59.0.html). Update Rust using the following command:
+```sh
+rustup update
+```
+
 ### Specifying Layouts
 Some binaries expect layouts as commandline arguments. These layouts are represented as strings specifying the keys of the layout from left to right, top to bottom, i.e. it starts on the top left of the keyboard and lists each letter of the base layer going to the right in the same row. After that the letters of the next row follow, again from left to right.
 

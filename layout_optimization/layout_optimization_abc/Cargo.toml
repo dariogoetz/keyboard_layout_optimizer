@@ -16,7 +16,6 @@ abc = "^0.2.3"
 anyhow = "^1.0.45"
 env_logger = "*"
 log = "*"
-num_cpus = "*"
 rand = "^0.8.4"
 rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
