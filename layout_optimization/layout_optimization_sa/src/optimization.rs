@@ -256,6 +256,7 @@ fn get_cost_sd(
 }
 
 /// Performs one run of Simulated Annealing, then returns the best layout found.
+#[allow(clippy::too_many_arguments)]
 pub fn optimize(
     process_name: &str,
     params: &Parameters,
