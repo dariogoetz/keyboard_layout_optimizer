@@ -58,7 +58,7 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 
 ## Usage
 ### Rust Version
-The minimum Rust-version required is [`1.59.0`](https://blog.rust-lang.org/2022/02/24/Rust-1.59.0.html). Update Rust using the following command:
+The minimum required Rust-version is [`1.59.0`](https://blog.rust-lang.org/2022/02/24/Rust-1.59.0.html). Update Rust using the following command:
 ```sh
 rustup update
 ```
