@@ -26,7 +26,7 @@ impl From<EvaluationResult> for LayoutEvaluation {
 }
 
 #[derive(Parser, Debug)]
-#[clap(name = "Keyboard layout optimization")]
+#[clap(name = "Keyboard layout evaluation")]
 struct Options {
     /// List of Layout keys from left to right, top to bottom
     layout_str: Vec<String>,

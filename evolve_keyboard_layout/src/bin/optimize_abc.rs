@@ -5,7 +5,7 @@ use evolve_keyboard_layout::common;
 use layout_optimization_abc::optimization;
 
 #[derive(Parser, Debug)]
-#[clap(name = "Keyboard layout optimization")]
+#[clap(name = "Keyboard layout optimization - Artificial Bee Colony")]
 struct Options {
     /// Evaluation parameters
     #[clap(flatten)]

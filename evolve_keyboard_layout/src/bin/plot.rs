@@ -3,7 +3,7 @@ use clap::Parser;
 use evolve_keyboard_layout::common;
 
 #[derive(Parser, Debug)]
-#[clap(name = "Keyboard layout optimization")]
+#[clap(name = "Keyboard layout plotting")]
 struct Options {
     /// Layout keys from left to right, top to bottom
     layout_str: String,

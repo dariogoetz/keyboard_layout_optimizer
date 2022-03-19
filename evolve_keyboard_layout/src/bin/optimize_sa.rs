@@ -7,7 +7,7 @@ use layout_evaluation::cache::Cache;
 use layout_optimization_sa::optimization;
 
 #[derive(Parser, Debug)]
-#[clap(name = "Keyboard layout optimization")]
+#[clap(name = "Keyboard layout optimization - Simulated Annealing")]
 struct Options {
     /// Evaluation parameters
     #[clap(flatten)]

@@ -5,7 +5,7 @@ use layout_evaluation::cache::Cache;
 use layout_optimization_genetic::optimization;
 
 #[derive(Parser, Debug)]
-#[clap(name = "Keyboard layout optimization")]
+#[clap(name = "Keyboard layout optimization - Genetic Algorithm")]
 struct Options {
     /// Evaluation parameters
     #[clap(flatten)]
