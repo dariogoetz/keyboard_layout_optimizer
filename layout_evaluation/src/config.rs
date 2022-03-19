@@ -4,6 +4,7 @@ use crate::{
 
 use anyhow::Result;
 use serde::Deserialize;
+use std::{fs::File, str::FromStr};
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
@@ -13,14 +14,14 @@ pub struct EvaluationParameters {
 
 impl EvaluationParameters {
     pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         let k: EvaluationParameters = serde_yaml::from_reader(f)?;
 
         Ok(k)
     }
 }
 
-impl std::str::FromStr for EvaluationParameters {
+impl FromStr for EvaluationParameters {
     type Err = serde_yaml::Error;
     fn from_str(evaluation_params_str: &str) -> Result<Self, Self::Err> {
         let cfg: EvaluationParameters = serde_yaml::from_str(evaluation_params_str)?;

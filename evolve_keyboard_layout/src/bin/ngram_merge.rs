@@ -1,7 +1,6 @@
 use clap::Parser;
 use rustc_hash::FxHashMap;
-use std::path::Path;
-use std::str::FromStr;
+use std::{hash::Hash, path::Path, str::FromStr};
 
 use layout_evaluation::ngrams::{Bigrams, Trigrams, Unigrams};
 
@@ -32,11 +31,7 @@ struct Options {
     out: String,
 }
 
-fn add<T: Clone + Eq + std::hash::Hash>(
-    weight: f64,
-    res: &mut FxHashMap<T, f64>,
-    ngrams: &FxHashMap<T, f64>,
-) {
+fn add<T: Clone + Eq + Hash>(weight: f64, res: &mut FxHashMap<T, f64>, ngrams: &FxHashMap<T, f64>) {
     ngrams.iter().fold(res, |acc, (c, w)| {
         let entry = acc.entry(c.clone()).or_default();
         *entry += weight * w;

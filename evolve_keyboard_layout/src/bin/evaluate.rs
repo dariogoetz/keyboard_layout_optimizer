@@ -1,13 +1,14 @@
-use clap::Parser;
+use evolve_keyboard_layout::common;
 use keyboard_layout::layout::Layout;
 use layout_evaluation::{cache::Cache, results::EvaluationResult};
-use serde::Serialize;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
 
+use clap::Parser;
 use rayon::prelude::*;
-
-use evolve_keyboard_layout::common;
+use serde::Serialize;
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 #[derive(Serialize)]
 struct LayoutEvaluation {

@@ -6,7 +6,7 @@ use layout_optimization_common::PermutationLayoutGenerator;
 use anyhow::Result;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::{fs::File, sync::Arc};
 
 use genevo::{
     genetic::{Children, FitnessFunction, Parents},
@@ -43,7 +43,7 @@ impl Default for Parameters {
 
 impl Parameters {
     pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
     }
 }

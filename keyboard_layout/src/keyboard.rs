@@ -5,6 +5,7 @@ use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
+use std::fs::File;
 
 /// The index of a `Key` in the `keys` vec of a `Keyboard
 pub type KeyIndex = u8;
@@ -72,7 +73,7 @@ impl Keyboard {
 
     /// Generate a `Keyboard` from a YAML file
     pub fn from_yaml_file(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         let k: KeyboardYAML = serde_yaml::from_reader(f)?;
         Ok(Keyboard::from_yaml_object(k))
     }

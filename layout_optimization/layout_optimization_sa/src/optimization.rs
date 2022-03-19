@@ -7,7 +7,7 @@ use anyhow::Result;
 use colored::Colorize;
 use rand_xoshiro::{rand_core::SeedableRng, Xoshiro256PlusPlus};
 use serde::Deserialize;
-use std::sync::Arc;
+use std::{fs::File, sync::Arc};
 
 use argmin::{
     prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode},
@@ -46,7 +46,7 @@ impl Default for Parameters {
 
 impl Parameters {
     pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
     }
     /// Makes sure that [self.init_temp] is greater than zero.

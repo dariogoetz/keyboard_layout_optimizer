@@ -10,10 +10,12 @@ use layout_evaluation::{
 
 use clap::Parser;
 use rustc_hash::FxHashMap;
-use std::fs::OpenOptions;
-use std::io::prelude::*;
-use std::path::Path;
-use std::sync::Arc;
+use std::{
+    fs::{self, OpenOptions},
+    io::prelude::*,
+    path::Path,
+    sync::Arc,
+};
 
 #[derive(Parser, Debug)]
 #[clap(name = "Keyboard layout evaluation")]
@@ -110,7 +112,7 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
 
     let text = options.text.as_ref().cloned().or_else(|| {
         options.corpus.as_ref().map(|corpus_file| {
-            std::fs::read_to_string(&corpus_file)
+            fs::read_to_string(&corpus_file)
                 .unwrap_or_else(|_| panic!("Could not read corpus file from {}.", corpus_file))
         })
     });

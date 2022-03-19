@@ -4,8 +4,7 @@ use argmin::prelude::{ArgminKV, Error, IterState, Observe};
 use genevo::prelude::*;
 use instant::Instant;
 use serde::Serialize;
-use std::str::FromStr;
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{

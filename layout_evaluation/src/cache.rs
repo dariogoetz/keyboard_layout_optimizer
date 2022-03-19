@@ -1,8 +1,7 @@
 use colored::Colorize;
 use parking_lot::Mutex;
 use rustc_hash::FxHashMap;
-use std::fmt::Display;
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 #[derive(Clone, Debug)]
 pub struct Cache<T: Clone> {
@@ -39,7 +38,7 @@ impl<T: Clone> Cache<T> {
     }
 }
 
-impl<T: Clone + Display + PartialOrd> Cache<T> {
+impl<T: Clone + fmt::Display + PartialOrd> Cache<T> {
     pub fn highlighted_fmt(&self, current_layout_str: Option<&str>, max_entries: usize) -> String {
         let mut results: Vec<(String, T)>;
         {
@@ -85,8 +84,8 @@ impl<T: Clone + Display + PartialOrd> Cache<T> {
     }
 }
 
-impl<T: Clone + Display + PartialOrd> std::fmt::Display for Cache<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<T: Clone + fmt::Display + PartialOrd> fmt::Display for Cache<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{}", self.highlighted_fmt(None, 30))
     }
 }

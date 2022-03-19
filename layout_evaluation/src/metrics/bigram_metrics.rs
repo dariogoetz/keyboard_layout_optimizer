@@ -1,9 +1,9 @@
 //! The `metrics` module provides a trait for bigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
+
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
-
-use std::env;
+use std::{env, fmt};
 
 pub mod finger_repeats;
 pub mod finger_repeats_lateral;
@@ -17,7 +17,7 @@ pub mod symmetric_handswitches;
 pub mod unbalancing_after_neighboring;
 
 /// BigramMetric is a trait for metrics that iterates over weighted bigrams.
-pub trait BigramMetric: Send + Sync + BigramMetricClone + std::fmt::Debug {
+pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
     /// Return the name of the metric.
     fn name(&self) -> &str;
 

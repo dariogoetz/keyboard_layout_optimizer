@@ -7,7 +7,7 @@ use crate::keyboard::{KeyIndex, Keyboard};
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 /// The index of a `LayerKey` in the `layerkeys` vec of a `Layout`
 ///
@@ -81,8 +81,8 @@ pub struct Layout {
     layer_costs: Vec<f64>,
 }
 
-impl std::fmt::Display for Layout {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for Layout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_text())
     }
 }

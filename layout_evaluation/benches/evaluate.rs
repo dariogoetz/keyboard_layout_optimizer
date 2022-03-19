@@ -10,8 +10,7 @@ use layout_evaluation::{
 
 use criterion::{criterion_group, criterion_main, Criterion};
 use serde::Deserialize;
-use std::path::Path;
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 const NGRAMS: &str = "../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4";
 const LAYOUT_CONFIG: &str = "../config/keyboard/standard.yml";

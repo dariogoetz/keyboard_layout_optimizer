@@ -1,8 +1,9 @@
-use clap::Parser;
-
 use evolve_keyboard_layout::common;
 use layout_evaluation::cache::Cache;
 use layout_optimization_genetic::optimization;
+
+use clap::Parser;
+use std::{env, process};
 
 #[derive(Parser, Debug)]
 #[clap(name = "Keyboard layout optimization - Genetic Algorithm")]
@@ -53,8 +54,8 @@ fn main() {
     env_logger::init();
 
     // Disable storing worst ngrams for speed boost
-    if std::env::var("SHOW_WORST").is_err() {
-        std::env::set_var("SHOW_WORST", "false");
+    if env::var("SHOW_WORST").is_err() {
+        env::set_var("SHOW_WORST", "false");
     };
 
     let final_results: Cache<f64> = Cache::new();
@@ -65,7 +66,7 @@ fn main() {
         // Display a summary of the optimization.
         println!("\n\n{}\n", cloned_final_results);
         // Stop execution
-        std::process::exit(0);
+        process::exit(0);
     })
     .expect("Error setting Ctrl-C handler");
 

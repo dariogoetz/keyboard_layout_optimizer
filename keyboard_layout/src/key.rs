@@ -2,6 +2,7 @@
 
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
+use std::slice;
 
 /// Row and columnar location on the keyboard
 #[derive(Clone, Copy, Default, Deserialize, PartialEq, Debug)]
@@ -102,7 +103,7 @@ impl<T: Copy> HandMap<T> {
         Self(data)
     }
 
-    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+    pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
@@ -142,7 +143,7 @@ impl<T: Copy> FingerMap<T> {
         Self(data)
     }
 
-    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+    pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
@@ -179,7 +180,7 @@ impl<T: Copy> HandFingerMap<T> {
         (*hand as usize) * 5 + (*finger as usize)
     }
 
-    pub fn iter(&self) -> std::slice::Iter<'_, T> {
+    pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 

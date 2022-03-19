@@ -1,7 +1,5 @@
 use clap::Parser;
-
-use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::{self, seq::SliceRandom};
 
 use evolve_keyboard_layout::common;
 
@@ -28,7 +26,7 @@ fn main() {
     let mut best_layout: String = "".into();
 
     for _ in 0..options.number_of_samples {
-        let mut rng = thread_rng();
+        let mut rng = rand::thread_rng();
         let mut s: Vec<char> = layout_str.chars().collect();
         s.shuffle(&mut rng);
         let s: String = s.iter().collect();

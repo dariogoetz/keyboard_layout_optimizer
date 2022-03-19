@@ -1,6 +1,7 @@
 //! The `results` module contains structs representing the results of metric evaluations.
 
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// The `NormalizationType` specifies how the total cost of a metric evaluation shall be normalized.
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -61,8 +62,8 @@ pub struct MetricResults {
     pub metric_costs: Vec<NormalizedMetricResult>,
 }
 
-impl std::fmt::Display for MetricResults {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for MetricResults {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "{:?} metrics:", self.metric_type)?;
 
         if self.metric_type != MetricType::Layout {
@@ -167,8 +168,8 @@ pub struct EvaluationResult {
     individual_results: Vec<MetricResults>,
 }
 
-impl std::fmt::Display for EvaluationResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for EvaluationResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.individual_results
             .iter()
             .fold(Ok(()), |acc, results| {
@@ -211,7 +212,7 @@ impl EvaluationResult {
         (1e8 / self.total_cost()) as usize
     }
 
-    pub fn iter(&self) -> std::slice::Iter<'_, MetricResults> {
+    pub fn iter(&self) -> slice::Iter<'_, MetricResults> {
         self.individual_results.iter()
     }
 }

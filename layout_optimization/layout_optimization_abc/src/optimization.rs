@@ -7,6 +7,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use std::{
     env,
+    fs::File,
     sync::{mpsc::Receiver, Arc},
     thread,
 };
@@ -30,7 +31,7 @@ impl Default for Parameters {
 
 impl Parameters {
     pub fn from_yaml(filename: &str) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         Ok(serde_yaml::from_reader(f)?)
     }
 }

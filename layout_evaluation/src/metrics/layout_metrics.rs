@@ -1,12 +1,14 @@
 //! The `metrics` module provides a trait for layout metrics.
 use keyboard_layout::layout::Layout;
 
+use std::fmt;
+
 pub mod shortcut_keys;
 pub mod similar_letter_groups;
 pub mod similar_letters;
 
 /// LayoutMetric is a trait for metrics that depends only on the layout.
-pub trait LayoutMetric: Send + Sync + LayoutMetricClone + std::fmt::Debug {
+pub trait LayoutMetric: Send + Sync + LayoutMetricClone + fmt::Debug {
     /// Return the name of the metric
     fn name(&self) -> &str;
     /// Compute the total cost for the metric

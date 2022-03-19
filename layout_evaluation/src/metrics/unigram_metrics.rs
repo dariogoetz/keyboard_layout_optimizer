@@ -3,7 +3,7 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
 
-use std::env;
+use std::{env, fmt};
 
 pub mod finger_balance;
 pub mod hand_disbalance;
@@ -11,7 +11,7 @@ pub mod key_costs;
 pub mod row_loads;
 
 /// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
-pub trait UnigramMetric: Send + Sync + UnigramMetricClone + std::fmt::Debug {
+pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
     /// Return the name of the metric
     fn name(&self) -> &str;
 

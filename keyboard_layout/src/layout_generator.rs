@@ -8,8 +8,7 @@ use crate::layout::Layout;
 use anyhow::Result;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde::Deserialize;
-use std::iter::FromIterator;
-use std::sync::Arc;
+use std::{fs::File, iter::FromIterator, sync::Arc};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -88,7 +87,7 @@ impl NeoLayoutGenerator {
 
     /// Generate a `NeoLayoutGenerator` from a YAML file
     pub fn from_yaml_file(filename: &str, keyboard: Arc<Keyboard>) -> Result<Self> {
-        let f = std::fs::File::open(filename)?;
+        let f = File::open(filename)?;
         let base: BaseLayoutYAML = serde_yaml::from_reader(f)?;
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }

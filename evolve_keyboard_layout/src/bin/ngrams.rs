@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::path::Path;
+use std::{fs, path::Path};
 
 use layout_evaluation::ngrams::{Bigrams, Trigrams, Unigrams};
 
@@ -19,7 +19,7 @@ fn main() {
     let options = Options::parse();
     env_logger::init();
 
-    let text = std::fs::read_to_string(&options.filename)
+    let text = fs::read_to_string(&options.filename)
         .unwrap_or_else(|_| panic!("Could not read corpus file from {}.", options.filename));
 
     let d = Path::new(&options.out);

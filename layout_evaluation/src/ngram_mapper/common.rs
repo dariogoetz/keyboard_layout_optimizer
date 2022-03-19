@@ -1,13 +1,15 @@
 /// The `common` module provides utility functions for resolving modifiers in ngrams.
 use keyboard_layout::layout::LayerKeyIndex;
 
+use std::slice;
+
 /// Iterator over unigrams of the base-layer key and each modifier.
 #[derive(Clone, Debug)]
 pub struct TakeOneLayerKey<'a> {
     base_key: LayerKeyIndex,
     modifiers: &'a [LayerKeyIndex],
     weight: f64,
-    iter: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter: Option<slice::Iter<'a, LayerKeyIndex>>,
 }
 
 impl<'a> Iterator for TakeOneLayerKey<'a> {
@@ -61,10 +63,10 @@ pub struct TakeTwoLayerKey<'a> {
     modifiers: &'a [LayerKeyIndex],
     weight: f64,
     same_key_mod_factor: f64,
-    iter_inner: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter_inner: Option<slice::Iter<'a, LayerKeyIndex>>,
     state_inner: Option<LayerKeyIndex>,
     inner_variant: u8,
-    iter_outer: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter_outer: Option<slice::Iter<'a, LayerKeyIndex>>,
     state_outer: Option<LayerKeyIndex>,
 }
 
@@ -177,13 +179,13 @@ pub struct TakeThreeLayerKey<'a> {
     modifiers: &'a [LayerKeyIndex],
     weight: f64,
     same_key_mod_factor: f64,
-    iter_inner: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter_inner: Option<slice::Iter<'a, LayerKeyIndex>>,
     state_inner: Option<LayerKeyIndex>,
     inner_variant: u8,
-    iter_middle: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter_middle: Option<slice::Iter<'a, LayerKeyIndex>>,
     state_middle: Option<LayerKeyIndex>,
     middle_variant: u8,
-    iter_outer: Option<std::slice::Iter<'a, LayerKeyIndex>>,
+    iter_outer: Option<slice::Iter<'a, LayerKeyIndex>>,
     state_outer: Option<LayerKeyIndex>,
 }
 

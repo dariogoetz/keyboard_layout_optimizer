@@ -4,9 +4,11 @@
 
 use anyhow::Result;
 use rustc_hash::FxHashMap;
-use std::fs::{create_dir_all, File};
-use std::io::{BufWriter, Write};
-use std::path::Path;
+use std::{
+    fs::{self, create_dir_all, File},
+    io::{BufWriter, Write},
+    path::Path,
+};
 
 /// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
@@ -57,7 +59,7 @@ impl Unigrams {
 
     /// Read unigrams and weights from a file containing lines with unigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
-        let data = std::fs::read_to_string(filename)?;
+        let data = fs::read_to_string(filename)?;
         Unigrams::from_frequencies_str(&data)
     }
 
@@ -160,7 +162,7 @@ impl Bigrams {
 
     /// Read bigrams and weights from a file containing lines with bigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
-        let data = std::fs::read_to_string(filename)?;
+        let data = fs::read_to_string(filename)?;
         Bigrams::from_frequencies_str(&data)
     }
 
@@ -268,7 +270,7 @@ impl Trigrams {
 
     /// Read trigrams and weights from a file containing lines with trigrams and their weights.
     pub fn from_file(filename: &str) -> Result<Self> {
-        let data = std::fs::read_to_string(filename)?;
+        let data = fs::read_to_string(filename)?;
         Trigrams::from_frequencies_str(&data)
     }
 

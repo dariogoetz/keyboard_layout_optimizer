@@ -1,8 +1,9 @@
-use clap::Parser;
-use colored::Colorize;
-
 use evolve_keyboard_layout::common;
 use layout_optimization_abc::optimization;
+
+use clap::Parser;
+use colored::Colorize;
+use std::env;
 
 #[derive(Parser, Debug)]
 #[clap(name = "Keyboard layout optimization - Artificial Bee Colony")]
@@ -41,8 +42,8 @@ fn main() {
     env_logger::init();
 
     // disable storing worst ngrams for speed boost
-    if std::env::var("SHOW_WORST").is_err() {
-        std::env::set_var("SHOW_WORST", "false");
+    if env::var("SHOW_WORST").is_err() {
+        env::set_var("SHOW_WORST", "false");
     };
 
     let options = Options::parse();

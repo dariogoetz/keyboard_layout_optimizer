@@ -1,9 +1,9 @@
 //! The `metrics` module provides a trait for trigram metrics.
 use keyboard_layout::layout::{LayerKey, Layout};
+
 use ordered_float::OrderedFloat;
 use priority_queue::DoublePriorityQueue;
-
-use std::env;
+use std::{env, fmt};
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
@@ -12,7 +12,7 @@ pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
 
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
-pub trait TrigramMetric: Send + Sync + TrigramMetricClone + std::fmt::Debug {
+pub trait TrigramMetric: Send + Sync + TrigramMetricClone + fmt::Debug {
     /// Return the name of the metric.
     fn name(&self) -> &str;
 

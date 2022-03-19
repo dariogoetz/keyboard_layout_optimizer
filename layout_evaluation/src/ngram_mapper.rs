@@ -41,6 +41,8 @@ pub mod on_demand_ngram_mapper;
 
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
+use std::fmt;
+
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
 // hashing performance.
@@ -72,7 +74,7 @@ pub struct MappedNgrams<'s> {
 }
 
 /// Provides ngrams in terms of a `Layout`'s `LayerKey`s.
-pub trait NgramMapper: Send + Sync + NgramMapperClone + std::fmt::Debug {
+pub trait NgramMapper: Send + Sync + NgramMapperClone + fmt::Debug {
     fn mapped_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s>;
 }
 

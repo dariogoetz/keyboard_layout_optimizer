@@ -1,17 +1,17 @@
 use super::Options;
 
-use rocket::fairing::{self, AdHoc};
-use rocket::http::Status;
-use rocket::response::status::Created;
-use rocket::serde::{json::Json, Deserialize, Serialize};
-use rocket::State;
-use rocket::{Build, Rocket};
+use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use layout_evaluation::{evaluation::Evaluator, results::EvaluationResult};
+
+use rocket::{
+    fairing::{self, AdHoc},
+    http::Status,
+    response::status::Created,
+    serde::{json::Json, Deserialize, Serialize},
+    State, {Build, Rocket},
+};
 use rocket_db_pools::{sqlx, Connection, Database};
 use rustc_hash::FxHashMap;
-
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
-use layout_evaluation::evaluation::Evaluator;
-use layout_evaluation::results::EvaluationResult;
 
 #[derive(Database)]
 #[database("sqlx")]

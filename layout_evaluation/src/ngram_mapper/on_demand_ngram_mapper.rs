@@ -13,6 +13,7 @@ use keyboard_layout::layout::Layout;
 
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
+use std::hash::Hash;
 
 /// Configuration parameters for the modifier splitting process.
 #[derive(Clone, Deserialize, Debug)]
@@ -76,7 +77,7 @@ impl OnDemandNgramMapper {
     }
 }
 
-fn groupby_sum<T: Clone + Eq + std::hash::Hash>(data: &[(T, f64)]) -> Vec<(T, f64)> {
+fn groupby_sum<T: Clone + Eq + Hash>(data: &[(T, f64)]) -> Vec<(T, f64)> {
     data.iter()
         .fold(FxHashMap::default(), |mut m, (k, w)| {
             *m.entry(k.clone()).or_insert(0.0) += *w;

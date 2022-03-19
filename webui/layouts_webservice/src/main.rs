@@ -1,9 +1,6 @@
 #[macro_use]
 extern crate rocket;
 
-use rocket::fairing::AdHoc;
-use rocket::fs::FileServer;
-
 use keyboard_layout::{
     config::LayoutConfig, keyboard::Keyboard, layout_generator::NeoLayoutGenerator,
 };
@@ -14,10 +11,10 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
+use rocket::{fairing::AdHoc, fs::FileServer};
 use rustc_hash::FxHashMap;
 use serde::Deserialize;
-use std::path::Path;
-use std::sync::Arc;
+use std::{path::Path, sync::Arc};
 
 mod api;
 
@@ -46,9 +43,11 @@ struct Options {
 }
 
 use async_trait::async_trait;
-use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::Header;
-use rocket::{Request, Response};
+use rocket::{
+    fairing::{Fairing, Info, Kind},
+    http::Header,
+    Request, Response,
+};
 
 pub struct Cors {
     options: Options,
