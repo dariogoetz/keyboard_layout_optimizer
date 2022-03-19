@@ -6,6 +6,7 @@ use layout_optimization_common::PermutationLayoutGenerator;
 use anyhow::Result;
 use serde::Deserialize;
 use std::{
+    env,
     sync::{mpsc::Receiver, Arc},
     thread,
 };
@@ -117,7 +118,10 @@ pub fn optimize(
         n_switches: params.n_switches,
     };
 
-    let ncpus = thread::available_parallelism().unwrap().get();
+    let ncpus: usize = env::var("RAYON_NUM_THREADS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or_else(|| thread::available_parallelism().unwrap().get());
     let hive = HiveBuilder::<FitnessCalc>::new(core, ncpus)
         .set_threads(ncpus)
         .set_retries(params.retries)
