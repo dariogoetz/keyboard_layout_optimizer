@@ -8,14 +8,15 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-use genevo::genetic::{Children, FitnessFunction, Parents};
-use genevo::operator::{prelude::*, CrossoverOp, GeneticOperator};
-use genevo::population::Population;
-use genevo::prelude::*;
-use genevo::random::SliceRandom;
-// use genevo::recombination::order::PartiallyMappedCrossover;
-use genevo::simulation::simulator::Simulator;
-use genevo::types::fmt::Display;
+use genevo::{
+    genetic::{Children, FitnessFunction, Parents},
+    operator::{prelude::*, CrossoverOp, GeneticOperator},
+    population::Population,
+    prelude::*,
+    random::SliceRandom,
+    simulation::simulator::Simulator,
+    types::fmt::Display,
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Parameters {
