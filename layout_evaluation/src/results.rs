@@ -1,7 +1,7 @@
 //! The `results` module contains structs representing the results of metric evaluations.
 
 use serde::{Deserialize, Serialize};
-use std::fmt;
+use std::{fmt, slice};
 
 /// The `NormalizationType` specifies how the total cost of a metric evaluation shall be normalized.
 #[derive(Debug, Clone, Deserialize, Serialize)]
