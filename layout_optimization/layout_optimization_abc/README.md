@@ -1,1 +1,1 @@
-Implemented using the [abc](https://github.com/daviddonna/abc-rs) crate.
+An Artificial Bee Colony algorithm (ABC); implemented using the [abc](https://github.com/daviddonna/abc-rs) crate.

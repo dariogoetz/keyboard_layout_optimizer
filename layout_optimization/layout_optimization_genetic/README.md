@@ -1,1 +1,1 @@
-Implemented using the [genevo](https://github.com/innoave/genevo) crate.
+A Genetic algorithm, implemented using the [genevo](https://github.com/innoave/genevo) crate.

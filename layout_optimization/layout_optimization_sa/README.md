@@ -1,1 +1,1 @@
-Implemented using the [argmin](https://github.com/argmin-rs/argmin) crate.
+A [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing) algorithm (SA); implemented using the [argmin](https://github.com/argmin-rs/argmin) crate.
