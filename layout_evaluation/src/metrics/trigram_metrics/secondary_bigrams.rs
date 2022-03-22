@@ -19,7 +19,7 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
-    pub exclude_containing: FxHashSet<char>,
+    pub exclude_starting: FxHashSet<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -27,7 +27,7 @@ pub struct SecondaryBigrams {
     bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
     factor_no_handswitch: f64,
     factor_handswitch: f64,
-    exclude_containing: FxHashSet<char>,
+    exclude_starting: FxHashSet<char>,
 }
 
 impl SecondaryBigrams {
@@ -39,7 +39,7 @@ impl SecondaryBigrams {
             bigram_metrics,
             factor_no_handswitch: params.factor_no_handswitch,
             factor_handswitch: params.factor_handswitch,
-            exclude_containing: params.exclude_containing.clone(),
+            exclude_starting: params.exclude_starting.clone(),
         }
     }
 }
@@ -63,9 +63,9 @@ impl TrigramMetric for SecondaryBigrams {
             return Some(0.0);
         }
 
-        if self.exclude_containing.contains(&k1.symbol)
-            || self.exclude_containing.contains(&k2.symbol)
-            || self.exclude_containing.contains(&k3.symbol)
+        if self.exclude_starting.contains(&k1.symbol)
+            || self.exclude_starting.contains(&k2.symbol)
+            || self.exclude_starting.contains(&k3.symbol)
         {
             return Some(0.0);
         };

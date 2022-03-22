@@ -417,7 +417,7 @@ metrics:
       # Multiply the cost with this factor if a handswitch occurs in the trigram
       factor_handswitch: 0.8
       # Exclude secondary bigrams from trigrams involving one of the following symbols
-      exclude_containing: []
+      exclude_starting: []
 
   # If all keys corresponding to a trigram are hit by the same finger (and are all unequal), a cost
   # is counted. A factor is multiplied for each bigram with keys belonging to different columns.
@@ -465,7 +465,7 @@ ngram_mapper:
     # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
     factor_handswitch: 0.8
     # Exclude trigrams that contain one of the following symbols
-    exclude_containing: []
+    exclude_starting: []
 
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.
