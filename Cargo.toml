@@ -10,6 +10,10 @@ members = [
 ]
 
 exclude = [
-    "webui/layouts_webservice",  # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
+    "webui/layouts_webservice",     # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
     "webui/layout_evaluation_wasm",
 ]
+
+[profile.release]
+codegen-units = 1
+lto = true
