@@ -78,8 +78,10 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols. Used in combination with `when_followed_by`.
     pub exclude_starting: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams that follow `exclude_starting` with `when_followed_by`
+    pub when_followed_by: FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -89,6 +91,7 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
             exclude_starting: FxHashSet::default(),
+            when_followed_by: FxHashSet::default(),
         }
     }
 }
@@ -118,8 +121,10 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
-        .filter(|(((_, layerkey1), (_, _), (_, _)), _)| {
-            !config.exclude_starting.contains(&layerkey1.symbol)
+        .filter(|(((_, layerkey1), (_, layerkey2), (_, _)), _)| {
+            !(config.exclude_starting.contains(&layerkey1.symbol)
+                && (config.when_followed_by.contains(&layerkey2.symbol)
+                    || config.when_followed_by.is_empty()))
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {

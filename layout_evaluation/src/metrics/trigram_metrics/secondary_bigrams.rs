@@ -18,8 +18,10 @@ pub struct Parameters {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols. Used in combination with `when_followed_by`.
     pub exclude_starting: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams that follow `exclude_starting` with `when_followed_by`
+    pub when_followed_by: FxHashSet<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -28,6 +30,7 @@ pub struct SecondaryBigrams {
     factor_no_handswitch: f64,
     factor_handswitch: f64,
     exclude_starting: FxHashSet<char>,
+    when_followed_by: FxHashSet<char>,
 }
 
 impl SecondaryBigrams {
@@ -40,6 +43,7 @@ impl SecondaryBigrams {
             factor_no_handswitch: params.factor_no_handswitch,
             factor_handswitch: params.factor_handswitch,
             exclude_starting: params.exclude_starting.clone(),
+            when_followed_by: params.when_followed_by.clone(),
         }
     }
 }
@@ -63,9 +67,11 @@ impl TrigramMetric for SecondaryBigrams {
             return Some(0.0);
         }
 
-        if self.exclude_starting.contains(&k1.symbol) {
+        if self.exclude_starting.contains(&k1.symbol)
+            && (self.when_followed_by.contains(&k2.symbol) || self.when_followed_by.is_empty())
+        {
             return Some(0.0);
-        };
+        }
 
         let factor = if k1.key.hand == k2.key.hand && k2.key.hand == k3.key.hand {
             self.factor_no_handswitch
