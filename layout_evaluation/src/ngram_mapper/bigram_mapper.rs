@@ -78,10 +78,12 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols. Used in combination with `when_followed_by`.
-    pub exclude_starting: FxHashSet<char>,
-    /// Exclude secondary bigrams for trigrams that follow `exclude_starting` with `when_followed_by`
-    pub when_followed_by: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
+    /// Used in combination with `followup_pause_indicator`.
+    pub initial_pause_indicator: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams that follow `initial_pause_indicator` with `followup_pause_indicator`
+    /// and then contain a normal non-`followup_pause_indicator`-symbol
+    pub followup_pause_indicator: FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -90,8 +92,8 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             enabled: true,
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
-            exclude_starting: FxHashSet::default(),
-            when_followed_by: FxHashSet::default(),
+            initial_pause_indicator: FxHashSet::default(),
+            followup_pause_indicator: FxHashSet::default(),
         }
     }
 }
@@ -121,10 +123,16 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, _)), _)| {
-            !(config.exclude_starting.contains(&layerkey1.symbol)
-                && (config.when_followed_by.contains(&layerkey2.symbol)
-                    || config.when_followed_by.is_empty()))
+        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
+            // Remove the trigrams where:
+            // 1. The first key is an `initial_pause_indicator`
+            // 2. The second key is a `followup_pause_indicator`
+            // 3. The third key is a normal letter (= not a pause_indicator of any kind)
+            !(config.initial_pause_indicator.contains(&layerkey1.symbol)
+                && (config.followup_pause_indicator.is_empty()
+                    || (config.followup_pause_indicator.contains(&layerkey2.symbol)
+                        && !config.initial_pause_indicator.contains(&layerkey3.symbol)
+                        && !config.followup_pause_indicator.contains(&layerkey3.symbol))))
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {

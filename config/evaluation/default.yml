@@ -427,10 +427,13 @@ metrics:
       factor_no_handswitch: 0.7
       # Multiply the cost with this factor if a handswitch occurs in the trigram
       factor_handswitch: 0.8
-      # Exclude secondary bigrams from trigrams starting with one of the following symbols ...
-      exclude_starting: [",", "."]
-      # ... which are followed by one of the following symbols
-      when_followed_by: [
+      # Mental pauses:
+      # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
+      # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
+      # Mental pauses start with a `initial_pause_indicator` and then contain one (or more)
+      # `followup_pause_indicator`s.
+      initial_pause_indicator: [",", "."]
+      followup_pause_indicator: [
         # Various types of whitespace (" ")
         "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
         "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",
@@ -485,10 +488,13 @@ ngram_mapper:
     factor_no_handswitch: 0.7
     # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
     factor_handswitch: 0.8
-    # Exclude trigrams that start with one of the following symbols
-    exclude_starting: [",", "."]
-    # ... which are followed by one of the following symbols
-    when_followed_by: [
+    # Mental pauses:
+    # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
+    # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
+    # Mental pauses start with a `initial_pause_indicator` and then contain one (or more)
+    # `followup_pause_indicator`s.
+    initial_pause_indicator: [",", "."]
+    followup_pause_indicator: [
       # Various types of whitespace (" ")
       "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
       "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",

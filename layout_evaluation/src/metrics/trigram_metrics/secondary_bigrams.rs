@@ -18,10 +18,12 @@ pub struct Parameters {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols. Used in combination with `when_followed_by`.
-    pub exclude_starting: FxHashSet<char>,
-    /// Exclude secondary bigrams for trigrams that follow `exclude_starting` with `when_followed_by`
-    pub when_followed_by: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
+    /// Used in combination with `followup_pause_indicator`.
+    pub initial_pause_indicator: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams that follow `initial_pause_indicator` with `followup_pause_indicator`
+    /// and then contain a normal non-`followup_pause_indicator`-symbol
+    pub followup_pause_indicator: FxHashSet<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -29,8 +31,8 @@ pub struct SecondaryBigrams {
     bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
     factor_no_handswitch: f64,
     factor_handswitch: f64,
-    exclude_starting: FxHashSet<char>,
-    when_followed_by: FxHashSet<char>,
+    initial_pause_indicator: FxHashSet<char>,
+    followup_pause_indicator: FxHashSet<char>,
 }
 
 impl SecondaryBigrams {
@@ -42,8 +44,8 @@ impl SecondaryBigrams {
             bigram_metrics,
             factor_no_handswitch: params.factor_no_handswitch,
             factor_handswitch: params.factor_handswitch,
-            exclude_starting: params.exclude_starting.clone(),
-            when_followed_by: params.when_followed_by.clone(),
+            initial_pause_indicator: params.initial_pause_indicator.clone(),
+            followup_pause_indicator: params.followup_pause_indicator.clone(),
         }
     }
 }
@@ -67,9 +69,23 @@ impl TrigramMetric for SecondaryBigrams {
             return Some(0.0);
         }
 
-        if self.exclude_starting.contains(&k1.symbol)
-            && (self.when_followed_by.contains(&k2.symbol) || self.when_followed_by.is_empty())
+        if self.initial_pause_indicator.contains(&k1.symbol)
+            && (self.followup_pause_indicator.is_empty()
+                || (self.followup_pause_indicator.contains(&k2.symbol)
+                    && !self.initial_pause_indicator.contains(&k3.symbol)
+                    && !self.followup_pause_indicator.contains(&k3.symbol)))
         {
+            // Return Some(0.0) if:
+            // 1. The first key is an `initial_pause_indicator`
+            // 2. The second key is a `followup_pause_indicator`
+            // 3. The third key is a normal letter (= not a pause_indicator of any kind)
+            /* println!(
+                "{}{}{}  {}",
+                k1.symbol,
+                k2.symbol,
+                k3.symbol,
+                k2.symbol.escape_unicode()
+            ); */
             return Some(0.0);
         }
 
