@@ -118,10 +118,8 @@ pub fn add_secondary_bigrams_from_trigrams(
                 w,
             )
         })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
+        .filter(|(((_, layerkey1), (_, _), (_, _)), _)| {
             !config.exclude_starting.contains(&layerkey1.symbol)
-                && !config.exclude_starting.contains(&layerkey2.symbol)
-                && !config.exclude_starting.contains(&layerkey3.symbol)
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {

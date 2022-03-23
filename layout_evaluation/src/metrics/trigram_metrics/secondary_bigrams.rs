@@ -63,10 +63,7 @@ impl TrigramMetric for SecondaryBigrams {
             return Some(0.0);
         }
 
-        if self.exclude_starting.contains(&k1.symbol)
-            || self.exclude_starting.contains(&k2.symbol)
-            || self.exclude_starting.contains(&k3.symbol)
-        {
+        if self.exclude_starting.contains(&k1.symbol) {
             return Some(0.0);
         };
 
