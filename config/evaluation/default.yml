@@ -430,10 +430,10 @@ metrics:
       # Mental pauses:
       # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
       # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-      # Mental pauses start with a `initial_pause_indicator` and then contain one (or more)
-      # `followup_pause_indicator`s.
-      initial_pause_indicator: [",", "."]
-      followup_pause_indicator: [
+      # Mental pauses start with a `initial_pause_indicators` and then contain one (or more)
+      # `followup_pause_indicators`.
+      initial_pause_indicators: [",", "."]
+      followup_pause_indicators: [
         # Various types of whitespace (" ")
         "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
         "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",
@@ -491,10 +491,10 @@ ngram_mapper:
     # Mental pauses:
     # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
     # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-    # Mental pauses start with a `initial_pause_indicator` and then contain one (or more)
-    # `followup_pause_indicator`s.
-    initial_pause_indicator: [",", "."]
-    followup_pause_indicator: [
+    # Mental pauses start with a `initial_pause_indicators` and then contain one (or more)
+    # `followup_pause_indicators`.
+    initial_pause_indicators: [",", "."]
+    followup_pause_indicators: [
       # Various types of whitespace (" ")
       "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
       "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",
