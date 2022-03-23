@@ -78,7 +78,7 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols
     pub exclude_starting: FxHashSet<char>,
 }
 
