@@ -21,8 +21,8 @@ pub struct Parameters {
     /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
     /// Used in combination with `followup_pause_indicators`.
     pub initial_pause_indicators: FxHashSet<char>,
-    /// Exclude secondary bigrams for trigrams that follow `initial_pause_indicators` with `followup_pause_indicators`
-    /// and then contain a normal non-`followup_pause_indicators`-symbol
+    /// Exclude secondary bigrams for trigrams that first contain one of the `initial_pause_indicators`, then one of the
+    /// `followup_pause_indicators` and finally contain a normal non-`..._pause_indicators`-symbol
     pub followup_pause_indicators: FxHashSet<char>,
 }
 

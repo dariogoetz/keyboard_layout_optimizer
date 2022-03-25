@@ -430,8 +430,8 @@ metrics:
       # Mental pauses:
       # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
       # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-      # Mental pauses start with a `initial_pause_indicators` and then contain one (or more)
-      # `followup_pause_indicators`.
+      # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
+      # one (or more) `followup_pause_indicators`.
       initial_pause_indicators: [",", "."]
       followup_pause_indicators: [
         # Various types of whitespace (" ")
@@ -491,8 +491,8 @@ ngram_mapper:
     # Mental pauses:
     # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
     # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-    # Mental pauses start with a `initial_pause_indicators` and then contain one (or more)
-    # `followup_pause_indicators`.
+    # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
+    # one (or more) `followup_pause_indicators`.
     initial_pause_indicators: [",", "."]
     followup_pause_indicators: [
       # Various types of whitespace (" ")
