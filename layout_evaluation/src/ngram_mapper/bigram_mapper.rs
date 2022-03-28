@@ -151,7 +151,7 @@ fn layerkey_indices(
         .grams
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
-        .filter(|((c1, _c2), _weight)| !exclude_line_breaks || *c1 != '\n')
+        .filter(|((c1, c2), _weight)| !(exclude_line_breaks && *c1 == '\n' && *c2 != '\n'))
         .for_each(|((c1, c2), weight)| {
             let layerkey1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,

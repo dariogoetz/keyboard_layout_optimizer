@@ -444,8 +444,9 @@ metrics:
       exclude_rows: [3]
 
 ngram_mapper:
-  # Exclude any ngram in which "\n" is contained as not the last symbol
-  # This encodes a mental pause that usually comes with hitting the "Enter" key
+  # Exclude ngrams that contain a line break, followed by a non-line-break character.
+  # This encodes a mental pause which usually comes after hitting the "Enter" key, before
+  # continuing to write.
   exclude_line_breaks: false
 
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers

@@ -33,7 +33,7 @@ pub struct NgramMapperConfig {
     pub secondary_bigrams_from_trigrams: SecondaryBigramsFromTrigramsConfig,
     /// Parameters for the increase in weight of common bigrams (with already high frequency).
     pub increase_common_bigrams: IncreaseCommonBigramsConfig,
-    /// Exclude line breaks in the beginning of bigrams and trigrams
+    /// Exclude ngrams that contain a line break, followed by a non-line-break character
     pub exclude_line_breaks: bool,
 }
 

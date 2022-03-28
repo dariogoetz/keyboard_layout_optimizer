@@ -22,7 +22,10 @@ fn mapped_trigrams(
         //.filter(|((c1, c2, c3), _weight)| {
         //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
         //})
-        .filter(|((c1, c2, _c3), _weight)| !exclude_line_breaks || (*c1 != '\n' && *c2 != '\n'))
+        .filter(|((c1, c2, c3), _weight)| {
+            // Exclude trigrams that contain a line break, followed by a non-line-break character
+            !(exclude_line_breaks && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n')))
+        })
         .for_each(|((c1, c2, c3), weight)| {
             let key1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(k) => k,
