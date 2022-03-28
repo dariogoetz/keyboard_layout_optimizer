@@ -431,17 +431,8 @@ metrics:
       # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
       # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
       # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
-      # one (or more) `followup_pause_indicators`.
+      # some kind of whitespace.
       initial_pause_indicators: [",", "."]
-      followup_pause_indicators: [
-        # Various types of whitespace (" ")
-        "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
-        "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",
-        "\u2006", "\u2007", "\u2008", "\u2009", "\u200A",
-        "\u200B", "\u202F", "\u205F", "\u3000", "\uFEFF",
-        # Various types of line-terminators, such as tab or newline
-        "\u000A", "\u000B", "\u000C", "\u000D", "\u0085", "\u2028", "\u2029",
-      ]
 
   # If all keys corresponding to a trigram are hit by the same finger (and are all unequal), a cost
   # is counted. A factor is multiplied for each bigram with keys belonging to different columns.
@@ -492,17 +483,8 @@ ngram_mapper:
     # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
     # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
     # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
-    # one (or more) `followup_pause_indicators`.
+    # some kind of whitespace.
     initial_pause_indicators: [",", "."]
-    followup_pause_indicators: [
-      # Various types of whitespace (" ")
-      "\u0020", "\u00A0", "\u1680", "\u180E", "\u2000",
-      "\u2001", "\u2002", "\u2003", "\u2004", "\u2005",
-      "\u2006", "\u2007", "\u2008", "\u2009", "\u200A",
-      "\u200B", "\u202F", "\u205F", "\u3000", "\uFEFF",
-      # Various types of line-terminators, such as tab or newline
-      "\u000A", "\u000B", "\u000C", "\u000D", "\u0085", "\u2028", "\u2029",
-    ]
 
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.

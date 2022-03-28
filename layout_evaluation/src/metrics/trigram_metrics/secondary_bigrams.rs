@@ -19,11 +19,7 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
-    /// Used in combination with `followup_pause_indicators`.
     pub initial_pause_indicators: FxHashSet<char>,
-    /// Exclude secondary bigrams for trigrams that first contain one of the `initial_pause_indicators`, then one of the
-    /// `followup_pause_indicators` and finally contain a normal non-`..._pause_indicators`-symbol
-    pub followup_pause_indicators: FxHashSet<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -32,7 +28,6 @@ pub struct SecondaryBigrams {
     factor_no_handswitch: f64,
     factor_handswitch: f64,
     initial_pause_indicators: FxHashSet<char>,
-    followup_pause_indicators: FxHashSet<char>,
 }
 
 impl SecondaryBigrams {
@@ -45,7 +40,6 @@ impl SecondaryBigrams {
             factor_no_handswitch: params.factor_no_handswitch,
             factor_handswitch: params.factor_handswitch,
             initial_pause_indicators: params.initial_pause_indicators.clone(),
-            followup_pause_indicators: params.followup_pause_indicators.clone(),
         }
     }
 }
@@ -70,22 +64,21 @@ impl TrigramMetric for SecondaryBigrams {
         }
 
         if self.initial_pause_indicators.contains(&k1.symbol)
-            && (self.followup_pause_indicators.is_empty()
-                || (self.followup_pause_indicators.contains(&k2.symbol)
-                    && !self.initial_pause_indicators.contains(&k3.symbol)
-                    && !self.followup_pause_indicators.contains(&k3.symbol)))
+            && k2.symbol.is_whitespace()
+            && !self.initial_pause_indicators.contains(&k3.symbol)
+            && !k3.symbol.is_whitespace()
         {
             // Return Some(0.0) if:
             // 1. The first key is an `initial_pause_indicators`
-            // 2. The second key is a `followup_pause_indicators`
+            // 2. The second key is some kind of whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
-            /* println!(
+            println!(
                 "{}{}{}  {}",
                 k1.symbol,
                 k2.symbol,
                 k3.symbol,
                 k2.symbol.escape_unicode()
-            ); */
+            );
             return Some(0.0);
         }
 

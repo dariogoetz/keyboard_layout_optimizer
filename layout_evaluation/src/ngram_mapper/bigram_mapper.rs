@@ -79,11 +79,7 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
-    /// Used in combination with `followup_pause_indicators`.
     pub initial_pause_indicators: FxHashSet<char>,
-    /// Exclude secondary bigrams for trigrams that first contain one of the `initial_pause_indicators`, then one of the
-    /// `followup_pause_indicators` and finally contain a normal non-`..._pause_indicators`-symbol
-    pub followup_pause_indicators: FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -93,7 +89,6 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
             initial_pause_indicators: FxHashSet::default(),
-            followup_pause_indicators: FxHashSet::default(),
         }
     }
 }
@@ -126,13 +121,12 @@ pub fn add_secondary_bigrams_from_trigrams(
         .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
             // Remove the trigrams where:
             // 1. The first key is an `initial_pause_indicators`
-            // 2. The second key is a `followup_pause_indicators`
+            // 2. The second key is some kind of whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
-            !(config.initial_pause_indicators.contains(&layerkey1.symbol)
-                && (config.followup_pause_indicators.is_empty()
-                    || (config.followup_pause_indicators.contains(&layerkey2.symbol)
-                        && !config.initial_pause_indicators.contains(&layerkey3.symbol)
-                        && !config.followup_pause_indicators.contains(&layerkey3.symbol))))
+            !config.initial_pause_indicators.contains(&layerkey1.symbol)
+                || !layerkey2.symbol.is_whitespace()
+                || config.initial_pause_indicators.contains(&layerkey3.symbol)
+                || layerkey3.symbol.is_whitespace()
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
