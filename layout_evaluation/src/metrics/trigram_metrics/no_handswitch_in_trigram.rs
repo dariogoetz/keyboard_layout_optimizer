@@ -1,11 +1,11 @@
-//! The trigram metric `NoHandSwithInTrigram` counts the weights of trigrams
+//! The trigram metric [`NoHandSwithInTrigram`] counts the weights of trigrams
 //! that do not involve a handswitch (thumbs are excluded). The cost may differ depending on whether
 //! there is a direction change from the first to the second bigram within the
 //! trigram.
 //!
 //! *Note:* In ArneBab's version of the metric, a precomputed table is used that only involves
 //! letters, period, and comma. Here, this is modelled by only including keys that are configured
-//! as "fixed" in the `Keyboard`.
+//! as "fixed" in the [`Keyboard`].
 
 use super::TrigramMetric;
 

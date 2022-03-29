@@ -1,4 +1,4 @@
-//! The bigram metric `ManualBigramPenalty` incurrs costs if the bigram is mapped
+//! The bigram metric [`ManualBigramPenalty`] incurrs costs if the bigram is mapped
 //! to one of a list of configurable "bad" key pairs (in terms of key locations).
 
 use super::BigramMetric;

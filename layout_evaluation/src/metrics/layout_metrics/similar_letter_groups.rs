@@ -1,6 +1,6 @@
-//! Used to be called `AsymmetricKeys` in earlier versions of this optimizer.
+//! Used to be called "`AsymmetricKeys`"" in earlier versions of this optimizer.
 //!
-//! The layout metric `SimilarLetterGroups` matches the relative locations of configurable pairs of
+//! The layout metric [`SimilarLetterGroups`] matches the relative locations of configurable pairs of
 //! groups of keys against each other, e.g. "aou" and "äöü". If each key has the same relative
 //! location to its counterpart as the others the costs are zero.
 //! Otherwise, a cost is given for each inconsistency in

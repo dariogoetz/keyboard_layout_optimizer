@@ -1,4 +1,4 @@
-//! The unigram metric `RowLoads` is an informational metric (with no cost)
+//! The unigram metric [`RowLoads`] is an informational metric (with no cost)
 //! that evaluates which fraction of the unigrams is typed on each row (excluding
 //! fixed and thumb keys).
 

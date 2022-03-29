@@ -1,4 +1,4 @@
-//! The layout metric `SimilarLetters` checks configurable pairs of keys
+//! The layout metric [`SimilarLetters`] checks configurable pairs of keys
 //! for sensible placement. (e.g. "aä", "bp", or "mn")
 //! The keys' positioning is rated the following way:
 //! - 0% cost if they are on the same key, but on different layers

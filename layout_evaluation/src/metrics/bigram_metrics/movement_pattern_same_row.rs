@@ -1,5 +1,3 @@
-use rustc_hash::FxHashSet;
-
 use super::BigramMetric;
 
 use keyboard_layout::{
@@ -7,6 +5,7 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
+use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Copy, Clone, Deserialize, Debug)]

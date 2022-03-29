@@ -1,5 +1,5 @@
 //! This module provides an implementation of trigram mapping functionalities
-//! used by the `OnDemandNgramMapper`.
+//! used by the [`OnDemandNgramMapper`].
 
 use super::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
@@ -57,7 +57,7 @@ fn mapped_trigrams(
     (trigram_keys, not_found_weight)
 }
 
-/// Generates `LayerKey`-based trigrams from char-based unigrams. Optionally resolves modifiers
+/// Generates [`LayerKey`]-based trigrams from char-based unigrams. Optionally resolves modifiers
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandTrigramMapper {
@@ -73,7 +73,7 @@ impl OnDemandTrigramMapper {
         }
     }
 
-    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
+    /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
         layout: &Layout,
@@ -91,7 +91,7 @@ impl OnDemandTrigramMapper {
         (trigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve `&LayerKey` references for `LayerKeyIndex`
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
     pub fn layerkeys<'s>(
         trigrams: &TrigramIndices,
         layout: &'s Layout,

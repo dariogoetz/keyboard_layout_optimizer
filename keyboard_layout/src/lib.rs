@@ -2,7 +2,7 @@
 //! and layouts that can be realized on it. These objects are analysed in the `layout_evaluation`
 //! crate in terms of their performance and comfort.
 //!
-//! The core object is the `layout::LayerKey` which represents a symbol that can be generated
+//! The core object is the [`layout::LayerKey`] which represents a symbol that can be generated
 //! with a given layout. It provides data about the involved key properties, required modifiers,
 //! and other associated properties.
 

@@ -1,5 +1,5 @@
 //! This module provides an implementation of bigram mapping functionalities
-//! used by the `OnDemandNgramMapper`.
+//! used by the [`OnDemandNgramMapper`].
 //!
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
@@ -174,7 +174,7 @@ fn layerkey_indices(
     (bigram_keys, not_found_weight)
 }
 
-/// Generates `LayerKey`-based bigrams from char-based unigrams. Optionally resolves modifiers
+/// Generates [`LayerKey`]-based [Bigrams] from char-based unigrams. Optionally resolves modifiers
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandBigramMapper {
@@ -190,7 +190,7 @@ impl OnDemandBigramMapper {
         }
     }
 
-    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
+    /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
         layout: &Layout,
@@ -215,7 +215,7 @@ impl OnDemandBigramMapper {
         (bigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve `&LayerKey` references for `LayerKeyIndex`
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
     pub fn layerkeys<'s>(
         bigrams: &BigramIndices,
         layout: &'s Layout,

@@ -1,5 +1,5 @@
 //! This module provides an implementation of unigram mapping functionalities
-//! used by the `OnDemandNgramMapper`.
+//! used by the [`OnDemandNgramMapper`].
 
 use super::on_demand_ngram_mapper::SplitModifiersConfig;
 use super::{common::*, UnigramIndices};
@@ -30,7 +30,7 @@ fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64
     (unigram_keys, not_found_weight)
 }
 
-/// Generates `LayerKey`-based unigrams from char-based unigrams. Optionally resolves modifiers
+/// Generates [`LayerKey`]-based unigrams from char-based unigrams. Optionally resolves modifiers
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandUnigramMapper {
@@ -46,7 +46,7 @@ impl OnDemandUnigramMapper {
         }
     }
 
-    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
+    /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
         let (mut unigram_keys, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
 
@@ -59,7 +59,7 @@ impl OnDemandUnigramMapper {
         (unigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve `&LayerKey` references for `LayerKeyIndex`
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
     pub fn layerkeys<'s>(
         unigrams: &UnigramIndices,
         layout: &'s Layout,
