@@ -72,13 +72,13 @@ impl TrigramMetric for SecondaryBigrams {
             // 1. The first key is an `initial_pause_indicators`
             // 2. The second key is some kind of whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
-            println!(
+            /* println!(
                 "{}{}{}  {}",
                 k1.symbol,
                 k2.symbol,
                 k3.symbol,
                 k2.symbol.escape_unicode()
-            );
+            ); */
             return Some(0.0);
         }
 
