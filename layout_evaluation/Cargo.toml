@@ -11,6 +11,7 @@ version = "0.1.0"
 [dependencies]
 keyboard_layout = { path = "../keyboard_layout" }
 
+ahash = "0.7.6"
 anyhow = "*"
 colored = "*"
 env_logger = "*"
