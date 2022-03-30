@@ -44,12 +44,13 @@ impl Default for Position {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
+#[repr(u8)]
 pub enum Finger {
-    Pinky = 4,
-    Ring = 3,
-    Middle = 2,
-    Pointer = 1,
-    Thumb = 0,
+    Thumb,   // 0
+    Pointer, // 1
+    Middle,  // 2
+    Ring,    // 3
+    Pinky,   // 4
 }
 
 impl Default for Finger {
@@ -60,15 +61,16 @@ impl Default for Finger {
 
 impl Finger {
     /// Counting distance between fingers (neighboring fingers have a distance of one)
-    pub fn distance(&self, other: &Finger) -> usize {
-        (*self as isize - *other as isize).abs() as usize
+    pub fn distance(&self, other: &Finger) -> u8 {
+        (*self as i8 - *other as i8).abs() as u8
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
+#[repr(u8)]
 pub enum Hand {
-    Left = 0,
-    Right = 1,
+    Left,  // 0
+    Right, // 1
 }
 
 impl Default for Hand {
