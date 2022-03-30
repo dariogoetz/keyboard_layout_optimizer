@@ -12,7 +12,7 @@ use layout_evaluation::{
 };
 
 use rocket::{fairing::AdHoc, fs::FileServer};
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 use std::{path::Path, sync::Arc};
 
@@ -82,7 +82,7 @@ fn rocket() -> _ {
 
     let options: Options = figment.extract().expect("config");
 
-    let mut layout_generators: FxHashMap<String, NeoLayoutGenerator> = FxHashMap::default();
+    let mut layout_generators: AHashMap<String, NeoLayoutGenerator> = AHashMap::default();
     for (config_id, layout_config) in &options.layout_configs {
         let layout_config = LayoutConfig::from_yaml(&layout_config)
             .expect(&format!("Could not load config file '{}'", &layout_config));

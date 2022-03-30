@@ -23,9 +23,9 @@ sqlx = { version = "^0.5.1", default-features = false, features = [
     "postgres",
 ] }
 
+ahash = "0.7.6"
 anyhow = "*"
 async-trait = "*"
-rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "*"
 serde_yaml = "*"

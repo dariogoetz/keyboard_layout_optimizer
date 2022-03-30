@@ -2,8 +2,8 @@
 //! ngram (unigram, bigram, trigram) data that serve as the underlying data for layout
 //! evaluations.
 
+use ahash::AHashMap;
 use anyhow::Result;
-use rustc_hash::FxHashMap;
 use std::{
     fs::{self, create_dir_all, File},
     io::{BufWriter, Write},
@@ -13,7 +13,7 @@ use std::{
 /// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Unigrams {
-    pub grams: FxHashMap<char, f64>,
+    pub grams: AHashMap<char, f64>,
 }
 
 fn process_special_characters(s: &str) -> String {
@@ -27,7 +27,7 @@ fn process_special_characters_inverse(s: &str) -> String {
 impl Unigrams {
     /// Collect unigrams from given text.
     pub fn from_text(text: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars
             //.filter(|c| !c.is_whitespace())
@@ -40,7 +40,7 @@ impl Unigrams {
 
     /// Read unigrams and weights from a string containing lines with unigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -75,7 +75,7 @@ impl Unigrams {
         let mut total_weight = 0.0;
         let mut sorted_grams: Vec<(char, f64)> = self.grams.clone().into_iter().collect();
         sorted_grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
-        let grams: FxHashMap<char, f64> = sorted_grams
+        let grams: AHashMap<char, f64> = sorted_grams
             .iter()
             .take_while(|(_c, w)| {
                 let res = total_weight < target_weight;
@@ -123,13 +123,13 @@ impl Unigrams {
 /// Holds a hashmap of bigrams (two chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Bigrams {
-    pub grams: FxHashMap<(char, char), f64>,
+    pub grams: AHashMap<(char, char), f64>,
 }
 
 impl Bigrams {
     /// Collect bigrams from given text.
     pub fn from_text(text: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars
             .clone()
@@ -144,7 +144,7 @@ impl Bigrams {
 
     /// Read bigrams and weights from a string containing lines with bigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -178,7 +178,7 @@ impl Bigrams {
         let mut total_weight = 0.0;
         let mut sorted_grams: Vec<((char, char), f64)> = self.grams.clone().into_iter().collect();
         sorted_grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
-        let grams: FxHashMap<(char, char), f64> = sorted_grams
+        let grams: AHashMap<(char, char), f64> = sorted_grams
             .iter()
             .take_while(|(_c, w)| {
                 let res = total_weight < target_weight;
@@ -228,13 +228,13 @@ impl Bigrams {
 /// Holds a hashmap of trigrams (three chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
 pub struct Trigrams {
-    pub grams: FxHashMap<(char, char, char), f64>,
+    pub grams: AHashMap<(char, char, char), f64>,
 }
 
 impl Trigrams {
     /// Collect trigrams from given text.
     pub fn from_text(text: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         let chars = text.chars().filter(|c| *c != '\r');
         chars
             .clone()
@@ -252,7 +252,7 @@ impl Trigrams {
 
     /// Read trigrams and weights from a string containing lines with trigrams and their weights.
     pub fn from_frequencies_str(data: &str) -> Result<Self> {
-        let mut grams = FxHashMap::default();
+        let mut grams = AHashMap::default();
         for line in data.lines() {
             let mut parts = line.trim_start().splitn(2, ' ');
             let weight: f64 = parts.next().unwrap().parse().unwrap();
@@ -287,7 +287,7 @@ impl Trigrams {
         let mut sorted_grams: Vec<((char, char, char), f64)> =
             self.grams.clone().into_iter().collect();
         sorted_grams.sort_by(|(_, w1), (_, w2)| w2.partial_cmp(w1).unwrap());
-        let grams: FxHashMap<(char, char, char), f64> = sorted_grams
+        let grams: AHashMap<(char, char, char), f64> = sorted_grams
             .iter()
             .take_while(|(_c, w)| {
                 let res = total_weight < target_weight;

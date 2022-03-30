@@ -18,6 +18,7 @@ layout_optimization_common = { path = "../layout_optimization/layout_optimizatio
 layout_optimization_genetic = { path = "../layout_optimization/layout_optimization_genetic" }
 layout_optimization_sa = { path = "../layout_optimization/layout_optimization_sa" }
 
+ahash = "0.7.6"
 anyhow = "*"
 clap = { version = "^3.0.0", features = ["derive"] }
 colored = "^2.0.0"
@@ -32,7 +33,6 @@ reqwest = { version = "^0.11", features = ["blocking", "json"] }
 # for a MUSL build use the following line instead
 # reqwest = { version = "0.11", features = ["blocking", "json", "rustls-tls"], default-features = false }
 
-rustc-hash = "^1.1.0"
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
 serde_yaml = "*"
