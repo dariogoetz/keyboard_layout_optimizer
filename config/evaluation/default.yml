@@ -432,7 +432,7 @@ metrics:
       # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
       # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
       # some kind of whitespace.
-      initial_pause_indicators: [",", "."]
+      initial_pause_indicators: [",", ".", "?", "!"]
 
   # If all keys corresponding to a trigram are hit by the same finger (and are all unequal), a cost
   # is counted. A factor is multiplied for each bigram with keys belonging to different columns.
@@ -484,7 +484,7 @@ ngram_mapper:
     # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
     # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
     # some kind of whitespace.
-    initial_pause_indicators: [",", "."]
+    initial_pause_indicators: [",", ".", "?", "!"]
 
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.
