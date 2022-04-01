@@ -1,14 +1,16 @@
 //! This module provides an implementation of unigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
-use super::on_demand_ngram_mapper::SplitModifiersConfig;
-use super::{common::*, UnigramIndices};
+use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
+use super::{UnigramIndices, UnigramIndicesVec};
 
 use crate::ngrams::Unigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use ahash::AHashMap;
+use keyboard_layout::layout::{LayerKey, Layout};
 
-fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
+/// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
+fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
     let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
     let mut not_found_weight = 0.0;
     unigrams
@@ -48,13 +50,15 @@ impl OnDemandUnigramMapper {
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
-        let (mut unigram_keys, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
+        let (unigram_keys_vec, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
 
-        if self.split_modifiers.enabled {
-            unigram_keys = Self::split_unigram_modifiers(&unigram_keys, layout);
-        }
+        let found_weight: f64 = unigram_keys_vec.iter().map(|(_, w)| w).sum();
 
-        let found_weight = unigram_keys.iter().map(|(_, w)| w).sum();
+        let unigram_keys = if self.split_modifiers.enabled {
+            Self::split_unigram_modifiers(unigram_keys_vec, layout)
+        } else {
+            unigram_keys_vec.into_iter().collect()
+        };
 
         (unigram_keys, found_weight, not_found_weight)
     }
@@ -75,28 +79,30 @@ impl OnDemandUnigramMapper {
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
-    fn split_unigram_modifiers(unigrams: &UnigramIndices, layout: &Layout) -> UnigramIndices {
-        unigrams
-            .iter()
-            .flat_map(|(k, w)| {
-                let (base, mods) = layout.resolve_modifiers(k);
+    fn split_unigram_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
+        let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
+        unigrams.into_iter().for_each(|(k, w)| {
+            let (base, mods) = layout.resolve_modifiers(&k);
 
-                TakeOneLayerKey::new(base, &mods, *w).collect::<Vec<(LayerKeyIndex, f64)>>()
+            // Make sure we don't have any duplicate unigrams by adding them up.
+            TakeOneLayerKey::new(base, &mods, w)
+                .for_each(|(idx, w)| idx_w_map.insert_or_add_weight(idx, w));
 
-                // if base.symbol == ' ' {
-                // println!(
-                //     "{:>3} -> {}",
-                //     k.symbol.escape_debug().to_string(),
-                //     v.iter()
-                //         .map(|(t1, w)| format!(
-                //             "{:>3} (weight: {:>12.2}) ",
-                //             t1.symbol.escape_debug().to_string(),
-                //             w
-                //         ))
-                //         .collect::<String>(),
-                // );
-                // }
-            })
-            .collect()
+            // if base.symbol == ' ' {
+            // println!(
+            //     "{:>3} -> {}",
+            //     k.symbol.escape_debug().to_string(),
+            //     v.iter()
+            //         .map(|(t1, w)| format!(
+            //             "{:>3} (weight: {:>12.2}) ",
+            //             t1.symbol.escape_debug().to_string(),
+            //             w
+            //         ))
+            //         .collect::<String>(),
+            // );
+            // }
+        });
+
+        idx_w_map
     }
 }

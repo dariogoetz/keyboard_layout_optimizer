@@ -11,9 +11,7 @@ use crate::ngrams::{Bigrams, Trigrams, Unigrams};
 
 use keyboard_layout::layout::Layout;
 
-use ahash::AHashMap;
 use serde::Deserialize;
-use std::hash::Hash;
 
 /// Configuration parameters for the modifier splitting process.
 #[derive(Clone, Deserialize, Debug)]
@@ -77,23 +75,11 @@ impl OnDemandNgramMapper {
     }
 }
 
-fn groupby_sum<T: Clone + Eq + Hash>(data: &[(T, f64)]) -> Vec<(T, f64)> {
-    data.iter()
-        .fold(AHashMap::default(), |mut m, (k, w)| {
-            *m.entry(k.clone()).or_insert(0.0) += *w;
-            m
-        })
-        .into_iter()
-        .collect()
-}
-
 impl NgramMapper for OnDemandNgramMapper {
     fn mapped_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
         // map char-based unigrams to LayerKeyIndex
         let (unigram_key_indices, unigrams_found, unigrams_not_found) =
             self.unigram_mapper.layerkey_indices(layout);
-        // sum duplicates in unigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
-        let unigram_key_indices = groupby_sum(&unigram_key_indices);
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, layout);
 
@@ -102,8 +88,6 @@ impl NgramMapper for OnDemandNgramMapper {
         let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
             .trigram_mapper
             .layerkey_indices(layout, self.config.exclude_line_breaks);
-        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
-        let trigram_key_indices = groupby_sum(&trigram_key_indices);
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
 
@@ -130,15 +114,13 @@ impl NgramMapper for OnDemandNgramMapper {
         );
 
         // (if enabled) increase the weight of bigrams with high weight even higher
-        bigram_key_indices = bigram_mapper::increase_common_bigrams(
-            &bigram_key_indices,
+        bigram_mapper::increase_common_bigrams(
+            &mut bigram_key_indices,
             &self.config.increase_common_bigrams,
         );
 
-        // sum duplicates in trigram vecs (involves a hashmap -> use LayerKeyIndex instead of &LayerKey for performance)
-        let bigram_key_indices = groupby_sum(&bigram_key_indices);
         // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
-        let bigrams_found = bigram_key_indices.iter().map(|(_, w)| w).sum();
+        let bigrams_found = bigram_key_indices.values().sum();
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, layout);
 
