@@ -64,9 +64,9 @@ impl TrigramMetric for SecondaryBigrams {
         }
 
         if self.initial_pause_indicators.contains(&k1.symbol)
-            && k2.symbol.is_whitespace()
+            && k2.symbol == ' '
             && !self.initial_pause_indicators.contains(&k3.symbol)
-            && !k3.symbol.is_whitespace()
+            && k3.symbol != ' '
         {
             // Return Some(0.0) if:
             // 1. The first key is an `initial_pause_indicators`

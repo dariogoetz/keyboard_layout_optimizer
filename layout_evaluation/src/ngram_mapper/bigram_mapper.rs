@@ -124,9 +124,9 @@ pub fn add_secondary_bigrams_from_trigrams(
             // 2. The second key is some kind of whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
             !config.initial_pause_indicators.contains(&layerkey1.symbol)
-                || !layerkey2.symbol.is_whitespace()
+                || layerkey2.symbol != ' '
                 || config.initial_pause_indicators.contains(&layerkey3.symbol)
-                || layerkey3.symbol.is_whitespace()
+                || layerkey3.symbol == ' '
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
