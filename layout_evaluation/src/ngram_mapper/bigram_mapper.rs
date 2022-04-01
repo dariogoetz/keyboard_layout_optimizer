@@ -153,22 +153,22 @@ fn layerkey_indices(
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
         .filter(|((c1, c2), _weight)| !(exclude_line_breaks && *c1 == '\n' && *c2 != '\n'))
         .for_each(|((c1, c2), weight)| {
-            let layerkey1 = match layout.get_layerkey_index_for_symbol(c1) {
-                Some(k) => k,
+            let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
-            let layerkey2 = match layout.get_layerkey_index_for_symbol(c2) {
-                Some(k) => k,
+            let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            bigram_keys.push(((layerkey1, layerkey2), *weight));
+            bigram_keys.push(((idx1, idx2), *weight));
         });
 
     (bigram_keys, not_found_weight)

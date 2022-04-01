@@ -16,15 +16,15 @@ fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64
         .iter()
         //.filter(|(c, _weight)| !c.is_whitespace())
         .for_each(|(c, weight)| {
-            let layerkey = match layout.get_layerkey_index_for_symbol(c) {
-                Some(k) => k,
+            let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            unigram_keys.push((layerkey, *weight));
+            unigram_keys.push((layerkeyidx, *weight));
         });
 
     (unigram_keys, not_found_weight)
