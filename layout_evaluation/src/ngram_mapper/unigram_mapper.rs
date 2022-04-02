@@ -52,13 +52,13 @@ impl OnDemandUnigramMapper {
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
         let (unigram_keys_vec, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
 
-        let found_weight: f64 = unigram_keys_vec.iter().map(|(_, w)| w).sum();
-
         let unigram_keys = if self.split_modifiers.enabled {
             Self::split_unigram_modifiers(unigram_keys_vec, layout)
         } else {
             unigram_keys_vec.into_iter().collect()
         };
+
+        let found_weight: f64 = unigram_keys.values().sum();
 
         (unigram_keys, found_weight, not_found_weight)
     }

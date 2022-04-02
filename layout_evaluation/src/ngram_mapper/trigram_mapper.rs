@@ -85,13 +85,13 @@ impl OnDemandTrigramMapper {
         let (trigram_keys_vec, not_found_weight) =
             mapped_trigrams(&self.trigrams, layout, exclude_line_breaks);
 
-        let found_weight: f64 = trigram_keys_vec.iter().map(|(_, w)| w).sum();
-
         let trigram_keys = if self.split_modifiers.enabled {
             self.split_trigram_modifiers(trigram_keys_vec, layout)
         } else {
             trigram_keys_vec.into_iter().collect()
         };
+
+        let found_weight: f64 = trigram_keys.values().sum();
 
         (trigram_keys, found_weight, not_found_weight)
     }
