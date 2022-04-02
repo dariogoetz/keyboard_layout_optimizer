@@ -134,7 +134,7 @@ impl Observe<AnnealingStruct> for BestObserver {
     }
 }
 
-/// Necessary to avoid errors when importing a [custom_observer] to `optimize()`.
+/// Necessary to avoid errors when importing a `custom_observer` to `optimize()`.
 impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
     fn observe_iter(
         &mut self,

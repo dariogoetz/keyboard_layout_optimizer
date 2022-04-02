@@ -48,7 +48,7 @@ pub struct NeoLayoutGenerator {
 }
 
 impl NeoLayoutGenerator {
-    /// Generate a `NeoLayoutGenerator` from a `BaseLayoutYAML` object
+    /// Generate a [`NeoLayoutGenerator`] from a [`BaseLayoutYAML`] object
     pub fn from_object(base: BaseLayoutYAML, keyboard: Arc<Keyboard>) -> Self {
         let keys: Vec<Vec<char>> = base
             .keys
@@ -85,20 +85,20 @@ impl NeoLayoutGenerator {
         }
     }
 
-    /// Generate a `NeoLayoutGenerator` from a YAML file
+    /// Generate a [`NeoLayoutGenerator`] from a YAML file
     pub fn from_yaml_file(filename: &str, keyboard: Arc<Keyboard>) -> Result<Self> {
         let f = File::open(filename)?;
         let base: BaseLayoutYAML = serde_yaml::from_reader(f)?;
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }
 
-    /// Generate a `NeoLayoutGenerator` from a YAML string
+    /// Generate a [`NeoLayoutGenerator`] from a YAML string
     pub fn from_yaml_str(data: &str, keyboard: Arc<Keyboard>) -> Result<Self> {
         let base: BaseLayoutYAML = serde_yaml::from_str(data)?;
         Ok(NeoLayoutGenerator::from_object(base, keyboard))
     }
 
-    /// Generate a Neo variant `Layout` from given string representation of its base layer.
+    /// Generate a Neo variant [`Layout`] from given string representation of its base layer.
     /// Does not check whether the given string is valid (sufficient, correct and unique charactors).
     /// This is useful for plotting unfinished or invalid layouts.
     pub fn generate_unchecked(&self, layout_keys: &str) -> Result<Layout> {
@@ -154,7 +154,7 @@ impl NeoLayoutGenerator {
         )
     }
 
-    /// Generate a Neo variant `Layout` from a given string representation of its base layer (only non-fixed keys)
+    /// Generate a Neo variant [`Layout`] from a given string representation of its base layer (only non-fixed keys)
     pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
 

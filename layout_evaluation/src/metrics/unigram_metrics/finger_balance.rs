@@ -1,4 +1,4 @@
-//! The unigram metric `FingerBalance` compares the aggregated unigram frequencies
+//! The unigram metric [`FingerBalance`] compares the aggregated unigram frequencies
 //! per finger with configurable intended finger loads. The metric costs come from
 //! discrepancies which are computed based on a standard deviation computation.
 //!
@@ -12,17 +12,17 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub intended_loads: FxHashMap<(Hand, Finger), f64>,
+    pub intended_loads: AHashMap<(Hand, Finger), f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct FingerBalance {
-    intended_loads: FxHashMap<(Hand, Finger), f64>,
+    intended_loads: AHashMap<(Hand, Finger), f64>,
 }
 
 impl FingerBalance {

@@ -1,5 +1,5 @@
 //! This module provides an implementation of bigram mapping functionalities
-//! used by the `OnDemandNgramMapper`.
+//! used by the [`OnDemandNgramMapper`].
 //!
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
@@ -156,30 +156,30 @@ fn layerkey_indices(
         .grams
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
-        .filter(|((c1, _c2), _weight)| !exclude_line_breaks || *c1 != '\n')
+        .filter(|((c1, c2), _weight)| !(exclude_line_breaks && *c1 == '\n' && *c2 != '\n'))
         .for_each(|((c1, c2), weight)| {
-            let layerkey1 = match layout.get_layerkey_index_for_symbol(c1) {
-                Some(k) => k,
+            let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
-            let layerkey2 = match layout.get_layerkey_index_for_symbol(c2) {
-                Some(k) => k,
+            let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            bigram_keys.push(((layerkey1, layerkey2), *weight));
+            bigram_keys.push(((idx1, idx2), *weight));
         });
 
     (bigram_keys, not_found_weight)
 }
 
-/// Generates `LayerKey`-based bigrams from char-based unigrams. Optionally resolves modifiers
+/// Generates [`LayerKey`]-based [Bigrams] from char-based unigrams. Optionally resolves modifiers
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandBigramMapper {
@@ -195,7 +195,7 @@ impl OnDemandBigramMapper {
         }
     }
 
-    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
+    /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
         layout: &Layout,
@@ -220,7 +220,7 @@ impl OnDemandBigramMapper {
         (bigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve `&LayerKey` references for `LayerKeyIndex`
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
     pub fn layerkeys<'s>(
         bigrams: &BigramIndices,
         layout: &'s Layout,

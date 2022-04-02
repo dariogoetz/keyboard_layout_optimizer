@@ -1,4 +1,4 @@
-//! The unigram metric `HandDisbalance` compares the aggregated unigram frequencies
+//! The unigram metric [`HandDisbalance`] compares the aggregated unigram frequencies
 //! for both hands (excluding thumbs). The resulting cost is the distance of each hand's load to 0.5.
 
 use super::UnigramMetric;

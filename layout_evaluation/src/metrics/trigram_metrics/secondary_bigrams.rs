@@ -1,4 +1,4 @@
-//! The trigram metric `SecondaryBigrams` takes the first and last symbol of a trigram
+//! The trigram metric [`SecondaryBigrams`] takes the first and last symbol of a trigram
 //! and evaluates it with all configured bigram metrics that can assign costs to
 //! individual bigrams (`individual_cost` does not return `None`).
 

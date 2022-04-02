@@ -1,4 +1,4 @@
-//! The layout metric `ShortcutKeys` penalizes configurable letters (usually "cvxz")
+//! The layout metric [`ShortcutKeys`] penalizes configurable letters (usually "cvxz")
 //! if they are not within the first 5 columns of the left side of the keyboard.
 //! The cost to add for each such a letter is configurable.
 

@@ -7,7 +7,7 @@ use rustc_hash::FxHashMap;
 use serde::Deserialize;
 use std::fs::File;
 
-/// The index of a `Key` in the `keys` vec of a `Keyboard
+/// The index of a [`Key`] in the `keys` vec of a [`Keyboard`]
 pub type KeyIndex = u8;
 
 /// A struct representing a keyboard as a list of keys
@@ -36,7 +36,7 @@ pub struct KeyboardYAML {
 }
 
 impl Keyboard {
-    /// Generate a `Keyboard` from a `KeyboardYAML` object
+    /// Generate a [`Keyboard`] from a [`KeyboardYAML`] object
     pub fn from_yaml_object(k: KeyboardYAML) -> Self {
         let keys = k
             .hands
@@ -71,14 +71,14 @@ impl Keyboard {
         }
     }
 
-    /// Generate a `Keyboard` from a YAML file
+    /// Generate a [`Keyboard`] from a YAML file
     pub fn from_yaml_file(filename: &str) -> Result<Self> {
         let f = File::open(filename)?;
         let k: KeyboardYAML = serde_yaml::from_reader(f)?;
         Ok(Keyboard::from_yaml_object(k))
     }
 
-    /// Generate a `Keyboard` from a YAML string
+    /// Generate a [`Keyboard`] from a YAML string
     pub fn from_yaml_str(data: &str) -> Result<Self> {
         let k: KeyboardYAML = serde_yaml::from_str(data)?;
         Ok(Keyboard::from_yaml_object(k))

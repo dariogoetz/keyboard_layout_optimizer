@@ -1,4 +1,4 @@
-//! The bigram metric `LineChanges` is a measure for the vertical distance
+//! The bigram metric [`LineChanges`] is a measure for the vertical distance
 //! to travel for a bigram (excluding thumbs). The vertical distance is normalized by the "horizontal" distance
 //! of the fingers. More precisely, the number of rows to travel is squared and divided by the
 //! finger distance. Additional adjustments are applied if the movement is upwards/downwards from/to

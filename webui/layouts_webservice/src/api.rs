@@ -11,7 +11,7 @@ use rocket::{
     State, {Build, Rocket},
 };
 use rocket_db_pools::{sqlx, Connection, Database};
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 
 #[derive(Database)]
 #[database("sqlx")]
@@ -77,7 +77,7 @@ fn cors_preflight() -> () {}
 async fn post(
     mut db: Connection<Db>,
     layout: Json<PostLayout>,
-    layout_generators: &State<FxHashMap<String, NeoLayoutGenerator>>,
+    layout_generators: &State<AHashMap<String, NeoLayoutGenerator>>,
     evaluator: &State<Evaluator>,
     config: &State<Options>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
@@ -177,7 +177,7 @@ async fn get(
     mut db: Connection<Db>,
     layout: &str,
     layout_config: Option<String>,
-    layout_generators: &State<FxHashMap<String, NeoLayoutGenerator>>,
+    layout_generators: &State<AHashMap<String, NeoLayoutGenerator>>,
     config: &State<Options>,
 ) -> Result<Json<LayoutEvaluation>> {
     let layout_config = layout_config.unwrap_or(config.default_layout_config.to_owned());
@@ -211,7 +211,7 @@ async fn get(
 async fn reeval(
     mut db: Connection<Db>,
     secret: &str,
-    layout_generators: &State<FxHashMap<String, NeoLayoutGenerator>>,
+    layout_generators: &State<AHashMap<String, NeoLayoutGenerator>>,
     evaluator: &State<Evaluator>,
     config: &State<Options>,
 ) -> Result<()> {

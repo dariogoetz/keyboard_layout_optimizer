@@ -1,11 +1,11 @@
-//! The `evaluation` module provides an `Evaluator` struct that can evaluate
+//! The `evaluation` module provides an [`Evaluator`] struct that can evaluate
 //! layouts with respect to a list of metrics and ngram data.
 //!
 //! It can hold multiple metrics operating on the layout itself, unigrams, bigrams,
 //! or trigrams. These are required to implement the corresponding trait from the `metrics` module.
 //!
 //! The ngram mapper is responsible for mapping char-based ngrams (as read from input data)
-//! to singles, pairs, and triplets of `LayerKey`s that can then be analysed by the individual metrics.
+//! to singles, pairs, and triplets of [`LayerKey`]s that can then be analysed by the individual metrics.
 
 use crate::results::{
     EvaluationResult, MetricResult, MetricResults, MetricType, NormalizationType,
@@ -67,7 +67,7 @@ pub struct MetricParameters {
     pub trigram_rolls: WeightedParams<trigram_metrics::rolls::Parameters>,
 }
 
-/// The `Evaluator` object is responsible for evaluating multiple metrics with respect to given ngram data.
+/// The [`Evaluator`] object is responsible for evaluating multiple metrics with respect to given ngram data.
 /// The metrics are handled as dynamically dispatched trait objects for the metric traits in the `metrics` module.
 #[derive(Clone, Debug)]
 pub struct Evaluator {
@@ -95,7 +95,7 @@ pub struct Evaluator {
 }
 
 impl Evaluator {
-    /// Generate an "empty" `Evaluator` object without any metric.
+    /// Generate an "empty" [`Evaluator`] object without any metric.
     pub fn default(ngram_mapper: Box<dyn NgramMapper>) -> Self {
         Evaluator {
             layout_metrics: Vec::new(),

@@ -36,7 +36,7 @@ impl Parameters {
     }
 }
 
-/// The fitness function for `Genotype`s.
+/// The fitness function for [`Genotype`]s.
 #[derive(Clone, Debug)]
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,

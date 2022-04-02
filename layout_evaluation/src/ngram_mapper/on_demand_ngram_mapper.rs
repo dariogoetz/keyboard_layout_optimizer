@@ -1,4 +1,4 @@
-//! This module provides an implementation of the `NgramMapper` trait.
+//! This module provides an implementation of the [`NgramMapper`] trait.
 
 use super::bigram_mapper::{
     self, IncreaseCommonBigramsConfig, OnDemandBigramMapper, SecondaryBigramsFromTrigramsConfig,
@@ -11,7 +11,7 @@ use crate::ngrams::{Bigrams, Trigrams, Unigrams};
 
 use keyboard_layout::layout::Layout;
 
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 use std::hash::Hash;
 
@@ -24,7 +24,7 @@ pub struct SplitModifiersConfig {
     pub same_key_mod_factor: f64,
 }
 
-/// Configuration parameters for the `OnDemandNgramMapper`.
+/// Configuration parameters for the [`OnDemandNgramMapper`].
 #[derive(Clone, Deserialize, Debug)]
 pub struct NgramMapperConfig {
     /// Parameters for the modifiers splitting process.
@@ -33,11 +33,11 @@ pub struct NgramMapperConfig {
     pub secondary_bigrams_from_trigrams: SecondaryBigramsFromTrigramsConfig,
     /// Parameters for the increase in weight of common bigrams (with already high frequency).
     pub increase_common_bigrams: IncreaseCommonBigramsConfig,
-    /// Exclude line breaks in the beginning of bigrams and trigrams
+    /// Exclude ngrams that contain a line break, followed by a non-line-break character
     pub exclude_line_breaks: bool,
 }
 
-/// Implements the `NgramMapper` trait for generating ngrams in terms of `LayerKey`s for a given `Layout`.
+/// Implements the [`NgramMapper`] trait for generating ngrams in terms of [`LayerKey`]s for a given [`Layout`].
 #[derive(Clone, Debug)]
 pub struct OnDemandNgramMapper {
     unigram_mapper: OnDemandUnigramMapper,
@@ -47,7 +47,7 @@ pub struct OnDemandNgramMapper {
 }
 
 impl OnDemandNgramMapper {
-    /// Generate a `OnDemandNgramMapper` with given char-based ngrams.
+    /// Generate a [`OnDemandNgramMapper`] with given char-based ngrams.
     pub fn with_ngrams(
         unigrams: Unigrams,
         bigrams: Bigrams,
@@ -62,7 +62,7 @@ impl OnDemandNgramMapper {
         }
     }
 
-    /// Generate a `OnDemandNgramMapper` with a given corpus (text). Generates corresponding ngrams automatically.
+    /// Generate a [`OnDemandNgramMapper`] with a given corpus (text). Generates corresponding ngrams automatically.
     pub fn with_corpus(text: &str, config: NgramMapperConfig) -> Self {
         let unigrams = Unigrams::from_text(text).expect("Could not generate unigrams from text.");
         let bigrams = Bigrams::from_text(text).expect("Could not generate bigrams from text.");
@@ -79,7 +79,7 @@ impl OnDemandNgramMapper {
 
 fn groupby_sum<T: Clone + Eq + Hash>(data: &[(T, f64)]) -> Vec<(T, f64)> {
     data.iter()
-        .fold(FxHashMap::default(), |mut m, (k, w)| {
+        .fold(AHashMap::default(), |mut m, (k, w)| {
             *m.entry(k.clone()).or_insert(0.0) += *w;
             m
         })
