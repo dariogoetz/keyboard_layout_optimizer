@@ -37,8 +37,6 @@ pub struct LayerKey {
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
     pub is_modifier: bool,
-    /// Is used for determining corresponding base layer key
-    key_index: KeyIndex,
 }
 
 impl LayerKey {
@@ -51,7 +49,6 @@ impl LayerKey {
         modifiers: Vec<LayerKeyIndex>,
         is_fixed: bool,
         is_modifier: bool,
-        key_index: KeyIndex,
     ) -> Self {
         Self {
             index,
@@ -61,7 +58,6 @@ impl LayerKey {
             modifiers,
             is_fixed,
             is_modifier,
-            key_index,
         }
     }
 }
@@ -90,8 +86,14 @@ pub struct Layout {
     pub layerkeys: Vec<LayerKey>,
     /// The underlying keyboard providing the keys
     pub keyboard: Arc<Keyboard>,
+    /// Vec of the [`KeyIndex`] corresponding to each [`LayerKey`] in `layerkeys`
+    layerkey_to_key_index: Vec<KeyIndex>,
+    /// Vec for each [`Key`] of the [`Keyboard`] containing a Vec of all [`LayerKey`] that are
+    /// generaten with that [`Key`]
     key_layers: Vec<Vec<LayerKeyIndex>>,
+    /// Map for retrieving the [`LayerKey`] for the symbol it generates
     key_map: FxHashMap<char, LayerKeyIndex>,
+    /// Costs associated with each layer
     layer_costs: Vec<f64>,
 }
 
@@ -111,6 +113,7 @@ impl Layout {
     ) -> Result<Self> {
         // generate layer keys
         let mut layerkeys = Vec::new();
+        let mut layerkey_to_key_index = Vec::new();
         let mut layerkey_index = 0;
         let key_layers: Vec<Vec<LayerKeyIndex>> = key_chars
             .iter()
@@ -187,6 +190,7 @@ impl Layout {
             layerkeys,
             key_layers,
             keyboard,
+            layerkey_to_key_index,
             key_map,
             layer_costs,
         })
@@ -241,8 +245,8 @@ impl Layout {
     /// Get the index of the "base" symbol (the one on the base layer, e.g. "A" -> "a") for a given [`LayerKeyIndex`]
     #[inline(always)]
     pub fn get_base_layerkey_index(&self, layerkey_index: &LayerKeyIndex) -> LayerKeyIndex {
-        let layerkey = self.get_layerkey(layerkey_index);
-        self.key_layers[layerkey.key_index as usize][0]
+        let key_index: usize = self.layerkey_to_key_index[*layerkey_index as usize] as usize;
+        self.key_layers[key_index][0]
     }
 
     /// Get a list of modifiers required to generate a given [`LayerKey`] as a Vec of [`LayerKey`]s
