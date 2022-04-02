@@ -23,7 +23,7 @@ pub type LayerKeyIndex = u16;
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
 #[derive(Clone, Debug)]
 pub struct LayerKey {
-    /// The [`LayerKeyIndex`]
+    /// The LayerKey's index; a unique value.
     pub index: LayerKeyIndex,
     /// Layer of the layout which the symbol belongs to
     pub layer: u8,

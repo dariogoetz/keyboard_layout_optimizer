@@ -31,9 +31,8 @@
 //! former ones and modifers always come before their base key. The number of generated trigrams from a single
 //! trigram can be large (tens of trigrams) if multiple symbols of the trigram are accessed using multiple modifiers.
 
-mod common;
-
 pub mod bigram_mapper;
+pub mod common;
 pub mod trigram_mapper;
 pub mod unigram_mapper;
 
