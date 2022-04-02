@@ -76,7 +76,7 @@ impl OnDemandNgramMapper {
 }
 
 impl NgramMapper for OnDemandNgramMapper {
-    fn mapped_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
+    fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
         // map char-based unigrams to LayerKeyIndex
         let (unigram_key_indices, unigrams_found, unigrams_not_found) =
             self.unigram_mapper.layerkey_indices(layout);

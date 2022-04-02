@@ -473,7 +473,7 @@ impl Evaluator {
 
     /// Evaluate all metrics for a layout.
     pub fn evaluate_layout(&self, layout: &Layout) -> EvaluationResult {
-        let mapped_ngrams = self.ngram_mapper.mapped_ngrams(layout);
+        let mapped_ngrams = self.ngram_mapper.map_ngrams(layout);
 
         // Layout metrics
         let metric_costs = self.evaluate_layout_metrics(layout);

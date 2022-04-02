@@ -11,7 +11,7 @@ use keyboard_layout::layout::{LayerKey, Layout};
 use ahash::AHashMap;
 
 /// Turns the [`Trigrams`]'s characters into their indices, returning a [`TrigramIndicesVec`].
-fn mapped_trigrams(
+fn map_trigrams(
     trigrams: &Trigrams,
     layout: &Layout,
     exclude_line_breaks: bool,
@@ -83,7 +83,7 @@ impl OnDemandTrigramMapper {
         exclude_line_breaks: bool,
     ) -> (TrigramIndices, f64, f64) {
         let (trigram_keys_vec, not_found_weight) =
-            mapped_trigrams(&self.trigrams, layout, exclude_line_breaks);
+            map_trigrams(&self.trigrams, layout, exclude_line_breaks);
 
         let trigram_keys = if self.split_modifiers.enabled {
             self.split_trigram_modifiers(trigram_keys_vec, layout)

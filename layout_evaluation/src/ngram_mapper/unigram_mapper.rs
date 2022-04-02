@@ -10,7 +10,7 @@ use ahash::AHashMap;
 use keyboard_layout::layout::{LayerKey, Layout};
 
 /// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
-fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
+fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
     let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
     let mut not_found_weight = 0.0;
     unigrams
@@ -50,7 +50,7 @@ impl OnDemandUnigramMapper {
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
-        let (unigram_keys_vec, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
+        let (unigram_keys_vec, not_found_weight) = map_unigrams(&self.unigrams, layout);
 
         let unigram_keys = if self.split_modifiers.enabled {
             Self::split_unigram_modifiers(unigram_keys_vec, layout)

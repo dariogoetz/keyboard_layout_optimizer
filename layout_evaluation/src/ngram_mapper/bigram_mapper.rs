@@ -117,7 +117,7 @@ pub fn add_secondary_bigrams_from_trigrams(
 }
 
 /// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndicesVec`].
-fn mapped_bigrams(
+fn map_bigrams(
     bigrams: &Bigrams,
     layout: &Layout,
     exclude_line_breaks: bool,
@@ -174,9 +174,8 @@ impl OnDemandBigramMapper {
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (BigramIndices, f64, f64) {
-        // println!("Before split: {:?}", self.bigrams.grams.get(&('l', 'r')));
         let (bigram_keys_vec, not_found_weight) =
-            mapped_bigrams(&self.bigrams, layout, exclude_line_breaks);
+            map_bigrams(&self.bigrams, layout, exclude_line_breaks);
 
         let bigram_keys = if self.split_modifiers.enabled {
             self.split_bigram_modifiers(bigram_keys_vec, layout)

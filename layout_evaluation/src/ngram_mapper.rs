@@ -78,7 +78,7 @@ pub struct MappedNgrams<'s> {
 
 /// Provides ngrams in terms of a [`Layout`]'s [`LayerKey`]s.
 pub trait NgramMapper: Send + Sync + NgramMapperClone + fmt::Debug {
-    fn mapped_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s>;
+    fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s>;
 }
 
 // in order to implement clone for Box<dyn LayoutMetric>, the following trick is necessary
