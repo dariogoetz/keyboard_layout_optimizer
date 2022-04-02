@@ -40,7 +40,6 @@ pub struct LayerKey {
 }
 
 impl LayerKey {
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         index: u16,
         layer: u8,
@@ -136,9 +135,8 @@ impl Layout {
                             Vec::new(),
                             *fixed,
                             false,
-                            key_index as KeyIndex,
                         ));
-
+                        layerkey_to_key_index.push(key_index as KeyIndex);
                         layerkey_index += 1;
                         used_layerkey_index
                     })
