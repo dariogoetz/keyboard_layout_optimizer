@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::{fmt, slice};
 
-/// The `NormalizationType` specifies how the total cost of a metric evaluation shall be normalized.
+/// The [`NormalizationType`] specifies how the total cost of a metric evaluation shall be normalized.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(tag = "type", content = "value")]
 #[serde(rename_all = "snake_case")]
@@ -49,7 +49,7 @@ pub struct NormalizedMetricResult {
     pub unweighted_cost: f64,
 }
 
-/// Describes a list of metric evaluation results of the same `MetricType`.
+/// Describes a list of metric evaluation results of the same [`MetricType`].
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MetricResults {
     /// Type of the metric, i.e. which data the metrics operated on.

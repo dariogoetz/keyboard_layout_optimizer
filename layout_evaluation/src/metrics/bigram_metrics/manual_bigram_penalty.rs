@@ -1,11 +1,11 @@
-//! The bigram metric `ManualBigramPenalty` incurrs costs if the bigram is mapped
+//! The bigram metric [`ManualBigramPenalty`] incurrs costs if the bigram is mapped
 //! to one of a list of configurable "bad" key pairs (in terms of key locations).
 
 use super::BigramMetric;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 
 /// A tuple, structured the following way: (Column, Row)
@@ -13,12 +13,12 @@ type MatrixPosition = (u8, u8);
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub matrix_positions: FxHashMap<(MatrixPosition, MatrixPosition), f64>,
+    pub matrix_positions: AHashMap<(MatrixPosition, MatrixPosition), f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct ManualBigramPenalty {
-    matrix_positions: FxHashMap<(MatrixPosition, MatrixPosition), f64>,
+    matrix_positions: AHashMap<(MatrixPosition, MatrixPosition), f64>,
 }
 
 impl ManualBigramPenalty {

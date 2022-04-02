@@ -1,4 +1,4 @@
-//! The trigram metric `TrigramFingerRepeats` counts the weights of trigrams
+//! The trigram metric [`TrigramFingerRepeats`] counts the weights of trigrams
 //! that do not involve the same key for all symbols (thumbs and consecutive
 //! identical keys are excluded).
 //!

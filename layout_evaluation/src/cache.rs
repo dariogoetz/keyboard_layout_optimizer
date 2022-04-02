@@ -1,11 +1,11 @@
+use ahash::AHashMap;
 use colored::Colorize;
 use parking_lot::Mutex;
-use rustc_hash::FxHashMap;
 use std::{fmt, sync::Arc};
 
 #[derive(Clone, Debug)]
 pub struct Cache<T: Clone> {
-    cache: Arc<Mutex<FxHashMap<String, T>>>,
+    cache: Arc<Mutex<AHashMap<String, T>>>,
 }
 
 impl<T: Clone> Default for Cache<T> {
@@ -17,7 +17,7 @@ impl<T: Clone> Default for Cache<T> {
 impl<T: Clone> Cache<T> {
     pub fn new() -> Self {
         Self {
-            cache: Arc::new(Mutex::new(FxHashMap::default())),
+            cache: Arc::new(Mutex::new(AHashMap::default())),
         }
     }
 

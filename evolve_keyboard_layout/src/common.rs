@@ -8,8 +8,8 @@ use layout_evaluation::{
     ngrams::{Bigrams, Trigrams, Unigrams},
 };
 
+use ahash::AHashMap;
 use clap::Parser;
-use rustc_hash::FxHashMap;
 use std::{
     fs::{self, OpenOptions},
     io::prelude::*,
@@ -179,7 +179,7 @@ pub fn publish_to_webservice(
     publish_layout_config: &str,
 ) {
     let client = reqwest::blocking::Client::new();
-    let mut body = FxHashMap::default();
+    let mut body = AHashMap::default();
     body.insert("published_by", publish_name.to_string());
     body.insert("layout", layout.as_text());
     body.insert("layout_config", publish_layout_config.to_string());

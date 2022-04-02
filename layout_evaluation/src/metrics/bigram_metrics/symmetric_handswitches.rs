@@ -1,4 +1,4 @@
-//! The bigram metric `SymmetricHandswitches` metric assigns a negative cost to each bigram
+//! The bigram metric [`SymmetricHandswitches`] metric assigns a negative cost to each bigram
 //! for which the two keys are symmetrical on each hand (thumbs are excluded).
 //!
 //! *Note*: In contrast to ArneBab's version, this gives negative costs to symmetric handswitches

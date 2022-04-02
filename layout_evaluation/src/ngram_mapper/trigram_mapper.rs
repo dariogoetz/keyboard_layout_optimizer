@@ -1,5 +1,5 @@
 //! This module provides an implementation of trigram mapping functionalities
-//! used by the `OnDemandNgramMapper`.
+//! used by the [`OnDemandNgramMapper`].
 
 use super::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
@@ -22,39 +22,42 @@ fn mapped_trigrams(
         //.filter(|((c1, c2, c3), _weight)| {
         //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
         //})
-        .filter(|((c1, c2, _c3), _weight)| !exclude_line_breaks || (*c1 != '\n' && *c2 != '\n'))
+        .filter(|((c1, c2, c3), _weight)| {
+            // Exclude trigrams that contain a line break, followed by a non-line-break character
+            !(exclude_line_breaks && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n')))
+        })
         .for_each(|((c1, c2, c3), weight)| {
-            let key1 = match layout.get_layerkey_index_for_symbol(c1) {
-                Some(k) => k,
+            let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            let key2 = match layout.get_layerkey_index_for_symbol(c2) {
-                Some(k) => k,
+            let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            let key3 = match layout.get_layerkey_index_for_symbol(c3) {
-                Some(k) => k,
+            let idx3 = match layout.get_layerkey_index_for_symbol(c3) {
+                Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
                     return;
                 }
             };
 
-            trigram_keys.push(((key1, key2, key3), *weight));
+            trigram_keys.push(((idx1, idx2, idx3), *weight));
         });
 
     (trigram_keys, not_found_weight)
 }
 
-/// Generates `LayerKey`-based trigrams from char-based unigrams. Optionally resolves modifiers
+/// Generates [`LayerKey`]-based trigrams from char-based unigrams. Optionally resolves modifiers
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandTrigramMapper {
@@ -70,7 +73,7 @@ impl OnDemandTrigramMapper {
         }
     }
 
-    /// For a given `Layout` generate `LayerKeyIndex`-based unigrams, optionally resolving modifiers for higer-layer symbols.
+    /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
         layout: &Layout,
@@ -88,7 +91,7 @@ impl OnDemandTrigramMapper {
         (trigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve `&LayerKey` references for `LayerKeyIndex`
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
     pub fn layerkeys<'s>(
         trigrams: &TrigramIndices,
         layout: &'s Layout,

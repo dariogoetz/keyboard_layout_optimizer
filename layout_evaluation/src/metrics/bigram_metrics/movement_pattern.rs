@@ -1,4 +1,4 @@
-//! The bigram metric `MovementPattern` puts cost on each bigram that is mapped to
+//! The bigram metric [`MovementPattern`] puts cost on each bigram that is mapped to
 //! (almost) neighboring fingers. Which finger combinations come with which costs is
 //! configurable.
 

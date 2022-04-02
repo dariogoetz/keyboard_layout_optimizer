@@ -1,5 +1,3 @@
-use rustc_hash::FxHashSet;
-
 use super::BigramMetric;
 
 use keyboard_layout::{
@@ -7,6 +5,7 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
+use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Copy, Clone, Deserialize, Debug)]
@@ -76,7 +75,7 @@ impl BigramMetric for MovementPatternSameRow {
 
         // no roll on lateral finger movements
         if self.exclude_lateral_finger_movement
-            && k1.key.finger.distance(&k2.key.finger) < (pos1.0 as i8 - pos2.0 as i8).abs() as usize
+            && k1.key.finger.distance(&k2.key.finger) < (pos1.0 as i8 - pos2.0 as i8).abs() as u8
         {
             return Some(0.0);
         }

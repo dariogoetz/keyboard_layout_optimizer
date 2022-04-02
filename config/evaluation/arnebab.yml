@@ -467,7 +467,7 @@ ngram_mapper:
     enabled: true
     # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
     factor_no_handswitch: 0.7
-    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
+    # Multiply the bigram's weight with this factor, if the trigram involves a handswitch
     factor_handswitch: 0.8
     # Mental pauses:
     # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.

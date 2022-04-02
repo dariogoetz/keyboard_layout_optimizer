@@ -1,4 +1,4 @@
-//! The bigram metric `FingerRepeatsLateral` incurrs a cost for bigram that uses the same finger
+//! The bigram metric [`FingerRepeatsLateral`] incurrs a cost for bigram that uses the same finger
 //! for different keys (thumb excluded) if a lateral (horizontal) movement takes place.
 //!
 //! *Note:* This metric is not present in ArneBab's version.
