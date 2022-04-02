@@ -120,14 +120,14 @@ impl NgramMapper for OnDemandNgramMapper {
             .filter(|((k1, k2), _)| !(k1 == k2 && k1.is_modifier))
             .collect();
 
-        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-        // --> remove
         // This trigram-loop is out of position (at the end of the function) because we want to use
         // the unfiltered trigrams in `bigram_mapper::add_secondary_bigrams_from_trigrams()`
         let trigrams = trigrams
             .into_iter()
             .filter(|((k1, k2, k3), _)| {
-                !((k1 == k2 && k1.is_modifier) || (k2 == k3 && k2.is_modifier))
+                // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+                // --> remove
+                !(k2.is_modifier && (k1 == k2 || k2 == k3))
             })
             .collect();
 
