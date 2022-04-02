@@ -5,7 +5,7 @@
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{BigramIndices, BigramIndicesVec};
+use super::BigramIndices;
 
 use crate::ngrams::Bigrams;
 
@@ -116,14 +116,14 @@ pub fn add_secondary_bigrams_from_trigrams(
         });
 }
 
-/// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndicesVec`].
+/// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndices`].
 fn map_bigrams(
     bigrams: &Bigrams,
     layout: &Layout,
     exclude_line_breaks: bool,
-) -> (BigramIndicesVec, f64) {
+) -> (BigramIndices, f64) {
     let mut not_found_weight = 0.0;
-    let mut bigram_keys = Vec::with_capacity(bigrams.grams.len());
+    let mut bigram_keys = AHashMap::with_capacity(bigrams.grams.len());
 
     bigrams
         .grams
@@ -146,7 +146,7 @@ fn map_bigrams(
                 }
             };
 
-            bigram_keys.push(((idx1, idx2), *weight));
+            bigram_keys.insert_or_add_weight((idx1, idx2), *weight);
         });
 
     (bigram_keys, not_found_weight)
@@ -174,13 +174,13 @@ impl OnDemandBigramMapper {
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (BigramIndices, f64, f64) {
-        let (bigram_keys_vec, not_found_weight) =
+        let (bigram_keys, not_found_weight) =
             map_bigrams(&self.bigrams, layout, exclude_line_breaks);
 
         let bigram_keys = if self.split_modifiers.enabled {
-            self.split_bigram_modifiers(bigram_keys_vec, layout)
+            self.split_bigram_modifiers(bigram_keys, layout)
         } else {
-            bigram_keys_vec.into_iter().collect()
+            bigram_keys
         };
 
         let found_weight: f64 = bigram_keys.values().sum();
@@ -211,8 +211,8 @@ impl OnDemandBigramMapper {
     ///
     /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
     /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
-    fn split_bigram_modifiers(&self, bigrams: BigramIndicesVec, layout: &Layout) -> BigramIndices {
-        let mut bigram_w_map = AHashMap::with_capacity(bigrams.len() / 3);
+    fn split_bigram_modifiers(&self, bigrams: BigramIndices, layout: &Layout) -> BigramIndices {
+        let mut bigram_w_map = AHashMap::with_capacity(bigrams.len());
 
         bigrams.into_iter().for_each(|((k1, k2), w)| {
             let (base1, mods1) = layout.resolve_modifiers(&k1);

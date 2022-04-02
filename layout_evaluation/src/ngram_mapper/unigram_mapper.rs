@@ -2,16 +2,16 @@
 //! used by the [`OnDemandNgramMapper`].
 
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{UnigramIndices, UnigramIndicesVec};
+use super::UnigramIndices;
 
 use crate::ngrams::Unigrams;
 
 use ahash::AHashMap;
 use keyboard_layout::layout::{LayerKey, Layout};
 
-/// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
-fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
-    let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
+/// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndices`].
+fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
+    let mut unigram_keys = AHashMap::with_capacity(unigrams.grams.len());
     let mut not_found_weight = 0.0;
     unigrams
         .grams
@@ -25,8 +25,7 @@ fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64
                     return;
                 }
             };
-
-            unigram_keys.push((layerkeyidx, *weight));
+            unigram_keys.insert_or_add_weight(layerkeyidx, *weight);
         });
 
     (unigram_keys, not_found_weight)
@@ -50,12 +49,12 @@ impl OnDemandUnigramMapper {
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
-        let (unigram_keys_vec, not_found_weight) = map_unigrams(&self.unigrams, layout);
+        let (unigram_keys, not_found_weight) = map_unigrams(&self.unigrams, layout);
 
         let unigram_keys = if self.split_modifiers.enabled {
-            Self::split_unigram_modifiers(unigram_keys_vec, layout)
+            Self::split_unigram_modifiers(unigram_keys, layout)
         } else {
-            unigram_keys_vec.into_iter().collect()
+            unigram_keys
         };
 
         let found_weight: f64 = unigram_keys.values().sum();
@@ -79,8 +78,8 @@ impl OnDemandUnigramMapper {
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
-    fn split_unigram_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
-        let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
+    fn split_unigram_modifiers(unigrams: UnigramIndices, layout: &Layout) -> UnigramIndices {
+        let mut idx_w_map = AHashMap::with_capacity(unigrams.len());
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
 

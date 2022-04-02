@@ -2,7 +2,7 @@
 //! used by the [`OnDemandNgramMapper`].
 
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{TrigramIndices, TrigramIndicesVec};
+use super::TrigramIndices;
 
 use crate::ngrams::Trigrams;
 
@@ -10,14 +10,14 @@ use keyboard_layout::layout::{LayerKey, Layout};
 
 use ahash::AHashMap;
 
-/// Turns the [`Trigrams`]'s characters into their indices, returning a [`TrigramIndicesVec`].
+/// Turns the [`Trigrams`]'s characters into their indices, returning a [`TrigramIndices`].
 fn map_trigrams(
     trigrams: &Trigrams,
     layout: &Layout,
     exclude_line_breaks: bool,
-) -> (TrigramIndicesVec, f64) {
+) -> (TrigramIndices, f64) {
     let mut not_found_weight = 0.0;
-    let mut trigram_keys = Vec::with_capacity(trigrams.grams.len());
+    let mut trigram_keys = AHashMap::with_capacity(trigrams.grams.len());
 
     trigrams
         .grams
@@ -54,7 +54,7 @@ fn map_trigrams(
                 }
             };
 
-            trigram_keys.push(((idx1, idx2, idx3), *weight));
+            trigram_keys.insert_or_add_weight((idx1, idx2, idx3), *weight);
         });
 
     (trigram_keys, not_found_weight)
@@ -82,13 +82,13 @@ impl OnDemandTrigramMapper {
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (TrigramIndices, f64, f64) {
-        let (trigram_keys_vec, not_found_weight) =
+        let (trigram_keys, not_found_weight) =
             map_trigrams(&self.trigrams, layout, exclude_line_breaks);
 
         let trigram_keys = if self.split_modifiers.enabled {
-            self.split_trigram_modifiers(trigram_keys_vec, layout)
+            self.split_trigram_modifiers(trigram_keys, layout)
         } else {
-            trigram_keys_vec.into_iter().collect()
+            trigram_keys
         };
 
         let found_weight: f64 = trigram_keys.values().sum();
@@ -127,10 +127,10 @@ impl OnDemandTrigramMapper {
     // this is one of the most intensive functions of the layout evaluation
     fn split_trigram_modifiers(
         &self,
-        trigrams: TrigramIndicesVec,
+        trigrams: TrigramIndices,
         layout: &Layout,
     ) -> TrigramIndices {
-        let mut trigram_w_map = AHashMap::with_capacity(trigrams.len() / 3);
+        let mut trigram_w_map = AHashMap::with_capacity(trigrams.len());
         trigrams.into_iter().for_each(|((k1, k2, k3), w)| {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
             let (base2, mods2) = layout.resolve_modifiers(&k2);
