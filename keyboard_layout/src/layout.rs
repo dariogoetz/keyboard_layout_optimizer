@@ -23,6 +23,8 @@ pub type LayerKeyIndex = u16;
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
 #[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
+    /// The [`LayerKeyIndex`]
+    pub index: u16,
     /// Layer of the layout which the symbol belongs to
     pub layer: u8,
     /// Key to press for the symbol
@@ -40,7 +42,9 @@ pub struct LayerKey {
 }
 
 impl LayerKey {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
+        index: u16,
         layer: u8,
         key: Key,
         symbol: char,
@@ -50,6 +54,7 @@ impl LayerKey {
         key_index: KeyIndex,
     ) -> Self {
         Self {
+            index,
             layer,
             key,
             symbol,
@@ -109,7 +114,10 @@ impl Layout {
                     .enumerate()
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
-                        let layerkey = LayerKey::new(
+                        let used_layerkey_index = layerkey_index;
+
+                        layerkeys.push(LayerKey::new(
+                            used_layerkey_index,
                             layer_id as u8,
                             key.clone(),
                             *c,
@@ -117,11 +125,10 @@ impl Layout {
                             *fixed,
                             false,
                             key_index as KeyIndex,
-                        );
-                        layerkey_index += 1;
-                        layerkeys.push(layerkey);
+                        ));
 
-                        layerkey_index - 1
+                        layerkey_index += 1;
+                        used_layerkey_index
                     })
                     .collect();
                 indices

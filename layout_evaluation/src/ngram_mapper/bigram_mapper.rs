@@ -5,7 +5,7 @@
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{BigramIndices, BigramIndicesVec, TrigramIndices};
+use super::{BigramIndices, BigramIndicesVec};
 
 use crate::ngrams::Bigrams;
 
@@ -88,9 +88,8 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
 /// Add secondary bigrams from the first and third symbol of a trigram (if they belong to the same hand).
 pub fn add_secondary_bigrams_from_trigrams(
     bigram_keys: &mut BigramIndices,
-    trigram_keys: &TrigramIndices,
+    trigram_keys: &[((&LayerKey, &LayerKey, &LayerKey), f64)],
     config: &SecondaryBigramsFromTrigramsConfig,
-    layout: &Layout,
 ) {
     if !config.enabled {
         return;
@@ -99,34 +98,22 @@ pub fn add_secondary_bigrams_from_trigrams(
     // there are many duplicates in the secondary bigrams -> using a hashmap is cheaper
     trigram_keys
         .iter()
-        .map(|((idx1, idx2, idx3), w)| {
-            (
-                (
-                    (idx1, layout.get_layerkey(idx1)),
-                    (idx2, layout.get_layerkey(idx2)),
-                    (idx3, layout.get_layerkey(idx3)),
-                ),
-                w,
-            )
-        })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
+        .filter(|((layerkey1, layerkey2, layerkey3), _)| {
             !config.exclude_containing.contains(&layerkey1.symbol)
                 && !config.exclude_containing.contains(&layerkey2.symbol)
                 && !config.exclude_containing.contains(&layerkey3.symbol)
         })
-        .for_each(
-            |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
-                let factor = if layerkey1.key.hand == layerkey2.key.hand
-                    && layerkey2.key.hand == layerkey3.key.hand
-                {
-                    config.factor_no_handswitch
-                } else {
-                    config.factor_handswitch
-                };
+        .for_each(|((layerkey1, layerkey2, layerkey3), weight)| {
+            let factor = if layerkey1.key.hand == layerkey2.key.hand
+                && layerkey2.key.hand == layerkey3.key.hand
+            {
+                config.factor_no_handswitch
+            } else {
+                config.factor_handswitch
+            };
 
-                bigram_keys.insert_or_add_weight((*idx1, *idx3), weight * factor);
-            },
-        );
+            bigram_keys.insert_or_add_weight((layerkey1.index, layerkey3.index), weight * factor);
+        });
 }
 
 /// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndicesVec`].
@@ -191,13 +178,13 @@ impl OnDemandBigramMapper {
         let (bigram_keys_vec, not_found_weight) =
             mapped_bigrams(&self.bigrams, layout, exclude_line_breaks);
 
-        let found_weight: f64 = bigram_keys_vec.iter().map(|(_, w)| w).sum();
-
         let bigram_keys = if self.split_modifiers.enabled {
             self.split_bigram_modifiers(bigram_keys_vec, layout)
         } else {
             bigram_keys_vec.into_iter().collect()
         };
+
+        let found_weight: f64 = bigram_keys.values().sum();
 
         // bigram_keys
         //     .iter()

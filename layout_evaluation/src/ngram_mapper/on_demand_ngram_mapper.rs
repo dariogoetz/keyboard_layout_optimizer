@@ -91,15 +91,6 @@ impl NgramMapper for OnDemandNgramMapper {
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
 
-        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-        // --> remove
-        let trigrams = trigrams
-            .into_iter()
-            .filter(|((k1, k2, k3), _)| {
-                !((k1 == k2 && k1.is_modifier) || (k2 == k3 && k2.is_modifier))
-            })
-            .collect();
-
         // map char-based bigrams to LayerKeyIndex
         let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
             .bigram_mapper
@@ -108,9 +99,8 @@ impl NgramMapper for OnDemandNgramMapper {
         // (if enabled) add bigrams consisting of first and third trigram symbols to vec of bigrams
         bigram_mapper::add_secondary_bigrams_from_trigrams(
             &mut bigram_key_indices,
-            &trigram_key_indices,
+            &trigrams,
             &self.config.secondary_bigrams_from_trigrams,
-            layout,
         );
 
         // (if enabled) increase the weight of bigrams with high weight even higher
@@ -128,6 +118,17 @@ impl NgramMapper for OnDemandNgramMapper {
         let bigrams = bigrams
             .into_iter()
             .filter(|((k1, k2), _)| !(k1 == k2 && k1.is_modifier))
+            .collect();
+
+        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+        // --> remove
+        // This trigram-loop is out of position (at the end of the function) because we want to use
+        // the unfiltered trigrams in `bigram_mapper::add_secondary_bigrams_from_trigrams()`
+        let trigrams = trigrams
+            .into_iter()
+            .filter(|((k1, k2, k3), _)| {
+                !((k1 == k2 && k1.is_modifier) || (k2 == k3 && k2.is_modifier))
+            })
             .collect();
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
