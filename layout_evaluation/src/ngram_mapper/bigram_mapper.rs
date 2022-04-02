@@ -121,7 +121,7 @@ pub fn add_secondary_bigrams_from_trigrams(
         .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
             // Remove the trigrams where:
             // 1. The first key is an `initial_pause_indicators`
-            // 2. The second key is some kind of whitespace
+            // 2. The second key is a whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
             !config.initial_pause_indicators.contains(&layerkey1.symbol)
                 || layerkey2.symbol != ' '

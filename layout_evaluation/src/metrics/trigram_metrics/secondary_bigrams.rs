@@ -70,7 +70,7 @@ impl TrigramMetric for SecondaryBigrams {
         {
             // Return Some(0.0) if:
             // 1. The first key is an `initial_pause_indicators`
-            // 2. The second key is some kind of whitespace
+            // 2. The second key is a whitespace
             // 3. The third key is a normal letter (= not a pause_indicator of any kind)
             return Some(0.0);
         }
