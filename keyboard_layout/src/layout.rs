@@ -11,8 +11,8 @@ use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
 ///
-/// This type ist used as key for hashmaps in unigrams, bigrams, and trigrams and
-/// thus directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
+/// This type is used as the key for hashmaps in unigrams, bigrams, and trigrams and thus
+/// directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
 /// Therefore, this is not a [`usize`] or larger.
 pub type LayerKeyIndex = u16;
 
@@ -21,10 +21,10 @@ pub type LayerKeyIndex = u16;
 /// and contains various other useful properties, e.g. a list of modifiers required to reach given layer.
 ///
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug)]
 pub struct LayerKey {
     /// The [`LayerKeyIndex`]
-    pub index: u16,
+    pub index: LayerKeyIndex,
     /// Layer of the layout which the symbol belongs to
     pub layer: u8,
     /// Key to press for the symbol
@@ -63,6 +63,15 @@ impl LayerKey {
             is_modifier,
             key_index,
         }
+    }
+}
+
+impl PartialEq for LayerKey {
+    /// This implementation assumes that [`LayerKey`]s that share the same `index` are identical.
+    /// This saves a lot of unneccessary checks that come with deriving [`PartialEq`] automatically.
+    #[inline(always)]
+    fn eq(&self, other: &Self) -> bool {
+        self.index == other.index
     }
 }
 
