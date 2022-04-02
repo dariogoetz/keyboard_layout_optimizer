@@ -425,8 +425,8 @@ metrics:
   # The `secondary_bigrams` metric evaluates all bigram metrics that can be computed on individual
   # bigrams (in particular not the finger- and hand-balance metrics) for the bigram resulting from
   # the first and last symbol of the trigram. Depending on whether the trigram involves a
-  # handswitch or not, factors are applied. Trigrams involving one of a list of specified symbols
-  # are excluded.
+  # handswitch or not, factors are applied. Trigrams starting with one of a list of specified
+  # symbols are excluded.
   secondary_bigrams:
     enabled: true
     weight: 0.5
