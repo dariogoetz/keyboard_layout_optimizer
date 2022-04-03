@@ -4,16 +4,18 @@
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
+use super::BigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{BigramIndices, BigramIndicesVec};
 
 use crate::ngrams::Bigrams;
 
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
 use ahash::AHashMap;
 use rustc_hash::FxHashSet;
 use serde::Deserialize;
+
+type BigramIndicesVec = Vec<((LayerKeyIndex, LayerKeyIndex), f64)>;
 
 /// Configuration parameters for process of increasing the weight of common bigrams.
 #[derive(Debug, Clone, Deserialize)]
@@ -123,33 +125,36 @@ fn map_bigrams(
     exclude_line_breaks: bool,
 ) -> (BigramIndicesVec, f64) {
     let mut not_found_weight = 0.0;
-    let mut bigram_keys = Vec::with_capacity(bigrams.grams.len());
-
-    bigrams
+    let bigrams_vec = bigrams
         .grams
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
-        .filter(|((c1, c2), _weight)| !(exclude_line_breaks && *c1 == '\n' && *c2 != '\n'))
-        .for_each(|((c1, c2), weight)| {
+        .filter_map(|((c1, c2), weight)| {
+            // Exclude bigrams that contain a line break, followed by a non-line-break character
+            if exclude_line_breaks && *c1 == '\n' && *c2 != '\n' {
+                return None;
+            }
+
             let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
             let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
 
-            bigram_keys.push(((idx1, idx2), *weight));
-        });
+            Some(((idx1, idx2), *weight))
+        })
+        .collect();
 
-    (bigram_keys, not_found_weight)
+    (bigrams_vec, not_found_weight)
 }
 
 /// Generates [`LayerKey`]-based [Bigrams] from char-based unigrams. Optionally resolves modifiers

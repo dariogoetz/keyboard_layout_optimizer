@@ -1,35 +1,37 @@
 //! This module provides an implementation of unigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
+use super::UnigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{UnigramIndices, UnigramIndicesVec};
 
 use crate::ngrams::Unigrams;
 
 use ahash::AHashMap;
-use keyboard_layout::layout::{LayerKey, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+
+type UnigramIndicesVec = Vec<(LayerKeyIndex, f64)>;
 
 /// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
 fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
-    let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
     let mut not_found_weight = 0.0;
-    unigrams
+    let unigrams_vec = unigrams
         .grams
         .iter()
         //.filter(|(c, _weight)| !c.is_whitespace())
-        .for_each(|(c, weight)| {
+        .filter_map(|(c, weight)| {
             let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
 
-            unigram_keys.push((layerkeyidx, *weight));
-        });
+            Some((layerkeyidx, *weight))
+        })
+        .collect();
 
-    (unigram_keys, not_found_weight)
+    (unigrams_vec, not_found_weight)
 }
 
 /// Generates [`LayerKey`]-based unigrams from char-based unigrams. Optionally resolves modifiers

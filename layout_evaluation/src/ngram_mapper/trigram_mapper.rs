@@ -1,14 +1,15 @@
 //! This module provides an implementation of trigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
+use super::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{TrigramIndices, TrigramIndicesVec};
 
 use crate::ngrams::Trigrams;
 
-use keyboard_layout::layout::{LayerKey, Layout};
-
 use ahash::AHashMap;
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+
+type TrigramIndicesVec = Vec<((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)>;
 
 /// Turns the [`Trigrams`]'s characters into their indices, returning a [`TrigramIndicesVec`].
 fn map_trigrams(
@@ -17,47 +18,46 @@ fn map_trigrams(
     exclude_line_breaks: bool,
 ) -> (TrigramIndicesVec, f64) {
     let mut not_found_weight = 0.0;
-    let mut trigram_keys = Vec::with_capacity(trigrams.grams.len());
-
-    trigrams
+    let trigrams_vec = trigrams
         .grams
         .iter()
         //.filter(|((c1, c2, c3), _weight)| {
         //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
         //})
-        .filter(|((c1, c2, c3), _weight)| {
+        .filter_map(|((c1, c2, c3), weight)| {
             // Exclude trigrams that contain a line break, followed by a non-line-break character
-            !(exclude_line_breaks && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n')))
-        })
-        .for_each(|((c1, c2, c3), weight)| {
+            if exclude_line_breaks && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n'))
+            {
+                return None;
+            }
+
             let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
-
             let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
-
             let idx3 = match layout.get_layerkey_index_for_symbol(c3) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return;
+                    return None;
                 }
             };
 
-            trigram_keys.push(((idx1, idx2, idx3), *weight));
-        });
+            Some(((idx1, idx2, idx3), *weight))
+        })
+        .collect();
 
-    (trigram_keys, not_found_weight)
+    (trigrams_vec, not_found_weight)
 }
 
 /// Generates [`LayerKey`]-based trigrams from char-based unigrams. Optionally resolves modifiers
