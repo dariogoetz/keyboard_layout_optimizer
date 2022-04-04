@@ -219,7 +219,7 @@ impl<T: Copy> HandFingerMap<T> {
 /// The [`Key`] struct represents a physical key on the keyboard. It provides various information about the location
 /// of the key it represents and how it is (supposed to be) used, e.g. which hand and finger shall press it, how
 /// "uncomfortable" it is to reach it (in terms of a cost valua), or if it forces the hand off the home row.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, PartialEq, Clone, Debug)]
 pub struct Key {
     /// Hand of the finger used to press the key
     pub hand: Hand,

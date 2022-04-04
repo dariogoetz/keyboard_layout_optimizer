@@ -90,45 +90,37 @@ impl NgramMapper for OnDemandNgramMapper {
             .layerkey_indices(layout, self.config.exclude_line_breaks);
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
+        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+        // --> remove
+        let trigrams = trigrams
+            .into_iter()
+            .filter(|((k1, k2, k3), _)| !(k2.is_modifier && (k1 == k2 || k2 == k3)))
+            .collect();
 
         // map char-based bigrams to LayerKeyIndex
         let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
             .bigram_mapper
             .layerkey_indices(layout, self.config.exclude_line_breaks);
-
         // (if enabled) add bigrams consisting of first and third trigram symbols to vec of bigrams
         bigram_mapper::add_secondary_bigrams_from_trigrams(
             &mut bigram_key_indices,
-            &trigrams,
+            &trigram_key_indices,
             &self.config.secondary_bigrams_from_trigrams,
+            layout,
         );
-
         // (if enabled) increase the weight of bigrams with high weight even higher
         bigram_mapper::increase_common_bigrams(
             &mut bigram_key_indices,
             &self.config.increase_common_bigrams,
         );
-
         // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
         let bigrams_found = bigram_key_indices.values().sum();
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, layout);
-
         // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
         let bigrams = bigrams
             .into_iter()
             .filter(|((k1, k2), _)| !(k1 == k2 && k1.is_modifier))
-            .collect();
-
-        // This trigram-loop is out of position (at the end of the function) because we want to use
-        // the unfiltered trigrams in `bigram_mapper::add_secondary_bigrams_from_trigrams()`
-        let trigrams = trigrams
-            .into_iter()
-            .filter(|((k1, k2, k3), _)| {
-                // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-                // --> remove
-                !(k2.is_modifier && (k1 == k2 || k2 == k3))
-            })
             .collect();
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging

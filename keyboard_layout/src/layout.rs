@@ -21,10 +21,8 @@ pub type LayerKeyIndex = u16;
 /// and contains various other useful properties, e.g. a list of modifiers required to reach given layer.
 ///
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
-#[derive(Clone, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct LayerKey {
-    /// The LayerKey's index; a unique value.
-    pub index: LayerKeyIndex,
     /// Layer of the layout which the symbol belongs to
     pub layer: u8,
     /// Key to press for the symbol
@@ -41,7 +39,6 @@ pub struct LayerKey {
 
 impl LayerKey {
     pub fn new(
-        index: u16,
         layer: u8,
         key: Key,
         symbol: char,
@@ -50,7 +47,6 @@ impl LayerKey {
         is_modifier: bool,
     ) -> Self {
         Self {
-            index,
             layer,
             key,
             symbol,
@@ -58,15 +54,6 @@ impl LayerKey {
             is_fixed,
             is_modifier,
         }
-    }
-}
-
-impl PartialEq for LayerKey {
-    /// This implementation assumes that [`LayerKey`]s that share the same `index` are identical.
-    /// This saves a lot of unneccessary checks that come with deriving [`PartialEq`] automatically.
-    #[inline(always)]
-    fn eq(&self, other: &Self) -> bool {
-        self.index == other.index
     }
 }
 
@@ -128,7 +115,6 @@ impl Layout {
                         let used_layerkey_index = layerkey_index;
 
                         layerkeys.push(LayerKey::new(
-                            used_layerkey_index,
                             layer_id as u8,
                             key.clone(),
                             *c,
