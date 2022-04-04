@@ -226,25 +226,26 @@ impl OnDemandBigramMapper {
         bigrams: &BigramIndices,
         layout: &'s Layout,
     ) -> Vec<((&'s LayerKey, &'s LayerKey), f64)> {
-        bigrams
-            .iter()
-            .filter_map(|((idx1, idx2), w)| {
-                let k1 = layout.get_layerkey(idx1);
+        let mut layerkeys = Vec::with_capacity(bigrams.len());
 
-                // If the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-                // --> remove
-                match k1.is_modifier && idx1 == idx2 {
-                    false => Some((
-                        (
-                            k1,                        // LayerKey 1
-                            layout.get_layerkey(idx2), // LayerKey 2
-                        ),
-                        *w,
-                    )),
-                    true => None,
-                }
-            })
-            .collect()
+        layerkeys.extend(bigrams.iter().filter_map(|((idx1, idx2), w)| {
+            let k1 = layout.get_layerkey(idx1);
+
+            // If the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+            // --> remove
+            match k1.is_modifier && idx1 == idx2 {
+                false => Some((
+                    (
+                        k1,                        // LayerKey 1
+                        layout.get_layerkey(idx2), // LayerKey 2
+                    ),
+                    *w,
+                )),
+                true => None,
+            }
+        }));
+
+        layerkeys
     }
 
     /// Map all bigrams to base-layer bigrams, potentially generating multiple bigrams
