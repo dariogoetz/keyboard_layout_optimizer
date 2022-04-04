@@ -23,41 +23,46 @@ fn map_trigrams(
     let mut not_found_weight = 0.0;
     let mut trigrams_vec = Vec::with_capacity(trigrams.grams.len());
 
-    trigrams
-        .grams
-        .iter()
-        //.filter(|((c1, c2, c3), _weight)| {
-        //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
-        //})
-        .filter(|((c1, c2, c3), _weight)| {
-            // Exclude trigrams that contain a line break, followed by a non-line-break character
-            !(exclude_line_breaks && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n')))
-        })
-        .for_each(|((c1, c2, c3), weight)| {
-            let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
-                Some(idx) => idx,
-                None => {
-                    not_found_weight += *weight;
-                    return;
+    trigrams_vec.extend(
+        trigrams
+            .grams
+            .iter()
+            //.filter(|((c1, c2, c3), _weight)| {
+            //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
+            //})
+            .filter_map(|((c1, c2, c3), weight)| {
+                // Exclude trigrams that contain a line break, followed by a non-line-break character
+                if exclude_line_breaks
+                    && ((*c1 == '\n' && *c2 != '\n') || (*c2 == '\n' && *c3 != '\n'))
+                {
+                    return None;
                 }
-            };
-            let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
-                Some(idx) => idx,
-                None => {
-                    not_found_weight += *weight;
-                    return;
-                }
-            };
-            let idx3 = match layout.get_layerkey_index_for_symbol(c3) {
-                Some(idx) => idx,
-                None => {
-                    not_found_weight += *weight;
-                    return;
-                }
-            };
 
-            trigrams_vec.push(((idx1, idx2, idx3), *weight));
-        });
+                let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
+                    Some(idx) => idx,
+                    None => {
+                        not_found_weight += *weight;
+                        return None;
+                    }
+                };
+                let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
+                    Some(idx) => idx,
+                    None => {
+                        not_found_weight += *weight;
+                        return None;
+                    }
+                };
+                let idx3 = match layout.get_layerkey_index_for_symbol(c3) {
+                    Some(idx) => idx,
+                    None => {
+                        not_found_weight += *weight;
+                        return None;
+                    }
+                };
+
+                Some(((idx1, idx2, idx3), *weight))
+            }),
+    );
 
     (trigrams_vec, not_found_weight)
 }
