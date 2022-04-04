@@ -142,34 +142,31 @@ fn map_bigrams(
     exclude_line_breaks: bool,
 ) -> (BigramIndicesVec, f64) {
     let mut not_found_weight = 0.0;
-    let bigrams_vec = bigrams
+    let mut bigrams_vec = Vec::with_capacity(bigrams.grams.len());
+
+    bigrams
         .grams
         .iter()
         //.filter(|((c1, c2), _weight)| !c1.is_whitespace() && !c2.is_whitespace())
-        .filter_map(|((c1, c2), weight)| {
-            // Exclude bigrams that contain a line break, followed by a non-line-break character
-            if exclude_line_breaks && *c1 == '\n' && *c2 != '\n' {
-                return None;
-            }
-
+        .filter(|((c1, c2), _weight)| !(exclude_line_breaks && *c1 == '\n' && *c2 != '\n'))
+        .for_each(|((c1, c2), weight)| {
             let idx1 = match layout.get_layerkey_index_for_symbol(c1) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return None;
+                    return;
                 }
             };
             let idx2 = match layout.get_layerkey_index_for_symbol(c2) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return None;
+                    return;
                 }
             };
 
-            Some(((idx1, idx2), *weight))
-        })
-        .collect();
+            bigrams_vec.push(((idx1, idx2), *weight));
+        });
 
     (bigrams_vec, not_found_weight)
 }

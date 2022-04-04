@@ -17,22 +17,23 @@ type UnigramIndicesVec = Vec<(LayerKeyIndex, f64)>;
 /// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
 fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
     let mut not_found_weight = 0.0;
-    let unigrams_vec = unigrams
+    let mut unigrams_vec = Vec::with_capacity(unigrams.grams.len());
+
+    unigrams
         .grams
         .iter()
         //.filter(|(c, _weight)| !c.is_whitespace())
-        .filter_map(|(c, weight)| {
+        .for_each(|(c, weight)| {
             let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
                 Some(idx) => idx,
                 None => {
                     not_found_weight += *weight;
-                    return None;
+                    return;
                 }
             };
 
-            Some((layerkeyidx, *weight))
-        })
-        .collect();
+            unigrams_vec.push((layerkeyidx, *weight));
+        });
 
     (unigrams_vec, not_found_weight)
 }
