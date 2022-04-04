@@ -19,21 +19,23 @@ fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64
     let mut not_found_weight = 0.0;
     let mut unigrams_vec = Vec::with_capacity(unigrams.grams.len());
 
-    unigrams
-        .grams
-        .iter()
-        //.filter(|(c, _weight)| !c.is_whitespace())
-        .for_each(|(c, weight)| {
-            let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
-                Some(idx) => idx,
-                None => {
-                    not_found_weight += *weight;
-                    return;
-                }
-            };
+    unigrams_vec.extend(
+        unigrams
+            .grams
+            .iter()
+            //.filter(|(c, _weight)| !c.is_whitespace())
+            .filter_map(|(c, weight)| {
+                let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
+                    Some(idx) => idx,
+                    None => {
+                        not_found_weight += *weight;
+                        return None;
+                    }
+                };
 
-            unigrams_vec.push((layerkeyidx, *weight));
-        });
+                Some((layerkeyidx, *weight))
+            }),
+    );
 
     (unigrams_vec, not_found_weight)
 }
