@@ -98,8 +98,9 @@ impl OnDemandTrigramMapper {
         (trigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
-    pub fn layerkeys<'s>(
+    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`] and filters trigrams that contain
+    /// repeating identical modifiers.
+    pub fn get_filtered_layerkeys<'s>(
         trigrams: &TrigramIndices,
         layout: &'s Layout,
     ) -> Vec<((&'s LayerKey, &'s LayerKey, &'s LayerKey), f64)> {

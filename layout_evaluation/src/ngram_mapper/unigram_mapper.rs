@@ -70,7 +70,7 @@ impl OnDemandUnigramMapper {
     }
 
     /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
-    pub fn layerkeys<'s>(
+    pub fn get_layerkeys<'s>(
         unigrams: &UnigramIndices,
         layout: &'s Layout,
     ) -> Vec<(&'s LayerKey, f64)> {

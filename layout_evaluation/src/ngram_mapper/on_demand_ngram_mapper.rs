@@ -81,7 +81,7 @@ impl NgramMapper for OnDemandNgramMapper {
         let (unigram_key_indices, unigrams_found, unigrams_not_found) =
             self.unigram_mapper.layerkey_indices(layout);
         // map LayerKeyIndex to &LayerKey
-        let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, layout);
+        let unigrams = OnDemandUnigramMapper::get_layerkeys(&unigram_key_indices, layout);
 
         // map trigrams before bigrams because secondary bigrams from trigrams map may be added
         // map char-based trigrams to LayerKeyIndex
@@ -89,7 +89,7 @@ impl NgramMapper for OnDemandNgramMapper {
             .trigram_mapper
             .layerkey_indices(layout, self.config.exclude_line_breaks);
         // map LayerKeyIndex to &LayerKey
-        let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
+        let trigrams = OnDemandTrigramMapper::get_filtered_layerkeys(&trigram_key_indices, layout);
 
         // map char-based bigrams to LayerKeyIndex
         let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
@@ -110,7 +110,7 @@ impl NgramMapper for OnDemandNgramMapper {
         // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
         let bigrams_found = bigram_key_indices.values().sum();
         // map LayerKeyIndex to &LayerKey
-        let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, layout);
+        let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
         // unigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());

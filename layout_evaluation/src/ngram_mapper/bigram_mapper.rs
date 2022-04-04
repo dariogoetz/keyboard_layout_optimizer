@@ -214,8 +214,9 @@ impl OnDemandBigramMapper {
         (bigram_keys, found_weight, not_found_weight)
     }
 
-    /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
-    pub fn layerkeys<'s>(
+    /// Resolves &[`LayerKey`] references for [`LayerKeyIndex`] and filters bigrams that contain
+    /// repeating identical modifiers.
+    pub fn get_filtered_layerkeys<'s>(
         bigrams: &BigramIndices,
         layout: &'s Layout,
     ) -> Vec<((&'s LayerKey, &'s LayerKey), f64)> {
