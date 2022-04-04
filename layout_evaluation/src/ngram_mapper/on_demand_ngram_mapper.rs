@@ -83,19 +83,13 @@ impl NgramMapper for OnDemandNgramMapper {
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::layerkeys(&unigram_key_indices, layout);
 
-        // map trigrams before bigrams because secondary bigrams from trigrams map be added
+        // map trigrams before bigrams because secondary bigrams from trigrams map may be added
         // map char-based trigrams to LayerKeyIndex
         let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
             .trigram_mapper
             .layerkey_indices(layout, self.config.exclude_line_breaks);
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::layerkeys(&trigram_key_indices, layout);
-        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-        // --> remove
-        let trigrams = trigrams
-            .into_iter()
-            .filter(|((k1, k2, k3), _)| !(k2.is_modifier && (k1 == k2 || k2 == k3)))
-            .collect();
 
         // map char-based bigrams to LayerKeyIndex
         let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
@@ -117,11 +111,6 @@ impl NgramMapper for OnDemandNgramMapper {
         let bigrams_found = bigram_key_indices.values().sum();
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::layerkeys(&bigram_key_indices, layout);
-        // if the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
-        let bigrams = bigrams
-            .into_iter()
-            .filter(|((k1, k2), _)| !(k1 == k2 && k1.is_modifier))
-            .collect();
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
         // unigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());

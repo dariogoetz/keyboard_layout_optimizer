@@ -106,15 +106,22 @@ impl OnDemandTrigramMapper {
     ) -> Vec<((&'s LayerKey, &'s LayerKey, &'s LayerKey), f64)> {
         trigrams
             .iter()
-            .map(|((k1, k2, k3), w)| {
-                (
-                    (
-                        layout.get_layerkey(k1),
-                        layout.get_layerkey(k2),
-                        layout.get_layerkey(k3),
-                    ),
-                    *w,
-                )
+            .filter_map(|((idx1, idx2, idx3), w)| {
+                let k2 = layout.get_layerkey(idx2);
+
+                // If the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
+                // --> remove
+                match k2.is_modifier && (idx1 == idx2 || idx2 == idx3) {
+                    false => Some((
+                        (
+                            layout.get_layerkey(idx1), // LayerKey 1
+                            k2,                        // LayerKey 2
+                            layout.get_layerkey(idx3), // LayerKey 3
+                        ),
+                        *w,
+                    )),
+                    true => None,
+                }
             })
             .collect()
     }
