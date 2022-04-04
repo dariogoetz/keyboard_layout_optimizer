@@ -21,7 +21,7 @@ pub type LayerKeyIndex = u16;
 /// and contains various other useful properties, e.g. a list of modifiers required to reach given layer.
 ///
 /// This struct serves as  major input to evaluation metrics in the `layout_evaluation` crate.
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug)]
 pub struct LayerKey {
     /// Layer of the layout which the symbol belongs to
     pub layer: u8,
@@ -54,6 +54,13 @@ impl LayerKey {
             is_fixed,
             is_modifier,
         }
+    }
+}
+
+impl PartialEq for LayerKey {
+    /// If two [`LayerKey`]s are on the same physical [Key] and on the same layer, they are identical.
+    fn eq(&self, other: &Self) -> bool {
+        self.layer == other.layer && self.key == other.key
     }
 }
 
