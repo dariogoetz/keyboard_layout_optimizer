@@ -1,7 +1,6 @@
 //! This module provides an implementation of unigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
-use super::UnigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Unigrams;
@@ -9,6 +8,10 @@ use crate::ngrams::Unigrams;
 use ahash::AHashMap;
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
+// Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
+// ones are used because they are smaller than a reference (u16 vs usize) and yield better
+// hashing performance.
+type UnigramIndices = AHashMap<LayerKeyIndex, f64>;
 type UnigramIndicesVec = Vec<(LayerKeyIndex, f64)>;
 
 /// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].

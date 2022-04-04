@@ -1,7 +1,6 @@
 //! This module provides an implementation of trigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
-use super::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Trigrams;
@@ -9,6 +8,10 @@ use crate::ngrams::Trigrams;
 use ahash::AHashMap;
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
+// Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
+// ones are used because they are smaller than a reference (u16 vs usize) and yield better
+// hashing performance.
+pub type TrigramIndices = AHashMap<(LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64>;
 type TrigramIndicesVec = Vec<((LayerKeyIndex, LayerKeyIndex, LayerKeyIndex), f64)>;
 
 /// Turns the [`Trigrams`]'s characters into their indices, returning a [`TrigramIndicesVec`].

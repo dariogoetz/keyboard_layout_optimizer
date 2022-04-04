@@ -4,8 +4,8 @@
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
+use super::trigram_mapper::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
-use super::{BigramIndices, TrigramIndices};
 
 use crate::ngrams::Bigrams;
 
@@ -15,6 +15,10 @@ use ahash::AHashMap;
 use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
+// Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
+// ones are used because they are smaller than a reference (u16 vs usize) and yield better
+// hashing performance.
+type BigramIndices = AHashMap<(LayerKeyIndex, LayerKeyIndex), f64>;
 type BigramIndicesVec = Vec<((LayerKeyIndex, LayerKeyIndex), f64)>;
 
 /// Configuration parameters for process of increasing the weight of common bigrams.
