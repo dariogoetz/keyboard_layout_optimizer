@@ -6,13 +6,13 @@ use evolve_keyboard_layout::common;
 #[derive(Parser, Debug)]
 #[clap(name = "Random keyboard layout evaluation")]
 struct Options {
+    /// Number of samples
+    #[clap(default_value = "1000")]
+    number_of_samples: usize,
+
     /// Evaluation parameters
     #[clap(flatten)]
     evaluation_parameters: common::Options,
-
-    /// Number of samples
-    #[clap(short, long, default_value = "1000")]
-    number_of_samples: usize,
 }
 fn main() {
     dotenv::dotenv().ok();
