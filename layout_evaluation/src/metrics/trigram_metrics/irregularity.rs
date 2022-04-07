@@ -91,7 +91,7 @@ impl TrigramMetric for Irregularity {
 
         let total_weight = total_weight.unwrap_or_else(|| trigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = trigrams.iter().filter_map(|(trigram, weight)| {
-            let res = self.individual_cost(
+            let cost_option = self.individual_cost(
                 trigram.0,
                 trigram.1,
                 trigram.2,
@@ -100,7 +100,7 @@ impl TrigramMetric for Irregularity {
                 layout,
             );
 
-            res.map(|c| (trigram, c))
+            cost_option.map(|cost| (trigram, cost))
         });
 
         let (total_cost, msg) = if show_worst {
