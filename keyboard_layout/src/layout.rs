@@ -112,8 +112,6 @@ impl Layout {
                     .enumerate()
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
-                        let used_layerkey_index = layerkey_index;
-
                         layerkeys.push(LayerKey::new(
                             layer_id as u8,
                             key.clone(),
@@ -123,10 +121,13 @@ impl Layout {
                             false,
                         ));
                         layerkey_to_key_index.push(key_index as KeyIndex);
+
+                        let old_layerkey_index = layerkey_index;
                         layerkey_index += 1;
-                        used_layerkey_index
+                        old_layerkey_index
                     })
                     .collect();
+
                 indices
             })
             .collect();
@@ -134,7 +135,8 @@ impl Layout {
         let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
 
         // a map that resolvers the `modifiers` chars to LayerKeyIndex
-        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> = Vec::new();
+        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> =
+            Vec::with_capacity(modifiers.len());
         for mods_per_hand in modifiers.iter() {
             let mut resolved_mods_per_hand = FxHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {

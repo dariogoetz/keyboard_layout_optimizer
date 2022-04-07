@@ -107,12 +107,11 @@ impl NeoLayoutGenerator {
         // assemble a Vec<Vec<char>> representation of the layer for the given layout string
         let mut given_chars = chars.iter();
 
-        let mut key_chars = Vec::new();
+        let mut key_chars = Vec::with_capacity(self.fixed_keys.len());
         for (key_layers, fixed) in self.keys.iter().zip(self.fixed_keys.iter()) {
             if *fixed {
                 key_chars.push(key_layers.clone());
             } else {
-                let mut new_key_layers = Vec::new();
                 let given_char = given_chars.next();
                 if given_char.is_none() {
                     // number of given layout keys are insufficient
@@ -131,16 +130,14 @@ impl NeoLayoutGenerator {
                     .map_err(anyhow::Error::msg)?;
 
                 let given_key_layers = &self.keys[*key_idx as usize];
-                given_key_layers
-                    .iter()
-                    .enumerate()
-                    .for_each(|(layer_id, c)| {
-                        if !self.fixed_layers.contains(&(layer_id as u8)) {
-                            new_key_layers.push(*c);
-                        } else {
-                            new_key_layers.push(*key_layers.get(layer_id).unwrap_or(&'␡'));
-                        }
-                    });
+                let mut new_key_layers = Vec::with_capacity(given_key_layers.len());
+                new_key_layers.extend(given_key_layers.iter().enumerate().map(|(layer_id, c)| {
+                    if !self.fixed_layers.contains(&(layer_id as u8)) {
+                        *c
+                    } else {
+                        *key_layers.get(layer_id).unwrap_or(&'␡')
+                    }
+                }));
                 key_chars.push(new_key_layers);
             }
         }

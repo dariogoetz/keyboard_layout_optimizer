@@ -62,17 +62,15 @@ impl LayoutMetric for SimilarLetterGroups {
         let mut cost = 0.0;
 
         for (s1, s2) in &self.letter_group_pairs {
-            let chars1: Vec<char> = s1.chars().collect();
-            let chars2: Vec<char> = s2.chars().collect();
+            let letters_per_group = s1.len();
+            let mut hand_directions: Vec<i8> = Vec::with_capacity(letters_per_group);
+            let mut finger_directions: Vec<i8> = Vec::with_capacity(letters_per_group);
+            let mut column_distances: Vec<i8> = Vec::with_capacity(letters_per_group);
+            let mut v_directions: Vec<i8> = Vec::with_capacity(letters_per_group);
 
-            let mut hand_directions = Vec::new();
-            let mut finger_directions = Vec::new();
-            let mut column_distances = Vec::new();
-            let mut v_directions = Vec::new();
-
-            for (c1, c2) in chars1.iter().zip(chars2.iter()) {
-                let key1 = &layout.get_layerkey_for_symbol(c1).unwrap().key;
-                let key2 = &layout.get_layerkey_for_symbol(c2).unwrap().key;
+            for (c1, c2) in s1.chars().zip(s2.chars()) {
+                let key1 = &layout.get_layerkey_for_symbol(&c1).unwrap().key;
+                let key2 = &layout.get_layerkey_for_symbol(&c2).unwrap().key;
 
                 let hand_direction = match (&key1.hand, &key2.hand) {
                     (&Hand::Left, &Hand::Right) => 1,
@@ -82,7 +80,7 @@ impl LayoutMetric for SimilarLetterGroups {
                 hand_directions.push(hand_direction);
 
                 // take key1 - key2 for comparability with ArneBab
-                let finger_direction = key1.finger as isize - key2.finger as isize;
+                let finger_direction = key1.finger as i8 - key2.finger as i8;
                 finger_directions.push(finger_direction);
 
                 let column_distance = key2.matrix_position.0 as i8 - key1.matrix_position.0 as i8;
