@@ -293,7 +293,7 @@ impl Layout {
             .key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
-            .filter(|c| !c.is_fixed)
+            .filter(|k| !k.is_fixed)
             .map(|k| k.symbol.to_string())
             .collect();
         let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
@@ -305,7 +305,7 @@ impl Layout {
         self.key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
-            .filter(|c| !c.is_fixed)
+            .filter(|k| !k.is_fixed)
             .map(|k| k.symbol)
             .collect()
     }
