@@ -73,9 +73,9 @@ impl BigramMetric for FingerRepeatsTopBottom {
             || k1.key.hand != k2.key.hand
             || k1.key.finger != k2.key.finger
             || (k1.key.finger == Finger::Thumb
-                && (k1.key.matrix_position.0 as i8 - k2.key.matrix_position.0 as i8).abs() <= 1)
+                && k1.key.matrix_position.0.abs_diff(k2.key.matrix_position.0) <= 1)
             || (k1.key.finger != Finger::Thumb
-                && (k1.key.matrix_position.1 as i8 - k2.key.matrix_position.1 as i8).abs() <= 1)
+                && k1.key.matrix_position.1.abs_diff(k2.key.matrix_position.1) <= 1)
         {
             return Some(0.0);
         }

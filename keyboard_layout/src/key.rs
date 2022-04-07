@@ -62,7 +62,7 @@ impl Default for Finger {
 impl Finger {
     /// Counting distance between fingers (neighboring fingers have a distance of one)
     pub fn distance(&self, other: &Finger) -> u8 {
-        (*self as i8 - *other as i8).abs() as u8
+        (*self as u8).abs_diff(*other as u8)
     }
 }
 

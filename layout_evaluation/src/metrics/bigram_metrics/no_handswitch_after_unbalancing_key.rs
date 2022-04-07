@@ -59,8 +59,8 @@ impl BigramMetric for NoHandSwitchAfterUnbalancingKey {
 
         // if the other key is unbalancing too and on the other side of the hand, put extra cost on it depending on their distance
         let unb2 = k2.key.unbalancing;
-        let dx = (k1.key.matrix_position.0 as i8 - k2.key.matrix_position.0 as i8).abs() as f64;
-        let dy = (k1.key.matrix_position.1 as i8 - k2.key.matrix_position.1 as i8).abs() as f64;
+        let dx = k1.key.matrix_position.0.abs_diff(k2.key.matrix_position.0) as f64;
+        let dy = k1.key.matrix_position.1.abs_diff(k2.key.matrix_position.1) as f64;
         if unb2 > 0.0 && dx > 3.0 {
             // second key is also unbalancing -> extra cost
             cost += unb1 * unb2 * self.unbalancing_after_unbalancing * (dx + dy - 3.0);

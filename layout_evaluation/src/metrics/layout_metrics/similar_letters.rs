@@ -59,10 +59,10 @@ impl LayoutMetric for SimilarLetters {
 
                 let on_same_layer = layerkey1.layer == layerkey2.layer;
                 let neighbor_horizontally = key1.matrix_position.1 == key2.matrix_position.1
-                    && (key1.matrix_position.0 as i8 - key2.matrix_position.0 as i8).abs() == 1
+                    && key1.matrix_position.0.abs_diff(key2.matrix_position.0) == 1
                     && on_same_layer;
                 let neighbor_vertically = key1.matrix_position.0 == key2.matrix_position.0
-                    && (key1.matrix_position.1 as i8 - key2.matrix_position.1 as i8).abs() == 1
+                    && key1.matrix_position.1.abs_diff(key2.matrix_position.1) == 1
                     && on_same_layer;
                 let on_same_key = key1.matrix_position == key2.matrix_position;
 
