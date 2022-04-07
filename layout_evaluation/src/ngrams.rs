@@ -2,6 +2,8 @@
 //! ngram (unigram, bigram, trigram) data that serve as the underlying data for layout
 //! evaluations.
 
+use crate::ngram_mapper::common::NgramMap;
+
 use ahash::AHashMap;
 use anyhow::Result;
 use std::{
@@ -32,7 +34,7 @@ impl Unigrams {
         chars
             //.filter(|c| !c.is_whitespace())
             .for_each(|c| {
-                *grams.entry(c).or_insert(0.0) += 1.0;
+                grams.insert_or_add_weight(c, 1.0);
             });
 
         Ok(Self { grams })
@@ -51,7 +53,7 @@ impl Unigrams {
                 log::error!("Len of unigram {} is unequad one: {:?}", unigram, chars);
             }
             let c = *chars.get(0).unwrap_or(&' ');
-            *grams.entry(c).or_insert(0.0) += weight;
+            grams.insert_or_add_weight(c, weight);
         }
 
         Ok(Unigrams { grams })
@@ -136,7 +138,7 @@ impl Bigrams {
             .zip(chars.clone().skip(1))
             //.filter(|(c1, c2)| !c1.is_whitespace() && !c2.is_whitespace())
             .for_each(|c| {
-                *grams.entry(c).or_insert(0.0) += 1.0;
+                grams.insert_or_add_weight(c, 1.0);
             });
 
         Ok(Self { grams })
@@ -154,7 +156,7 @@ impl Bigrams {
             if c.len() != 2 {
                 log::info!("Len of bigram {} is unequal two: {:?}", bigram, c);
             }
-            *grams.entry((c[0], c[1])).or_insert(0.0) += weight;
+            grams.insert_or_add_weight((c[0], c[1]), weight);
         }
 
         Ok(Bigrams { grams })
@@ -244,7 +246,7 @@ impl Trigrams {
             //    !c1.is_whitespace() && !c2.is_whitespace() && !c3.is_whitespace()
             //})
             .for_each(|((c1, c2), c3)| {
-                *grams.entry((c1, c2, c3)).or_insert(0.0) += 1.0;
+                grams.insert_or_add_weight((c1, c2, c3), 1.0);
             });
 
         Ok(Self { grams })
@@ -262,7 +264,7 @@ impl Trigrams {
             if c.len() != 3 {
                 log::info!("Len of trigram {} is unequal three: {:?}", trigram, c);
             }
-            *grams.entry((c[0], c[1], c[2])).or_insert(0.0) += weight;
+            grams.insert_or_add_weight((c[0], c[1], c[2]), weight);
         }
 
         Ok(Trigrams { grams })

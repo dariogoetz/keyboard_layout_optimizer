@@ -46,9 +46,9 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
 
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = unigrams.iter().filter_map(|(unigram, weight)| {
-            let res = self.individual_cost(*unigram, *weight, total_weight, layout);
+            let cost_option = self.individual_cost(*unigram, *weight, total_weight, layout);
 
-            res.map(|c| (unigram, c))
+            cost_option.map(|cost| (unigram, cost))
         });
 
         let (total_cost, msg) = if show_worst {

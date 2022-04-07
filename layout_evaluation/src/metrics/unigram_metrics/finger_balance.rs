@@ -34,7 +34,7 @@ impl FingerBalance {
             .filter(|((_h, f), _l)| *f != Finger::Thumb)
             .fold(0.0, |acc, (_, l)| acc + l);
         let mut intended_loads = params.intended_loads.clone();
-        intended_loads.iter_mut().for_each(|(_, l)| {
+        intended_loads.values_mut().for_each(|l| {
             *l /= total_intended;
         });
         Self { intended_loads }

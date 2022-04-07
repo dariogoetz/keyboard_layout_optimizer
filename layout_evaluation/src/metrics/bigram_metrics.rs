@@ -53,9 +53,10 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
 
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
         let cost_iter = bigrams.iter().filter_map(|(bigram, weight)| {
-            let res = self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
+            let cost_option =
+                self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
 
-            res.map(|c| (bigram, c))
+            cost_option.map(|cost| (bigram, cost))
         });
 
         let (total_cost, msg) = if show_worst {

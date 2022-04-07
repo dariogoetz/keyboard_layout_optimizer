@@ -11,8 +11,8 @@ use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
 ///
-/// This type ist used as key for hashmaps in unigrams, bigrams, and trigrams and
-/// thus directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
+/// This type is used as the key for hashmaps in unigrams, bigrams, and trigrams and thus
+/// directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
 /// Therefore, this is not a [`usize`] or larger.
 pub type LayerKeyIndex = u16;
 
@@ -35,8 +35,6 @@ pub struct LayerKey {
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
     pub is_modifier: bool,
-    /// Is used for determining corresponding base layer key
-    key_index: KeyIndex,
 }
 
 impl LayerKey {
@@ -47,7 +45,6 @@ impl LayerKey {
         modifiers: Vec<LayerKeyIndex>,
         is_fixed: bool,
         is_modifier: bool,
-        key_index: KeyIndex,
     ) -> Self {
         Self {
             layer,
@@ -56,7 +53,6 @@ impl LayerKey {
             modifiers,
             is_fixed,
             is_modifier,
-            key_index,
         }
     }
 }
@@ -76,8 +72,14 @@ pub struct Layout {
     pub layerkeys: Vec<LayerKey>,
     /// The underlying keyboard providing the keys
     pub keyboard: Arc<Keyboard>,
+    /// Vec of the [`KeyIndex`] corresponding to each [`LayerKey`] in `layerkeys`
+    layerkey_to_key_index: Vec<KeyIndex>,
+    /// Vec for each [`Key`] of the [`Keyboard`] containing a Vec of all [`LayerKey`] that are
+    /// generaten with that [`Key`]
     key_layers: Vec<Vec<LayerKeyIndex>>,
+    /// Map for retrieving the [`LayerKey`] for the symbol it generates
     key_map: FxHashMap<char, LayerKeyIndex>,
+    /// Costs associated with each layer
     layer_costs: Vec<f64>,
 }
 
@@ -97,6 +99,7 @@ impl Layout {
     ) -> Result<Self> {
         // generate layer keys
         let mut layerkeys = Vec::new();
+        let mut layerkey_to_key_index = Vec::new();
         let mut layerkey_index = 0;
         let key_layers: Vec<Vec<LayerKeyIndex>> = key_chars
             .iter()
@@ -109,21 +112,22 @@ impl Layout {
                     .enumerate()
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
-                        let layerkey = LayerKey::new(
+                        layerkeys.push(LayerKey::new(
                             layer_id as u8,
                             key.clone(),
                             *c,
                             Vec::new(),
                             *fixed,
                             false,
-                            key_index as KeyIndex,
-                        );
-                        layerkey_index += 1;
-                        layerkeys.push(layerkey);
+                        ));
+                        layerkey_to_key_index.push(key_index as KeyIndex);
 
-                        layerkey_index - 1
+                        let old_layerkey_index = layerkey_index;
+                        layerkey_index += 1;
+                        old_layerkey_index
                     })
                     .collect();
+
                 indices
             })
             .collect();
@@ -131,7 +135,8 @@ impl Layout {
         let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
 
         // a map that resolvers the `modifiers` chars to LayerKeyIndex
-        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> = Vec::new();
+        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> =
+            Vec::with_capacity(modifiers.len());
         for mods_per_hand in modifiers.iter() {
             let mut resolved_mods_per_hand = FxHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {
@@ -171,6 +176,7 @@ impl Layout {
             layerkeys,
             key_layers,
             keyboard,
+            layerkey_to_key_index,
             key_map,
             layer_costs,
         })
@@ -225,8 +231,8 @@ impl Layout {
     /// Get the index of the "base" symbol (the one on the base layer, e.g. "A" -> "a") for a given [`LayerKeyIndex`]
     #[inline(always)]
     pub fn get_base_layerkey_index(&self, layerkey_index: &LayerKeyIndex) -> LayerKeyIndex {
-        let layerkey = self.get_layerkey(layerkey_index);
-        self.key_layers[layerkey.key_index as usize][0]
+        let key_index: usize = self.layerkey_to_key_index[*layerkey_index as usize] as usize;
+        self.key_layers[key_index][0]
     }
 
     /// Get a list of modifiers required to generate a given [`LayerKey`] as a Vec of [`LayerKey`]s
@@ -246,36 +252,31 @@ impl Layout {
 
     /// Plot a graphical representation of a layer
     pub fn plot_layer(&self, layer: usize) -> String {
-        let keys_strings: Vec<String> = self
+        let fmt_char = |c: char| -> char {
+            match c {
+                ' ' => '␣',
+                '\n' => '\u{23ce}',
+                '\t' => '\u{21e5}',
+                '' => '\u{2327}',
+                '␡' => ' ',
+                normal_char => normal_char,
+            }
+        };
+        let key_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|c| {
                 if c.len() > layer {
-                    self.get_layerkey(&c[layer])
-                        .symbol
-                        .to_string()
-                        .replace(' ', "␣")
-                        .replace('\n', "\u{23ce}")
-                        .replace('\t', "\u{21e5}")
-                        .replace('', "\u{2327}")
-                        .replace('␡', " ")
+                    fmt_char(self.get_layerkey(&c[layer]).symbol)
                 } else if !c.is_empty() {
-                    self.get_layerkey(&c[c.len() - 1])
-                        .symbol
-                        .to_string()
-                        .replace(' ', "␣")
-                        .replace('\n', "\u{23ce}")
-                        .replace('\t', "\u{21e5}")
-                        .replace('', "\u{2327}")
-                        .replace('␡', " ")
+                    fmt_char(self.get_layerkey(&c[c.len() - 1]).symbol)
                 } else {
-                    " ".to_string()
+                    ' '
                 }
             })
             .collect();
 
-        let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        self.keyboard.plot(&keys_str)
+        self.keyboard.plot(&key_chars)
     }
 
     /// Plot a graphical representation of the base (first) layer
@@ -285,15 +286,14 @@ impl Layout {
 
     /// Plot a compact graphical representation (without borders and only non-fixed keys) of the base (first) layer
     pub fn plot_compact(&self) -> String {
-        let keys_strings: Vec<String> = self
+        let key_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
-            .filter(|c| !c.is_fixed)
-            .map(|k| k.symbol.to_string())
+            .filter(|k| !k.is_fixed)
+            .map(|k| k.symbol)
             .collect();
-        let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        self.keyboard.plot_compact(&keys_str)
+        self.keyboard.plot_compact(&key_chars)
     }
 
     /// Concatenate all non-fixed keys into a string without any whitespace
@@ -301,7 +301,7 @@ impl Layout {
         self.key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
-            .filter(|c| !c.is_fixed)
+            .filter(|k| !k.is_fixed)
             .map(|k| k.symbol)
             .collect()
     }

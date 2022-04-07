@@ -197,13 +197,10 @@ impl EvaluationResult {
 
     pub fn total_cost(&self) -> f64 {
         let mut cost = 0.0;
-        for mc in self
-            .individual_results
+        self.individual_results
             .iter()
             .filter(|mc| !mc.metric_costs.is_empty())
-        {
-            cost += mc.total_cost();
-        }
+            .for_each(|mc| cost += mc.total_cost());
 
         cost
     }
