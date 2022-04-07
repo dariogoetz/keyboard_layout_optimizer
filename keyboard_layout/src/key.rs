@@ -219,7 +219,7 @@ impl<T: Copy> HandFingerMap<T> {
 /// The [`Key`] struct represents a physical key on the keyboard. It provides various information about the location
 /// of the key it represents and how it is (supposed to be) used, e.g. which hand and finger shall press it, how
 /// "uncomfortable" it is to reach it (in terms of a cost valua), or if it forces the hand off the home row.
-#[derive(Default, Clone, Debug)]
+#[derive(Default, PartialEq, Clone, Debug)]
 pub struct Key {
     /// Hand of the finger used to press the key
     pub hand: Hand,
@@ -241,12 +241,4 @@ pub struct Key {
 
     /// How strongly does the hand need to move away from the home row (start position)
     pub unbalancing: f64,
-}
-
-impl PartialEq for Key {
-    /// Per definition, there can only be one [`Key`] per [`MatrixPosition`].
-    /// Thus, comparing [`MatrixPosition`] suffices to obtain [`PartialEq`].
-    fn eq(&self, other: &Self) -> bool {
-        self.matrix_position == other.matrix_position
-    }
 }
