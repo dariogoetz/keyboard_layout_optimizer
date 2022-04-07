@@ -85,7 +85,7 @@ impl Keyboard {
     }
 
     /// Plot a graphical representation of the keyboard with given key labels
-    pub fn plot(&self, key_labels: &[&str]) -> String {
+    pub fn plot(&self, key_labels: &[char]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
         let labels: FxHashMap<usize, String> = key_labels
@@ -97,10 +97,10 @@ impl Keyboard {
     }
 
     /// Plot a compact graphical representation of the keyboard with given key labels without borders (compatible with ArneBab's input strings)
-    pub fn plot_compact(&self, key_labels: &[&str]) -> String {
+    pub fn plot_compact(&self, key_labels: &[char]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: FxHashMap<usize, &str> = key_labels.iter().cloned().enumerate().collect();
+        let labels: FxHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template_short, &labels)
             .unwrap()
     }

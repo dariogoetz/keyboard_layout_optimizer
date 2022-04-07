@@ -252,36 +252,31 @@ impl Layout {
 
     /// Plot a graphical representation of a layer
     pub fn plot_layer(&self, layer: usize) -> String {
-        let keys_strings: Vec<String> = self
+        let fmt_char = |c: char| -> char {
+            match c {
+                ' ' => '␣',
+                '\n' => '\u{23ce}',
+                '\t' => '\u{21e5}',
+                '' => '\u{2327}',
+                '␡' => ' ',
+                normal_char => normal_char,
+            }
+        };
+        let keys_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|c| {
                 if c.len() > layer {
-                    self.get_layerkey(&c[layer])
-                        .symbol
-                        .to_string()
-                        .replace(' ', "␣")
-                        .replace('\n', "\u{23ce}")
-                        .replace('\t', "\u{21e5}")
-                        .replace('', "\u{2327}")
-                        .replace('␡', " ")
+                    fmt_char(self.get_layerkey(&c[layer]).symbol)
                 } else if !c.is_empty() {
-                    self.get_layerkey(&c[c.len() - 1])
-                        .symbol
-                        .to_string()
-                        .replace(' ', "␣")
-                        .replace('\n', "\u{23ce}")
-                        .replace('\t', "\u{21e5}")
-                        .replace('', "\u{2327}")
-                        .replace('␡', " ")
+                    fmt_char(self.get_layerkey(&c[c.len() - 1]).symbol)
                 } else {
-                    " ".to_string()
+                    ' '
                 }
             })
             .collect();
 
-        let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        self.keyboard.plot(&keys_str)
+        self.keyboard.plot(&keys_chars)
     }
 
     /// Plot a graphical representation of the base (first) layer
@@ -291,15 +286,14 @@ impl Layout {
 
     /// Plot a compact graphical representation (without borders and only non-fixed keys) of the base (first) layer
     pub fn plot_compact(&self) -> String {
-        let keys_strings: Vec<String> = self
+        let keys_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|k| !k.is_fixed)
-            .map(|k| k.symbol.to_string())
+            .map(|k| k.symbol)
             .collect();
-        let keys_str: Vec<&str> = keys_strings.iter().map(|s| s.as_str()).collect();
-        self.keyboard.plot_compact(&keys_str)
+        self.keyboard.plot_compact(&keys_chars)
     }
 
     /// Concatenate all non-fixed keys into a string without any whitespace
