@@ -262,7 +262,7 @@ impl Layout {
                 normal_char => normal_char,
             }
         };
-        let keys_chars: Vec<char> = self
+        let key_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|c| {
@@ -276,7 +276,7 @@ impl Layout {
             })
             .collect();
 
-        self.keyboard.plot(&keys_chars)
+        self.keyboard.plot(&key_chars)
     }
 
     /// Plot a graphical representation of the base (first) layer
@@ -286,14 +286,14 @@ impl Layout {
 
     /// Plot a compact graphical representation (without borders and only non-fixed keys) of the base (first) layer
     pub fn plot_compact(&self) -> String {
-        let keys_chars: Vec<char> = self
+        let key_chars: Vec<char> = self
             .key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|k| !k.is_fixed)
             .map(|k| k.symbol)
             .collect();
-        self.keyboard.plot_compact(&keys_chars)
+        self.keyboard.plot_compact(&key_chars)
     }
 
     /// Concatenate all non-fixed keys into a string without any whitespace

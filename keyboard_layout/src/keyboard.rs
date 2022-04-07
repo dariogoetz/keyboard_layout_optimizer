@@ -88,11 +88,7 @@ impl Keyboard {
     pub fn plot(&self, key_labels: &[char]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: FxHashMap<usize, String> = key_labels
-            .iter()
-            .map(|c| c.to_string())
-            .enumerate()
-            .collect();
+        let labels: FxHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template, &labels).unwrap()
     }
 
