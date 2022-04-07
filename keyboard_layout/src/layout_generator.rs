@@ -130,14 +130,17 @@ impl NeoLayoutGenerator {
                     .map_err(anyhow::Error::msg)?;
 
                 let given_key_layers = &self.keys[*key_idx as usize];
-                let mut new_key_layers = Vec::with_capacity(given_key_layers.len());
-                new_key_layers.extend(given_key_layers.iter().enumerate().map(|(layer_id, c)| {
-                    if !self.fixed_layers.contains(&(layer_id as u8)) {
-                        *c
-                    } else {
-                        *key_layers.get(layer_id).unwrap_or(&'␡')
-                    }
-                }));
+                let new_key_layers = given_key_layers
+                    .iter()
+                    .enumerate()
+                    .map(|(layer_id, c)| {
+                        if !self.fixed_layers.contains(&(layer_id as u8)) {
+                            *c
+                        } else {
+                            *key_layers.get(layer_id).unwrap_or(&'␡')
+                        }
+                    })
+                    .collect();
                 key_chars.push(new_key_layers);
             }
         }

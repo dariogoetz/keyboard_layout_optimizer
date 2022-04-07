@@ -378,21 +378,20 @@ impl Evaluator {
             return Vec::new();
         }
 
-        let mut metric_costs: Vec<MetricResult> = Vec::with_capacity(self.layout_metrics.len());
-        metric_costs.extend(
-            self.layout_metrics
-                .iter()
-                .map(|(weight, normalization, metric)| {
-                    let (cost, message) = metric.total_cost(layout);
-                    MetricResult {
-                        name: metric.name().to_string(),
-                        cost,
-                        weight: *weight,
-                        normalization: normalization.clone(),
-                        message,
-                    }
-                }),
-        );
+        let metric_costs: Vec<MetricResult> = self
+            .layout_metrics
+            .iter()
+            .map(|(weight, normalization, metric)| {
+                let (cost, message) = metric.total_cost(layout);
+                MetricResult {
+                    name: metric.name().to_string(),
+                    cost,
+                    weight: *weight,
+                    normalization: normalization.clone(),
+                    message,
+                }
+            })
+            .collect();
 
         metric_costs
     }
@@ -408,21 +407,20 @@ impl Evaluator {
         }
 
         let total_weight = keys.iter().map(|(_, w)| w).sum();
-        let mut metric_costs: Vec<MetricResult> = Vec::with_capacity(self.unigram_metrics.len());
-        metric_costs.extend(
-            self.unigram_metrics
-                .iter()
-                .map(|(weight, normalization, metric)| {
-                    let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
-                    MetricResult {
-                        name: metric.name().to_string(),
-                        cost,
-                        weight: *weight,
-                        normalization: normalization.clone(),
-                        message,
-                    }
-                }),
-        );
+        let metric_costs: Vec<MetricResult> = self
+            .unigram_metrics
+            .iter()
+            .map(|(weight, normalization, metric)| {
+                let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
+                MetricResult {
+                    name: metric.name().to_string(),
+                    cost,
+                    weight: *weight,
+                    normalization: normalization.clone(),
+                    message,
+                }
+            })
+            .collect();
 
         metric_costs
     }
@@ -438,21 +436,20 @@ impl Evaluator {
         }
 
         let total_weight = keys.iter().map(|(_, w)| w).sum();
-        let mut metric_costs: Vec<MetricResult> = Vec::with_capacity(self.bigram_metrics.len());
-        metric_costs.extend(
-            self.bigram_metrics
-                .iter()
-                .map(|(weight, normalization, metric)| {
-                    let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
-                    MetricResult {
-                        name: metric.name().to_string(),
-                        cost,
-                        weight: *weight,
-                        normalization: normalization.clone(),
-                        message,
-                    }
-                }),
-        );
+        let metric_costs: Vec<MetricResult> = self
+            .bigram_metrics
+            .iter()
+            .map(|(weight, normalization, metric)| {
+                let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
+                MetricResult {
+                    name: metric.name().to_string(),
+                    cost,
+                    weight: *weight,
+                    normalization: normalization.clone(),
+                    message,
+                }
+            })
+            .collect();
 
         metric_costs
     }
@@ -468,21 +465,20 @@ impl Evaluator {
         }
 
         let total_weight = keys.iter().map(|(_, w)| w).sum();
-        let mut metric_costs: Vec<MetricResult> = Vec::with_capacity(self.trigram_metrics.len());
-        metric_costs.extend(
-            self.trigram_metrics
-                .iter()
-                .map(|(weight, normalization, metric)| {
-                    let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
-                    MetricResult {
-                        name: metric.name().to_string(),
-                        cost,
-                        weight: *weight,
-                        normalization: normalization.clone(),
-                        message,
-                    }
-                }),
-        );
+        let metric_costs: Vec<MetricResult> = self
+            .trigram_metrics
+            .iter()
+            .map(|(weight, normalization, metric)| {
+                let (cost, message) = metric.total_cost(keys, Some(total_weight), layout);
+                MetricResult {
+                    name: metric.name().to_string(),
+                    cost,
+                    weight: *weight,
+                    normalization: normalization.clone(),
+                    message,
+                }
+            })
+            .collect();
 
         metric_costs
     }
