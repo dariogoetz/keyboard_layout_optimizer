@@ -11,8 +11,8 @@ use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
 ///
-/// This type ist used as key for hashmaps in unigrams, bigrams, and trigrams and
-/// thus directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
+/// This type is used as the key for hashmaps in unigrams, bigrams, and trigrams and thus
+/// directly impacts performance of the evaluation (hashing can take a large chunk of the computation time).
 /// Therefore, this is not a [`usize`] or larger.
 pub type LayerKeyIndex = u16;
 
@@ -112,19 +112,19 @@ impl Layout {
                     .enumerate()
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
-                        let layerkey = LayerKey::new(
+                        let used_layerkey_index = layerkey_index;
+
+                        layerkeys.push(LayerKey::new(
                             layer_id as u8,
                             key.clone(),
                             *c,
                             Vec::new(),
                             *fixed,
                             false,
-                        );
-                        layerkey_index += 1;
-                        layerkeys.push(layerkey);
+                        ));
                         layerkey_to_key_index.push(key_index as KeyIndex);
-
-                        layerkey_index - 1
+                        layerkey_index += 1;
+                        used_layerkey_index
                     })
                     .collect();
                 indices

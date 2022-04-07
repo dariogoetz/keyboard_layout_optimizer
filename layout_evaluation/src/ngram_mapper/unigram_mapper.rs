@@ -1,33 +1,43 @@
 //! This module provides an implementation of unigram mapping functionalities
 //! used by the [`OnDemandNgramMapper`].
 
-use super::on_demand_ngram_mapper::SplitModifiersConfig;
-use super::{common::*, UnigramIndices};
+use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Unigrams;
 
+use ahash::AHashMap;
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
-fn mapped_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
-    let mut unigram_keys = Vec::with_capacity(unigrams.grams.len());
+// Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
+// ones are used because they are smaller than a reference (u16 vs usize) and yield better
+// hashing performance.
+type UnigramIndices = AHashMap<LayerKeyIndex, f64>;
+type UnigramIndicesVec = Vec<(LayerKeyIndex, f64)>;
+
+/// Turns the [`Unigrams`]'s characters into their indices, returning a [`UnigramIndicesVec`].
+fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64) {
     let mut not_found_weight = 0.0;
-    unigrams
-        .grams
-        .iter()
-        //.filter(|(c, _weight)| !c.is_whitespace())
-        .for_each(|(c, weight)| {
-            let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
-                Some(idx) => idx,
-                None => {
-                    not_found_weight += *weight;
-                    return;
-                }
-            };
+    let mut unigrams_vec = Vec::with_capacity(unigrams.grams.len());
 
-            unigram_keys.push((layerkeyidx, *weight));
-        });
+    unigrams_vec.extend(
+        unigrams
+            .grams
+            .iter()
+            //.filter(|(c, _weight)| !c.is_whitespace())
+            .filter_map(|(c, weight)| {
+                let layerkeyidx = match layout.get_layerkey_index_for_symbol(c) {
+                    Some(idx) => idx,
+                    None => {
+                        not_found_weight += *weight;
+                        return None;
+                    }
+                };
 
-    (unigram_keys, not_found_weight)
+                Some((layerkeyidx, *weight))
+            }),
+    );
+
+    (unigrams_vec, not_found_weight)
 }
 
 /// Generates [`LayerKey`]-based unigrams from char-based unigrams. Optionally resolves modifiers
@@ -48,19 +58,21 @@ impl OnDemandUnigramMapper {
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
-        let (mut unigram_keys, not_found_weight) = mapped_unigrams(&self.unigrams, layout);
+        let (unigram_keys_vec, not_found_weight) = map_unigrams(&self.unigrams, layout);
 
-        if self.split_modifiers.enabled {
-            unigram_keys = Self::split_unigram_modifiers(&unigram_keys, layout);
-        }
+        let unigram_keys = if self.split_modifiers.enabled {
+            Self::split_unigram_modifiers(unigram_keys_vec, layout)
+        } else {
+            unigram_keys_vec.into_iter().collect()
+        };
 
-        let found_weight = unigram_keys.iter().map(|(_, w)| w).sum();
+        let found_weight: f64 = unigram_keys.values().sum();
 
         (unigram_keys, found_weight, not_found_weight)
     }
 
     /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]
-    pub fn layerkeys<'s>(
+    pub fn get_layerkeys<'s>(
         unigrams: &UnigramIndices,
         layout: &'s Layout,
     ) -> Vec<(&'s LayerKey, f64)> {
@@ -75,28 +87,30 @@ impl OnDemandUnigramMapper {
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
-    fn split_unigram_modifiers(unigrams: &UnigramIndices, layout: &Layout) -> UnigramIndices {
-        unigrams
-            .iter()
-            .flat_map(|(k, w)| {
-                let (base, mods) = layout.resolve_modifiers(k);
+    fn split_unigram_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
+        let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
+        unigrams.into_iter().for_each(|(k, w)| {
+            let (base, mods) = layout.resolve_modifiers(&k);
 
-                TakeOneLayerKey::new(base, &mods, *w).collect::<Vec<(LayerKeyIndex, f64)>>()
+            // Make sure we don't have any duplicate unigrams by adding them up.
+            TakeOneLayerKey::new(base, &mods, w)
+                .for_each(|(idx, w)| idx_w_map.insert_or_add_weight(idx, w));
 
-                // if base.symbol == ' ' {
-                // println!(
-                //     "{:>3} -> {}",
-                //     k.symbol.escape_debug().to_string(),
-                //     v.iter()
-                //         .map(|(t1, w)| format!(
-                //             "{:>3} (weight: {:>12.2}) ",
-                //             t1.symbol.escape_debug().to_string(),
-                //             w
-                //         ))
-                //         .collect::<String>(),
-                // );
-                // }
-            })
-            .collect()
+            // if base.symbol == ' ' {
+            // println!(
+            //     "{:>3} -> {}",
+            //     k.symbol.escape_debug().to_string(),
+            //     v.iter()
+            //         .map(|(t1, w)| format!(
+            //             "{:>3} (weight: {:>12.2}) ",
+            //             t1.symbol.escape_debug().to_string(),
+            //             w
+            //         ))
+            //         .collect::<String>(),
+            // );
+            // }
+        });
+
+        idx_w_map
     }
 }

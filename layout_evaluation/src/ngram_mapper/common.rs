@@ -1,7 +1,8 @@
 /// The `common` module provides utility functions for resolving modifiers in ngrams.
 use keyboard_layout::layout::LayerKeyIndex;
 
-use std::slice;
+use ahash::AHashMap;
+use std::{cmp::Eq, hash::Hash, slice};
 
 /// Iterator over unigrams of the base-layer key and each modifier.
 #[derive(Clone, Debug)]
@@ -424,3 +425,16 @@ impl<'a> TakeThreeLayerKey<'a> {
 
 //     res
 // }
+
+pub trait NgramMap<Ngram: Eq + Hash> {
+    /// Adds the ngram to the HashMap if it does not already exist.
+    /// If it does exist, simply add its weight to the preexisting weight.
+    fn insert_or_add_weight(&mut self, k: Ngram, v: f64);
+}
+
+impl<Ngram: Eq + Hash> NgramMap<Ngram> for AHashMap<Ngram, f64> {
+    #[inline(always)]
+    fn insert_or_add_weight(&mut self, k: Ngram, v: f64) {
+        *self.entry(k).or_insert(0.0) += v;
+    }
+}
