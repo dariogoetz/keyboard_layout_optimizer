@@ -26,37 +26,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: recursive
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
 
-      - uses: jetli/wasm-pack-action@v0.3.0
-        with:
-          # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-          version: 'latest'
 
-      - name: Build WASM
-        run: wasm-pack build --release
-        working-directory: ./webui/layout_evaluation_wasm
+    - uses: jetli/wasm-pack-action@v0.3.0
+      with:
+        # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
+        version: 'latest'
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
+    - name: Build WASM
+      run: wasm-pack build --release
+      working-directory: ./webui/layout_evaluation_wasm
 
-      - name: Install node packages
-        run: npm install
-        working-directory: ./webui/layout_evaluation_wasm/www
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
 
-      - name: Build Webpage
-        run: npm run build
-        working-directory: ./webui/layout_evaluation_wasm/www
+    - name: Install node packages
+      run: npm install
+      working-directory: ./webui/layout_evaluation_wasm/www
 
-      - name: Deploy to github pages
-        uses: JamesIves/github-pages-deploy-action@4.1.7
-        if: github.event_name != 'pull_request'
-        with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: ./webui/layout_evaluation_wasm/www/dist # The folder the action should deploy.
+    - name: Build Webpage
+      run: npm run build
+      working-directory: ./webui/layout_evaluation_wasm/www
+
+    - name: Deploy to github pages
+      uses: JamesIves/github-pages-deploy-action@4.1.7
+      if: github.event_name != 'pull_request'
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        folder: ./webui/layout_evaluation_wasm/www/dist # The folder the action should deploy.
 
   heroku-webpage:
     runs-on: ubuntu-latest
