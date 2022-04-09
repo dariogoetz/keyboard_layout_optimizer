@@ -50,7 +50,7 @@ impl From<EvaluationResult> for LayoutEvaluation {
     fn from(res: EvaluationResult) -> Self {
         Self {
             total_cost: res.total_cost(),
-            details: res.clone(),
+            details: res,
             printed: None,
             plot: None,
             layout: None,
@@ -63,7 +63,6 @@ pub struct LayoutPlotter {
     layout_generator: NeoLayoutGenerator,
 }
 
-#[wasm_bindgen]
 impl LayoutPlotter {
     pub fn new(layout_cfg_str: &str) -> Result<LayoutPlotter, JsValue> {
         utils::set_panic_hook();
@@ -73,8 +72,7 @@ impl LayoutPlotter {
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
 
-        let layout_generator =
-            NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
+        let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard);
 
         Ok(LayoutPlotter { layout_generator })
     }
@@ -93,7 +91,6 @@ pub struct NgramProvider {
     ngram_provider: OnDemandNgramMapper,
 }
 
-#[wasm_bindgen]
 impl NgramProvider {
     pub fn with_frequencies(
         eval_params_str: &str,
@@ -113,7 +110,7 @@ impl NgramProvider {
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
-        let ngram_mapper_config = eval_params.ngram_mapper.clone();
+        let ngram_mapper_config = eval_params.ngram_mapper;
 
         let ngram_provider =
             OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
@@ -125,9 +122,9 @@ impl NgramProvider {
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
-        let ngram_mapper_config = eval_params.ngram_mapper.clone();
+        let ngram_mapper_config = eval_params.ngram_mapper;
 
-        let ngram_provider = OnDemandNgramMapper::with_corpus(&text, ngram_mapper_config);
+        let ngram_provider = OnDemandNgramMapper::with_corpus(text, ngram_mapper_config);
 
         Ok(NgramProvider { ngram_provider })
     }
@@ -139,7 +136,6 @@ pub struct LayoutEvaluator {
     evaluator: Evaluator,
 }
 
-#[wasm_bindgen]
 impl LayoutEvaluator {
     pub fn new(
         layout_cfg_str: &str,
@@ -153,8 +149,7 @@ impl LayoutEvaluator {
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_cfg.keyboard));
 
-        let layout_generator =
-            NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard.clone());
+        let layout_generator = NeoLayoutGenerator::from_object(layout_cfg.base_layout, keyboard);
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
@@ -195,7 +190,7 @@ impl LayoutEvaluator {
 
     pub fn permutable_keys(&self) -> JsValue {
         let permutable_keys = self.layout_generator.permutable_keys();
-        return JsValue::from_serde(&permutable_keys).unwrap();
+        JsValue::from_serde(&permutable_keys).unwrap()
     }
 }
 
@@ -208,7 +203,6 @@ pub struct LayoutOptimizer {
     parameters: genevo_optimization::Parameters,
 }
 
-#[wasm_bindgen]
 impl LayoutOptimizer {
     pub fn new(
         layout_str: &str,
@@ -243,7 +237,7 @@ impl LayoutOptimizer {
     }
 
     pub fn parameters(&self) -> JsValue {
-        return JsValue::from_serde(&self.parameters).unwrap();
+        JsValue::from_serde(&self.parameters).unwrap()
     }
 
     pub fn step(&mut self) -> Result<JsValue, JsValue> {
@@ -255,13 +249,13 @@ impl LayoutOptimizer {
                     if best_solution.solution.fitness > king.0 {
                         self.all_time_best = Some((
                             best_solution.solution.fitness,
-                            best_solution.solution.genome.clone(),
+                            best_solution.solution.genome,
                         ));
                     }
                 } else {
                     self.all_time_best = Some((
                         best_solution.solution.fitness,
-                        best_solution.solution.genome.clone(),
+                        best_solution.solution.genome,
                     ));
                 }
 
@@ -278,14 +272,14 @@ impl LayoutOptimizer {
                 res.plot = plot;
                 res.layout = layout_str;
 
-                return Ok(JsValue::from_serde(&Some(res)).unwrap());
+                Ok(JsValue::from_serde(&Some(res)).unwrap())
             }
             Ok(SimResult::Final(_, _, _, _)) => {
-                return Ok(JsValue::from_serde(&None::<Option<EvaluationResult>>).unwrap());
+                Ok(JsValue::from_serde(&None::<Option<EvaluationResult>>).unwrap())
                 // break
             }
             Err(error) => {
-                return Err(format!("Error in optimization: {:?}", error))?;
+                return Err(format!("Error in optimization: {:?}", error).into());
                 // break
             }
         }
@@ -321,7 +315,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
             let t_js = JsValue::from(t_string);
             let _ = self.update_callback.call2(&this, &iter_js, &t_js);
         }
-        if state.is_best() && (&state.param != &state.prev_best_param) {
+        if state.is_best() && (state.param != state.prev_best_param) {
             let this = JsValue::null();
             let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
             let cost_js = JsValue::from(state.cost);
@@ -331,7 +325,6 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
     }
 }
 
-#[wasm_bindgen]
 pub fn sa_optimize(
     layout_str: &str,
     optimization_params_str: &str,
