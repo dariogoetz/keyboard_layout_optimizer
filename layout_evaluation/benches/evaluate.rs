@@ -25,7 +25,7 @@ pub struct NGramConfig {
 
 pub fn evaluate_bench(c: &mut Criterion) {
     let layout_config = LayoutConfig::from_yaml(LAYOUT_CONFIG)
-        .unwrap_or_else(|_| panic!("Could not load config file '/keyboard/standard.yml'"));
+        .unwrap_or_else(|e| panic!("Could not load config file '/keyboard/standard.yml': {}", e));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 

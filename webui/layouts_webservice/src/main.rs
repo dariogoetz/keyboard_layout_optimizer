@@ -85,7 +85,7 @@ fn rocket() -> _ {
     let mut layout_generators: AHashMap<String, NeoLayoutGenerator> = AHashMap::default();
     for (config_id, layout_config) in &options.layout_configs {
         let layout_config = LayoutConfig::from_yaml(&layout_config)
-            .expect(&format!("Could not load config file '{}'", &layout_config));
+            .map_err(|e| &format!("Could not load config file '{}': ", &layout_config, e));
 
         let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
         let layout_generator = NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard);

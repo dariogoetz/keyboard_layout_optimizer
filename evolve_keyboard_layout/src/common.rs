@@ -94,7 +94,7 @@ pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
 
 pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
     let layout_config = LayoutConfig::from_yaml(layout_config)
-        .unwrap_or_else(|_| panic!("Could not load config file {}", layout_config));
+        .unwrap_or_else(|e| panic!("Could not load config file {}: {}", layout_config, e));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
 
