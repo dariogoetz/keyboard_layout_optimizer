@@ -3,6 +3,7 @@ use super::Options;
 use keyboard_layout::layout_generator::NeoLayoutGenerator;
 use layout_evaluation::{evaluation::Evaluator, results::EvaluationResult};
 
+use ahash::AHashMap;
 use rocket::{
     fairing::{self, AdHoc},
     http::Status,
@@ -11,7 +12,6 @@ use rocket::{
     State, {Build, Rocket},
 };
 use rocket_db_pools::{sqlx, Connection, Database};
-use ahash::AHashMap;
 
 #[derive(Database)]
 #[database("sqlx")]
@@ -71,7 +71,7 @@ struct PostLayout {
 }
 
 #[options("/")]
-fn cors_preflight() -> () {}
+fn cors_preflight() {}
 
 #[post("/", data = "<layout>")]
 async fn post(
@@ -82,7 +82,7 @@ async fn post(
     config: &State<Options>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
     // check if highlight wants to be set without permission
-    let is_admin = config.secret == layout.secret.clone().unwrap_or("".to_string());
+    let is_admin = config.secret == layout.secret.clone().unwrap_or_else(|| "".to_string());
     let highlight = layout.highlight.unwrap_or(false);
     if highlight && !is_admin {
         return Err(Status::Forbidden);
@@ -92,7 +92,7 @@ async fn post(
     let layout_config = layout
         .layout_config
         .clone()
-        .unwrap_or(config.default_layout_config.to_owned());
+        .unwrap_or_else(|| config.default_layout_config.to_owned());
     let layout_generator = layout_generators
         .get(&layout_config)
         .ok_or(Status::BadRequest)?;
@@ -154,7 +154,7 @@ async fn list(
     config: &State<Options>,
     mut db: Connection<Db>,
 ) -> Result<Json<Vec<LayoutEvaluation>>> {
-    let layout_config = layout_config.unwrap_or(config.default_layout_config.to_owned());
+    let layout_config = layout_config.unwrap_or_else(|| config.default_layout_config.to_owned());
     let layouts = sqlx::query_as::<_, LayoutEvaluationDB>(
         "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight, layout_config FROM layouts WHERE layout_config = $1",
     )
@@ -180,7 +180,7 @@ async fn get(
     layout_generators: &State<AHashMap<String, NeoLayoutGenerator>>,
     config: &State<Options>,
 ) -> Result<Json<LayoutEvaluation>> {
-    let layout_config = layout_config.unwrap_or(config.default_layout_config.to_owned());
+    let layout_config = layout_config.unwrap_or_else(|| config.default_layout_config.to_owned());
     let layout_generator = layout_generators
         .get(&layout_config)
         .ok_or(Status::BadRequest)?;
@@ -215,7 +215,7 @@ async fn reeval(
     evaluator: &State<Evaluator>,
     config: &State<Options>,
 ) -> Result<()> {
-    let is_admin = config.secret == secret.to_string();
+    let is_admin = config.secret == *secret;
     if !is_admin {
         println!("Wrong password provided for re-evaluation.");
         return Err(Status::Unauthorized);
