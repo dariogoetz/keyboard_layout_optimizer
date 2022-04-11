@@ -3,7 +3,7 @@
 use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 
 use anyhow::Result;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 use serde::Deserialize;
 use std::fs::File;
 
@@ -33,6 +33,62 @@ pub struct KeyboardYAML {
     unbalancing_positions: Vec<Vec<f64>>,
     plot_template: String,
     plot_template_short: String,
+}
+
+impl KeyboardYAML {
+    /// Checks the [`KeyboardYAML`] for common errors.
+    pub fn validate(&self) -> Result<(), String> {
+        let flat_matrix_positions = self.matrix_positions.concat();
+        let flat_positions = self.positions.concat();
+
+        // Make sure that all settings that should have the same number of elements
+        // do in fact have the same number of elements.
+        let mut lengths = FxHashSet::default();
+        lengths.insert(flat_matrix_positions.len());
+        lengths.insert(flat_positions.len());
+        lengths.insert(self.hands.concat().len());
+        lengths.insert(self.fingers.concat().len());
+        lengths.insert(self.key_costs.concat().len());
+        lengths.insert(self.symmetries.concat().len());
+        lengths.insert(self.unbalancing_positions.concat().len());
+        if lengths.len() > 1 {
+            return Err(
+                "Not every description of the keyboard has the same number of keys.".to_string(),
+            );
+        }
+
+        // Make sure there's no duplicates in `matrix_positions`.
+        if flat_matrix_positions
+            .iter()
+            .enumerate()
+            .any(|(first_idx, checked_pos)| {
+                let last_idx = flat_matrix_positions
+                    .iter()
+                    .rposition(|pos2| pos2 == checked_pos)
+                    .unwrap();
+                first_idx != last_idx
+            })
+        {
+            return Err("Duplicate `matrix_positions` found.".to_string());
+        }
+
+        // Make sure there's no duplicates in `positions`.
+        if flat_positions
+            .iter()
+            .enumerate()
+            .any(|(first_idx, checked_pos)| {
+                let last_idx = flat_positions
+                    .iter()
+                    .rposition(|pos2| pos2 == checked_pos)
+                    .unwrap();
+                first_idx != last_idx
+            })
+        {
+            return Err("Duplicate `positions` found.".to_string());
+        }
+
+        Ok(())
+    }
 }
 
 impl Keyboard {

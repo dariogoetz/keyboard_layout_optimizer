@@ -34,6 +34,22 @@ pub struct BaseLayoutYAML {
     layer_costs: Vec<f64>,
 }
 
+impl BaseLayoutYAML {
+    /// Checks the [`KeyboardYAML`] for common errors.
+    pub fn validate(&self) -> Result<(), String> {
+        let flat_keys = self.keys.concat();
+        let flat_fixed_keys = self.fixed_keys.concat();
+
+        // Make sure that all settings that should have the same number of elements
+        // do in fact have the same number of elements.
+        if flat_keys.len() != flat_fixed_keys.len() {
+            return Err("There are not the same number of `keys` as there are fixed/permutable entries `fixed_keys`.".to_string());
+        }
+
+        Ok(())
+    }
+}
+
 /// Provides functionalities for generating Neo layout variants from given string representations
 /// of their base layer.
 #[derive(Clone, Debug)]

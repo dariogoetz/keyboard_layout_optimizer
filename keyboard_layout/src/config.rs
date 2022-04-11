@@ -3,6 +3,7 @@ use crate::layout_generator::BaseLayoutYAML;
 
 use anyhow::Result;
 use serde::Deserialize;
+use std::error::Error;
 use std::{fs::File, str::FromStr};
 
 #[derive(Deserialize, Debug)]
@@ -12,18 +13,26 @@ pub struct LayoutConfig {
 }
 
 impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self> {
+    pub fn from_yaml(filename: &str) -> Result<Self, Box<dyn Error>> {
         let f = File::open(filename)?;
         let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
+        cfg.validate()?;
 
         Ok(cfg)
+    }
+
+    pub fn validate(&self) -> Result<(), String> {
+        self.keyboard.validate()?;
+        self.base_layout.validate()?;
+        Ok(())
     }
 }
 
 impl FromStr for LayoutConfig {
-    type Err = serde_yaml::Error;
+    type Err = Box<dyn Error>;
     fn from_str(layout_config_str: &str) -> Result<Self, Self::Err> {
         let cfg: LayoutConfig = serde_yaml::from_str(layout_config_str)?;
+        cfg.validate()?;
 
         Ok(cfg)
     }
