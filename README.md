@@ -12,7 +12,7 @@ The corresponding webapp implementation is located in the `webui/layout_evaluati
 
 ## Webapp - Result Exploration
 
-Results can be published to and then explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
+Published results can be explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
 
 The corresponding webserver's implementation is located in the `webui/layouts_webservice` crate.
 
@@ -126,6 +126,9 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 ```
 
 #### Optimization Algorithms
+- To optimize a preexisting layout while keeping it similar to the original, [Artificial Bee Colony](#artificial-bee-colony-optimize_abcrs) optimization and [Genetic optimization](#genetic-algorithm-optimize_geneticrs) seem to be best suited.
+- [Simulated Annealing](#simulated-annealing-optimizesars) produces the best layouts from scratch.
+
 ##### Artificial Bee Colony (`optimize_abc.rs`)
 Currently, a few of the options available in the other binaries are not yet implemented for this optimization.
 
