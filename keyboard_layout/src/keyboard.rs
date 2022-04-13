@@ -35,6 +35,19 @@ pub struct KeyboardYAML {
     plot_template_short: String,
 }
 
+/// Takes a slice of some iterable and checks whether that iterable contains
+/// duplicates of any of its elements.
+fn contains_duplicates<T: PartialEq>(v: &[T]) -> bool {
+    // Cycle through all elements
+    v.iter().enumerate().any(|(first_idx, checked_pos)| {
+        // Get index of last element that is equal to `checked_pos`
+        let last_idx = v.iter().rposition(|pos| pos == checked_pos).unwrap();
+        // See if that last element is different from the first one,
+        // which would be a duplicate.
+        first_idx != last_idx
+    })
+}
+
 impl KeyboardYAML {
     /// Checks the [`KeyboardYAML`] for common errors.
     pub fn validate(&self) -> Result<(), String> {
@@ -53,37 +66,18 @@ impl KeyboardYAML {
         lengths.insert(self.unbalancing_positions.concat().len());
         if lengths.len() > 1 {
             return Err(
-                "Not every description of the keyboard has the same number of keys.".to_string(),
+                "Not every description of the keyboard contains the same number of keys."
+                    .to_string(),
             );
         }
 
-        // Make sure there's no duplicates in `matrix_positions`.
-        if flat_matrix_positions
-            .iter()
-            .enumerate()
-            .any(|(first_idx, checked_pos)| {
-                let last_idx = flat_matrix_positions
-                    .iter()
-                    .rposition(|pos2| pos2 == checked_pos)
-                    .unwrap();
-                first_idx != last_idx
-            })
-        {
+        // Make sure there are no duplicates in `matrix_positions`.
+        if contains_duplicates(&flat_matrix_positions) {
             return Err("Duplicate `matrix_positions` found.".to_string());
         }
 
-        // Make sure there's no duplicates in `positions`.
-        if flat_positions
-            .iter()
-            .enumerate()
-            .any(|(first_idx, checked_pos)| {
-                let last_idx = flat_positions
-                    .iter()
-                    .rposition(|pos2| pos2 == checked_pos)
-                    .unwrap();
-                first_idx != last_idx
-            })
-        {
+        // Make sure there are no duplicates in `positions`.
+        if contains_duplicates(&flat_positions) {
             return Err("Duplicate `positions` found.".to_string());
         }
 
