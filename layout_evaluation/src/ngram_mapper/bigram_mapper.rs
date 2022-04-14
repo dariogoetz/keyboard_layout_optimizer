@@ -12,7 +12,6 @@ use crate::ngrams::Bigrams;
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
 use ahash::AHashMap;
-use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
@@ -77,7 +76,7 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
-    pub initial_pause_indicators: FxHashSet<char>,
+    pub initial_pause_indicators: Vec<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -86,7 +85,7 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             enabled: true,
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
-            initial_pause_indicators: FxHashSet::default(),
+            initial_pause_indicators: Vec::default(),
         }
     }
 }

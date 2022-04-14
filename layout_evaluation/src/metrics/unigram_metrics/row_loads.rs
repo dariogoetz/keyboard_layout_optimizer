@@ -9,7 +9,7 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -35,7 +35,7 @@ impl UnigramMetric for RowLoads {
         _total_weight: Option<f64>,
         _layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut row_load: FxHashMap<u8, f64> = FxHashMap::default();
+        let mut row_load: AHashMap<u8, f64> = AHashMap::default();
         let mut total_weight = 0.0;
         unigrams
             .iter()

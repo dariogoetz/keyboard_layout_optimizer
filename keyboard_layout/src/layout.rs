@@ -5,8 +5,8 @@
 use crate::key::{Hand, Key};
 use crate::keyboard::{KeyIndex, Keyboard};
 
+use ahash::AHashMap;
 use anyhow::Result;
-use rustc_hash::FxHashMap;
 use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
@@ -78,7 +78,7 @@ pub struct Layout {
     /// generaten with that [`Key`]
     key_layers: Vec<Vec<LayerKeyIndex>>,
     /// Map for retrieving the [`LayerKey`] for the symbol it generates
-    key_map: FxHashMap<char, LayerKeyIndex>,
+    key_map: AHashMap<char, LayerKeyIndex>,
     /// Costs associated with each layer
     layer_costs: Vec<f64>,
 }
@@ -94,7 +94,7 @@ impl Layout {
         key_chars: Vec<Vec<char>>,
         fixed_keys: Vec<bool>,
         keyboard: Arc<Keyboard>,
-        modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
+        modifiers: Vec<AHashMap<Hand, Vec<char>>>,
         layer_costs: Vec<f64>,
     ) -> Result<Self> {
         // generate layer keys
@@ -135,10 +135,10 @@ impl Layout {
         let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
 
         // a map that resolvers the `modifiers` chars to LayerKeyIndex
-        let mut mod_map: Vec<FxHashMap<Hand, Vec<LayerKeyIndex>>> =
+        let mut mod_map: Vec<AHashMap<Hand, Vec<LayerKeyIndex>>> =
             Vec::with_capacity(modifiers.len());
         for mods_per_hand in modifiers.iter() {
-            let mut resolved_mods_per_hand = FxHashMap::default();
+            let mut resolved_mods_per_hand = AHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {
                 let mut resolved_mods = Vec::new();
                 for mc in mods.iter() {
@@ -182,8 +182,8 @@ impl Layout {
         })
     }
 
-    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> FxHashMap<char, LayerKeyIndex> {
-        let mut m = FxHashMap::default();
+    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> AHashMap<char, LayerKeyIndex> {
+        let mut m = AHashMap::default();
         layerkeys
             .iter()
             .enumerate()

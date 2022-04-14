@@ -9,7 +9,6 @@ use crate::results::NormalizationType;
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
-use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -19,7 +18,7 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
     /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
-    pub initial_pause_indicators: FxHashSet<char>,
+    pub initial_pause_indicators: Vec<char>,
 }
 
 #[derive(Clone, Debug)]
@@ -27,7 +26,7 @@ pub struct SecondaryBigrams {
     bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
     factor_no_handswitch: f64,
     factor_handswitch: f64,
-    initial_pause_indicators: FxHashSet<char>,
+    initial_pause_indicators: Vec<char>,
 }
 
 impl SecondaryBigrams {

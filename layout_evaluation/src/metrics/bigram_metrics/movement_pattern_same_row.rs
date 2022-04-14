@@ -5,7 +5,6 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
-use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Copy, Clone, Deserialize, Debug)]
@@ -18,7 +17,7 @@ pub struct FingerSwitchCost {
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     /// Rows to exclude for finger rolls
-    pub exclude_rows: FxHashSet<u8>,
+    pub exclude_rows: Vec<u8>,
     /// If to exclude bigrams containing keys with a positive "unbalancing" value
     pub exclude_unbalancing: bool,
     // If to exclude bigrams containing a lateral finger movement
@@ -29,7 +28,7 @@ pub struct Parameters {
 
 #[derive(Clone, Debug)]
 pub struct MovementPatternSameRow {
-    exclude_rows: FxHashSet<u8>,
+    exclude_rows: Vec<u8>,
     exclude_unbalancing: bool,
     exclude_lateral_finger_movement: bool,
     finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,

@@ -1,6 +1,6 @@
 //! This module provides structs for representing physical properties of keys in a keyboard
 
-use rustc_hash::FxHashMap;
+use ahash::AHashMap;
 use serde::Deserialize;
 use std::slice;
 
@@ -97,7 +97,7 @@ impl<T: Copy> HandMap<T> {
         Self([default; 2])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Hand, T>, default: T) -> Self {
+    pub fn with_hashmap(map: &AHashMap<Hand, T>, default: T) -> Self {
         let mut data = [default; 2];
         for (hand, elem) in map {
             data[*hand as usize] = *elem;
@@ -137,7 +137,7 @@ impl<T: Copy> FingerMap<T> {
         Self([default; 5])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Finger, T>, default: T) -> Self {
+    pub fn with_hashmap(map: &AHashMap<Finger, T>, default: T) -> Self {
         let mut data = [default; 5];
         for (finger, elem) in map {
             data[*finger as usize] = *elem;
@@ -167,7 +167,7 @@ impl<T: Copy> HandFingerMap<T> {
         Self([default; 10])
     }
 
-    pub fn with_hashmap(map: &FxHashMap<Hand, FxHashMap<Finger, T>>, default: T) -> Self {
+    pub fn with_hashmap(map: &AHashMap<Hand, AHashMap<Finger, T>>, default: T) -> Self {
         let mut data = [default; 10];
         for (hand, hand_map) in map {
             for (finger, elem) in hand_map {
