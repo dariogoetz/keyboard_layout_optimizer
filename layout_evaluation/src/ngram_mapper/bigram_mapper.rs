@@ -76,8 +76,8 @@ pub struct SecondaryBigramsFromTrigramsConfig {
     pub factor_no_handswitch: f64,
     /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
     pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams containing at least one of the given symbols
-    pub exclude_containing: FxHashSet<char>,
+    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
+    pub initial_pause_indicators: FxHashSet<char>,
 }
 
 impl Default for SecondaryBigramsFromTrigramsConfig {
@@ -86,7 +86,7 @@ impl Default for SecondaryBigramsFromTrigramsConfig {
             enabled: true,
             factor_no_handswitch: 0.7,
             factor_handswitch: 0.8,
-            exclude_containing: FxHashSet::default(),
+            initial_pause_indicators: FxHashSet::default(),
         }
     }
 }
@@ -116,9 +116,14 @@ pub fn add_secondary_bigrams_from_trigrams(
             )
         })
         .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
-            !config.exclude_containing.contains(&layerkey1.symbol)
-                && !config.exclude_containing.contains(&layerkey2.symbol)
-                && !config.exclude_containing.contains(&layerkey3.symbol)
+            // Remove the trigrams where:
+            // 1. The first key is an `initial_pause_indicators`
+            // 2. The second key is a whitespace
+            // 3. The third key is a normal letter (= not a pause_indicator of any kind)
+            !config.initial_pause_indicators.contains(&layerkey1.symbol)
+                || layerkey2.symbol != ' '
+                || config.initial_pause_indicators.contains(&layerkey3.symbol)
+                || layerkey3.symbol == ' '
         })
         .for_each(
             |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
