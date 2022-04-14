@@ -2,8 +2,8 @@
 
 use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
 
+use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
-use rustc_hash::{FxHashMap, FxHashSet};
 use serde::Deserialize;
 use std::fs::File;
 
@@ -56,7 +56,7 @@ impl KeyboardYAML {
 
         // Make sure that all settings that should have the same number of elements
         // do in fact have the same number of elements.
-        let mut lengths = FxHashSet::default();
+        let mut lengths = AHashSet::default();
         lengths.insert(flat_matrix_positions.len());
         lengths.insert(flat_positions.len());
         lengths.insert(self.hands.concat().len());
@@ -138,7 +138,7 @@ impl Keyboard {
     pub fn plot(&self, key_labels: &[char]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: FxHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
+        let labels: AHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template, &labels).unwrap()
     }
 
@@ -146,7 +146,7 @@ impl Keyboard {
     pub fn plot_compact(&self, key_labels: &[char]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: FxHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
+        let labels: AHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template_short, &labels)
             .unwrap()
     }

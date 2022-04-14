@@ -5,8 +5,8 @@ use crate::key::Hand;
 use crate::keyboard::Keyboard;
 use crate::layout::Layout;
 
+use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
-use rustc_hash::{FxHashMap, FxHashSet};
 use serde::Deserialize;
 use std::{fs::File, iter::FromIterator, sync::Arc};
 use thiserror::Error;
@@ -30,7 +30,7 @@ pub struct BaseLayoutYAML {
     keys: Vec<Vec<Vec<String>>>,
     fixed_keys: Vec<Vec<bool>>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
+    modifiers: Vec<AHashMap<Hand, Vec<char>>>,
     layer_costs: Vec<f64>,
 }
 
@@ -56,9 +56,9 @@ impl BaseLayoutYAML {
 pub struct NeoLayoutGenerator {
     keys: Vec<Vec<char>>,
     fixed_keys: Vec<bool>,
-    permutable_key_map: FxHashMap<char, u8>,
+    permutable_key_map: AHashMap<char, u8>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<FxHashMap<Hand, Vec<char>>>,
+    modifiers: Vec<AHashMap<Hand, Vec<char>>>,
     layer_costs: Vec<f64>,
     keyboard: Arc<Keyboard>,
 }
@@ -79,7 +79,7 @@ impl NeoLayoutGenerator {
             .collect();
         let fixed_keys: Vec<bool> = base.fixed_keys.iter().flatten().cloned().collect();
 
-        let mut permutable_key_map: FxHashMap<char, u8> = FxHashMap::default();
+        let mut permutable_key_map: AHashMap<char, u8> = AHashMap::default();
         keys.iter()
             .zip(fixed_keys.iter())
             .enumerate()
@@ -174,14 +174,14 @@ impl NeoLayoutGenerator {
     pub fn generate(&self, layout_keys: &str) -> Result<Layout> {
         let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
 
-        let char_set: FxHashSet<char> = FxHashSet::from_iter(chars.clone());
-        let layout_set: FxHashSet<char> =
-            FxHashSet::from_iter(self.permutable_key_map.keys().cloned());
+        let char_set: AHashSet<char> = AHashSet::from_iter(chars.clone());
+        let layout_set: AHashSet<char> =
+            AHashSet::from_iter(self.permutable_key_map.keys().cloned());
 
         // Check for duplicate chars
         if char_set.len() != chars.len() {
-            let mut duplicates = FxHashSet::default();
-            let mut seen_chars = FxHashSet::default();
+            let mut duplicates = AHashSet::default();
+            let mut seen_chars = AHashSet::default();
             for char in chars.iter() {
                 if seen_chars.contains(char) {
                     duplicates.insert(*char);

@@ -5,7 +5,6 @@ use keyboard_layout::{
     layout::{LayerKey, Layout},
 };
 
-use rustc_hash::FxHashSet;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
@@ -15,14 +14,14 @@ pub struct Parameters {
     /// Factor to apply to a trigram's weight if the roll is going outwards
     pub factor_outward: f64,
     /// Rows to exclude for finger rolls
-    pub exclude_rows: FxHashSet<u8>,
+    pub exclude_rows: Vec<u8>,
 }
 
 #[derive(Clone, Debug)]
 pub struct TrigramRolls {
     factor_inward: f64,
     factor_outward: f64,
-    exclude_rows: FxHashSet<u8>,
+    exclude_rows: Vec<u8>,
 }
 
 impl TrigramRolls {
