@@ -63,6 +63,7 @@ pub struct LayoutPlotter {
     layout_generator: NeoLayoutGenerator,
 }
 
+#[wasm_bindgen]
 impl LayoutPlotter {
     pub fn new(layout_cfg_str: &str) -> Result<LayoutPlotter, JsValue> {
         utils::set_panic_hook();
@@ -91,6 +92,7 @@ pub struct NgramProvider {
     ngram_provider: OnDemandNgramMapper,
 }
 
+#[wasm_bindgen]
 impl NgramProvider {
     pub fn with_frequencies(
         eval_params_str: &str,
@@ -136,6 +138,7 @@ pub struct LayoutEvaluator {
     evaluator: Evaluator,
 }
 
+#[wasm_bindgen]
 impl LayoutEvaluator {
     pub fn new(
         layout_cfg_str: &str,
@@ -203,6 +206,7 @@ pub struct LayoutOptimizer {
     parameters: genevo_optimization::Parameters,
 }
 
+#[wasm_bindgen]
 impl LayoutOptimizer {
     pub fn new(
         layout_str: &str,
@@ -325,6 +329,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
     }
 }
 
+#[wasm_bindgen]
 pub fn sa_optimize(
     layout_str: &str,
     optimization_params_str: &str,
