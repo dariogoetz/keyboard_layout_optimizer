@@ -283,7 +283,7 @@ impl LayoutOptimizer {
                 // break
             }
             Err(error) => {
-                return Err(format!("Error in optimization: {:?}", error).into());
+                Err(format!("Error in optimization: {:?}", error).into())
                 // break
             }
         }
