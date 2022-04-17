@@ -334,7 +334,7 @@ metrics:
 
       # from: Finger for first symbol of the bigram
       # to: Finger for second symbol of the bigram
-      # factor: Factor to apply for such a movement
+      # cost: Factor to apply for such a movement
       finger_switch_costs:
         - { from: [Left, Pinky],   to: [Left, Ring],    cost: 0.1 }
         - { from: [Left, Pinky],   to: [Left, Middle],  cost: 0.5 }
