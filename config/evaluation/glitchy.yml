@@ -10,7 +10,7 @@ metrics:
       value: 1.0
     params:
       # symbols that shall be considered "shortcut keys"
-      shortcut_chars: cvxzy
+      shortcut_chars: cvxz
       cost: 1.0
       within_n_leftmost_cols: 5
 
@@ -34,10 +34,10 @@ metrics:
             - ["a", "ä"]
             - ["o", "ö"]
             - ["u", "ü"]
-        - same_key_cost: 0.5
-          neighboring_cost: 0.5
+        - same_key_cost: 0.7
+          neighboring_cost: 0.7
           same_column_cost: 0.9
-          symmetric_cost: 0.7
+          symmetric_cost: 0.8
           letter_pairs:
             # Similar letters
             - ["g", "k"]
