@@ -13,29 +13,14 @@ pub struct MatrixPosition(
     pub u8,
 );
 
-impl MatrixPosition {
-    /// Euclidean distance to another row/column position on the keyboard
-    pub fn distance(&self, other: &MatrixPosition) -> f64 {
-        (0.5 * (self.0 as f64 - other.0 as f64).powi(2) + (self.1 as f64 - other.1 as f64).powi(2))
-            .sqrt()
-    }
-}
-
 /// 2D position on the keyboard
 #[derive(Clone, Copy, Deserialize, PartialEq, Debug)]
 pub struct Position(
-    /// Horizontal positioning (~Column)
+    /// Horizontal positioning
     pub f64,
-    /// Vertical positioning (~Row)
+    /// Vertical positioning
     pub f64,
 );
-
-impl Position {
-    /// Euclidean distance to another row/column position on the keyboard
-    pub fn distance(&self, other: &Position) -> f64 {
-        (0.5 * (self.0 - other.0).powi(2) + (self.1 - other.1).powi(2)).sqrt()
-    }
-}
 
 impl Default for Position {
     fn default() -> Self {
