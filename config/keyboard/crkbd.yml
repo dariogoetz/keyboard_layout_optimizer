@@ -110,8 +110,6 @@ base_layout:
       - ["⏎"]
       - [" ", " ", " ", "0", " ", " "]
       - ["⇙"]
-      - [""]
-      - [""]
 
   fixed_keys:
     - [ false, false, false, false, false, false,                  false, false, false, false, false, false]
