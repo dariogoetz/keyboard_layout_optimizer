@@ -54,10 +54,10 @@ impl BigramMetric for FingerRepeatsLateral {
             return Some(0.0);
         }
 
-        Some(
-            (1.0 + self.unbalancing_factor * k1.key.unbalancing)
-                * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
-                * weight,
-        )
+        let cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing)
+            * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
+            * weight;
+
+        Some(cost)
     }
 }
