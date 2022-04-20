@@ -68,7 +68,6 @@ impl BigramMetric for FingerRepeatsTopBottom {
         total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        let critical_point = self.critical_fraction * total_weight;
         if k1 == k2
             || k1.key.hand != k2.key.hand
             || k1.key.finger != k2.key.finger
@@ -80,6 +79,7 @@ impl BigramMetric for FingerRepeatsTopBottom {
             return Some(0.0);
         }
 
+        let critical_point = self.critical_fraction * total_weight;
         let mut cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing)
             * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
             * weight;
