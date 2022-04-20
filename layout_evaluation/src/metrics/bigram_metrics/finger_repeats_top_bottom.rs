@@ -84,7 +84,8 @@ impl BigramMetric for FingerRepeatsTopBottom {
             * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
             * weight;
 
-        // NOTE: In ArneBab's solution, increasing common repeats is done in a previous, separate step (in "finger_repeats_from_file")
+        // NOTE: In ArneBab's solution, increasing common repeats is done in a previous,
+        // separate step (in "finger_repeats_from_file")
 
         // reduce weight of index finger repeats
         if k1.key.finger == Finger::Pointer {
