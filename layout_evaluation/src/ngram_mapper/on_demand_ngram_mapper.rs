@@ -1,7 +1,7 @@
 //! This module provides an implementation of the [`NgramMapper`] trait.
 
 use super::bigram_mapper::{
-    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper, SecondaryBigramsFromTrigramsConfig,
+    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper
 };
 use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
@@ -27,8 +27,6 @@ pub struct SplitModifiersConfig {
 pub struct NgramMapperConfig {
     /// Parameters for the modifiers splitting process.
     pub split_modifiers: SplitModifiersConfig,
-    /// Parameters for adding secondary bigrams from trigrams.
-    pub secondary_bigrams_from_trigrams: SecondaryBigramsFromTrigramsConfig,
     /// Parameters for the increase in weight of common bigrams (with already high frequency).
     pub increase_common_bigrams: IncreaseCommonBigramsConfig,
     /// Exclude ngrams that contain a line break, followed by a non-line-break character
@@ -77,40 +75,36 @@ impl OnDemandNgramMapper {
 
 impl NgramMapper for OnDemandNgramMapper {
     fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
+        // TODO: first increase common ngrams
+        // TODO: then determine ngrams_found
+        // TODO: then split modifiers
+
         // map char-based unigrams to LayerKeyIndex
         let (unigram_key_indices, unigrams_found, unigrams_not_found) =
             self.unigram_mapper.layerkey_indices(layout);
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::get_layerkeys(&unigram_key_indices, layout);
 
-        // map trigrams before bigrams because secondary bigrams from trigrams map may be added
+        // map char-based bigrams to LayerKeyIndex
+        let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
+            .bigram_mapper
+            .layerkey_indices(layout, self.config.exclude_line_breaks);
+
+        // (if enabled) increase the weight of bigrams with high weight even higher
+        bigram_mapper::increase_common_bigrams(
+            &mut bigram_key_indices,
+            &self.config.increase_common_bigrams,
+        );
+        let bigrams_found = bigram_key_indices.values().sum();
+        // map LayerKeyIndex to &LayerKey
+        let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
+
         // map char-based trigrams to LayerKeyIndex
         let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
             .trigram_mapper
             .layerkey_indices(layout, self.config.exclude_line_breaks);
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::get_filtered_layerkeys(&trigram_key_indices, layout);
-
-        // map char-based bigrams to LayerKeyIndex
-        let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
-            .bigram_mapper
-            .layerkey_indices(layout, self.config.exclude_line_breaks);
-        // (if enabled) add bigrams consisting of first and third trigram symbols to vec of bigrams
-        bigram_mapper::add_secondary_bigrams_from_trigrams(
-            &mut bigram_key_indices,
-            &trigram_key_indices,
-            &self.config.secondary_bigrams_from_trigrams,
-            layout,
-        );
-        // (if enabled) increase the weight of bigrams with high weight even higher
-        bigram_mapper::increase_common_bigrams(
-            &mut bigram_key_indices,
-            &self.config.increase_common_bigrams,
-        );
-        // recompute total found bigram weight (after adding secondary bigrams and increasing weights)
-        let bigrams_found = bigram_key_indices.values().sum();
-        // map LayerKeyIndex to &LayerKey
-        let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
 
         // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
         // unigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());

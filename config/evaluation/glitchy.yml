@@ -483,21 +483,6 @@ ngram_mapper:
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
 
-  # Add secondary bigrams from trigrams to the pool of bigrams. Secondary bigrams contain the first
-  # and last key corresponding to a trigram.
-  secondary_bigrams_from_trigrams:
-    enabled: false
-    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
-    factor_no_handswitch: 0.7
-    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
-    factor_handswitch: 0.8
-    # Mental pauses:
-    # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
-    # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-    # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
-    # some kind of whitespace.
-    initial_pause_indicators: [",", "."]
-
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.
   increase_common_bigrams:

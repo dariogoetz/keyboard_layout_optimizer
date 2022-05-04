@@ -3,7 +3,7 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: true
+    enabled: false
     weight: 0.35
     normalization:
       type: fixed
@@ -16,7 +16,7 @@ metrics:
 
   # Pairs of keys that shall be placed in related positions to each other
   similar_letters:
-    enabled: true
+    enabled: false
     weight: 3.0
     normalization:
       type: fixed
@@ -48,7 +48,7 @@ metrics:
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
   similar_letter_groups:
-    enabled: true
+    enabled: false
     weight: 10.0
     normalization:
       type: fixed
@@ -268,7 +268,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 100.0
+    weight: 70.0
     normalization:
       type: weight_found
       value: 1.0
@@ -313,8 +313,8 @@ metrics:
         - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
 
   movement_pattern_same_row:
-    enabled: true
-    weight: 200.0
+    enabled: false
+    weight: 150.0
     normalization:
       type: weight_found
       value: 1.0
@@ -364,7 +364,7 @@ metrics:
   # depending on the distance to the first key is added.
   no_handswitch_after_unbalancing_key:
     enabled: true
-    weight: 18.0
+    weight: 60.0
     normalization:
       type: weight_found
       value: 1.0
@@ -473,21 +473,6 @@ ngram_mapper:
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
-
-  # Add secondary bigrams from trigrams to the pool of bigrams. Secondary bigrams contain the first
-  # and last key corresponding to a trigram.
-  secondary_bigrams_from_trigrams:
-    enabled: false
-    # Multiply the bigram's weight with this factor, if the trigram involves no handswitch
-    factor_no_handswitch: 0.7
-    # Multiply the bigram's weight with this factor, if the trigram involves a handswitch
-    factor_handswitch: 0.8
-    # Mental pauses:
-    # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
-    # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
-    # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
-    # some kind of whitespace.
-    initial_pause_indicators: [",", "."]
 
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.

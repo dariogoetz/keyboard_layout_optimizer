@@ -4,7 +4,6 @@
 //! Note: In contrast to ArneBab's algorithm, here all trigrams will be used
 //! for secondary bigrams. Not only those that lead to same-hand bigrams.
 
-use super::trigram_mapper::TrigramIndices;
 use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
@@ -66,78 +65,6 @@ pub fn increase_common_bigrams(
     });
 }
 
-/// Configuration parameters for adding secondary bigrams from trigrams.
-#[derive(Debug, Clone, Deserialize)]
-pub struct SecondaryBigramsFromTrigramsConfig {
-    /// Whether to add secondary bigrams from trigrams.
-    pub enabled: bool,
-    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves no handswitch.
-    pub factor_no_handswitch: f64,
-    /// Factor to apply to a trigram's weight before assigning it to the secondary bigram if the trigram involves a handswitch.
-    pub factor_handswitch: f64,
-    /// Exclude secondary bigrams for trigrams starting with at least one of the given symbols.
-    pub initial_pause_indicators: Vec<char>,
-}
-
-impl Default for SecondaryBigramsFromTrigramsConfig {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            factor_no_handswitch: 0.7,
-            factor_handswitch: 0.8,
-            initial_pause_indicators: Vec::default(),
-        }
-    }
-}
-
-/// Add secondary bigrams from the first and third symbol of a trigram (if they belong to the same hand).
-pub fn add_secondary_bigrams_from_trigrams(
-    bigram_keys: &mut BigramIndices,
-    trigram_keys: &TrigramIndices,
-    config: &SecondaryBigramsFromTrigramsConfig,
-    layout: &Layout,
-) {
-    if !config.enabled {
-        return;
-    }
-
-    // there are many duplicates in the secondary bigrams -> using a hashmap is cheaper
-    trigram_keys
-        .iter()
-        .map(|((idx1, idx2, idx3), w)| {
-            (
-                (
-                    (idx1, layout.get_layerkey(idx1)),
-                    (idx2, layout.get_layerkey(idx2)),
-                    (idx3, layout.get_layerkey(idx3)),
-                ),
-                w,
-            )
-        })
-        .filter(|(((_, layerkey1), (_, layerkey2), (_, layerkey3)), _)| {
-            // Remove the trigrams where:
-            // 1. The first key is an `initial_pause_indicators`
-            // 2. The second key is a whitespace
-            // 3. The third key is a normal letter (= not a pause_indicator of any kind)
-            !config.initial_pause_indicators.contains(&layerkey1.symbol)
-                || layerkey2.symbol != ' '
-                || config.initial_pause_indicators.contains(&layerkey3.symbol)
-                || layerkey3.symbol == ' '
-        })
-        .for_each(
-            |(((idx1, layerkey1), (_, layerkey2), (idx3, layerkey3)), weight)| {
-                let factor = if layerkey1.key.hand == layerkey2.key.hand
-                    && layerkey2.key.hand == layerkey3.key.hand
-                {
-                    config.factor_no_handswitch
-                } else {
-                    config.factor_handswitch
-                };
-
-                bigram_keys.insert_or_add_weight((*idx1, *idx3), *weight * factor);
-            },
-        );
-}
 
 /// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndicesVec`].
 fn map_bigrams(
