@@ -52,9 +52,9 @@ pub struct Options {
     #[clap(long)]
     pub no_split_modifiers: bool,
 
-    /// Do not increase weight of common bigrams
+    /// Do not increase weight of common ngrams
     #[clap(long)]
-    pub no_increase_common_bigrams: bool,
+    pub no_increase_common_ngrams: bool,
 }
 
 #[derive(Parser, Debug)]
@@ -117,8 +117,8 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     if options.no_split_modifiers {
         ngram_mapper_config.split_modifiers.enabled = false;
     }
-    if options.no_increase_common_bigrams {
-        ngram_mapper_config.increase_common_bigrams.enabled = false;
+    if options.no_increase_common_ngrams {
+        ngram_mapper_config.increase_common_ngrams.enabled = false;
     }
 
     let ngram_provider = match text {

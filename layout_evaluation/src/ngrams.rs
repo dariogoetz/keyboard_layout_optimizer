@@ -6,11 +6,57 @@ use crate::ngram_mapper::common::NgramMap;
 
 use ahash::AHashMap;
 use anyhow::Result;
+use serde::Deserialize;
 use std::{
     fs::{self, create_dir_all, File},
     io::{BufWriter, Write},
     path::Path,
 };
+
+/// Configuration parameters for process of increasing the weight of common ngrams.
+#[derive(Debug, Clone, Deserialize)]
+pub struct IncreaseCommonNgramsConfig {
+    /// Whether to increase the weight of common ngrams even further.
+    pub enabled: bool,
+    /// The critical fraction above which a ngram's weight will be increased.
+    pub critical_fraction: f64,
+    /// The slope with which the ngram's weight will be increased.
+    /// The increment is performed linearly starting from the critical fraction,
+    /// i.e. a ngram with weight equal the critical fraction is actually not affected.
+    pub factor: f64,
+    /// A minimum total weight (of all ngrams) that needs to be achieved. Otherwise no
+    /// increment takes place.
+    pub total_weight_threshold: f64,
+}
+
+impl Default for IncreaseCommonNgramsConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            critical_fraction: 0.001,
+            factor: 2.0,
+            total_weight_threshold: 20.0,
+        }
+    }
+}
+
+pub fn increase_common_ngrams<T>(
+    symbol_weights: &mut AHashMap<T, f64>,
+    config: &IncreaseCommonNgramsConfig,
+) {
+    if !config.enabled {
+        return;
+    }
+
+    let total_weight: f64 = symbol_weights.values().sum();
+    let critical_point = config.critical_fraction * total_weight;
+
+    symbol_weights.values_mut().for_each(|weight| {
+        if *weight > critical_point && total_weight > config.total_weight_threshold {
+            *weight += (*weight - critical_point) * (config.factor - 1.0);
+        }
+    });
+}
 
 /// Holds a hashmap of unigrams (single chars) with corresponding frequency (here often called "weight").
 #[derive(Clone, Debug)]
@@ -120,6 +166,12 @@ impl Unigrams {
 
         Ok(())
     }
+
+    pub fn increase_common(&self, params: &IncreaseCommonNgramsConfig) -> Self {
+        let mut grams = self.grams.clone();
+        increase_common_ngrams(&mut grams, params);
+        Self { grams }
+    }
 }
 
 /// Holds a hashmap of bigrams (two chars) with corresponding frequency (here often called "weight").
@@ -224,6 +276,12 @@ impl Bigrams {
         });
 
         Ok(())
+    }
+
+    pub fn increase_common(&self, params: &IncreaseCommonNgramsConfig) -> Self {
+        let mut grams = self.grams.clone();
+        increase_common_ngrams(&mut grams, params);
+        Self { grams }
     }
 }
 
@@ -339,5 +397,11 @@ impl Trigrams {
         });
 
         Ok(())
+    }
+
+    pub fn increase_common(&self, params: &IncreaseCommonNgramsConfig) -> Self {
+        let mut grams = self.grams.clone();
+        increase_common_ngrams(&mut grams, params);
+        Self { grams }
     }
 }

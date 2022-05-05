@@ -71,26 +71,23 @@ fn map_trigrams(
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandTrigramMapper {
-    trigrams: Trigrams,
     split_modifiers: SplitModifiersConfig,
 }
 
 impl OnDemandTrigramMapper {
-    pub fn new(trigrams: Trigrams, split_modifiers: SplitModifiersConfig) -> Self {
-        Self {
-            trigrams,
-            split_modifiers,
-        }
+    pub fn new(split_modifiers: SplitModifiersConfig) -> Self {
+        Self { split_modifiers }
     }
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
+        trigrams: &Trigrams,
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (TrigramIndices, f64, f64) {
         let (trigram_keys_vec, not_found_weight) =
-            map_trigrams(&self.trigrams, layout, exclude_line_breaks);
+            map_trigrams(trigrams, layout, exclude_line_breaks);
 
         let trigram_keys = if self.split_modifiers.enabled {
             self.split_trigram_modifiers(trigram_keys_vec, layout)

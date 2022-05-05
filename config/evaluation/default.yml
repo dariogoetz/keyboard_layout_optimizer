@@ -476,7 +476,7 @@ ngram_mapper:
 
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.
-  increase_common_bigrams:
+  increase_common_ngrams:
     enabled: false
     # Bigrams with a relative weight exceeding this threshold are considered
     critical_fraction: 0.001

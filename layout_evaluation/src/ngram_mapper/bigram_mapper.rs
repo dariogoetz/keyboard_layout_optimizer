@@ -11,60 +11,12 @@ use crate::ngrams::Bigrams;
 use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
 
 use ahash::AHashMap;
-use serde::Deserialize;
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
 // hashing performance.
 type BigramIndices = AHashMap<(LayerKeyIndex, LayerKeyIndex), f64>;
 type BigramIndicesVec = Vec<((LayerKeyIndex, LayerKeyIndex), f64)>;
-
-/// Configuration parameters for process of increasing the weight of common bigrams.
-#[derive(Debug, Clone, Deserialize)]
-pub struct IncreaseCommonBigramsConfig {
-    /// Whether to increase the weight of common bigrams even further.
-    pub enabled: bool,
-    /// The critical fraction above which a bigram's weight will be increased.
-    pub critical_fraction: f64,
-    /// The slope with which the bigram's weight will be increased.
-    /// The increment is performed linearly starting from the critical fraction,
-    /// i.e. a bigram with weight equal the critical fraction is actually not affected.
-    pub factor: f64,
-    /// A minimum total weight (of all bigrams) that needs to be achieved. Otherwise no
-    /// increment takes place.
-    pub total_weight_threshold: f64,
-}
-
-impl Default for IncreaseCommonBigramsConfig {
-    fn default() -> Self {
-        Self {
-            enabled: true,
-            critical_fraction: 0.001,
-            factor: 2.0,
-            total_weight_threshold: 20.0,
-        }
-    }
-}
-
-/// Increase the weight of bigrams that already have a weight exceeding a threshold even further.
-pub fn increase_common_bigrams(
-    bigram_keys: &mut BigramIndices,
-    config: &IncreaseCommonBigramsConfig,
-) {
-    if !config.enabled {
-        return;
-    }
-
-    let total_weight: f64 = bigram_keys.values().sum();
-    let critical_point = config.critical_fraction * total_weight;
-
-    bigram_keys.values_mut().for_each(|weight| {
-        if *weight > critical_point && total_weight > config.total_weight_threshold {
-            *weight += (*weight - critical_point) * (config.factor - 1.0);
-        }
-    });
-}
-
 
 /// Turns the [`Bigrams`]'s characters into their indices, returning a [`BigramIndicesVec`].
 fn map_bigrams(
@@ -112,26 +64,22 @@ fn map_bigrams(
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandBigramMapper {
-    bigrams: Bigrams,
     split_modifiers: SplitModifiersConfig,
 }
 
 impl OnDemandBigramMapper {
-    pub fn new(bigrams: Bigrams, split_modifiers: SplitModifiersConfig) -> Self {
-        Self {
-            bigrams,
-            split_modifiers,
-        }
+    pub fn new(split_modifiers: SplitModifiersConfig) -> Self {
+        Self { split_modifiers }
     }
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(
         &self,
+        bigrams: &Bigrams,
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (BigramIndices, f64, f64) {
-        let (bigram_keys_vec, not_found_weight) =
-            map_bigrams(&self.bigrams, layout, exclude_line_breaks);
+        let (bigram_keys_vec, not_found_weight) = map_bigrams(bigrams, layout, exclude_line_breaks);
 
         let bigram_keys = if self.split_modifiers.enabled {
             self.split_bigram_modifiers(bigram_keys_vec, layout)

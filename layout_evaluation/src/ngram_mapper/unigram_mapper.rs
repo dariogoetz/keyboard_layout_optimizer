@@ -44,21 +44,21 @@ fn map_unigrams(unigrams: &Unigrams, layout: &Layout) -> (UnigramIndicesVec, f64
 /// for higher-layer symbols of the layout.
 #[derive(Clone, Debug)]
 pub struct OnDemandUnigramMapper {
-    unigrams: Unigrams,
     split_modifiers: SplitModifiersConfig,
 }
 
 impl OnDemandUnigramMapper {
-    pub fn new(unigrams: Unigrams, split_modifiers: SplitModifiersConfig) -> Self {
-        Self {
-            unigrams,
-            split_modifiers,
-        }
+    pub fn new(split_modifiers: SplitModifiersConfig) -> Self {
+        Self { split_modifiers }
     }
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
-    pub fn layerkey_indices(&self, layout: &Layout) -> (UnigramIndices, f64, f64) {
-        let (unigram_keys_vec, not_found_weight) = map_unigrams(&self.unigrams, layout);
+    pub fn layerkey_indices(
+        &self,
+        unigrams: &Unigrams,
+        layout: &Layout,
+    ) -> (UnigramIndices, f64, f64) {
+        let (unigram_keys_vec, not_found_weight) = map_unigrams(unigrams, layout);
 
         let unigram_keys = if self.split_modifiers.enabled {
             Self::split_unigram_modifiers(unigram_keys_vec, layout)

@@ -1,13 +1,11 @@
 //! This module provides an implementation of the [`NgramMapper`] trait.
 
-use super::bigram_mapper::{
-    self, IncreaseCommonBigramsConfig, OnDemandBigramMapper
-};
+use super::bigram_mapper::OnDemandBigramMapper;
 use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
 use super::{MappedNgrams, NgramMapper};
 
-use crate::ngrams::{Bigrams, Trigrams, Unigrams};
+use crate::ngrams::{Bigrams, IncreaseCommonNgramsConfig, Trigrams, Unigrams};
 
 use keyboard_layout::layout::Layout;
 
@@ -27,8 +25,8 @@ pub struct SplitModifiersConfig {
 pub struct NgramMapperConfig {
     /// Parameters for the modifiers splitting process.
     pub split_modifiers: SplitModifiersConfig,
-    /// Parameters for the increase in weight of common bigrams (with already high frequency).
-    pub increase_common_bigrams: IncreaseCommonBigramsConfig,
+    /// Parameters for the increase in weight of common ngrams (with already high frequency).
+    pub increase_common_ngrams: IncreaseCommonNgramsConfig,
     /// Exclude ngrams that contain a line break, followed by a non-line-break character
     pub exclude_line_breaks: bool,
 }
@@ -36,6 +34,9 @@ pub struct NgramMapperConfig {
 /// Implements the [`NgramMapper`] trait for generating ngrams in terms of [`LayerKey`]s for a given [`Layout`].
 #[derive(Clone, Debug)]
 pub struct OnDemandNgramMapper {
+    unigrams: Unigrams,
+    bigrams: Bigrams,
+    trigrams: Trigrams,
     unigram_mapper: OnDemandUnigramMapper,
     bigram_mapper: OnDemandBigramMapper,
     trigram_mapper: OnDemandTrigramMapper,
@@ -51,9 +52,12 @@ impl OnDemandNgramMapper {
         config: NgramMapperConfig,
     ) -> Self {
         Self {
-            unigram_mapper: OnDemandUnigramMapper::new(unigrams, config.split_modifiers.clone()),
-            bigram_mapper: OnDemandBigramMapper::new(bigrams, config.split_modifiers.clone()),
-            trigram_mapper: OnDemandTrigramMapper::new(trigrams, config.split_modifiers.clone()),
+            unigrams,
+            bigrams,
+            trigrams,
+            unigram_mapper: OnDemandUnigramMapper::new(config.split_modifiers.clone()),
+            bigram_mapper: OnDemandBigramMapper::new(config.split_modifiers.clone()),
+            trigram_mapper: OnDemandTrigramMapper::new(config.split_modifiers.clone()),
             config,
         }
     }
@@ -65,44 +69,51 @@ impl OnDemandNgramMapper {
         let trigrams = Trigrams::from_text(text).expect("Could not generate trigrams from text.");
 
         Self {
-            unigram_mapper: OnDemandUnigramMapper::new(unigrams, config.split_modifiers.clone()),
-            bigram_mapper: OnDemandBigramMapper::new(bigrams, config.split_modifiers.clone()),
-            trigram_mapper: OnDemandTrigramMapper::new(trigrams, config.split_modifiers.clone()),
+            unigrams,
+            bigrams,
+            trigrams,
+            unigram_mapper: OnDemandUnigramMapper::new(config.split_modifiers.clone()),
+            bigram_mapper: OnDemandBigramMapper::new(config.split_modifiers.clone()),
+            trigram_mapper: OnDemandTrigramMapper::new(config.split_modifiers.clone()),
             config,
         }
     }
 }
 
+// TODO: implement function (generic over ngrams) that increases common ngrams before splitting
+// TODO: implement a variant with simple quadratic behavior
+
 impl NgramMapper for OnDemandNgramMapper {
     fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
-        // TODO: first increase common ngrams
-        // TODO: then determine ngrams_found
-        // TODO: then split modifiers
+        let unigrams = self
+            .unigrams
+            .increase_common(&self.config.increase_common_ngrams);
 
         // map char-based unigrams to LayerKeyIndex
         let (unigram_key_indices, unigrams_found, unigrams_not_found) =
-            self.unigram_mapper.layerkey_indices(layout);
+            self.unigram_mapper.layerkey_indices(&unigrams, layout);
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::get_layerkeys(&unigram_key_indices, layout);
 
+        let bigrams = self
+            .bigrams
+            .increase_common(&self.config.increase_common_ngrams);
         // map char-based bigrams to LayerKeyIndex
-        let (mut bigram_key_indices, _bigrams_found, bigrams_not_found) = self
+        let (bigram_key_indices, _bigrams_found, bigrams_not_found) = self
             .bigram_mapper
-            .layerkey_indices(layout, self.config.exclude_line_breaks);
+            .layerkey_indices(&bigrams, layout, self.config.exclude_line_breaks);
 
-        // (if enabled) increase the weight of bigrams with high weight even higher
-        bigram_mapper::increase_common_bigrams(
-            &mut bigram_key_indices,
-            &self.config.increase_common_bigrams,
-        );
         let bigrams_found = bigram_key_indices.values().sum();
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
 
+        let trigrams = self
+            .trigrams
+            .increase_common(&self.config.increase_common_ngrams);
         // map char-based trigrams to LayerKeyIndex
         let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
             .trigram_mapper
-            .layerkey_indices(layout, self.config.exclude_line_breaks);
+            .layerkey_indices(&trigrams, layout, self.config.exclude_line_breaks);
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::get_filtered_layerkeys(&trigram_key_indices, layout);
 
