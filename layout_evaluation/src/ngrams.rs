@@ -13,6 +13,16 @@ use std::{
     path::Path,
 };
 
+
+
+/// Configuration parameters for ngram processing
+#[derive(Debug, Clone, Deserialize)]
+pub struct NgramsConfig {
+    /// Parameters for the increase in weight of common ngrams (with already high frequency).
+    pub increase_common_ngrams: IncreaseCommonNgramsConfig,
+}
+
+
 /// Configuration parameters for process of increasing the weight of common ngrams.
 #[derive(Debug, Clone, Deserialize)]
 pub struct IncreaseCommonNgramsConfig {

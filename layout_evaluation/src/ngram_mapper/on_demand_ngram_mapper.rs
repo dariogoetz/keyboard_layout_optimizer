@@ -5,7 +5,7 @@ use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
 use super::{MappedNgrams, NgramMapper};
 
-use crate::ngrams::{Bigrams, IncreaseCommonNgramsConfig, Trigrams, Unigrams};
+use crate::ngrams::{Bigrams, Trigrams, Unigrams};
 
 use keyboard_layout::layout::Layout;
 
@@ -25,8 +25,6 @@ pub struct SplitModifiersConfig {
 pub struct NgramMapperConfig {
     /// Parameters for the modifiers splitting process.
     pub split_modifiers: SplitModifiersConfig,
-    /// Parameters for the increase in weight of common ngrams (with already high frequency).
-    pub increase_common_ngrams: IncreaseCommonNgramsConfig,
     /// Exclude ngrams that contain a line break, followed by a non-line-break character
     pub exclude_line_breaks: bool,
 }

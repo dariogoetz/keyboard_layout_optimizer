@@ -1,5 +1,5 @@
 use crate::{
-    evaluation::MetricParameters, ngram_mapper::on_demand_ngram_mapper::NgramMapperConfig,
+    evaluation::MetricParameters, ngram_mapper::on_demand_ngram_mapper::NgramMapperConfig, ngrams::NgramsConfig,
 };
 
 use anyhow::Result;
@@ -9,6 +9,7 @@ use std::{fs::File, str::FromStr};
 #[derive(Clone, Deserialize, Debug)]
 pub struct EvaluationParameters {
     pub metrics: MetricParameters,
+    pub ngrams: NgramsConfig,
     pub ngram_mapper: NgramMapperConfig,
 }
 

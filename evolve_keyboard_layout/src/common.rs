@@ -117,8 +117,10 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
     if options.no_split_modifiers {
         ngram_mapper_config.split_modifiers.enabled = false;
     }
+
+    let mut ngrams_config = eval_params.ngrams.clone();
     if options.no_increase_common_ngrams {
-        ngram_mapper_config.increase_common_ngrams.enabled = false;
+        ngrams_config.increase_common_ngrams.enabled = false;
     }
 
     let (unigrams, bigrams, trigrams) = match text {
@@ -149,9 +151,9 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
         }
     };
 
-    let mut unigrams = unigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
-    let mut bigrams = bigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
-    let mut trigrams = trigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
+    let mut unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
+    let mut bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
+    let mut trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
 
     if let Some(tops) = options.tops {
         unigrams = unigrams.tops(tops);
