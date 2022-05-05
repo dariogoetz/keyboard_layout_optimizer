@@ -123,7 +123,7 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
         ngrams_config.increase_common_ngrams.enabled = false;
     }
 
-    let (unigrams, bigrams, trigrams) = match text {
+    let (mut unigrams, mut bigrams, mut trigrams) = match text {
         Some(txt) => {
             let unigrams =
                 Unigrams::from_text(&txt).expect("Could not generate unigrams from text.");
@@ -151,9 +151,11 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
         }
     };
 
-    let mut unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
-    let mut bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
-    let mut trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
+    if ngrams_config.increase_common_ngrams.enabled {
+        unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
+    }
 
     if let Some(tops) = options.tops {
         unigrams = unigrams.tops(tops);
