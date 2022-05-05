@@ -53,11 +53,7 @@ impl OnDemandUnigramMapper {
     }
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
-    pub fn layerkey_indices(
-        &self,
-        unigrams: &Unigrams,
-        layout: &Layout,
-    ) -> (UnigramIndices, f64, f64) {
+    pub fn layerkey_indices(&self, unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
         let (unigram_keys_vec, not_found_weight) = map_unigrams(unigrams, layout);
 
         let unigram_keys = if self.split_modifiers.enabled {
@@ -66,9 +62,7 @@ impl OnDemandUnigramMapper {
             unigram_keys_vec.into_iter().collect()
         };
 
-        let found_weight: f64 = unigram_keys.values().sum();
-
-        (unigram_keys, found_weight, not_found_weight)
+        (unigram_keys, not_found_weight)
     }
 
     /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`]

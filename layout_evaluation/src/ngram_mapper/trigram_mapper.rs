@@ -85,7 +85,7 @@ impl OnDemandTrigramMapper {
         trigrams: &Trigrams,
         layout: &Layout,
         exclude_line_breaks: bool,
-    ) -> (TrigramIndices, f64, f64) {
+    ) -> (TrigramIndices, f64) {
         let (trigram_keys_vec, not_found_weight) =
             map_trigrams(trigrams, layout, exclude_line_breaks);
 
@@ -95,9 +95,7 @@ impl OnDemandTrigramMapper {
             trigram_keys_vec.into_iter().collect()
         };
 
-        let found_weight: f64 = trigram_keys.values().sum();
-
-        (trigram_keys, found_weight, not_found_weight)
+        (trigram_keys, not_found_weight)
     }
 
     /// Resolve &[`LayerKey`] references for [`LayerKeyIndex`] and filters trigrams that contain

@@ -61,59 +61,35 @@ impl OnDemandNgramMapper {
             config,
         }
     }
-
-    /// Generate a [`OnDemandNgramMapper`] with a given corpus (text). Generates corresponding ngrams automatically.
-    pub fn with_corpus(text: &str, config: NgramMapperConfig) -> Self {
-        let unigrams = Unigrams::from_text(text).expect("Could not generate unigrams from text.");
-        let bigrams = Bigrams::from_text(text).expect("Could not generate bigrams from text.");
-        let trigrams = Trigrams::from_text(text).expect("Could not generate trigrams from text.");
-
-        Self {
-            unigrams,
-            bigrams,
-            trigrams,
-            unigram_mapper: OnDemandUnigramMapper::new(config.split_modifiers.clone()),
-            bigram_mapper: OnDemandBigramMapper::new(config.split_modifiers.clone()),
-            trigram_mapper: OnDemandTrigramMapper::new(config.split_modifiers.clone()),
-            config,
-        }
-    }
 }
 
-// TODO: implement function (generic over ngrams) that increases common ngrams before splitting
-// TODO: implement a variant with simple quadratic behavior
 
 impl NgramMapper for OnDemandNgramMapper {
     fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
-        let unigrams = self
-            .unigrams
-            .increase_common(&self.config.increase_common_ngrams);
-
         // map char-based unigrams to LayerKeyIndex
-        let (unigram_key_indices, unigrams_found, unigrams_not_found) =
-            self.unigram_mapper.layerkey_indices(&unigrams, layout);
+        let (unigram_key_indices, unigrams_not_found) =
+            self.unigram_mapper.layerkey_indices(&self.unigrams, layout);
+        let unigrams_found = self.unigrams.total_weight() - unigrams_not_found;
         // map LayerKeyIndex to &LayerKey
         let unigrams = OnDemandUnigramMapper::get_layerkeys(&unigram_key_indices, layout);
 
-        let bigrams = self
-            .bigrams
-            .increase_common(&self.config.increase_common_ngrams);
         // map char-based bigrams to LayerKeyIndex
-        let (bigram_key_indices, _bigrams_found, bigrams_not_found) = self
-            .bigram_mapper
-            .layerkey_indices(&bigrams, layout, self.config.exclude_line_breaks);
-
-        let bigrams_found = bigram_key_indices.values().sum();
+        let (bigram_key_indices, bigrams_not_found) = self.bigram_mapper.layerkey_indices(
+            &self.bigrams,
+            layout,
+            self.config.exclude_line_breaks,
+        );
+        let bigrams_found = self.bigrams.total_weight() - unigrams_not_found;
         // map LayerKeyIndex to &LayerKey
         let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
 
-        let trigrams = self
-            .trigrams
-            .increase_common(&self.config.increase_common_ngrams);
         // map char-based trigrams to LayerKeyIndex
-        let (trigram_key_indices, trigrams_found, trigrams_not_found) = self
-            .trigram_mapper
-            .layerkey_indices(&trigrams, layout, self.config.exclude_line_breaks);
+        let (trigram_key_indices, trigrams_not_found) = self.trigram_mapper.layerkey_indices(
+            &self.trigrams,
+            layout,
+            self.config.exclude_line_breaks,
+        );
+        let trigrams_found = self.trigrams.total_weight() - unigrams_not_found;
         // map LayerKeyIndex to &LayerKey
         let trigrams = OnDemandTrigramMapper::get_filtered_layerkeys(&trigram_key_indices, layout);
 

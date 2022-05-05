@@ -78,7 +78,7 @@ impl OnDemandBigramMapper {
         bigrams: &Bigrams,
         layout: &Layout,
         exclude_line_breaks: bool,
-    ) -> (BigramIndices, f64, f64) {
+    ) -> (BigramIndices, f64) {
         let (bigram_keys_vec, not_found_weight) = map_bigrams(bigrams, layout, exclude_line_breaks);
 
         let bigram_keys = if self.split_modifiers.enabled {
@@ -87,8 +87,6 @@ impl OnDemandBigramMapper {
             bigram_keys_vec.into_iter().collect()
         };
 
-        let found_weight: f64 = bigram_keys.values().sum();
-
         // bigram_keys
         //     .iter()
         //     .filter(|((c1, c2), _)| c1.symbol == 'l' && c2.symbol == 'r')
@@ -96,7 +94,7 @@ impl OnDemandBigramMapper {
         //         println!("After split: {}", w);
         //     });
 
-        (bigram_keys, found_weight, not_found_weight)
+        (bigram_keys, not_found_weight)
     }
 
     /// Resolves &[`LayerKey`] references for [`LayerKeyIndex`] and filters bigrams that contain

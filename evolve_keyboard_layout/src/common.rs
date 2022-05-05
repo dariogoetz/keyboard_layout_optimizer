@@ -121,31 +121,46 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
         ngram_mapper_config.increase_common_ngrams.enabled = false;
     }
 
-    let ngram_provider = match text {
-        Some(txt) => OnDemandNgramMapper::with_corpus(&txt, ngram_mapper_config),
+    let (unigrams, bigrams, trigrams) = match text {
+        Some(txt) => {
+            let unigrams =
+                Unigrams::from_text(&txt).expect("Could not generate unigrams from text.");
+            let bigrams = Bigrams::from_text(&txt).expect("Could not generate bigrams from text.");
+            let trigrams =
+                Trigrams::from_text(&txt).expect("Could not generate trigrams from text.");
+
+            (unigrams, bigrams, trigrams)
+        }
         None => {
             let p = Path::new(&options.ngrams).join("1-grams.txt");
             log::info!("Reading unigram file: '{:?}'", p);
-            let mut unigrams = Unigrams::from_file(p.to_str().unwrap())
+            let unigrams = Unigrams::from_file(p.to_str().unwrap())
                 .unwrap_or_else(|_| panic!("Could not read 1-gramme file from '{:?}'.", &p));
             let p = Path::new(&options.ngrams).join("2-grams.txt");
             log::info!("Reading bigram file: '{:?}'", p);
-            let mut bigrams = Bigrams::from_file(p.to_str().unwrap())
+            let bigrams = Bigrams::from_file(p.to_str().unwrap())
                 .unwrap_or_else(|_| panic!("Could not read 2-gramme file from '{:?}'.", &p));
             let p = Path::new(&options.ngrams).join("3-grams.txt");
             log::info!("Reading trigram file: '{:?}'", p);
-            let mut trigrams = Trigrams::from_file(p.to_str().unwrap())
+            let trigrams = Trigrams::from_file(p.to_str().unwrap())
                 .unwrap_or_else(|_| panic!("Could not read 3-gramme file from '{:?}'.", &p));
 
-            if let Some(tops) = options.tops {
-                unigrams = unigrams.tops(tops);
-                bigrams = bigrams.tops(tops);
-                trigrams = trigrams.tops(tops);
-            }
-
-            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config)
+            (unigrams, bigrams, trigrams)
         }
     };
+
+    let mut unigrams = unigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
+    let mut bigrams = bigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
+    let mut trigrams = trigrams.increase_common(&ngram_mapper_config.increase_common_ngrams);
+
+    if let Some(tops) = options.tops {
+        unigrams = unigrams.tops(tops);
+        bigrams = bigrams.tops(tops);
+        trigrams = trigrams.tops(tops);
+    }
+
+    let ngram_provider =
+        OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
     Evaluator::default(Box::new(ngram_provider)).default_metrics(&eval_params.metrics)
 }
