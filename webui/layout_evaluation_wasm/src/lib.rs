@@ -101,19 +101,26 @@ impl NgramProvider {
         bigrams_str: &str,
         trigrams_str: &str,
     ) -> Result<NgramProvider, JsValue> {
-        let unigrams = Unigrams::from_frequencies_str(unigrams_str)
+        let mut unigrams = Unigrams::from_frequencies_str(unigrams_str)
             .map_err(|e| format!("Could not load unigrams: {:?}", e))?;
 
-        let bigrams = Bigrams::from_frequencies_str(bigrams_str)
+        let mut bigrams = Bigrams::from_frequencies_str(bigrams_str)
             .map_err(|e| format!("Could not load bigrams: {:?}", e))?;
 
-        let trigrams = Trigrams::from_frequencies_str(trigrams_str)
+        let mut trigrams = Trigrams::from_frequencies_str(trigrams_str)
             .map_err(|e| format!("Could not load trigrams: {:?}", e))?;
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
         let ngram_mapper_config = eval_params.ngram_mapper.clone();
+        let ngrams_config = eval_params.ngrams.clone();
+
+        if ngrams_config.increase_common_ngrams.enabled {
+            unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
+            bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
+            trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        }
 
         let ngram_provider =
             OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
@@ -122,12 +129,29 @@ impl NgramProvider {
     }
 
     pub fn with_text(eval_params_str: &str, text: &str) -> Result<NgramProvider, JsValue> {
+        let mut unigrams =
+            Unigrams::from_text(&text)
+                .map_err(|e| format!("Could not generate unigrams from text: {:?}", e))?;
+        let mut bigrams = Bigrams::from_text(&text)
+                .map_err(|e| format!("Could not generate bigrams from text: {:?}", e))?;
+        let mut trigrams =
+            Trigrams::from_text(&text)
+                .map_err(|e| format!("Could not generate trigrams from text: {:?}", e))?;
+
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
         let ngram_mapper_config = eval_params.ngram_mapper.clone();
+        let ngrams_config = eval_params.ngrams.clone();
 
-        let ngram_provider = OnDemandNgramMapper::with_corpus(&text, ngram_mapper_config);
+        if ngrams_config.increase_common_ngrams.enabled {
+            unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
+            bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
+            trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        }
+
+        let ngram_provider =
+            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
 
         Ok(NgramProvider { ngram_provider })
     }
