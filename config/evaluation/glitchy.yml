@@ -469,6 +469,18 @@ metrics:
       factor_outward: 0.2
       exclude_rows: [3]
 
+ngrams:
+  # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
+  # specified thresholds.
+  increase_common_bigrams:
+    enabled: false
+    # Bigrams with a relative weight exceeding this threshold are considered
+    critical_fraction: 0.001
+    # The weight for bigrams exceeding both thresholds is multiplied by this factor
+    factor: 2.0
+    # Bigrams with an absolute weight exceeding this threshold are considered
+    total_weight_threshold: 20.0
+
 ngram_mapper:
   # Exclude ngrams that contain a line break, followed by a non-line-break character.
   # This encodes a mental pause which usually comes after hitting the "Enter" key, before
@@ -482,14 +494,3 @@ ngram_mapper:
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
-
-  # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
-  # specified thresholds.
-  increase_common_bigrams:
-    enabled: false
-    # Bigrams with a relative weight exceeding this threshold are considered
-    critical_fraction: 0.001
-    # The weight for bigrams exceeding both thresholds is multiplied by this factor
-    factor: 2.0
-    # Bigrams with an absolute weight exceeding this threshold are considered
-    total_weight_threshold: 20.0
