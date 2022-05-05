@@ -61,7 +61,6 @@ impl OnDemandNgramMapper {
     }
 }
 
-
 impl NgramMapper for OnDemandNgramMapper {
     fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
         // map char-based unigrams to LayerKeyIndex

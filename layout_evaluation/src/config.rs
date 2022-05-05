@@ -1,5 +1,6 @@
 use crate::{
-    evaluation::MetricParameters, ngram_mapper::on_demand_ngram_mapper::NgramMapperConfig, ngrams::NgramsConfig,
+    evaluation::MetricParameters, ngram_mapper::on_demand_ngram_mapper::NgramMapperConfig,
+    ngrams::NgramsConfig,
 };
 
 use anyhow::Result;

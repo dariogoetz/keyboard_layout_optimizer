@@ -23,12 +23,6 @@ pub struct Parameters {
     pub pinky_finger_factor: f64,
     /// If some of the involved keys are unbalancing, add the unbalancing weight with this factor
     pub unbalancing_factor: f64,
-    /// If the bigram weight exceeds this fraction of the total weight, the additional factor is multiplied with the cost.
-    pub critical_fraction: f64,
-    /// The slope for increasing the cost if the bigram weight exceeds the threshold.
-    pub factor: f64,
-    /// The minimum total weight required for increasing the cost behind the threshold.
-    pub total_weight_threshold: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -36,9 +30,6 @@ pub struct FingerRepeatsTopBottom {
     index_finger_factor: f64,
     pinky_finger_factor: f64,
     unbalancing_factor: f64,
-    critical_fraction: f64,
-    factor: f64,
-    total_weight_threshold: f64,
 }
 
 impl FingerRepeatsTopBottom {
@@ -47,9 +38,6 @@ impl FingerRepeatsTopBottom {
             index_finger_factor: params.index_finger_factor,
             pinky_finger_factor: params.pinky_finger_factor,
             unbalancing_factor: params.unbalancing_factor,
-            critical_fraction: params.critical_fraction,
-            factor: params.factor,
-            total_weight_threshold: params.total_weight_threshold,
         }
     }
 }
@@ -65,7 +53,7 @@ impl BigramMetric for FingerRepeatsTopBottom {
         k1: &LayerKey,
         k2: &LayerKey,
         weight: f64,
-        total_weight: f64,
+        _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
         if k1 == k2
@@ -79,7 +67,6 @@ impl BigramMetric for FingerRepeatsTopBottom {
             return Some(0.0);
         }
 
-        let critical_point = self.critical_fraction * total_weight;
         let mut cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing)
             * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
             * weight;
@@ -94,11 +81,6 @@ impl BigramMetric for FingerRepeatsTopBottom {
         // increase weight of pinky finger repeats
         if k1.key.finger == Finger::Pinky {
             cost *= self.pinky_finger_factor;
-        }
-
-        // increase weight of common repeats
-        if cost > critical_point && total_weight > self.total_weight_threshold {
-            cost += (cost - critical_point) * (self.factor - 1.0);
         }
 
         Some(cost)
