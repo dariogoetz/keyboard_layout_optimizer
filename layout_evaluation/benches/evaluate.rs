@@ -37,20 +37,27 @@ pub fn evaluate_bench(c: &mut Criterion) {
 
     let p = Path::new(NGRAMS).join("1-grams.txt");
     log::info!("Reading unigram file: '{:?}'", p);
-    let unigrams = Unigrams::from_file(p.to_str().unwrap())
+    let mut unigrams = Unigrams::from_file(p.to_str().unwrap())
         .unwrap_or_else(|_| panic!("Could not read 1-gramme file from '{:?}'.", p));
 
     let p = Path::new(NGRAMS).join("2-grams.txt");
     log::info!("Reading bigram file: '{:?}'", p);
-    let bigrams = Bigrams::from_file(p.to_str().unwrap())
+    let mut bigrams = Bigrams::from_file(p.to_str().unwrap())
         .unwrap_or_else(|_| panic!("Could not read 2-gramme file from '{:?}'.", p));
 
     let p = Path::new(NGRAMS).join("3-grams.txt");
     log::info!("Reading trigram file: '{:?}'", p);
-    let trigrams = Trigrams::from_file(p.to_str().unwrap())
+    let mut trigrams = Trigrams::from_file(p.to_str().unwrap())
         .unwrap_or_else(|_| panic!("Could not read 3-gramme file from '{:?}'.", p));
 
     let ngram_mapper_config = eval_params.ngram_mapper.clone();
+    let ngrams_config = eval_params.ngrams.clone();
+
+    if ngrams_config.increase_common_ngrams.enabled {
+        unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
+        trigrams = trigrams.increase_common(&ngrams_config.increase_common_ngrams);
+    }
 
     let ngram_provider =
         OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
