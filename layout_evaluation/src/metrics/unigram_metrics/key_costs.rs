@@ -33,12 +33,17 @@ impl UnigramMetric for KeyCost {
         total_weight: f64,
         layout: &Layout,
     ) -> Option<f64> {
-        let cost = key.key.cost + layout.get_layer_cost(key.layer as usize);
+        let modifier_cost: f64 = key
+            .modifiers
+            .iter()
+            .map(|i| layout.get_layerkey(&i).key.cost)
+            .sum();
+        let cost = key.key.cost + modifier_cost;
 
         // log the top scorers (with weight > 1%)
         if weight > 0.01 * total_weight {
             log::trace!("Unigram: {:>3}, Finger: {:<13}, Weight: {:>12.2}, Cost per key: {:>8.4}, Cost: {:>14.4}",
-                        key.symbol.escape_debug().to_string(), format!("{:?} {:?}", key.key.hand, key.key.finger), weight, cost, weight * cost);
+                        key, format!("{:?} {:?}", key.key.hand, key.key.finger), weight, cost, weight * cost);
         }
 
         Some(weight * cost)

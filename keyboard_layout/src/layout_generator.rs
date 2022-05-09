@@ -1,7 +1,7 @@
 //! This module provides a layout generator that can generate Neo variant layouts
 //! from given string representations of its base layer.
 
-use crate::key::Hand;
+use crate::key::{Hand, MatrixPosition};
 use crate::keyboard::Keyboard;
 use crate::layout::Layout;
 
@@ -30,8 +30,7 @@ pub struct BaseLayoutYAML {
     keys: Vec<Vec<Vec<String>>>,
     fixed_keys: Vec<Vec<bool>>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<AHashMap<Hand, Vec<char>>>,
-    layer_costs: Vec<f64>,
+    modifiers: Vec<AHashMap<Hand, Vec<MatrixPosition>>>,
 }
 
 impl BaseLayoutYAML {
@@ -58,8 +57,7 @@ pub struct NeoLayoutGenerator {
     fixed_keys: Vec<bool>,
     permutable_key_map: AHashMap<char, u8>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<AHashMap<Hand, Vec<char>>>,
-    layer_costs: Vec<f64>,
+    modifiers: Vec<AHashMap<Hand, Vec<MatrixPosition>>>,
     keyboard: Arc<Keyboard>,
 }
 
@@ -96,7 +94,6 @@ impl NeoLayoutGenerator {
             permutable_key_map,
             fixed_layers: base.fixed_layers,
             modifiers: base.modifiers,
-            layer_costs: base.layer_costs,
             keyboard,
         }
     }
@@ -166,7 +163,6 @@ impl NeoLayoutGenerator {
             self.fixed_keys.clone(),
             self.keyboard.clone(),
             self.modifiers.clone(),
-            self.layer_costs.clone(),
         )
     }
 

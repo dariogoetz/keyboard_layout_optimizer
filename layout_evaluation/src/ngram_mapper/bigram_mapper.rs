@@ -169,13 +169,13 @@ impl OnDemandBigramMapper {
 
             // log::debug!(
             //     "{:>3}{:<3} -> {}",
-            //     k1.symbol.escape_debug().to_string(),
-            //     k2.symbol.escape_debug().to_string(),
+            //     k1,
+            //     k2,
             //     v.iter()
             //         .map(|((t1, t2), w)| format!(
             //             "{}{} (weight: {:>12.3}) ",
-            //             t1.symbol.escape_debug(),
-            //             t2.symbol.escape_debug(),
+            //             t1,
+            //             t2,
             //             w
             //         ))
             //         .collect::<String>(),

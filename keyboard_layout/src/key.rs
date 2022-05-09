@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::slice;
 
 /// Row and columnar location on the keyboard
-#[derive(Clone, Copy, Default, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Copy, Default, Deserialize, PartialEq, Eq, Hash, Debug)]
 pub struct MatrixPosition(
     /// Index of column
     pub u8,

@@ -2,10 +2,10 @@
 //! its relation to the individual keys required to generate the layout's symbols.
 //! These provide the core objects that are evaluated in the `layout_evaluation` crate.
 
-use crate::key::{Hand, Key};
+use crate::key::{Hand, Key, MatrixPosition};
 use crate::keyboard::{KeyIndex, Keyboard};
 
-use ahash::AHashMap;
+use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
 use std::{fmt, sync::Arc};
 
@@ -35,6 +35,16 @@ pub struct LayerKey {
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
     pub is_modifier: bool,
+}
+
+impl fmt::Display for LayerKey {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.is_modifier {
+            write!(f, "Mod({})", self.symbol.escape_debug().to_string())
+        } else {
+            write!(f, "{}", self.symbol.escape_debug().to_string())
+        }
+    }
 }
 
 impl LayerKey {
@@ -79,8 +89,6 @@ pub struct Layout {
     key_layers: Vec<Vec<LayerKeyIndex>>,
     /// Map for retrieving the [`LayerKey`] for the symbol it generates
     key_map: AHashMap<char, LayerKeyIndex>,
-    /// Costs associated with each layer
-    layer_costs: Vec<f64>,
 }
 
 impl fmt::Display for Layout {
@@ -94,10 +102,20 @@ impl Layout {
         key_chars: Vec<Vec<char>>,
         fixed_keys: Vec<bool>,
         keyboard: Arc<Keyboard>,
-        modifiers: Vec<AHashMap<Hand, Vec<char>>>,
-        layer_costs: Vec<f64>,
+        modifiers: Vec<AHashMap<Hand, Vec<MatrixPosition>>>,
     ) -> Result<Self> {
+        // collect all positions of modifier keys
+        let mut mod_positions: AHashSet<MatrixPosition> = AHashSet::default();
+        for mods_per_hand in modifiers.iter() {
+            for (_hand, mods) in mods_per_hand.iter() {
+                for mp in mods.iter() {
+                    mod_positions.insert(mp.clone());
+                }
+            }
+        }
+
         // generate layer keys
+        let mut mod_indices: AHashMap<MatrixPosition, LayerKeyIndex> = AHashMap::default();
         let mut layerkeys = Vec::new();
         let mut layerkey_to_key_index = Vec::new();
         let mut layerkey_index = 0;
@@ -112,6 +130,27 @@ impl Layout {
                     .enumerate()
                     .take(modifiers.len() + 1) // only consider layers for which a modifier is available
                     .map(|(layer_id, c)| {
+                        // if the current key is used as a modifier, add a corresponding layerkey
+                        if layer_id == 0 && mod_positions.contains(&key.matrix_position) {
+                            mod_indices
+                                .entry(key.matrix_position.clone())
+                                .or_insert_with(|| {
+                                    layerkeys.push(LayerKey::new(
+                                        0,
+                                        key.clone(),
+                                        *c,
+                                        Vec::new(),
+                                        *fixed,
+                                        true,
+                                    ));
+                                    layerkey_to_key_index.push(key_index as KeyIndex);
+
+                                    layerkey_index += 1;
+                                    layerkey_index - 1
+                                });
+                        }
+
+                        // add the actual new layerkey
                         layerkeys.push(LayerKey::new(
                             layer_id as u8,
                             key.clone(),
@@ -122,9 +161,8 @@ impl Layout {
                         ));
                         layerkey_to_key_index.push(key_index as KeyIndex);
 
-                        let old_layerkey_index = layerkey_index;
                         layerkey_index += 1;
-                        old_layerkey_index
+                        layerkey_index - 1
                     })
                     .collect();
 
@@ -132,25 +170,21 @@ impl Layout {
             })
             .collect();
 
-        let key_map = Self::gen_key_map(&layerkeys, &layer_costs);
-
         // a map that resolvers the `modifiers` chars to LayerKeyIndex
         let mut mod_map: Vec<AHashMap<Hand, Vec<LayerKeyIndex>>> =
             Vec::with_capacity(modifiers.len());
+
         for mods_per_hand in modifiers.iter() {
             let mut resolved_mods_per_hand = AHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {
                 let mut resolved_mods = Vec::new();
-                for mc in mods.iter() {
-                    let mod_idx = *key_map
-                        .get(mc)
-                        .ok_or(format!("Modifier '{}' is not a supported symbol", mc))
+                for mp in mods.iter() {
+                    let mod_idx = *mod_indices
+                        .get(mp)
+                        .ok_or(format!("Modifier position '{:?}' not a found", mp))
                         .map_err(anyhow::Error::msg)?;
 
                     resolved_mods.push(mod_idx);
-
-                    // flag this layerkey as modifier
-                    layerkeys[mod_idx as usize].is_modifier = true;
                 }
                 resolved_mods_per_hand.insert(*hand, resolved_mods);
             }
@@ -172,17 +206,18 @@ impl Layout {
             k.modifiers = mods;
         });
 
+        let key_map = Self::gen_key_map(&layerkeys);
+
         Ok(Self {
             layerkeys,
             key_layers,
             keyboard,
             layerkey_to_key_index,
             key_map,
-            layer_costs,
         })
     }
 
-    fn gen_key_map(layerkeys: &[LayerKey], layer_costs: &[f64]) -> AHashMap<char, LayerKeyIndex> {
+    fn gen_key_map(layerkeys: &[LayerKey]) -> AHashMap<char, LayerKeyIndex> {
         let mut m = AHashMap::default();
         layerkeys
             .iter()
@@ -192,10 +227,21 @@ impl Layout {
                 let entry = m.entry(layerkey.symbol).or_insert(new_layerkey_index);
                 let entry_layerkey = &layerkeys[*entry as usize]; // is layerkey or existing one from map m
 
+                let entry_modifier_cost: f64 = entry_layerkey
+                    .modifiers
+                    .iter()
+                    .map(|i| layerkeys[*i as usize].key.cost)
+                    .sum();
+
+                let new_modifier_cost: f64 = layerkey
+                    .modifiers
+                    .iter()
+                    .map(|i| layerkeys[*i as usize].key.cost)
+                    .sum();
+
                 // NOTE: In contrast to ArneBab's version, here the layer costs are not multiplied by 3
-                let entry_cost =
-                    entry_layerkey.key.cost + layer_costs[entry_layerkey.layer as usize];
-                let new_cost = layerkey.key.cost + layer_costs[layerkey.layer as usize];
+                let entry_cost = entry_layerkey.key.cost + entry_modifier_cost;
+                let new_cost = layerkey.key.cost + new_modifier_cost;
 
                 // if key already exists use the representation with lowest key cost
                 // if costs are identical, use lowest layer
@@ -242,12 +288,6 @@ impl Layout {
         let k = self.get_layerkey(k);
         let mods = k.modifiers.to_vec();
         (base, mods)
-    }
-
-    /// Get the cost that are associated with a layer
-    #[inline(always)]
-    pub fn get_layer_cost(&self, layer: usize) -> f64 {
-        *self.layer_costs.get(layer).unwrap_or(&0.0)
     }
 
     /// Plot a graphical representation of a layer

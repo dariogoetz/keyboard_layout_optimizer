@@ -101,9 +101,9 @@ impl TrigramMetric for TrigramRolls {
             (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing) * (1.0 + k3.key.unbalancing);
 
         // log::info!("trigram roll: {}{}{} -> {:4.3}",
-        //     k1.symbol.to_string().escape_debug(),
-        //     k2.symbol.to_string().escape_debug(),
-        //     k3.symbol.to_string().escape_debug(),
+        //     k1,
+        //     k2,
+        //     k3,
         //     cost.abs() * weight
         // );
 

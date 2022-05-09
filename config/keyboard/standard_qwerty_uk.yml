@@ -148,7 +148,5 @@ base_layout:
   fixed_layers: []
 
   modifiers:
-    - Left: ["⇧"]
-      Right: ["⇗"]
-
-  layer_costs: [0, 20]
+    - Left: [[0,3]]
+      Right: [[18,3]]

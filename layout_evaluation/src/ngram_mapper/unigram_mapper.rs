@@ -93,11 +93,11 @@ impl OnDemandUnigramMapper {
             // if base.symbol == ' ' {
             // println!(
             //     "{:>3} -> {}",
-            //     k.symbol.escape_debug().to_string(),
+            //     k,
             //     v.iter()
             //         .map(|(t1, w)| format!(
             //             "{:>3} (weight: {:>12.2}) ",
-            //             t1.symbol.escape_debug().to_string(),
+            //             t1,
             //             w
             //         ))
             //         .collect::<String>(),
