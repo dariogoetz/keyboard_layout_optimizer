@@ -485,7 +485,7 @@ impl Evaluator {
 
     /// Evaluate all metrics for a layout.
     pub fn evaluate_layout(&self, layout: &Layout) -> EvaluationResult {
-        let mapped_ngrams = self.ngram_mapper.map_ngrams(layout);
+        let mut results: Vec<MetricResults> = Vec::new();
 
         // Layout metrics
         let metric_costs = self.evaluate_layout_metrics(layout);
@@ -493,43 +493,56 @@ impl Evaluator {
         metric_costs
             .into_iter()
             .for_each(|mc| layout_costs.add_result(mc));
+        results.push(layout_costs);
 
         // Unigram metrics
-        let metric_costs = self.evaluate_unigram_metrics(layout, &mapped_ngrams.unigrams);
-        let mut unigram_costs = MetricResults::new(
-            MetricType::Unigram,
-            mapped_ngrams.unigrams_found,
-            mapped_ngrams.unigrams_not_found,
-        );
-        metric_costs
-            .into_iter()
-            .for_each(|mc| unigram_costs.add_result(mc));
+        if !self.unigram_metrics.is_empty() {
+            let mapped_unigrams = self.ngram_mapper.map_unigrams(layout);
+            let metric_costs = self.evaluate_unigram_metrics(layout, &mapped_unigrams.grams);
+            let mut unigram_costs = MetricResults::new(
+                MetricType::Unigram,
+                mapped_unigrams.weight_found,
+                mapped_unigrams.weight_not_found,
+            );
+            metric_costs
+                .into_iter()
+                .for_each(|mc| unigram_costs.add_result(mc));
+
+            results.push(unigram_costs);
+        }
 
         // Bigram metrics
-        let metric_costs = self.evaluate_bigram_metrics(layout, &mapped_ngrams.bigrams);
-        let mut bigram_costs = MetricResults::new(
-            MetricType::Bigram,
-            mapped_ngrams.bigrams_found,
-            mapped_ngrams.bigrams_not_found,
-        );
-        metric_costs
-            .into_iter()
-            .for_each(|mc| bigram_costs.add_result(mc));
+        if !self.bigram_metrics.is_empty() {
+            let mapped_bigrams = self.ngram_mapper.map_bigrams(layout);
+            let metric_costs = self.evaluate_bigram_metrics(layout, &mapped_bigrams.grams);
+            let mut bigram_costs = MetricResults::new(
+                MetricType::Bigram,
+                mapped_bigrams.weight_found,
+                mapped_bigrams.weight_not_found,
+            );
+            metric_costs
+                .into_iter()
+                .for_each(|mc| bigram_costs.add_result(mc));
+
+            results.push(bigram_costs);
+        }
 
         // Trigram metrics
-        let metric_costs = self.evaluate_trigram_metrics(layout, &mapped_ngrams.trigrams);
-        let mut trigram_costs = MetricResults::new(
-            MetricType::Trigram,
-            mapped_ngrams.trigrams_found,
-            mapped_ngrams.trigrams_not_found,
-        );
-        metric_costs
-            .into_iter()
-            .for_each(|mc| trigram_costs.add_result(mc));
+        if !self.trigram_metrics.is_empty() {
+            let mapped_trigrams = self.ngram_mapper.map_trigrams(layout);
+            let metric_costs = self.evaluate_trigram_metrics(layout, &mapped_trigrams.grams);
+            let mut trigram_costs = MetricResults::new(
+                MetricType::Trigram,
+                mapped_trigrams.weight_found,
+                mapped_trigrams.weight_not_found,
+            );
+            metric_costs
+                .into_iter()
+                .for_each(|mc| trigram_costs.add_result(mc));
 
-        EvaluationResult::new(
-            layout.as_text(),
-            vec![layout_costs, unigram_costs, bigram_costs, trigram_costs],
-        )
+            results.push(trigram_costs);
+        }
+
+        EvaluationResult::new(layout.as_text(), results)
     }
 }

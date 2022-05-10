@@ -3,7 +3,7 @@
 use super::bigram_mapper::OnDemandBigramMapper;
 use super::trigram_mapper::OnDemandTrigramMapper;
 use super::unigram_mapper::OnDemandUnigramMapper;
-use super::{MappedNgrams, NgramMapper};
+use super::{MappedBigrams, MappedTrigrams, MappedUnigrams, NgramMapper};
 
 use crate::ngrams::{Bigrams, Trigrams, Unigrams};
 
@@ -62,49 +62,54 @@ impl OnDemandNgramMapper {
 }
 
 impl NgramMapper for OnDemandNgramMapper {
-    fn map_ngrams<'s>(&self, layout: &'s Layout) -> MappedNgrams<'s> {
+    fn map_unigrams<'s>(&self, layout: &'s Layout) -> MappedUnigrams<'s> {
         // map char-based unigrams to LayerKeyIndex
-        let (unigram_key_indices, unigrams_not_found) =
+        let (key_indices, weight_not_found) =
             self.unigram_mapper.layerkey_indices(&self.unigrams, layout);
-        let unigrams_found = self.unigrams.total_weight() - unigrams_not_found;
+        let weight_found = self.unigrams.total_weight() - weight_not_found;
         // map LayerKeyIndex to &LayerKey
-        let unigrams = OnDemandUnigramMapper::get_layerkeys(&unigram_key_indices, layout);
+        let grams = OnDemandUnigramMapper::get_layerkeys(&key_indices, layout);
 
+        MappedUnigrams {
+            grams,
+            weight_not_found,
+            weight_found,
+        }
+    }
+
+    fn map_bigrams<'s>(&self, layout: &'s Layout) -> MappedBigrams<'s> {
         // map char-based bigrams to LayerKeyIndex
-        let (bigram_key_indices, bigrams_not_found) = self.bigram_mapper.layerkey_indices(
+        let (key_indices, weight_not_found) = self.bigram_mapper.layerkey_indices(
             &self.bigrams,
             layout,
             self.config.exclude_line_breaks,
         );
-        let bigrams_found = self.bigrams.total_weight() - unigrams_not_found;
+        let weight_found = self.bigrams.total_weight() - weight_not_found;
         // map LayerKeyIndex to &LayerKey
-        let bigrams = OnDemandBigramMapper::get_filtered_layerkeys(&bigram_key_indices, layout);
+        let grams = OnDemandBigramMapper::get_filtered_layerkeys(&key_indices, layout);
 
+        MappedBigrams {
+            grams,
+            weight_not_found,
+            weight_found,
+        }
+    }
+
+    fn map_trigrams<'s>(&self, layout: &'s Layout) -> MappedTrigrams<'s> {
         // map char-based trigrams to LayerKeyIndex
-        let (trigram_key_indices, trigrams_not_found) = self.trigram_mapper.layerkey_indices(
+        let (key_indices, weight_not_found) = self.trigram_mapper.layerkey_indices(
             &self.trigrams,
             layout,
             self.config.exclude_line_breaks,
         );
-        let trigrams_found = self.trigrams.total_weight() - unigrams_not_found;
+        let weight_found = self.trigrams.total_weight() - weight_not_found;
         // map LayerKeyIndex to &LayerKey
-        let trigrams = OnDemandTrigramMapper::get_filtered_layerkeys(&trigram_key_indices, layout);
+        let grams = OnDemandTrigramMapper::get_filtered_layerkeys(&key_indices, layout);
 
-        // sorting costs about 10% performance per evaluation and only gains some niceties in debugging
-        // unigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
-        // bigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
-        // trigrams.sort_by(|(_, w1), (_, w2)| w1.partial_cmp(&w2).unwrap());
-
-        MappedNgrams {
-            unigrams,
-            unigrams_found,
-            unigrams_not_found,
-            bigrams,
-            bigrams_found,
-            bigrams_not_found,
-            trigrams,
-            trigrams_found,
-            trigrams_not_found,
+        MappedTrigrams {
+            grams,
+            weight_not_found,
+            weight_found,
         }
     }
 }
