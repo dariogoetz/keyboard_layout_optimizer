@@ -102,19 +102,15 @@ impl NgramProvider {
     ) -> Result<NgramProvider, JsValue> {
         let mut unigrams = Unigrams::from_frequencies_str(unigrams_str)
             .map_err(|e| format!("Could not load unigrams: {:?}", e))?;
-
         let mut bigrams = Bigrams::from_frequencies_str(bigrams_str)
             .map_err(|e| format!("Could not load bigrams: {:?}", e))?;
-
         let mut trigrams = Trigrams::from_frequencies_str(trigrams_str)
             .map_err(|e| format!("Could not load trigrams: {:?}", e))?;
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
-        let ngram_mapper_config = eval_params.ngram_mapper;
-        let ngrams_config = eval_params.ngrams.clone();
-
+        let ngrams_config = eval_params.ngrams;
         if ngrams_config.increase_common_ngrams.enabled {
             unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
             bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
@@ -122,7 +118,7 @@ impl NgramProvider {
         }
 
         let ngram_provider =
-            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
+            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, eval_params.ngram_mapper);
 
         Ok(NgramProvider { ngram_provider })
     }
@@ -138,9 +134,7 @@ impl NgramProvider {
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
             .map_err(|e| format!("Could not read evaluation parameters: {:?}", e))?;
 
-        let ngram_mapper_config = eval_params.ngram_mapper;
-        let ngrams_config = eval_params.ngrams.clone();
-
+        let ngrams_config = eval_params.ngrams;
         if ngrams_config.increase_common_ngrams.enabled {
             unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);
             bigrams = bigrams.increase_common(&ngrams_config.increase_common_ngrams);
@@ -148,7 +142,7 @@ impl NgramProvider {
         }
 
         let ngram_provider =
-            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, ngram_mapper_config);
+            OnDemandNgramMapper::with_ngrams(unigrams, bigrams, trigrams, eval_params.ngram_mapper);
 
         Ok(NgramProvider { ngram_provider })
     }
