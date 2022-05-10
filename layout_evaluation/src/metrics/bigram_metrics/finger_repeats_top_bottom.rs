@@ -1,8 +1,7 @@
 //! The bigram metric [`FingerRepeatsTopBottom`] incurrs a cost for bigram that uses the same finger
 //! for different keys (thumb excluded) passing over one row (vertical distance at least two rows).
 //! If the finger is the pointer, the cost may be multiplied with a configurable factor (usually
-//! lessening the cost). If the bigram is very common, its cost is increased even further with a
-//! configurable slope.
+//! lessening the cost).
 //!
 //! *Note:* In contrast to ArneBab's version of the metric, thumbs are excluded.
 
