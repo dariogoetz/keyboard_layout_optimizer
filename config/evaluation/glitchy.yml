@@ -157,14 +157,6 @@ metrics:
       pinky_finger_factor: 1.2
       # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
       unbalancing_factor: 0.0
-      # Common bigrams are weighted additionally only if their absolute weight exceeds this
-      # threshold
-      total_weight_threshold: 20
-      # Common bigrams are weighted additionally only if their relative weight exceeds this
-      # fraction
-      critical_fraction: 1.00025 # >1 -> do not use
-      # Common bigrams are weighted additionally by this factor
-      factor: 5.0
 
   # If both keys corresponding to a bigram belong to the same finger AND are more than one row
   # apart vertically, a cost is counted depending on their vertical distance.
@@ -183,14 +175,6 @@ metrics:
       pinky_finger_factor: 1.2
       # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
       unbalancing_factor: 0.0
-      # Common bigrams are weighted additionally only if their absolute weight exceeds this
-      # threshold
-      total_weight_threshold: 20
-      # Common bigrams are weighted additionally only if their relative weight exceeds this
-      # fraction
-      critical_fraction: 1.00025 # >1 -> do not use
-      # Common bigrams are weighted additionally by this factor
-      factor: 5.0
 
   # If both keys corresponding to a bigram belong to the same finger AND belong to the same row,
   # a cost is counted.
@@ -472,7 +456,7 @@ metrics:
 ngrams:
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
   # specified thresholds.
-  increase_common_bigrams:
+  increase_common_ngrams:
     enabled: false
     # Bigrams with a relative weight exceeding this threshold are considered
     critical_fraction: 0.001
