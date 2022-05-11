@@ -4,6 +4,7 @@
 
 use super::BigramMetric;
 
+use ahash::AHashMap;
 use keyboard_layout::{
     key::{Finger, Hand, HandFingerMap},
     layout::{LayerKey, Layout},
@@ -21,29 +22,56 @@ pub struct FingerSwitchCost {
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     /// Cost associated with bigrams from a finger to another one
-    pub finger_switch_costs: Vec<FingerSwitchCost>,
-    /// Reduce penalties for bigrams on the same row by this factor
-    pub same_row_reduction_factor: Vec<f64>,
+    pub finger_switch_factor: Vec<FingerSwitchCost>,
+    finger_lengths: AHashMap<Hand, AHashMap<Finger, f64>>,
+    short_up_to_long_or_long_down_to_short_factor: f64,
+    short_down_to_long_or_long_up_to_short_factor: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct MovementPattern {
-    finger_switch_costs: HandFingerMap<HandFingerMap<f64>>,
-    same_row_reduction_factor: Vec<f64>,
+    finger_switch_factor: HandFingerMap<HandFingerMap<f64>>,
+    finger_lengths: HandFingerMap<f64>,
+    short_up_to_long_or_long_down_to_short_factor: f64,
+    short_down_to_long_or_long_up_to_short_factor: f64,
 }
 
 impl MovementPattern {
     pub fn new(params: &Parameters) -> Self {
-        let mut finger_switch_costs = HandFingerMap::with_default(HandFingerMap::with_default(0.0));
-        params.finger_switch_costs.iter().for_each(|fsc| {
-            let m = finger_switch_costs.get_mut(&fsc.from.0, &fsc.from.1);
+        let mut finger_switch_factor =
+            HandFingerMap::with_default(HandFingerMap::with_default(0.0));
+        params.finger_switch_factor.iter().for_each(|fsc| {
+            let m = finger_switch_factor.get_mut(&fsc.from.0, &fsc.from.1);
             m.set(&fsc.to.0, &fsc.to.1, fsc.cost);
         });
+        let finger_lengths = HandFingerMap::with_hashmap(&params.finger_lengths, 1.0);
 
         Self {
-            finger_switch_costs,
-            same_row_reduction_factor: params.same_row_reduction_factor.to_vec(),
+            finger_switch_factor,
+            finger_lengths,
+            short_up_to_long_or_long_down_to_short_factor: params
+                .short_up_to_long_or_long_down_to_short_factor,
+            short_down_to_long_or_long_up_to_short_factor: params
+                .short_down_to_long_or_long_up_to_short_factor,
         }
+    }
+}
+
+impl MovementPattern {
+    #[inline(always)]
+    fn finger_is_longer(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
+        let len1 = self.finger_lengths.get(h1, f1);
+        let len2 = self.finger_lengths.get(h2, f2);
+
+        len1 > len2
+    }
+
+    #[inline(always)]
+    fn finger_is_shorter(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
+        let len1 = self.finger_lengths.get(h1, f1);
+        let len2 = self.finger_lengths.get(h2, f2);
+
+        len1 < len2
     }
 }
 
@@ -61,21 +89,37 @@ impl BigramMetric for MovementPattern {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        let mut cost = weight
-            * *self
-                .finger_switch_costs
-                .get(&k1.key.hand, &k1.key.finger)
-                .get(&k2.key.hand, &k2.key.finger);
+        let f1 = k1.key.finger;
+        let f2 = k2.key.finger;
+        let h1 = k1.key.hand;
+        let h2 = k2.key.hand;
 
-        // if both keys are on the same row, they might be reduced in cost
-        if k1.key.matrix_position.1 == k2.key.matrix_position.1 {
-            let reduction_factor = self
-                .same_row_reduction_factor
-                .get(k1.key.matrix_position.1 as usize)
-                .unwrap_or(&0.0);
-            cost *= 1.0 - reduction_factor;
+        if f1 == Finger::Thumb || f2 == Finger::Thumb || h1 != h2 || f1 == f2 {
+            return Some(0.0);
         }
 
-        Some(cost)
+        let pos1 = k1.key.matrix_position;
+        let pos2 = k2.key.matrix_position;
+
+        let upwards: bool = pos2.1 < pos1.1;
+        let downwards: bool = pos2.1 > pos1.1;
+
+        let first_is_longer = self.finger_is_longer(&h1, &f1, &h2, &f2);
+        let first_is_shorter = self.finger_is_shorter(&h1, &f1, &h2, &f2);
+
+        let num_rows = pos1.1.abs_diff(pos2.1) as f64;
+
+        let finger_switch_factor = self.finger_switch_factor.get(&h1, &f1).get(&h2, &f2);
+        let direction_factor = if (upwards && first_is_shorter) || (downwards && first_is_longer) {
+            self.short_up_to_long_or_long_down_to_short_factor
+        } else if (downwards && first_is_shorter) || (upwards && first_is_longer) {
+            self.short_down_to_long_or_long_up_to_short_factor
+        } else {
+            1.0
+        };
+
+        let cost = num_rows * finger_switch_factor * direction_factor;
+
+        Some(weight * cost)
     }
 }

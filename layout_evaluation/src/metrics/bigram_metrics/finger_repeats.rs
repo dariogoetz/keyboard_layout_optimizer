@@ -6,8 +6,9 @@
 
 use super::BigramMetric;
 
+use ahash::AHashMap;
 use keyboard_layout::{
-    key::Finger,
+    key::{Finger, FingerMap, Hand},
     layout::{LayerKey, Layout},
 };
 
@@ -15,27 +16,30 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    /// If the finger repetition is done by the index finger, the cost is multiplied with this factor.
-    pub index_finger_factor: f64,
-    /// If the finger repetition is done by the pinky finger, the cost is multiplied with this factor.
-    pub pinky_finger_factor: f64,
-    /// If some of the involved keys are unbalancing, add the unbalancing weight with this factor
-    pub unbalancing_factor: f64,
+    pub finger_factors: AHashMap<Finger, f64>,
+    pub upwards_factor: f64,
+    pub downwards_factor: f64,
+    pub lateral_factor: f64,
+    pub in_line_factor: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct FingerRepeats {
-    index_finger_factor: f64,
-    pinky_finger_factor: f64,
-    unbalancing_factor: f64,
+    finger_factors: FingerMap<f64>,
+    upwards_factor: f64,
+    downwards_factor: f64,
+    lateral_factor: f64,
+    in_line_factor: f64,
 }
 
 impl FingerRepeats {
     pub fn new(params: &Parameters) -> Self {
         Self {
-            index_finger_factor: params.index_finger_factor,
-            pinky_finger_factor: params.pinky_finger_factor,
-            unbalancing_factor: params.unbalancing_factor,
+            finger_factors: FingerMap::with_hashmap(&params.finger_factors, 1.0),
+            upwards_factor: params.upwards_factor,
+            downwards_factor: params.downwards_factor,
+            lateral_factor: params.lateral_factor,
+            in_line_factor: params.in_line_factor,
         }
     }
 }
@@ -54,26 +58,55 @@ impl BigramMetric for FingerRepeats {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        if k1 == k2 || k1.key.hand != k2.key.hand || k1.key.finger != k2.key.finger {
+        if (k1 == k2 && k1.is_modifier)
+            || k1.key.hand != k2.key.hand
+            || k1.key.finger != k2.key.finger
+        {
             return Some(0.0);
         }
 
-        let mut cost = (1.0 + self.unbalancing_factor * k1.key.unbalancing)
-            * (1.0 + self.unbalancing_factor * k2.key.unbalancing)
-            * weight;
+        let pos1 = k1.key.matrix_position;
+        let pos2 = k2.key.matrix_position;
+        let is_thumb: bool = k1.key.finger == Finger::Thumb;
 
-        // NOTE: In ArneBab's solution, increasing common repeats is done in a previous,
-        // separate step (in "finger_repeats_from_file")
+        let upwards: bool = pos2.1 < pos1.1;
+        let downwards: bool = pos2.1 > pos1.1;
+        let inwards: bool = if k1.key.hand == Hand::Left {
+            pos1.0 < pos2.0
+        } else {
+            pos1.0 > pos2.0
+        };
+        let outwards: bool = if k1.key.hand == Hand::Left {
+            pos1.0 > pos2.0
+        } else {
+            pos1.0 < pos2.0
+        };
 
-        // reduce weight of index finger repeats
-        if k1.key.finger == Finger::Pointer {
-            cost *= self.index_finger_factor;
-        }
-        // increase weight of pinky finger repeats
-        if k1.key.finger == Finger::Pinky {
-            cost *= self.pinky_finger_factor;
-        }
+        let dist_in_line = if is_thumb {
+            pos1.0.abs_diff(pos2.0) as f64
+        } else {
+            pos1.1.abs_diff(pos2.1) as f64
+        };
+        let dist_lateral = if is_thumb {
+            pos1.1.abs_diff(pos2.1) as f64
+        } else {
+            pos1.0.abs_diff(pos2.0) as f64
+        };
 
-        Some(cost)
+        let direction_factor = if inwards || (!is_thumb && upwards) {
+            self.upwards_factor
+        } else if outwards || (!is_thumb && downwards) {
+            self.downwards_factor
+        } else {
+            1.0
+        };
+
+        let finger_factor = self.finger_factors.get(&k1.key.finger);
+        let in_line_dist_factor = 1.0 + self.in_line_factor * dist_in_line;
+        let lateral_dist_factor = 1.0 + self.lateral_factor * dist_lateral;
+
+        let cost = finger_factor * lateral_dist_factor * direction_factor * in_line_dist_factor;
+
+        Some(weight * cost)
     }
 }

@@ -142,76 +142,16 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      # Costs of repeats with the index finger are multiplied with this factor
-      index_finger_factor: 0.9
-      # Costs of repeats with the pinky finger are multiplied with this factor
-      pinky_finger_factor: 1.2
-      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
-      unbalancing_factor: 0.0
-
-  # If both keys corresponding to a bigram belong to the same finger AND are more than one row
-  # apart vertically, a cost is counted depending on their vertical distance.
-  # Bigrams that appear often (more than a specified share of the total number of bigrams) are
-  # weighted with an additional factor.
-  finger_repeats_top_bottom:
-    enabled: true
-    weight: 1850.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # Costs of repeats with the index finger are multiplied with this factor
-      index_finger_factor: 0.9
-      # Costs of repeats with the pinky finger are multiplied with this factor
-      pinky_finger_factor: 1.2
-      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
-      unbalancing_factor: 0.0
-
-  # If both keys corresponding to a bigram belong to the same finger AND belong to the same row,
-  # a cost is counted.
-  # No cost incurs, if it is the same key. Such repeats are weighted with an additional
-  finger_repeats_lateral:
-    enabled: true
-    weight: 780.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # Increase finger repeats with unbalancing keys by the unbalancing value with this weight
-      unbalancing_factor: 1.0
-
-  # If the keys corresponding to a bigram belong to fingers of the same hand, a cost is counted
-  # depending on their vertical and horizontal distance. Depending on the direction of movement and
-  # "length" of the involved fingers, additional factors may be involved.
-  line_changes:
-    enabled: true
-    weight: 5.5
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # Finger lengths
-      finger_lengths:
-        Left:
-          Pinky: 1
-          Ring: 2
-          Middle: 3
-          Pointer: 2
-        Right:
-          Pinky: 1
-          Ring: 2
-          Middle: 3
-          Pointer: 2
-      # If the movement is directed upwards from a short towards a long
-      # or downwards from a long towards a short finger,
-      # the cost is reduced by this factor
-      short_up_to_long_or_long_down_to_short_reduction: 0.25
-      # If the movement is directed downwards from a short towards a long
-      # or upwards from a long towards a short finger,
-      # the cost is increased by this factor
-      short_down_to_long_or_long_up_to_short_increase: 0.5
-      # Whether also bigrams involving both hands shall be considered
-      count_row_changes_between_hands: false
+      finger_factors:
+        Thumb: 1.2
+        Pointer: 0.8
+        Middle: 1.0
+        Ring: 1.1
+        Pinky: 1.2
+      upwards_factor: 1.2
+      downwards_factor: 1.1
+      lateral_factor: 1.8
+      in_line_factor: 1.0
 
   # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
@@ -257,15 +197,10 @@ metrics:
       type: weight_found
       value: 1.0
     params:
-      # reduce costs by this factor if both symbols of the bigram are on the same row
-      # the factor is given per row
-      # (first element corresponds to row with matrix_position 0, usually number row)
-      same_row_reduction_factor: [0, 0.6, 0.8, 0]
-
       # from: Finger for first symbol of the bigram
       # to: Finger for second symbol of the bigram
       # cost: Cost to count for such a movement
-      finger_switch_costs:
+      finger_switch_factor:
         - { from: [Left, Pinky],   to: [Left, Ring],    cost: 8 }
         - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
 
@@ -296,52 +231,28 @@ metrics:
         - { from: [Right, Pointer], to: [Right, Ring],    cost: 0.3 }
         - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
 
-  movement_pattern_same_row:
-    enabled: true
-    weight: 200.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      exclude_rows: [3]
-      exclude_unbalancing: false
-      exclude_lateral_finger_movement: true
+      # Finger lengths
+      finger_lengths:
+        Left:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Pointer: 2
+        Right:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Pointer: 2
 
-      # from: Finger for first symbol of the bigram
-      # to: Finger for second symbol of the bigram
-      # cost: Factor to apply for such a movement
-      finger_switch_costs:
-        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 0.1 }
-        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 0.5 }
-        - { from: [Left, Pinky],   to: [Left, Pointer],  cost: 1 }
+      # If the movement is directed upwards from a short towards a long
+      # or downwards from a long towards a short finger,
+      # the cost is multiplied by this factor
+      short_up_to_long_or_long_down_to_short_factor: 1.5
 
-        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 0 }
-        - { from: [Left, Ring],    to: [Left, Middle],  cost: 0.4 }
-        - { from: [Left, Ring],    to: [Left, Pointer], cost: 0.8 }
-
-        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 0.2 }
-        - { from: [Left, Middle],  to: [Left, Ring],    cost: 0.1 }
-        - { from: [Left, Middle],  to: [Left, Pointer], cost: 1.5 }
-
-        - { from: [Left, Pointer], to: [Left, Pinky],   cost: 1 }
-        - { from: [Left, Pointer], to: [Left, Ring],    cost: 1 }
-        - { from: [Left, Pointer], to: [Left, Middle],  cost: 1.1 }
-
-        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 0.1 }
-        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 0.5 }
-        - { from: [Right, Pinky],   to: [Right, Pointer],  cost: 1 }
-
-        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 0 }
-        - { from: [Right, Ring],    to: [Right, Middle],  cost: 0.4 }
-        - { from: [Right, Ring],    to: [Right, Pointer], cost: 0.8 }
-
-        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 0.2 }
-        - { from: [Right, Middle],  to: [Right, Ring],    cost: 0.1 }
-        - { from: [Right, Middle],  to: [Right, Pointer], cost: 1.5 }
-
-        - { from: [Right, Pointer], to: [Right, Pinky],   cost: 1 }
-        - { from: [Right, Pointer], to: [Right, Ring],    cost: 1 }
-        - { from: [Right, Pointer], to: [Right, Middle],  cost: 1.1 }
+      # If the movement is directed downwards from a short towards a long
+      # or upwards from a long towards a short finger,
+      # the cost is multiplied by this factor
+      short_down_to_long_or_long_up_to_short_factor: 2.0
 
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted. If the second key is unbalancing as well, an additional cost

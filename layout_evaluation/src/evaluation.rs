@@ -46,14 +46,8 @@ pub struct MetricParameters {
 
     pub symmetric_handswitches: WeightedParams<bigram_metrics::symmetric_handswitches::Parameters>,
     pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
-    pub finger_repeats_lateral: WeightedParams<bigram_metrics::finger_repeats_lateral::Parameters>,
-    pub finger_repeats_top_bottom:
-        WeightedParams<bigram_metrics::finger_repeats_top_bottom::Parameters>,
-    pub line_changes: WeightedParams<bigram_metrics::line_changes::Parameters>,
     pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
     pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
-    pub movement_pattern_same_row:
-        WeightedParams<bigram_metrics::movement_pattern_same_row::Parameters>,
     pub no_handswitch_after_unbalancing_key:
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
     pub unbalancing_after_neighboring:
@@ -181,34 +175,6 @@ impl Evaluator {
         );
         self.bigram_metric(
             Box::new(
-                bigram_metrics::finger_repeats_lateral::FingerRepeatsLateral::new(
-                    &params.finger_repeats_lateral.params,
-                ),
-            ),
-            params.finger_repeats_lateral.weight,
-            params.finger_repeats_lateral.normalization.clone(),
-            params.finger_repeats_lateral.enabled,
-        );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::finger_repeats_top_bottom::FingerRepeatsTopBottom::new(
-                    &params.finger_repeats_top_bottom.params,
-                ),
-            ),
-            params.finger_repeats_top_bottom.weight,
-            params.finger_repeats_top_bottom.normalization.clone(),
-            params.finger_repeats_top_bottom.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::line_changes::LineChanges::new(
-                &params.line_changes.params,
-            )),
-            params.line_changes.weight,
-            params.line_changes.normalization.clone(),
-            params.line_changes.enabled,
-        );
-        self.bigram_metric(
-            Box::new(
                 bigram_metrics::manual_bigram_penalty::ManualBigramPenalty::new(
                     &params.manual_bigram_penalty.params,
                 ),
@@ -224,16 +190,6 @@ impl Evaluator {
             params.movement_pattern.weight,
             params.movement_pattern.normalization.clone(),
             params.movement_pattern.enabled,
-        );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::movement_pattern_same_row::MovementPatternSameRow::new(
-                    &params.movement_pattern_same_row.params,
-                ),
-            ),
-            params.movement_pattern_same_row.weight,
-            params.movement_pattern_same_row.normalization.clone(),
-            params.movement_pattern_same_row.enabled,
         );
         self.bigram_metric(
             Box::new(

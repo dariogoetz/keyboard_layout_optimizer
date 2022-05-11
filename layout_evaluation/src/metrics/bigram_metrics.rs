@@ -6,12 +6,8 @@ use priority_queue::DoublePriorityQueue;
 use std::{env, fmt};
 
 pub mod finger_repeats;
-pub mod finger_repeats_lateral;
-pub mod finger_repeats_top_bottom;
-pub mod line_changes;
 pub mod manual_bigram_penalty;
 pub mod movement_pattern;
-pub mod movement_pattern_same_row;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod symmetric_handswitches;
 pub mod unbalancing_after_neighboring;
