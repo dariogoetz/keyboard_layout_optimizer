@@ -40,9 +40,9 @@ pub struct LayerKey {
 impl fmt::Display for LayerKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.is_modifier {
-            write!(f, "Mod({})", self.symbol.escape_debug().to_string())
+            write!(f, "Mod({})", self.symbol.escape_debug())
         } else {
-            write!(f, "{}", self.symbol.escape_debug().to_string())
+            write!(f, "{}", self.symbol.escape_debug())
         }
     }
 }
@@ -109,7 +109,7 @@ impl Layout {
         for mods_per_hand in modifiers.iter() {
             for (_hand, mods) in mods_per_hand.iter() {
                 for mp in mods.iter() {
-                    mod_positions.insert(mp.clone());
+                    mod_positions.insert(*mp);
                 }
             }
         }
@@ -132,22 +132,20 @@ impl Layout {
                     .map(|(layer_id, c)| {
                         // if the current key is used as a modifier, add a corresponding layerkey
                         if layer_id == 0 && mod_positions.contains(&key.matrix_position) {
-                            mod_indices
-                                .entry(key.matrix_position.clone())
-                                .or_insert_with(|| {
-                                    layerkeys.push(LayerKey::new(
-                                        0,
-                                        key.clone(),
-                                        *c,
-                                        Vec::new(),
-                                        *fixed,
-                                        true,
-                                    ));
-                                    layerkey_to_key_index.push(key_index as KeyIndex);
+                            mod_indices.entry(key.matrix_position).or_insert_with(|| {
+                                layerkeys.push(LayerKey::new(
+                                    0,
+                                    key.clone(),
+                                    *c,
+                                    Vec::new(),
+                                    *fixed,
+                                    true,
+                                ));
+                                layerkey_to_key_index.push(key_index as KeyIndex);
 
-                                    layerkey_index += 1;
-                                    layerkey_index - 1
-                                });
+                                layerkey_index += 1;
+                                layerkey_index - 1
+                            });
                         }
 
                         // add the actual new layerkey

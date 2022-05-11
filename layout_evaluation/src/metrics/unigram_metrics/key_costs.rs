@@ -36,7 +36,7 @@ impl UnigramMetric for KeyCost {
         let modifier_cost: f64 = key
             .modifiers
             .iter()
-            .map(|i| layout.get_layerkey(&i).key.cost)
+            .map(|i| layout.get_layerkey(i).key.cost)
             .sum();
         let cost = key.key.cost + modifier_cost;
 
