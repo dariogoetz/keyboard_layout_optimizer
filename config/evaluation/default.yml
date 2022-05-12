@@ -131,10 +131,8 @@ metrics:
       null: null
 
   # If both keys corresponding to a bigram belong to the same finger, a cost is counted.
-  # No cost incurs, if it is the same key. Such repeats are weighted with an additional
-  # factor, if the index or pinky finger is involved.
-  # Bigrams that appear often (more than a specified share of the total number of bigrams) are
-  # weighted with an additional factor.
+  # The cost can be weighted by the individual keys and if they are performed by stretching
+  # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
     enabled: true
     weight: 780.0
@@ -142,16 +140,21 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # Finger-individual weights to be multiplied with the cost
       finger_factors:
         Thumb: 1.2
         Pointer: 0.8
         Middle: 1.0
         Ring: 1.1
         Pinky: 1.2
+      # Factor applied if the repeat consists of a movement
+      # in line of the finger "outwards", i.e. by stretching the finger
       stretch_factor: 1.2
+      # Factor applied if the repeat consists of a movement
+      # in line of the finger "inwards", i.e. by curling the finger
       curl_factor: 1.1
+      # Factor applied if the repeat consists of a lateral movement
       lateral_factor: 1.8
-      in_line_factor: 1.0
 
   # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
@@ -188,7 +191,8 @@ metrics:
         [[17, 2], [17, 2]]: 0.3
         [[17, 3], [17, 3]]: 0.5
 
-  # Depending on which fingers of the same hand are used to hit the keys of a bigram, costs are
+  # Depending on which fingers of the same hand are used to hit the keys of a bigram,
+  # how many rows were crossed and in which direction the movement occurs, costs are
   # counted.
   movement_pattern:
     enabled: true
@@ -250,7 +254,10 @@ metrics:
       # the cost is multiplied by this factor
       short_down_to_long_or_long_up_to_short_factor: 2.0
 
-      same_row_offset: 0.2
+      # The cost is multiplied by the same_row_offset plus number of crossed rows.
+      # If same_row_offset is zero, movement patterns on the same row have zero cost.
+      same_row_offset: 0.1
+
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted. If the second key is unbalancing as well, an additional cost
   # depending on the distance to the first key is added.
