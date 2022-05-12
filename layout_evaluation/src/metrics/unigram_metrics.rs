@@ -45,18 +45,21 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
             .unwrap_or(3);
 
         let total_weight = total_weight.unwrap_or_else(|| unigrams.iter().map(|(_, w)| w).sum());
-        let cost_iter = unigrams.iter().filter_map(|(unigram, weight)| {
-            let cost_option = self.individual_cost(*unigram, *weight, total_weight, layout);
+        let cost_iter = unigrams
+            .iter()
+            .enumerate()
+            .filter_map(|(i, (unigram, weight))| {
+                let cost_option = self.individual_cost(*unigram, *weight, total_weight, layout);
 
-            cost_option.map(|cost| (unigram, cost))
-        });
+                cost_option.map(|cost| (i, unigram, cost))
+            });
 
         let (total_cost, msg) = if show_worst {
             let (total_cost, worst) = cost_iter.fold(
                 (0.0, DoublePriorityQueue::new()),
-                |(mut total_cost, mut worst), (unigram, cost)| {
+                |(mut total_cost, mut worst), (i, _, cost)| {
                     total_cost += cost;
-                    worst.push(unigram.symbol, OrderedFloat(cost.abs()));
+                    worst.push(i, OrderedFloat(cost.abs()));
                     if worst.len() > n_worst {
                         worst.pop_min();
                     }
@@ -71,10 +74,11 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
                 .into_sorted_iter()
                 .rev()
                 .filter(|(_, cost)| cost.into_inner() > 0.0)
-                .map(|(unigram, cost)| {
+                .map(|(i, cost)| {
+                    let (gram, _) = unigrams[i];
                     format!(
                         "{} ({:>5.2}%)",
-                        unigram.to_string().escape_debug(),
+                        gram,
                         100.0 * cost.into_inner() / total_cost,
                     )
                 })
@@ -88,7 +92,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
 
             (total_cost, msg)
         } else {
-            let total_cost: f64 = cost_iter.map(|(_, c)| c).sum();
+            let total_cost: f64 = cost_iter.map(|(_, _, c)| c).sum();
 
             (total_cost, None)
         };

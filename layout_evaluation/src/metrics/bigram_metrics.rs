@@ -48,23 +48,25 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
             .unwrap_or(3);
 
         let total_weight = total_weight.unwrap_or_else(|| bigrams.iter().map(|(_, w)| w).sum());
-        let cost_iter = bigrams.iter().filter_map(|(bigram, weight)| {
-            let cost_option =
-                self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
+        let cost_iter = bigrams
+            .iter()
+            .enumerate()
+            .filter_map(|(i, (bigram, weight))| {
+                let cost_option =
+                    self.individual_cost(bigram.0, bigram.1, *weight, total_weight, layout);
 
-            cost_option.map(|cost| (bigram, cost))
-        });
+                cost_option.map(|cost| (i, bigram, cost))
+            });
 
         let (total_cost, msg) = if show_worst {
             let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
                 (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
-                |(mut total_cost, mut worst, mut worst_nonfixed), (bigram, cost)| {
+                |(mut total_cost, mut worst, mut worst_nonfixed), (i, bigram, cost)| {
                     total_cost += cost;
 
-                    worst.push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
+                    worst.push(i, OrderedFloat(cost.abs()));
                     if !bigram.0.is_fixed && !bigram.1.is_fixed {
-                        worst_nonfixed
-                            .push((bigram.0.symbol, bigram.1.symbol), OrderedFloat(cost.abs()));
+                        worst_nonfixed.push(i, OrderedFloat(cost.abs()));
                     }
 
                     if worst.len() > n_worst {
@@ -78,16 +80,17 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
                 },
             );
 
-            let gen_msgs = |q: DoublePriorityQueue<(char, char), OrderedFloat<f64>>| {
+            let gen_msgs = |q: DoublePriorityQueue<usize, OrderedFloat<f64>>| {
                 let worst_msgs: Vec<String> = q
                     .into_sorted_iter()
                     .rev()
                     .filter(|(_, cost)| cost.into_inner() > 0.0)
-                    .map(|(bigram, cost)| {
+                    .map(|(i, cost)| {
+                        let (gram, _) = bigrams[i];
                         format!(
                             "{}{} ({:>5.2}%)",
-                            bigram.0.to_string().escape_debug(),
-                            bigram.1.to_string().escape_debug(),
+                            gram.0,
+                            gram.1,
                             100.0 * cost.into_inner() / total_cost,
                         )
                     })
@@ -115,7 +118,7 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
 
             (total_cost, msg)
         } else {
-            let total_cost: f64 = cost_iter.map(|(_, c)| c).sum();
+            let total_cost: f64 = cost_iter.map(|(_, _, c)| c).sum();
 
             (total_cost, None)
         };
