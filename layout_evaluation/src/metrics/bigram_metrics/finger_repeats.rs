@@ -17,8 +17,8 @@ use serde::Deserialize;
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     pub finger_factors: AHashMap<Finger, f64>,
-    pub upwards_factor: f64,
-    pub downwards_factor: f64,
+    pub stretch_factor: f64,
+    pub curl_factor: f64,
     pub lateral_factor: f64,
     pub in_line_factor: f64,
 }
@@ -26,8 +26,8 @@ pub struct Parameters {
 #[derive(Clone, Debug)]
 pub struct FingerRepeats {
     finger_factors: FingerMap<f64>,
-    upwards_factor: f64,
-    downwards_factor: f64,
+    stretch_factor: f64,
+    curl_factor: f64,
     lateral_factor: f64,
     in_line_factor: f64,
 }
@@ -36,8 +36,8 @@ impl FingerRepeats {
     pub fn new(params: &Parameters) -> Self {
         Self {
             finger_factors: FingerMap::with_hashmap(&params.finger_factors, 1.0),
-            upwards_factor: params.upwards_factor,
-            downwards_factor: params.downwards_factor,
+            stretch_factor: params.stretch_factor,
+            curl_factor: params.curl_factor,
             lateral_factor: params.lateral_factor,
             in_line_factor: params.in_line_factor,
         }
@@ -94,9 +94,9 @@ impl BigramMetric for FingerRepeats {
         };
 
         let direction_factor = if inwards || (!is_thumb && upwards) {
-            self.upwards_factor
+            self.stretch_factor
         } else if outwards || (!is_thumb && downwards) {
-            self.downwards_factor
+            self.curl_factor
         } else {
             1.0
         };

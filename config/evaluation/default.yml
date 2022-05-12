@@ -148,8 +148,8 @@ metrics:
         Middle: 1.0
         Ring: 1.1
         Pinky: 1.2
-      upwards_factor: 1.2
-      downwards_factor: 1.1
+      stretch_factor: 1.2
+      curl_factor: 1.1
       lateral_factor: 1.8
       in_line_factor: 1.0
 
@@ -244,16 +244,13 @@ metrics:
           Middle: 3
           Pointer: 2
 
-      # If the movement is directed upwards from a short towards a long
-      # or downwards from a long towards a short finger,
-      # the cost is multiplied by this factor
-      short_up_to_long_or_long_down_to_short_factor: 1.5
 
       # If the movement is directed downwards from a short towards a long
       # or upwards from a long towards a short finger,
       # the cost is multiplied by this factor
       short_down_to_long_or_long_up_to_short_factor: 2.0
 
+      same_row_offset: 0.2
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted. If the second key is unbalancing as well, an additional cost
   # depending on the distance to the first key is added.

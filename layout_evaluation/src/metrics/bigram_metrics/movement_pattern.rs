@@ -22,18 +22,18 @@ pub struct FingerSwitchCost {
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     /// Cost associated with bigrams from a finger to another one
-    pub finger_switch_factor: Vec<FingerSwitchCost>,
+    finger_switch_factor: Vec<FingerSwitchCost>,
     finger_lengths: AHashMap<Hand, AHashMap<Finger, f64>>,
-    short_up_to_long_or_long_down_to_short_factor: f64,
     short_down_to_long_or_long_up_to_short_factor: f64,
+    same_row_offset: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct MovementPattern {
     finger_switch_factor: HandFingerMap<HandFingerMap<f64>>,
     finger_lengths: HandFingerMap<f64>,
-    short_up_to_long_or_long_down_to_short_factor: f64,
     short_down_to_long_or_long_up_to_short_factor: f64,
+    same_row_offset: f64,
 }
 
 impl MovementPattern {
@@ -49,29 +49,10 @@ impl MovementPattern {
         Self {
             finger_switch_factor,
             finger_lengths,
-            short_up_to_long_or_long_down_to_short_factor: params
-                .short_up_to_long_or_long_down_to_short_factor,
             short_down_to_long_or_long_up_to_short_factor: params
                 .short_down_to_long_or_long_up_to_short_factor,
+            same_row_offset: params.same_row_offset,
         }
-    }
-}
-
-impl MovementPattern {
-    #[inline(always)]
-    fn finger_is_longer(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
-        let len1 = self.finger_lengths.get(h1, f1);
-        let len2 = self.finger_lengths.get(h2, f2);
-
-        len1 > len2
-    }
-
-    #[inline(always)]
-    fn finger_is_shorter(&self, h1: &Hand, f1: &Finger, h2: &Hand, f2: &Finger) -> bool {
-        let len1 = self.finger_lengths.get(h1, f1);
-        let len2 = self.finger_lengths.get(h2, f2);
-
-        len1 < len2
     }
 }
 
@@ -104,21 +85,21 @@ impl BigramMetric for MovementPattern {
         let upwards: bool = pos2.1 < pos1.1;
         let downwards: bool = pos2.1 > pos1.1;
 
-        let first_is_longer = self.finger_is_longer(&h1, &f1, &h2, &f2);
-        let first_is_shorter = self.finger_is_shorter(&h1, &f1, &h2, &f2);
+        let finger_length_diff =
+            self.finger_lengths.get(&h1, &f1) - self.finger_lengths.get(&h2, &f2);
+        let first_is_longer = finger_length_diff > 0.0;
+        let first_is_shorter = finger_length_diff < 0.0;
 
         let num_rows = pos1.1.abs_diff(pos2.1) as f64;
 
         let finger_switch_factor = self.finger_switch_factor.get(&h1, &f1).get(&h2, &f2);
-        let direction_factor = if (upwards && first_is_shorter) || (downwards && first_is_longer) {
-            self.short_up_to_long_or_long_down_to_short_factor
-        } else if (downwards && first_is_shorter) || (upwards && first_is_longer) {
+        let direction_factor = if (downwards && first_is_shorter) || (upwards && first_is_longer) {
             self.short_down_to_long_or_long_up_to_short_factor
         } else {
             1.0
         };
 
-        let cost = num_rows * finger_switch_factor * direction_factor;
+        let cost = (self.same_row_offset + num_rows) * finger_switch_factor * direction_factor;
 
         Some(weight * cost)
     }
