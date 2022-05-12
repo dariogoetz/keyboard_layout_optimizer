@@ -4,6 +4,7 @@
 
 use super::UnigramMetric;
 
+use itertools::Itertools;
 use keyboard_layout::{
     key::Finger,
     layout::{LayerKey, Layout},
@@ -47,10 +48,13 @@ impl UnigramMetric for RowLoads {
 
         let mut messages = Vec::new();
 
-        row_load.into_iter().for_each(|(row, load)| {
-            let msg = format!("Row {}: {:>.1}%", row, 100.0 * load / total_weight);
-            messages.push(msg);
-        });
+        row_load
+            .into_iter()
+            .sorted_by_key(|(row, _)| *row)
+            .for_each(|(row, load)| {
+                let msg = format!("Row {}: {:>.1}%", row, 100.0 * load / total_weight);
+                messages.push(msg);
+            });
 
         let message = messages.join("; ");
 
