@@ -20,6 +20,7 @@ pub struct Parameters {
     pub stretch_factor: f64,
     pub curl_factor: f64,
     pub lateral_factor: f64,
+    pub same_key_offset: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -28,6 +29,7 @@ pub struct FingerRepeats {
     stretch_factor: f64,
     curl_factor: f64,
     lateral_factor: f64,
+    same_key_offset: f64,
 }
 
 impl FingerRepeats {
@@ -37,6 +39,7 @@ impl FingerRepeats {
             stretch_factor: params.stretch_factor,
             curl_factor: params.curl_factor,
             lateral_factor: params.lateral_factor,
+            same_key_offset: params.same_key_offset,
         }
     }
 }
@@ -99,10 +102,11 @@ impl BigramMetric for FingerRepeats {
         };
 
         let finger_factor = self.finger_factors.get(&k1.key.finger);
-        let in_line_dist_factor = 1.0 + direction_factor * dist_in_line;
-        let lateral_dist_factor = 1.0 + self.lateral_factor * dist_lateral;
 
-        let cost = finger_factor * lateral_dist_factor * in_line_dist_factor;
+        let cost = finger_factor
+            * (self.same_key_offset
+                + direction_factor * dist_in_line
+                + self.lateral_factor * dist_lateral);
 
         Some(weight * cost)
     }
