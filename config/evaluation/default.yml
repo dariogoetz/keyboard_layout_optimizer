@@ -154,7 +154,7 @@ metrics:
       # in line of the finger "inwards", i.e. by curling the finger
       curl_factor: 1.1
       # Factor applied if the repeat consists of a lateral movement
-      lateral_factor: 1.8
+      lateral_factor: 1.5
       # Cost to apply if the finger repeat happens on the same key
       same_key_offset: 0.5
 
