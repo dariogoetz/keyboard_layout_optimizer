@@ -100,7 +100,7 @@ metrics:
   # Each keystroke incurs a cost (defined in the keyboard's layout config)
   key_costs:
     enabled: true
-    weight: 7.55
+    weight: 20.0
     normalization:
       type: weight_found
       value: 1.0
@@ -198,7 +198,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 100.0
+    weight: 50.0
     normalization:
       type: weight_found
       value: 1.0
@@ -303,7 +303,7 @@ metrics:
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
     enabled: true
-    weight: 650.0
+    weight: 300.0
     normalization:
       type: weight_found
       value: 1.0
