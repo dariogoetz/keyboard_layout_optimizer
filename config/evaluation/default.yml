@@ -248,7 +248,6 @@ metrics:
           Middle: 3
           Pointer: 2
 
-
       # If the movement is directed downwards from a short towards a long
       # or upwards from a long towards a short finger,
       # the cost is multiplied by this factor
@@ -319,7 +318,7 @@ metrics:
   # symbols are excluded.
   secondary_bigrams:
     enabled: true
-    weight: 0.5
+    weight: 0.1
     normalization:
       type: weight_found
       value: 1.0
@@ -338,7 +337,7 @@ metrics:
   # If all keys corresponding to a trigram are hit by the same finger (and are all unequal), a cost
   # is counted. A factor is multiplied for each bigram with keys belonging to different columns.
   trigram_finger_repeats:
-    enabled: true
+    enabled: false
     weight: 10000.0
     normalization:
       type: weight_found
