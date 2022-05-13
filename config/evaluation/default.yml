@@ -34,16 +34,16 @@ metrics:
             - ["a", "ä"]
             - ["o", "ö"]
             - ["u", "ü"]
-        - same_key_cost: 0.5
-          neighboring_cost: 0.5
-          same_column_cost: 0.8
-          symmetric_cost: 0.7
-          letter_pairs:
-            # Similar letters
-            - ["g", "k"]
-            - ["p", "b"]
-            - ["d", "t"]
-            - ["m", "n"]
+        # - same_key_cost: 0.5
+        #   neighboring_cost: 0.5
+        #   same_column_cost: 0.8
+        #   symmetric_cost: 0.7
+        #   letter_pairs:
+        #     # Similar letters
+        #     - ["g", "k"]
+        #     - ["p", "b"]
+        #     - ["d", "t"]
+        #     - ["m", "n"]
 
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
