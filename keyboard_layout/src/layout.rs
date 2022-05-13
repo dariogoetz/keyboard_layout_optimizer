@@ -40,7 +40,7 @@ pub struct LayerKey {
 impl fmt::Display for LayerKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.is_modifier {
-            write!(f, "Mod({})", self.symbol.escape_debug())
+            write!(f, "[{}]", self.symbol.escape_debug())
         } else {
             write!(f, "{}", self.symbol.escape_debug())
         }
