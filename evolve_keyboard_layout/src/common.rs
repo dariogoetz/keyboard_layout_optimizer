@@ -96,14 +96,9 @@ pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
     log::info!("A-priori estimations from key_costs:");
     log::info!(
-        "Finger loads (thumbs set to 0.0): {}",
+        "Finger loads (thumbs set to 0.00): {}",
         keyboard.estimated_finger_loads(true)
     );
-    log::info!(
-        "Finger loads (including thumbs):  {}",
-        keyboard.estimated_finger_loads(false)
-    );
-
     let mut messages = Vec::new();
     keyboard
         .estimated_row_loads()
