@@ -2,6 +2,7 @@
 
 use ahash::AHashMap;
 use serde::Deserialize;
+use std::fmt;
 use std::slice;
 
 /// Row and columnar location on the keyboard
@@ -171,6 +172,10 @@ impl<T: Copy> HandFingerMap<T> {
         self.0.iter()
     }
 
+    pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
+        self.0.iter_mut()
+    }
+
     pub fn set(&mut self, hand: &Hand, finger: &Finger, val: T) {
         self.0[Self::index(hand, finger)] = val;
     }
@@ -198,6 +203,26 @@ impl<T: Copy> HandFingerMap<T> {
                 f(hand, finger, &mut self.0[Self::index(hand, finger)]);
             }
         }
+    }
+}
+
+impl<T: Copy + fmt::Display> fmt::Display for HandFingerMap<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let message = format!(
+            "{:.2} {:.2} {:.2} {:.2} {:.2} - {:.2} {:.2} {:.2} {:.2} {:.2}",
+            self.get(&Hand::Left, &Finger::Pinky),
+            self.get(&Hand::Left, &Finger::Ring),
+            self.get(&Hand::Left, &Finger::Middle),
+            self.get(&Hand::Left, &Finger::Pointer),
+            self.get(&Hand::Left, &Finger::Thumb),
+            self.get(&Hand::Right, &Finger::Thumb),
+            self.get(&Hand::Right, &Finger::Pointer),
+            self.get(&Hand::Right, &Finger::Middle),
+            self.get(&Hand::Right, &Finger::Ring),
+            self.get(&Hand::Right, &Finger::Pinky),
+        );
+
+        write!(f, "{}", message)
     }
 }
 

@@ -1,6 +1,6 @@
 //! This module provides a struct representing a keyboard.
 
-use crate::key::{Finger, Hand, Key, MatrixPosition, Position};
+use crate::key::{Finger, Hand, HandFingerMap, Key, MatrixPosition, Position};
 
 use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
@@ -149,5 +149,36 @@ impl Keyboard {
         let labels: AHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template_short, &labels)
             .unwrap()
+    }
+
+    pub fn estimated_finger_loads(&self, exclude_thumbs: bool) -> HandFingerMap<f64> {
+        let mut intended_loads: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
+
+        self.keys
+            .iter()
+            .filter(|k| !exclude_thumbs || k.finger != Finger::Thumb)
+            .for_each(|k| {
+                let il = intended_loads.get_mut(&k.hand, &k.finger);
+                *il += 1.0 / (1.0 + k.cost);
+            });
+
+        let sum: f64 = intended_loads.iter().sum();
+        intended_loads.iter_mut().for_each(|il| *il /= sum);
+
+        intended_loads
+    }
+
+    pub fn estimated_row_loads(&self) -> AHashMap<u8, f64> {
+        let mut intended_loads: AHashMap<u8, f64> = AHashMap::default();
+
+        self.keys.iter().for_each(|k| {
+            let il = intended_loads.entry(k.matrix_position.1).or_insert(0.0);
+            *il += 1.0 / (1.0 + k.cost);
+        });
+
+        let sum: f64 = intended_loads.values().sum();
+        intended_loads.values_mut().for_each(|il| *il /= sum);
+
+        intended_loads
     }
 }

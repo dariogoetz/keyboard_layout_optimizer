@@ -10,6 +10,7 @@ use layout_evaluation::{
 
 use ahash::AHashMap;
 use clap::Parser;
+use itertools::Itertools;
 use std::{
     fs::{self, OpenOptions},
     io::prelude::*,
@@ -93,6 +94,27 @@ pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
         .unwrap_or_else(|e| panic!("Could not load config file {}: {}", layout_config, e));
 
     let keyboard = Arc::new(Keyboard::from_yaml_object(layout_config.keyboard));
+    log::info!("A-priori estimations from key_costs:");
+    log::info!(
+        "Finger loads (thumbs set to 0.0): {}",
+        keyboard.estimated_finger_loads(true)
+    );
+    log::info!(
+        "Finger loads (including thumbs):  {}",
+        keyboard.estimated_finger_loads(false)
+    );
+
+    let mut messages = Vec::new();
+    keyboard
+        .estimated_row_loads()
+        .iter()
+        .sorted_by_key(|(row, _)| *row)
+        .for_each(|(row, load)| {
+            let msg = format!("Row {}: {:>.2}", row, load);
+            messages.push(msg);
+        });
+    let message = messages.join(" ");
+    log::info!("Row loads: {}", message);
 
     NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard)
 }
