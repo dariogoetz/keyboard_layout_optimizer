@@ -386,4 +386,3 @@ ngram_mapper:
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
-
