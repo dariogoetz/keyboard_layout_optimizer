@@ -24,11 +24,11 @@ impl FromStr for WeightedComponent {
 #[clap(name = "Ngram frequency merge")]
 /// Merge multiple ngram frequency files with given weights into a new one
 struct Options {
-    /// Pairs of weight and ngram frequency directory in the form path:weight
-    components: Vec<WeightedComponent>,
-
     /// Directory name for resulting ngram frequency files
     out: String,
+
+    /// Pairs of weight and ngram frequency directory in the form path:weight
+    components: Vec<WeightedComponent>,
 }
 
 fn add<T: Clone + Eq + Hash>(weight: f64, res: &mut AHashMap<T, f64>, ngrams: &AHashMap<T, f64>) {
