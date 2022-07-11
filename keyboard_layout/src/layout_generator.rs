@@ -13,12 +13,16 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LayoutError {
-    #[error("Invalid keyboard layout: Duplicate characters in layout '{0}': '{1}'")]
+    #[error("Invalid keyboard layout: Duplicate characters in provided layout '{0}': '{1}'")]
     DuplicateChars(String, String),
-    #[error("Invalid keyboard layout: Missing characters: '{0}'")]
+    #[error("Invalid keyboard layout: Missing characters in provided layout: '{0}'")]
     MissingChars(String),
-    #[error("Invalid keyboard layout: Unsupported characters: '{0}'")]
+    #[error("Invalid keyboard layout: Unsupported characters in provided layout (not in first level of `base_layout` and `fixed_keys` with value `false`): '{0}'")]
     UnsupportedChars(String),
+    #[error(
+        "Invalid base layout: Not the same number of `keys` ({0}) as entries in `fixed_keys` ({1})"
+    )]
+    WrongKeyNumber(usize, usize),
 }
 
 /// A collection of data (configuration) regarding the Neo layout (and its family)
@@ -35,14 +39,14 @@ pub struct BaseLayoutYAML {
 
 impl BaseLayoutYAML {
     /// Checks the [`KeyboardYAML`] for common errors.
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> Result<()> {
         let flat_keys = self.keys.concat();
         let flat_fixed_keys = self.fixed_keys.concat();
 
         // Make sure that all settings that should have the same number of elements
         // do in fact have the same number of elements.
         if flat_keys.len() != flat_fixed_keys.len() {
-            return Err("There are not the same number of `keys` as there are fixed/permutable entries `fixed_keys`.".to_string());
+            return Err(LayoutError::WrongKeyNumber(flat_keys.len(), flat_fixed_keys.len()).into());
         }
 
         Ok(())
@@ -136,12 +140,7 @@ impl NeoLayoutGenerator {
                 let key_idx = self
                     .permutable_key_map
                     .get(given_char)
-                    .ok_or(format!(
-                        "Unsupported symbol in given layout keys: '{}'",
-                        given_char
-                    ))
-                    .map_err(anyhow::Error::msg)?;
-
+                    .ok_or(LayoutError::UnsupportedChars(given_char.to_string()))?;
                 let given_key_layers = &self.keys[*key_idx as usize];
                 let new_key_layers = given_key_layers
                     .iter()

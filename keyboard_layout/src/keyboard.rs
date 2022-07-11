@@ -6,6 +6,17 @@ use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
 use serde::Deserialize;
 use std::fs::File;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum KeyboardError {
+    #[error("Invalid keyboard: Not the same number of keys in each keyboard list.")]
+    WrongKeyNumber,
+    #[error("Invalid keyboard: Duplicate `matrix_positions`.")]
+    DuplicateMatrixPositions,
+    #[error("Invalid keyboard: Duplicate `positions`.")]
+    DuplicatePositions,
+}
 
 /// The index of a [`Key`] in the `keys` vec of a [`Keyboard`]
 pub type KeyIndex = u8;
@@ -50,7 +61,7 @@ fn contains_duplicates<T: PartialEq>(v: &[T]) -> bool {
 
 impl KeyboardYAML {
     /// Checks the [`KeyboardYAML`] for common errors.
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> Result<()> {
         let flat_matrix_positions = self.matrix_positions.concat();
         let flat_positions = self.positions.concat();
 
@@ -65,20 +76,17 @@ impl KeyboardYAML {
         lengths.insert(self.symmetries.concat().len());
         lengths.insert(self.unbalancing_positions.concat().len());
         if lengths.len() > 1 {
-            return Err(
-                "Not every description of the keyboard contains the same number of keys."
-                    .to_string(),
-            );
+            return Err(KeyboardError::WrongKeyNumber)?;
         }
 
         // Make sure there are no duplicates in `matrix_positions`.
         if contains_duplicates(&flat_matrix_positions) {
-            return Err("Duplicate `matrix_positions` found.".to_string());
+            return Err(KeyboardError::DuplicateMatrixPositions)?;
         }
 
         // Make sure there are no duplicates in `positions`.
         if contains_duplicates(&flat_positions) {
-            return Err("Duplicate `positions` found.".to_string());
+            return Err(KeyboardError::DuplicatePositions)?;
         }
 
         Ok(())

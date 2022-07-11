@@ -13,7 +13,7 @@ pub struct LayoutConfig {
 }
 
 impl LayoutConfig {
-    pub fn from_yaml(filename: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn from_yaml(filename: &str) -> Result<Self> {
         let f = File::open(filename)?;
         let cfg: LayoutConfig = serde_yaml::from_reader(f)?;
         cfg.validate()?;
@@ -21,7 +21,7 @@ impl LayoutConfig {
         Ok(cfg)
     }
 
-    pub fn validate(&self) -> Result<(), String> {
+    pub fn validate(&self) -> Result<()> {
         self.keyboard.validate()?;
         self.base_layout.validate()?;
         Ok(())
