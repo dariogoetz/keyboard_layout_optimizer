@@ -99,7 +99,8 @@ impl BigramMetric for MovementPattern {
             1.0
         };
 
-        let cost = (self.same_row_offset + num_rows) * finger_switch_factor * direction_factor;
+        let cost =
+            (self.same_row_offset + num_rows * num_rows) * finger_switch_factor * direction_factor;
 
         Some(weight * cost)
     }
