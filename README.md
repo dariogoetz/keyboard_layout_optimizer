@@ -127,7 +127,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 
 #### Optimization Algorithms
 Choosing an algorithm:
-- [Simulated Annealing](#simulated-annealing-optimizesars) produces the best layouts from scratch.
+- [Simulated Annealing](#simulated-annealing-optimize_sars) produces the best layouts from scratch.
 - To optimize a preexisting layout while keeping it similar to the original, [Artificial Bee Colony](#artificial-bee-colony-optimize_abcrs) and [Genetic](#genetic-algorithm-optimize_geneticrs) optimization are best suited.
 
 ##### Artificial Bee Colony (`optimize_abc.rs`)
