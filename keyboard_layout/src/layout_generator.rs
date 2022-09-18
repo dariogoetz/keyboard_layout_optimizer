@@ -140,7 +140,7 @@ impl NeoLayoutGenerator {
                 let key_idx = self
                     .permutable_key_map
                     .get(given_char)
-                    .ok_or(LayoutError::UnsupportedChars(given_char.to_string()))?;
+                    .ok_or_else(|| LayoutError::UnsupportedChars(given_char.to_string()))?;
                 let given_key_layers = &self.keys[*key_idx as usize];
                 let new_key_layers = given_key_layers
                     .iter()

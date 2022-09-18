@@ -76,17 +76,17 @@ impl KeyboardYAML {
         lengths.insert(self.symmetries.concat().len());
         lengths.insert(self.unbalancing_positions.concat().len());
         if lengths.len() > 1 {
-            return Err(KeyboardError::WrongKeyNumber)?;
+            return Err(KeyboardError::WrongKeyNumber.into());
         }
 
         // Make sure there are no duplicates in `matrix_positions`.
         if contains_duplicates(&flat_matrix_positions) {
-            return Err(KeyboardError::DuplicateMatrixPositions)?;
+            return Err(KeyboardError::DuplicateMatrixPositions.into());
         }
 
         // Make sure there are no duplicates in `positions`.
         if contains_duplicates(&flat_positions) {
-            return Err(KeyboardError::DuplicatePositions)?;
+            return Err(KeyboardError::DuplicatePositions.into());
         }
 
         Ok(())
