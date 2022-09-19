@@ -1,6 +1,6 @@
 mod utils;
 
-use argmin::prelude::{ArgminKV, Error, IterState, Observe};
+use argmin::core::{observers::Observe, Error, State, KV};
 use genevo::prelude::*;
 use instant::Instant;
 use serde::Serialize;
@@ -22,7 +22,9 @@ use layout_evaluation::{
 
 use layout_optimization_common::PermutationLayoutGenerator;
 use layout_optimization_genetic::optimization as genevo_optimization;
-use layout_optimization_sa::optimization as sa_optimization;
+use layout_optimization_sa::optimization::{
+    self as sa_optimization, CustomObserver as SaCustomObserver, SaIterState,
+};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -124,11 +126,11 @@ impl NgramProvider {
     }
 
     pub fn with_text(eval_params_str: &str, text: &str) -> Result<NgramProvider, JsValue> {
-        let mut unigrams = Unigrams::from_text(&text)
+        let mut unigrams = Unigrams::from_text(text)
             .map_err(|e| format!("Could not generate unigrams from text: {:?}", e))?;
-        let mut bigrams = Bigrams::from_text(&text)
+        let mut bigrams = Bigrams::from_text(text)
             .map_err(|e| format!("Could not generate bigrams from text: {:?}", e))?;
-        let mut trigrams = Trigrams::from_text(&text)
+        let mut trigrams = Trigrams::from_text(text)
             .map_err(|e| format!("Could not generate trigrams from text: {:?}", e))?;
 
         let eval_params: EvaluationParameters = serde_yaml::from_str(eval_params_str)
@@ -314,12 +316,8 @@ struct SaObserver {
     new_best_callback: js_sys::Function,
 }
 
-impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
-    fn observe_iter(
-        &mut self,
-        state: &IterState<sa_optimization::AnnealingStruct>,
-        kv: &ArgminKV,
-    ) -> Result<(), Error> {
+impl Observe<SaIterState> for SaObserver {
+    fn observe_iter(&mut self, state: &SaIterState, kv: &KV) -> Result<(), Error> {
         if (state.iter > 0) && (self.last_update_call.elapsed().as_millis() > 500) {
             self.last_update_call = Instant::now();
             let this = JsValue::null();
@@ -327,7 +325,7 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
             let mut t_string = String::from("Not found.");
             for (key, value) in &kv.kv {
                 if *key == "t" {
-                    let t_num: f32 = value.parse().unwrap();
+                    let t_num: f32 = value.to_string().parse().unwrap();
                     let t_long_str = format!("{:.3}", t_num);
                     t_string = format!("{:.5}", t_long_str);
                 }
@@ -337,7 +335,10 @@ impl Observe<sa_optimization::AnnealingStruct> for SaObserver {
         }
         if state.is_best() && (state.param != state.prev_best_param) {
             let this = JsValue::null();
-            let layout_js = JsValue::from(self.layout_generator.generate_string(&state.param));
+            let layout_js = JsValue::from(
+                self.layout_generator
+                    .generate_string(state.param.as_ref().unwrap()),
+            );
             let cost_js = JsValue::from(state.cost);
             let _ = self.new_best_callback.call2(&this, &layout_js, &cost_js);
         }
@@ -394,7 +395,7 @@ pub fn sa_optimize(
         &layout_evaluator.evaluator,
         /* log_everything: */ false,
         Some(Cache::new()),
-        Some(Box::new(observer)),
+        Some(SaCustomObserver(Box::new(observer))),
     );
     let minus_one = JsValue::from(-1);
     let _ = update_callback.call1(&this, &minus_one);

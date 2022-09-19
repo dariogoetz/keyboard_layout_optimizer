@@ -10,8 +10,11 @@ use serde::Deserialize;
 use std::{fs::File, sync::Arc};
 
 use argmin::{
-    prelude::{ArgminKV, ArgminOp, Error, Executor, IterState, Observe, ObserverMode},
-    solver::simulatedannealing::{SATempFunc, SimulatedAnnealing},
+    core::{
+        observers::{Observe, ObserverMode},
+        CostFunction, Error, Executor, IterState, State, KV,
+    },
+    solver::simulatedannealing::{Anneal, SATempFunc, SimulatedAnnealing},
 };
 
 #[derive(Deserialize, Debug)]
@@ -70,15 +73,12 @@ pub struct AnnealingStruct {
     result_cache: Option<Cache<f64>>,
 }
 
-impl ArgminOp for AnnealingStruct {
+impl CostFunction for AnnealingStruct {
     type Param = Vec<usize>;
     type Output = f64;
-    type Hessian = ();
-    type Jacobian = ();
-    type Float = f64;
 
     /// Evaluate param (= the layout-vector).
-    fn apply(&self, param: &Self::Param) -> Result<Self::Output, Error> {
+    fn cost(&self, param: &Self::Param) -> Result<Self::Output, Error> {
         let evaluate_layout_str = |layout_str: &str| -> f64 {
             let l = self
                 .layout_generator
@@ -97,14 +97,22 @@ impl ArgminOp for AnnealingStruct {
 
         Ok(evaluation_result)
     }
+}
 
-    /// Modify param (~the layout).
-    fn modify(&self, param: &Self::Param, _temp: f64) -> Result<Self::Param, Error> {
+impl Anneal for AnnealingStruct {
+    type Param = Vec<usize>;
+    type Output = Vec<usize>;
+    type Float = f64;
+
+    /// Anneal a parameter vector, slightly changing it.
+    fn anneal(&self, param: &Self::Param, _temp: f64) -> Result<Self::Output, Error> {
         Ok(self
             .layout_generator
             .perform_n_swaps(param, self.key_switches))
     }
 }
+
+pub type SaIterState = IterState<Vec<usize>, (), (), (), f64>;
 
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct BestObserver {
@@ -112,17 +120,15 @@ struct BestObserver {
     layout_generator: PermutationLayoutGenerator,
 }
 
-impl Observe<AnnealingStruct> for BestObserver {
-    fn observe_iter(
-        &mut self,
-        state: &IterState<AnnealingStruct>,
-        _kv: &ArgminKV,
-    ) -> Result<(), Error> {
+impl Observe<SaIterState> for BestObserver {
+    fn observe_iter(&mut self, state: &SaIterState, _kv: &KV) -> Result<(), Error> {
         let reason = match state.iter {
             0 => "Starting layout:".blue(),
             _ => "New best:".green(),
         };
-        let best_layout = self.layout_generator.generate_string(&state.best_param);
+        let best_layout = self
+            .layout_generator
+            .generate_string(state.best_param.as_ref().unwrap());
         log::info!(
             "{} {} {} ({:>6.1})",
             format!("{}:", self.id).yellow().bold(),
@@ -134,14 +140,12 @@ impl Observe<AnnealingStruct> for BestObserver {
     }
 }
 
+pub struct CustomObserver(pub Box<dyn Observe<SaIterState>>);
+
 /// Necessary to avoid errors when importing a `custom_observer` to `optimize()`.
-impl Observe<AnnealingStruct> for Box<dyn Observe<AnnealingStruct>> {
-    fn observe_iter(
-        &mut self,
-        state: &IterState<AnnealingStruct>,
-        kv: &ArgminKV,
-    ) -> Result<(), Error> {
-        (*self).as_mut().observe_iter(state, kv)
+impl Observe<SaIterState> for CustomObserver {
+    fn observe_iter(&mut self, state: &SaIterState, kv: &KV) -> Result<(), Error> {
+        self.0.observe_iter(state, kv)
     }
 }
 
@@ -152,15 +156,15 @@ struct IterationObserver {
     log_everything: bool,
 }
 
-impl Observe<AnnealingStruct> for IterationObserver {
-    fn observe_iter(
-        &mut self,
-        state: &IterState<AnnealingStruct>,
-        kv: &ArgminKV,
-    ) -> Result<(), Error> {
+impl Observe<SaIterState> for IterationObserver {
+    fn observe_iter(&mut self, state: &SaIterState, kv: &KV) -> Result<(), Error> {
         if state.iter > 0 {
-            let layout = self.layout_generator.generate_string(&state.param);
-            let best_layout = self.layout_generator.generate_string(&state.best_param);
+            let layout = self
+                .layout_generator
+                .generate_string(state.param.as_ref().unwrap());
+            let best_layout = self
+                .layout_generator
+                .generate_string(state.best_param.as_ref().unwrap());
             /* Structure of ArgminKV.kv: Vec<(&'static str, String)>
             t: 111.38906945299198
             new_be: true
@@ -175,11 +179,11 @@ impl Observe<AnnealingStruct> for IterationObserver {
             ra_ac: false
             time: 0.533206799 */
             let mut temperature = String::from("Not found.");
-            let mut accepted = "Not found";
+            let mut accepted = String::from("Not found");
             for (key, value) in &kv.kv {
                 match *key {
                     "t" => temperature = format!("{:.5}", value),
-                    "acc" => accepted = value,
+                    "acc" => accepted = value.to_string(),
                     _ => {}
                 }
             }
@@ -267,7 +271,7 @@ pub fn optimize(
     evaluator: &Evaluator,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
-    custom_observer: Option<Box<dyn Observe<AnnealingStruct>>>,
+    custom_observer: Option<CustomObserver>,
 ) -> Layout {
     let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
     // Get initial Layout.
@@ -318,21 +322,26 @@ pub fn optimize(
     // Create new SA solver with some parameters (see docs for details)
     // This essentially just prepares the SA solver. It is not run yet, nor does it know anything about the problem it is about to solve.
     let rng = Xoshiro256PlusPlus::from_entropy();
-    let solver = SimulatedAnnealing::new(init_temp, rng)
+    let solver = SimulatedAnnealing::new_with_rng(init_temp, rng)
         .unwrap()
         // Optional: Define temperature function (defaults to `SATempFunc::TemperatureFast`)
-        .temp_func(SATempFunc::Exponential(0.998))
+        .with_temp_func(SATempFunc::Exponential(0.998))
         /////////////////////////
         // Stopping criteria   //
         /////////////////////////
         // Optional: stop if there was no accepted solution after [params.stall_accepted] iterations
-        .stall_accepted(params.stall_accepted);
+        .with_stall_accepted(params.stall_accepted);
 
     // Create and run the executor, which will apply the solver to the problem, given a starting point (`init_param`)
-    let mut executor = Executor::new(problem, solver, initial_indices)
-        .timer(false)
-        // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
-        .max_iters(params.max_iters);
+    let mut executor = Executor::new(problem, solver)
+        .configure(|state| {
+            state
+                // Set initial starting-param (~staring layout)
+                .param(initial_indices)
+                // Optional: Set maximum number of iterations (defaults to `std::u64::MAX`)
+                .max_iters(params.max_iters)
+        })
+        .timer(false);
     match custom_observer {
         // If a custom Observer was supplied, only use that Observer.
         Some(observer) => {
@@ -369,6 +378,6 @@ pub fn optimize(
     );
     let res = executor.run().unwrap();
 
-    let best_layout_param = res.state().get_best_param();
-    pm.generate_layout(&best_layout_param)
+    let best_layout_param = res.state().get_best_param().unwrap();
+    pm.generate_layout(best_layout_param)
 }
