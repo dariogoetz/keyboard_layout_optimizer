@@ -32,11 +32,11 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 - **movement pattern** - How comfortable is it to type individual bigrams? Which finger follows which? How many rows? Upwards/downwards?
 - **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
 - **hand disbalance** - Are left and right hands similarly loaded?
-- **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
 - **no handswitch after unbalancing key** - How often does no handswitch occur after a hand needed to move away from the home row?
 - **unbalancing after neighboring** - How often do unbalancing keys occur consecutively?
 - **irregularity** - How often are the first and the second bigram in a trigram "bad" (wrt. to all bigram metrics)?
 - **no handswitch in trigram** - How often does no handswitch happen within a trigram (and have a direction change in between)?
+- **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
 - **similar letters** - (learnability) Which keys are similar (in some sense), but lie in unsimilar locations (e.g. "a" - "ä" or "b" - "p")?
 - **similar letter-groups** - (learnability)Which groups of keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?<br>Used to be called "asymmetric keys".
 - **symmetric handswitches** - How often are consecutive keystrokes of different hands not symmetrical?
