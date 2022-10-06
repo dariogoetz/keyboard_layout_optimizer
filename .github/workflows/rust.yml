@@ -42,7 +42,7 @@ jobs:
     - uses: jetli/wasm-pack-action@v0.3.0
       with:
         # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
-        version: 'latest'
+        version: '0.10.1'
 
     - name: Build WASM
       run: wasm-pack build --release
