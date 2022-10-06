@@ -1,9 +1,11 @@
 # Keyboard Layout Optimizer
 
-Neo variant layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
-It supports layouts of the ["Neo"-family](https://neo-layout.org/), i.e. permutations of the base layer, where layers 2, 5, and 6 follow the permutation and layers 3 and 4 remain unchanged.
+Keyboard layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
+It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (that are activated by holding corresponding modifiers). 
 
-At the heart of the optimization lies a layout evaluation that involves multiple criteria on the frequencies of unigrams, bigrams, and trigrams.
+At the heart of the optimization lies a layout evaluation that involves multiple criteria/metrics on the frequencies of unigrams, bigrams, and trigrams. And with a little bit of Rust-knowledge, new metrics can easily be added.
+
+For the optimization, individual layers can be excluded from permutations, e.g. in the default configuration, permutations are performed in the base layer and layers 2, 5, and 6 whereas layers 3 and 4 remain unchanged (in the spirit of "Neo"-family layouts).
 
 ## Webapp - Evaluation and Optimization
 There is a webapp providing (a significant subset of) the evaluation and optimization functionalities at https://dariogoetz.github.io/keyboard_layout_optimizer.
@@ -17,34 +19,33 @@ Published results can be explored and compared at https://keyboard-layout-optimi
 The corresponding webserver's implementation is located in the `webui/layouts_webservice` crate.
 
 ## Features
-- evaluation of keyboard layouts of the ["Neo" family](https://neo-layout.org/)
-- evaluation based on prepared unigrams, bigrams, and trigrams or a text
-- fast evaluation (~100ms per layout for standard corpus)
+- evaluation based on unigrams, bigrams, and trigrams
+- support for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
+- flexible configuration options for metrics and keyboards (e.g. configs for ergo-boards)
+- fast evaluation (~100ms per layout including trigram metrics even for large corpora &gt; 100 MB)
 - layout optimization using [various algorithms](#optimization-algorithms)
-- accounting for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
 
 ## Metrics
-- **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
-- **similar letters** - Which keys are similar (in some sense), but lie in unsimilar locations (e.g. "a" - "ä" or "b" - "p")?
-- **similar letter-groups** - Which groups of keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?<br>Used to be called "asymmetric keys".
 - **key costs** - How do the letter frequencies relate to the "cost" associated to the keys?
-- **hand disbalance** - Are left and right hands similarly loaded?
-- **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
 - **finger repeats** - How often are fingers in action consecutively?
 - **finger repeats top and bottom** - How often does the same finger need to move from top to bottom row (or vice versa) consecutively?
-- **movement pattern** - How often are (near-)neighboring fingers used one after the other?
+- **movement pattern** - How comfortable is it to type individual bigrams? Which finger follows which? How many rows? Upwards/downwards?
+- **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
+- **hand disbalance** - Are left and right hands similarly loaded?
+- **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
 - **no handswitch after unbalancing key** - How often does no handswitch occur after a hand needed to move away from the home row?
 - **unbalancing after neighboring** - How often do unbalancing keys occur consecutively?
-- **line changes** - How far (vertically) are consecutive keystrokes of the same hand apart?
-- **asymmetric bigrams** - How often are consecutive keystrokes of different hands not symmetrical?
-- **manual bigram penalty** - How often do some key-combinations occur that are hard to type but do not fall into the other metrics cases?
-- **no handswitch in trigram** - How often does no handswitch happen within a trigram (and have a direction change in between)?
 - **irregularity** - How often are the first and the second bigram in a trigram "bad" (wrt. to all bigram metrics)?
+- **no handswitch in trigram** - How often does no handswitch happen within a trigram (and have a direction change in between)?
+- **similar letters** - (learnability) Which keys are similar (in some sense), but lie in unsimilar locations (e.g. "a" - "ä" or "b" - "p")?
+- **similar letter-groups** - (learnability)Which groups of keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?<br>Used to be called "asymmetric keys".
+- **symmetric handswitches** - How often are consecutive keystrokes of different hands not symmetrical?
+- **manual bigram penalty** - How often do some key-combinations occur that are hard to type but do not fall into the other metrics cases?
 
 ## Installation
 1. Clone the repository
     ``` sh
-    git clone https://github.com/dariogoetz/keyboard_layout_optimizer.git --recurse-submodules
+    git clone https://github.com/dariogoetz/keyboard_layout_optimizer.git
     ```
 1. Build the binaries (add `CC=gcc` in the beginning if `cc` is not installed, but `gcc` is)
     ``` sh
@@ -115,7 +116,7 @@ There is also an alternative evaluation config file named `arnebab.yml` that aim
 evaluator.
 
 ### Layout Optimization Binary
-The available optimize-binaries include `optimize_abc.rs`, `optimize_genetic.rs`, and `optimize_sa.rs`.
+The available optimize-binaries include `optimize_genetic.rs`, `optimize_sa.rs`, and `optimize_abc.rs`.
 If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
 Optional commandline parameters can be explored with the `-h` option.
 
@@ -128,15 +129,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions
 #### Optimization Algorithms
 Choosing an algorithm:
 - [Simulated Annealing](#simulated-annealing-optimize_sars) produces the best layouts from scratch.
-- To optimize a preexisting layout while keeping it similar to the original, [Artificial Bee Colony](#artificial-bee-colony-optimize_abcrs) and [Genetic](#genetic-algorithm-optimize_geneticrs) optimization are best suited.
-
-##### Artificial Bee Colony (`optimize_abc.rs`)
-Currently, a few of the options available in the other binaries are not yet implemented for this optimization.
-
-Example of an optimization (starting from a random layout, fixing "," and "."):
-``` sh
-RUST_LOG=INFO ./target/release/optimize_abc -f ",."
-```
+- To optimize a preexisting layout while keeping it similar to the original, [Genetic](#genetic-algorithm-optimize_geneticrs) optimization is best suited.
 
 ##### Genetic Algorithm (`optimize_genetic.rs`)
 Example (starting from Bone layout, fixing "," and "."):
@@ -156,11 +149,19 @@ In contrast to other binaries, using this algorithm you can optimize multiple st
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" -s "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" -s "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
 
+##### Artificial Bee Colony (`optimize_abc.rs`)
+This algorithm is not regarded "production-ready" and only a few of the options available in the other binaries are implemented.
+
+Example of an optimization (starting from a random layout, fixing "," and "."):
+``` sh
+RUST_LOG=INFO ./target/release/optimize_abc -f ",."
+```
+
 #### Configuration
 The parameters of the corresponding optimization process can be configured in the files:
-* `abc.yml`
 * `genetic.yml`
 * `sa.yml`
+* `abc.yml`
 
 They can be found inside the config-directory (`config/optimization/`).
 
@@ -181,9 +182,9 @@ optimization binaries.
 The project includes several binaries within the `evolve_keyboard_layout` crate:
 1. `plot` - Plots six layers (neo-layouts have six layers) of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
-1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
 1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
+1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
 1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
 1. `ngrams` - Generates ngram-frequency files (used as standard input to the evaluation) from a
    given text file
