@@ -10,47 +10,47 @@ import sa_opt_params from '../../../config/optimization/sa_web.yml'
 import Worker from "./worker.js"
 
 const LAYOUT_CONFIGS = {
-    standard: config_standard_keyboard,
-    ortho: config_ortho,
-    moonlander: config_moonlander,
-    crkbd: config_crkbd,
+  standard: config_standard_keyboard,
+  ortho: config_ortho,
+  moonlander: config_moonlander,
+  crkbd: config_crkbd,
 }
 
 const OPTIMIZATION_ALGORITHM_PARAMS = {
-    "genevo": genevo_opt_params,
-    "simulated_annealing": sa_opt_params,
+  "genevo": genevo_opt_params,
+  "simulated_annealing": sa_opt_params,
 }
 
 const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
 
 const NGRAMS = [
-    { key: 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4', label: 'Blend (deu/eng 60/40)', description: 'Ngram frequencies from various German and English corpora in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_wiki_0.6_eng_wiki_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_wiki_1m', label: 'Wikipedia (deu)', description: 'Ngram frequencies from German Wikipedia 2021. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'eng_wiki_1m', label: 'Wikipedia (eng)', description: 'Ngram frequencies from English Wikipedia 2016. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_web_0.6_eng_web_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_web_1m', label: 'Web-public (deu)', description: 'Ngram frequencies from German "Web-public 2019". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'eng_web_1m', label: 'Web-public (eng)', description: 'Ngram frequencies from English "Web-public 2018". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_mixed_0.6_eng_news_typical_0.4', label: 'Mixed/News typical (deu/eng 60/40)', description: 'Ngram frequencies from German "Mixed Typical (2011)" and English "News Typical (2016)" in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'deu_mixed_1m', label: 'Mixed Typical (deu)', description: 'Ngram frequencies from German "Mixed 2011". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'eng_news_typical_1m', label: 'News Typical (eng)', description: 'Ngram frequencies from English "News Typical 2016". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
-    { key: 'irc_neo', label: '#neo - IRC', description: 'Ngram frequencies from the #neo IRC channel. Mostly in German.' },
-    { key: 'arne_no_special', label: 'ArneBab', description: 'Ngram frequencies used in ArneBabs optimizer. Sourced from <a href="https://hg.sr.ht/~arnebab/evolve-keyboard-layout">ArneBabs optimizer</a>.' },
+  { key: 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4', label: 'Blend (deu/eng 60/40)', description: 'Ngram frequencies from various German and English corpora in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_wiki_0.6_eng_wiki_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_wiki_1m', label: 'Wikipedia (deu)', description: 'Ngram frequencies from German Wikipedia 2021. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'eng_wiki_1m', label: 'Wikipedia (eng)', description: 'Ngram frequencies from English Wikipedia 2016. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_web_0.6_eng_web_0.4', label: 'Wikipedia (deu/eng 60/40)', description: 'Ngram frequencies from German (2021) and English (2016) Wikipedia in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_web_1m', label: 'Web-public (deu)', description: 'Ngram frequencies from German "Web-public 2019". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'eng_web_1m', label: 'Web-public (eng)', description: 'Ngram frequencies from English "Web-public 2018". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_mixed_0.6_eng_news_typical_0.4', label: 'Mixed/News typical (deu/eng 60/40)', description: 'Ngram frequencies from German "Mixed Typical (2011)" and English "News Typical (2016)" in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'deu_mixed_1m', label: 'Mixed Typical (deu)', description: 'Ngram frequencies from German "Mixed 2011". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'eng_news_typical_1m', label: 'News Typical (eng)', description: 'Ngram frequencies from English "News Typical 2016". Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
+  { key: 'irc_neo', label: '#neo - IRC', description: 'Ngram frequencies from the #neo IRC channel. Mostly in German.' },
+  { key: 'arne_no_special', label: 'ArneBab', description: 'Ngram frequencies used in ArneBabs optimizer. Sourced from <a href="https://hg.sr.ht/~arnebab/evolve-keyboard-layout">ArneBabs optimizer</a>.' },
 ]
 const DEFAULT_NGRAM = 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4'
 
 function setDifference(setA, setB) {
-    var _difference = new Set(setA);
-    for (var elem of setB) {
-        _difference.delete(elem);
-    }
-    return _difference;
+  var _difference = new Set(setA);
+  for (var elem of setB) {
+    _difference.delete(elem);
+  }
+  return _difference;
 }
 
 Vue.use(VueCodemirror)
 
 Vue.component('evaluator-app', {
-    template: `
+  template: `
 <b-container fluid>
 
   <h1>Keyboard Layout Evaluator</h1>
@@ -151,417 +151,417 @@ Vue.component('evaluator-app', {
 
 </b-container>
 `,
-    props: {
-        relative: { type: Boolean, default: false },
-        logscale: { type: Boolean, default: false },
-    },
-    data() {
-        // LAYOUT_CONFIGS is defined in "vue-components.js"
-        let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
-        let optParams = Object.assign({}, OPTIMIZATION_ALGORITHM_PARAMS);
-        return {
-            details: [],
-            inputLayoutRaw: null,
-            showInputValidState: false,
-            wasm: null,
-            rawWorker: null,
-            worker: null,
-            ngramProviderInitialized: false,
-            evaluatorInitialized: false,
-            ngramType: null,
-            ngrams: null,
-            corpusText: null,
-            evalParamsStr: null,
-            optMode: null,
-            permutableKeys: null,
-            optParams,
-            selectedLayoutConfig: null,
-            layoutConfigs,
-            loading: 1,
-            saOptimizationOngoing: false,
-            optStep: -1,
-            temperatureStr: "",
-            optTotalSteps: 0,
-            optFixed: ",.",
-            optCancel: false,
-        }
-    },
-    computed: {
-        chartStyles() {
-            return {
-                height: "600px",
-                position: "relative"
-            }
-        },
-
-        inputLayout() {
-            let layoutString = (this.inputLayoutRaw || "").replace(" ", "")
-            layoutString = layoutString.toLowerCase()
-            return layoutString
-        },
-
-        layoutConfig() {
-            return this.layoutConfigs[this.selectedLayoutConfig]
-        },
-
-        currentOptParams() {
-            return this.optParams[this.optMode]
-        },
-
-        invalidInputFeedback() {
-            let permutableKeys = new Set(this.permutableKeys)
-            let givenKeys = new Set()
-            let duplicates = new Set()
-
-            for (let i = 0; i < this.inputLayout.length; i++) {
-                let c = this.inputLayout.charAt(i)
-                if (givenKeys.has(c)) {
-                    duplicates.add(c)
-                } else {
-                    givenKeys.add(c)
-                }
-            }
-
-            duplicates = Array.from(duplicates).sort()
-            let missing = Array.from(setDifference(permutableKeys, givenKeys)).sort()
-            let unknown = Array.from(setDifference(givenKeys, permutableKeys)).sort()
-
-            if (duplicates.length === 0 && missing.length === 0 && unknown.length === 0) {
-                return null
-            }
-
-            let msg = ""
-            if (duplicates.length) {
-                msg += `Duplicates: "${duplicates.join('')}". `
-            }
-            if (missing.length) {
-                msg += `Missing: "${missing.join('')}". `
-            }
-            if (unknown.length) {
-                msg += `Unknown: "${unknown.join('')}". `
-            }
-
-            return msg
-        },
-
-        inputLayoutValid() {
-            if (!this.showInputValidState) {
-                return null
-            } else if (this.invalidInputFeedback === null) {
-                return true
-            } else {
-                return false
-            }
-        }
-
-    },
-
-    async created() {
-        this.evalParamsStr = eval_params
-
-        this.wasm = await import("evolve-keyboard-layout-wasm")
-        this.createWorkers();
-
-        // reduce initial value of this.loading
-        this.loading -= 1
-    },
-
-    methods: {
-        async createWorkers() {
-            this.rawWorker = new Worker('worker.js')
-            this.worker = Comlink.wrap(this.rawWorker)
-            await this.worker.init()
-            await this.initNgramProvider()
-            await this.initLayoutEvaluator()
-        },
-
-        randomInput(fix) {
-            let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
-            if (fix) {
-                array = 'zluaqwbdgyjßcrieomntshvxüäöpfk'.split('')
-
-            }
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            let res = array.join('')
-            if (fix) {
-                res = array.slice(0, array.length - 1).join('') + ',.' + array[array.length - 1]
-            }
-            this.inputLayoutRaw = res
-        },
-        setInput(layout) {
-            this.inputLayoutRaw = layout
-        },
-        async evaluateInput() {
-            this.showInputValidState = true
-            // check if the current layout is already available in this.details
-            let existing = this.details.filter((d) => d.layout == this.inputLayout)
-            if (existing.length > 0) {
-                this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, { variant: "primary" })
-                this.showInputValidState = false
-            } else {
-                try {
-                    let details = await this.evaluate(this.inputLayout)
-                    this.details.push(details)
-                    this.showInputValidState = false
-                } catch (err) {
-                    console.error(err)
-                }
-            }
-        },
-
-        async evaluateExisting() {
-            if (!this.evaluatorInitialized || this.worker === null) {
-                return
-            }
-            let promises = []
-            this.details.forEach((d) => {
-                let promise = this.evaluate(d.layout)
-                promises.push(promise)
-            })
-
-            try {
-                let details = await Promise.all(promises)
-                this.details = details
-            } catch (err) {
-                console.error(err)
-            }
-        },
-
-        async evaluate(layout) {
-            let promise = new Promise(async (resolve, reject) => {
-
-                if (this.inputLayoutValid !== null && !this.inputLayoutValid) {
-                    this.$bvToast.toast("Could not evaluate Layout: " + this.invalidInputFeedback, { variant: "danger" })
-                    return
-                }
-
-                this.$bvToast.toast(`Evaluating layout "${layout}"`, { variant: "primary" })
-                this.loading += 1
-                try {
-                    let res = await this.worker.evaluateLayout(layout)
-                    res.layout = layout
-                    this.loading -= 1
-                    resolve(res)
-                } catch (err) {
-                    this.$bvToast.toast(`Could not generate a valid layout: ${err}`, { variant: "danger" })
-                    this.loading -= 1
-                    reject(err)
-                }
-            })
-            return promise
-        },
-
-        async initNgramProvider() {
-            if (this.ngrams === null || this.worker === null) {
-                return
-            }
-            this.loading += 1
-            let data = this.ngrams
-            if (this.ngramType === "from_text") {
-                data = this.corpusText
-            }
-            try {
-                await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
-                this.ngramProviderInitialized = true
-                this.loading -= 1
-            } catch (err) {
-                this.$bvToast.toast(`Could not initialize ngram provider: ${err}`, { variant: "danger" })
-                this.loading -= 1
-                throw err
-            }
-        },
-
-        async initLayoutEvaluator() {
-            if (!this.ngramProviderInitialized || this.worker === null) {
-                return
-            }
-            this.loading += 1
-            try {
-                await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
-                this.permutableKeys = await this.worker.permutableKeys()
-                this.evaluatorInitialized = true
-                this.loading -= 1
-            } catch (err) {
-                this.$bvToast.toast(`Could not initialize layout evaluator: ${err}`, { variant: "danger" })
-                this.loading -= 1
-                throw err
-            }
-        },
-
-        async updateEvalParams(evalParamsStr) {
-            this.evalParamsStr = evalParamsStr
-
-            try {
-                await this.initNgramProvider()
-                await this.initLayoutEvaluator()
-                await this.evaluateExisting()
-                this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
-            } catch (err) {
-                this.$bvToast.toast("Did not update evaluation parameters", { variant: "danger" })
-            }
-        },
-
-        updateOptParams(newOptParamsStr) {
-            this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
-            this.optParams[this.optMode] = newOptParamsStr;
-        },
-
-        async updateNgramProviderParams(ngramType, ngramData) {
-            this.ngramType = ngramType
-
-            if (ngramType === "from_text") {
-                this.corpusText = ngramData
-            } else {
-                this.ngrams = ngramData
-            }
-
-            try {
-                await this.initNgramProvider()
-                await this.initLayoutEvaluator()
-                await this.evaluateExisting()
-                this.$bvToast.toast("Saved ngram parameters", { variant: "primary" })
-            } catch (err) {
-                this.$bvToast.toast("Did not update ngram parameters", { variant: "danger" })
-            }
-        },
-
-        async updateLayoutConfig(layoutConfig) {
-            this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
-
-            try {
-                await this.initLayoutEvaluator()
-                await this.evaluateExisting()
-                this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
-            } catch (err) {
-                this.$bvToast.toast("Did not update layout configuration", { variant: "danger" })
-            }
-        },
-
-        async selectLayoutConfigType(selectedLayoutConfig) {
-            this.selectedLayoutConfig = selectedLayoutConfig
-
-            try {
-                await this.initLayoutEvaluator()
-                await this.evaluateExisting()
-                this.$bvToast.toast(`Switched to layout configuration ${selectedLayoutConfig}`, { variant: "primary" })
-            } catch (err) {
-                this.$bvToast.toast(`Did not switch to layout configuration ${selectedLayoutConfig}`, { variant: "danger" })
-            }
-        },
-
-        selectOptimizationAlgorithm(algorithmKey, algorithmLabel) {
-            if (this.optMode !== null) {
-                this.$bvToast.toast(`Switched to ${algorithmLabel}`, { variant: "primary" })
-            }
-            this.optMode = algorithmKey;
-        },
-
-        removeLayout(layout) {
-            this.details = this.details.filter((d) => d.layout !== layout)
-        },
-
-        async startOptimization() {
-            // Check if given layout_str is valid
-            try {
-                this.showInputValidState = true
-                await this.evaluate(this.inputLayout)
-                this.showInputValidState = false
-            } catch (err) {
-                this.optStep = -1
-                this.optCancel = false
-                return
-            }
-            this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
-
-            if (this.optMode === "simulated_annealing") {
-                this.saOptimization()
-            } else if (this.optMode === "genevo") {
-                this.genevoOtimization()
-            } else {
-                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
-            }
-        },
-        stopOptimization() {
-            if (this.optMode === "simulated_annealing") {
-                this.stopSaOptimization()
-            } else if (this.optMode === "genevo") {
-                this.stopGenevoOtimization()
-            } else {
-                this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
-            }
-        },
-
-        async saOptimization() {
-            this.saOptimizationOngoing = true
-            await this.worker.saOptimize(
-                this.inputLayout,
-                this.optFixed,
-                this.currentOptParams,
-                Comlink.proxy(() => { }),
-                Comlink.proxy(this.updateInfo),
-                Comlink.proxy(this.setNewBest),
-            )
-            this.$bvToast.toast("Optimization finished", { variant: "primary" })
-            this.evaluateInput();
-            this.saOptimizationOngoing = false
-        },
-        updateInfo(stepNr, tStr) {
-            this.optStep = stepNr
-            this.temperatureStr = tStr
-        },
-        setNewBest(layout, cost) {
-            this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "primary" })
-            this.inputLayoutRaw = layout
-        },
-        stopSaOptimization() {
-            this.$bvToast.toast("Stopping optimization", { variant: "primary" })
-            this.rawWorker.terminate()
-            this.createWorkers().then((_data) => {
-                this.$bvToast.toast("Optimization finished", { variant: "primary" });
-                this.optStep = -1;
-                this.saOptimizationOngoing = false
-            })
-        },
-
-        async genevoOtimization() {
-            const optParams = await this.worker.initGenLayoutOptimizer(
-                this.inputLayout,
-                this.optFixed,
-                this.currentOptParams
-            )
-            this.optTotalSteps = optParams.generation_limit
-            this.optStep = 1
-            this.optCancel = false
-
-            let res
-            do {
-                res = await this.worker.genOptimizationStep()
-                if (res !== null) {
-                    if (res.layout !== this.inputLayout) {
-                        this.$bvToast.toast(`New layout found: ${res.layout}`, { variant: "primary" })
-                        this.inputLayoutRaw = res.layout
-                    }
-                    this.optStep += 1
-                }
-            } while (res !== null && !this.optCancel)
-
-            this.$bvToast.toast("Optimization finished", { variant: "primary" })
-            this.optStep = -1
-            this.optCancel = false
-            this.evaluateInput();
-        },
-        stopGenevoOtimization() {
-            this.$bvToast.toast("Stopping optimization", { variant: "primary" })
-            this.optCancel = true
-        },
+  props: {
+    relative: { type: Boolean, default: false },
+    logscale: { type: Boolean, default: false },
+  },
+  data() {
+    // LAYOUT_CONFIGS is defined in "vue-components.js"
+    let layoutConfigs = Object.assign({}, LAYOUT_CONFIGS)
+    let optParams = Object.assign({}, OPTIMIZATION_ALGORITHM_PARAMS);
+    return {
+      details: [],
+      inputLayoutRaw: null,
+      showInputValidState: false,
+      wasm: null,
+      rawWorker: null,
+      worker: null,
+      ngramProviderInitialized: false,
+      evaluatorInitialized: false,
+      ngramType: null,
+      ngrams: null,
+      corpusText: null,
+      evalParamsStr: null,
+      optMode: null,
+      permutableKeys: null,
+      optParams,
+      selectedLayoutConfig: null,
+      layoutConfigs,
+      loading: 1,
+      saOptimizationOngoing: false,
+      optStep: -1,
+      temperatureStr: "",
+      optTotalSteps: 0,
+      optFixed: ",.",
+      optCancel: false,
     }
+  },
+  computed: {
+    chartStyles() {
+      return {
+        height: "600px",
+        position: "relative"
+      }
+    },
+
+    inputLayout() {
+      let layoutString = (this.inputLayoutRaw || "").replace(" ", "")
+      layoutString = layoutString.toLowerCase()
+      return layoutString
+    },
+
+    layoutConfig() {
+      return this.layoutConfigs[this.selectedLayoutConfig]
+    },
+
+    currentOptParams() {
+      return this.optParams[this.optMode]
+    },
+
+    invalidInputFeedback() {
+      let permutableKeys = new Set(this.permutableKeys)
+      let givenKeys = new Set()
+      let duplicates = new Set()
+
+      for (let i = 0; i < this.inputLayout.length; i++) {
+        let c = this.inputLayout.charAt(i)
+        if (givenKeys.has(c)) {
+          duplicates.add(c)
+        } else {
+          givenKeys.add(c)
+        }
+      }
+
+      duplicates = Array.from(duplicates).sort()
+      let missing = Array.from(setDifference(permutableKeys, givenKeys)).sort()
+      let unknown = Array.from(setDifference(givenKeys, permutableKeys)).sort()
+
+      if (duplicates.length === 0 && missing.length === 0 && unknown.length === 0) {
+        return null
+      }
+
+      let msg = ""
+      if (duplicates.length) {
+        msg += `Duplicates: "${duplicates.join('')}". `
+      }
+      if (missing.length) {
+        msg += `Missing: "${missing.join('')}". `
+      }
+      if (unknown.length) {
+        msg += `Unknown: "${unknown.join('')}". `
+      }
+
+      return msg
+    },
+
+    inputLayoutValid() {
+      if (!this.showInputValidState) {
+        return null
+      } else if (this.invalidInputFeedback === null) {
+        return true
+      } else {
+        return false
+      }
+    }
+
+  },
+
+  async created() {
+    this.evalParamsStr = eval_params
+
+    this.wasm = await import("evolve-keyboard-layout-wasm")
+    this.createWorkers();
+
+    // reduce initial value of this.loading
+    this.loading -= 1
+  },
+
+  methods: {
+    async createWorkers() {
+      this.rawWorker = new Worker('worker.js')
+      this.worker = Comlink.wrap(this.rawWorker)
+      await this.worker.init()
+      await this.initNgramProvider()
+      await this.initLayoutEvaluator()
+    },
+
+    randomInput(fix) {
+      let array = 'zluaqwbdgyjßcrieomntshvxüäöpf,.k'.split('')
+      if (fix) {
+        array = 'zluaqwbdgyjßcrieomntshvxüäöpfk'.split('')
+
+      }
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      let res = array.join('')
+      if (fix) {
+        res = array.slice(0, array.length - 1).join('') + ',.' + array[array.length - 1]
+      }
+      this.inputLayoutRaw = res
+    },
+    setInput(layout) {
+      this.inputLayoutRaw = layout
+    },
+    async evaluateInput() {
+      this.showInputValidState = true
+      // check if the current layout is already available in this.details
+      let existing = this.details.filter((d) => d.layout == this.inputLayout)
+      if (existing.length > 0) {
+        this.$bvToast.toast(`Layout '${this.inputLayout}' is already available`, { variant: "primary" })
+        this.showInputValidState = false
+      } else {
+        try {
+          let details = await this.evaluate(this.inputLayout)
+          this.details.push(details)
+          this.showInputValidState = false
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    },
+
+    async evaluateExisting() {
+      if (!this.evaluatorInitialized || this.worker === null) {
+        return
+      }
+      let promises = []
+      this.details.forEach((d) => {
+        let promise = this.evaluate(d.layout)
+        promises.push(promise)
+      })
+
+      try {
+        let details = await Promise.all(promises)
+        this.details = details
+      } catch (err) {
+        console.error(err)
+      }
+    },
+
+    async evaluate(layout) {
+      let promise = new Promise(async (resolve, reject) => {
+
+        if (this.inputLayoutValid !== null && !this.inputLayoutValid) {
+          this.$bvToast.toast("Could not evaluate Layout: " + this.invalidInputFeedback, { variant: "danger" })
+          return
+        }
+
+        this.$bvToast.toast(`Evaluating layout "${layout}"`, { variant: "primary" })
+        this.loading += 1
+        try {
+          let res = await this.worker.evaluateLayout(layout)
+          res.layout = layout
+          this.loading -= 1
+          resolve(res)
+        } catch (err) {
+          this.$bvToast.toast(`Could not generate a valid layout: ${err}`, { variant: "danger" })
+          this.loading -= 1
+          reject(err)
+        }
+      })
+      return promise
+    },
+
+    async initNgramProvider() {
+      if (this.ngrams === null || this.worker === null) {
+        return
+      }
+      this.loading += 1
+      let data = this.ngrams
+      if (this.ngramType === "from_text") {
+        data = this.corpusText
+      }
+      try {
+        await this.worker.initNgramProvider(this.ngramType, this.evalParamsStr, data)
+        this.ngramProviderInitialized = true
+        this.loading -= 1
+      } catch (err) {
+        this.$bvToast.toast(`Could not initialize ngram provider: ${err}`, { variant: "danger" })
+        this.loading -= 1
+        throw err
+      }
+    },
+
+    async initLayoutEvaluator() {
+      if (!this.ngramProviderInitialized || this.worker === null) {
+        return
+      }
+      this.loading += 1
+      try {
+        await this.worker.initLayoutEvaluator(this.layoutConfig, this.evalParamsStr)
+        this.permutableKeys = await this.worker.permutableKeys()
+        this.evaluatorInitialized = true
+        this.loading -= 1
+      } catch (err) {
+        this.$bvToast.toast(`Could not initialize layout evaluator: ${err}`, { variant: "danger" })
+        this.loading -= 1
+        throw err
+      }
+    },
+
+    async updateEvalParams(evalParamsStr) {
+      this.evalParamsStr = evalParamsStr
+
+      try {
+        await this.initNgramProvider()
+        await this.initLayoutEvaluator()
+        await this.evaluateExisting()
+        this.$bvToast.toast("Saved evaluation parameters", { variant: "primary" })
+      } catch (err) {
+        this.$bvToast.toast("Did not update evaluation parameters", { variant: "danger" })
+      }
+    },
+
+    updateOptParams(newOptParamsStr) {
+      this.$bvToast.toast("Saved new optimization parameters", { variant: "primary" })
+      this.optParams[this.optMode] = newOptParamsStr;
+    },
+
+    async updateNgramProviderParams(ngramType, ngramData) {
+      this.ngramType = ngramType
+
+      if (ngramType === "from_text") {
+        this.corpusText = ngramData
+      } else {
+        this.ngrams = ngramData
+      }
+
+      try {
+        await this.initNgramProvider()
+        await this.initLayoutEvaluator()
+        await this.evaluateExisting()
+        this.$bvToast.toast("Saved ngram parameters", { variant: "primary" })
+      } catch (err) {
+        this.$bvToast.toast("Did not update ngram parameters", { variant: "danger" })
+      }
+    },
+
+    async updateLayoutConfig(layoutConfig) {
+      this.layoutConfigs[this.selectedLayoutConfig] = layoutConfig
+
+      try {
+        await this.initLayoutEvaluator()
+        await this.evaluateExisting()
+        this.$bvToast.toast("Saved layout configuration", { variant: "primary" })
+      } catch (err) {
+        this.$bvToast.toast("Did not update layout configuration", { variant: "danger" })
+      }
+    },
+
+    async selectLayoutConfigType(selectedLayoutConfig) {
+      this.selectedLayoutConfig = selectedLayoutConfig
+
+      try {
+        await this.initLayoutEvaluator()
+        await this.evaluateExisting()
+        this.$bvToast.toast(`Switched to layout configuration ${selectedLayoutConfig}`, { variant: "primary" })
+      } catch (err) {
+        this.$bvToast.toast(`Did not switch to layout configuration ${selectedLayoutConfig}`, { variant: "danger" })
+      }
+    },
+
+    selectOptimizationAlgorithm(algorithmKey, algorithmLabel) {
+      if (this.optMode !== null) {
+        this.$bvToast.toast(`Switched to ${algorithmLabel}`, { variant: "primary" })
+      }
+      this.optMode = algorithmKey;
+    },
+
+    removeLayout(layout) {
+      this.details = this.details.filter((d) => d.layout !== layout)
+    },
+
+    async startOptimization() {
+      // Check if given layout_str is valid
+      try {
+        this.showInputValidState = true
+        await this.evaluate(this.inputLayout)
+        this.showInputValidState = false
+      } catch (err) {
+        this.optStep = -1
+        this.optCancel = false
+        return
+      }
+      this.$bvToast.toast(`Starting optimization of ${this.inputLayout}`, { variant: "primary" })
+
+      if (this.optMode === "simulated_annealing") {
+        this.saOptimization()
+      } else if (this.optMode === "genevo") {
+        this.genevoOtimization()
+      } else {
+        this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+      }
+    },
+    stopOptimization() {
+      if (this.optMode === "simulated_annealing") {
+        this.stopSaOptimization()
+      } else if (this.optMode === "genevo") {
+        this.stopGenevoOtimization()
+      } else {
+        this.$bvToast.toast(`Error: Could not recognize mode of optimization: ${this.optMode}`, { variant: "danger" })
+      }
+    },
+
+    async saOptimization() {
+      this.saOptimizationOngoing = true
+      await this.worker.saOptimize(
+        this.inputLayout,
+        this.optFixed,
+        this.currentOptParams,
+        Comlink.proxy(() => { }),
+        Comlink.proxy(this.updateInfo),
+        Comlink.proxy(this.setNewBest),
+      )
+      this.$bvToast.toast("Optimization finished", { variant: "primary" })
+      this.evaluateInput();
+      this.saOptimizationOngoing = false
+    },
+    updateInfo(stepNr, tStr) {
+      this.optStep = stepNr
+      this.temperatureStr = tStr
+    },
+    setNewBest(layout, cost) {
+      this.$bvToast.toast(`New best layout found: ${layout}.\nCost: ${cost}`, { variant: "primary" })
+      this.inputLayoutRaw = layout
+    },
+    stopSaOptimization() {
+      this.$bvToast.toast("Stopping optimization", { variant: "primary" })
+      this.rawWorker.terminate()
+      this.createWorkers().then((_data) => {
+        this.$bvToast.toast("Optimization finished", { variant: "primary" });
+        this.optStep = -1;
+        this.saOptimizationOngoing = false
+      })
+    },
+
+    async genevoOtimization() {
+      const optParams = await this.worker.initGenLayoutOptimizer(
+        this.inputLayout,
+        this.optFixed,
+        this.currentOptParams
+      )
+      this.optTotalSteps = optParams.generation_limit
+      this.optStep = 1
+      this.optCancel = false
+
+      let res
+      do {
+        res = await this.worker.genOptimizationStep()
+        if (res !== null) {
+          if (res.layout !== this.inputLayout) {
+            this.$bvToast.toast(`New layout found: ${res.layout}`, { variant: "primary" })
+            this.inputLayoutRaw = res.layout
+          }
+          this.optStep += 1
+        }
+      } while (res !== null && !this.optCancel)
+
+      this.$bvToast.toast("Optimization finished", { variant: "primary" })
+      this.optStep = -1
+      this.optCancel = false
+      this.evaluateInput();
+    },
+    stopGenevoOtimization() {
+      this.$bvToast.toast("Stopping optimization", { variant: "primary" })
+      this.optCancel = true
+    },
+  }
 })
 
 Vue.component('layout-button', {
-    template: `
+  template: `
       <div>
         <b-button-group size="sm" class="mx-1">
           <b-button disabled variant="outline-dark">{{layout}}</b-button>
@@ -574,61 +574,61 @@ Vue.component('layout-button', {
         </b-modal>
       </div>
     `,
-    props: {
-        layout: { type: String, default: "", required: true },
-        layoutConfig: { type: String, required: true },
+  props: {
+    layout: { type: String, default: "", required: true },
+    layoutConfig: { type: String, required: true },
+  },
+  data() {
+    return {
+      publishName: null,
+      showNameState: false,
+      showModal: false,
+    }
+  },
+  computed: {
+    nameState() {
+      if (!this.showNameState) {
+        return null
+      } else if (this.publishName === null || this.publishName.length === 0) {
+        return false
+      } else {
+        return true
+      }
     },
-    data() {
-        return {
-            publishName: null,
-            showNameState: false,
-            showModal: false,
+  },
+  methods: {
+    remove() {
+      this.$emit("remove", this.layout)
+    },
+    async publish(bvModalEvt) {
+      this.showNameState = true
+      if (!this.nameState) {
+        bvModalEvt.preventDefault()
+        return
+      }
+      try {
+        let res = await fetch(PUBLISH_URL, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ layout: this.layout, published_by: this.publishName, layout_config: this.layoutConfig })
+        })
+        let resData = await res.json()
+        if (resData.published_by !== this.publishName) {
+          this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'warning' })
+        } else {
+          this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'primary' })
         }
-    },
-    computed: {
-        nameState() {
-            if (!this.showNameState) {
-                return null
-            } else if (this.publishName === null || this.publishName.length === 0) {
-                return false
-            } else {
-                return true
-            }
-        },
-    },
-    methods: {
-        remove() {
-            this.$emit("remove", this.layout)
-        },
-        async publish(bvModalEvt) {
-            this.showNameState = true
-            if (!this.nameState) {
-                bvModalEvt.preventDefault()
-                return
-            }
-            try {
-                let res = await fetch(PUBLISH_URL, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ layout: this.layout, published_by: this.publishName, layout_config: this.layoutConfig })
-                })
-                let resData = await res.json()
-                if (resData.published_by !== this.publishName) {
-                    this.$bvToast.toast(`Layout had already been published by "${resData.published_by}": Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'warning' })
-                } else {
-                    this.$bvToast.toast(`Successfully published layout: Cost: ${resData.total_cost.toFixed(2)}`, { variant: 'primary' })
-                }
-            } catch (err) {
-                this.$bvToast.toast(`Error while publishing layout: ${err}`, { variant: 'danger' })
-            }
-        }
-    },
+      } catch (err) {
+        this.$bvToast.toast(`Error while publishing layout: ${err}`, { variant: 'danger' })
+      }
+    }
+  },
 })
 
 Vue.component('ngram-config', {
-    template: `
+  template: `
     <div>
       <b-form-select label="NGram Type" v-model="selected" :options="options" @change="select"></b-form-select>
       <div v-if="selected === 'from_text'">
@@ -647,158 +647,158 @@ Vue.component('ngram-config', {
       </div>
     </div>
     `,
-    props: {
-        defaultSelection: { type: String, default: DEFAULT_NGRAM },
-    },
-    data() {
-        let options = []
-        let description = {}
-        NGRAMS.forEach(c => {
-            options.push({ value: c.key, text: c.label })
-            description[c.key] = c.description
-        })
-        options.push({ value: 'from_text', text: 'From Text' })
+  props: {
+    defaultSelection: { type: String, default: DEFAULT_NGRAM },
+  },
+  data() {
+    let options = []
+    let description = {}
+    NGRAMS.forEach(c => {
+      options.push({ value: c.key, text: c.label })
+      description[c.key] = c.description
+    })
+    options.push({ value: 'from_text', text: 'From Text' })
 
-        return {
-            selected: this.defaultSelection,
-            options,
-            initialLoad: true,
-            oldText: "",
-            text: "",
-            description,
-        }
+    return {
+      selected: this.defaultSelection,
+      options,
+      initialLoad: true,
+      oldText: "",
+      text: "",
+      description,
+    }
+  },
+  created() {
+    this.select()
+  },
+  computed: {
+    detailsHTML() {
+      return this.description[this.selected]
     },
-    created() {
-        this.select()
+  },
+  methods: {
+    select() {
+      if (this.selected === 'from_text') {
+        this.emit('from_text', this.text)
+      } else {
+        this.emit('prepared', this.selected)
+      }
     },
-    computed: {
-        detailsHTML() {
-            return this.description[this.selected]
-        },
+    save() {
+      this.oldText = this.text
+      this.emit(this.selected, this.text)
     },
-    methods: {
-        select() {
-            if (this.selected === 'from_text') {
-                this.emit('from_text', this.text)
-            } else {
-                this.emit('prepared', this.selected)
-            }
-        },
-        save() {
-            this.oldText = this.text
-            this.emit(this.selected, this.text)
-        },
-        emit(ngramType, ngramData) {
-            if (!this.initialLoad) {
-                this.$bvToast.toast("Updated ngrams", { variant: "primary" })
-            } else {
-                this.initialLoad = false
-            }
-            this.$emit('selected', ngramType, ngramData)
-        }
-    },
+    emit(ngramType, ngramData) {
+      if (!this.initialLoad) {
+        this.$bvToast.toast("Updated ngrams", { variant: "primary" })
+      } else {
+        this.initialLoad = false
+      }
+      this.$emit('selected', ngramType, ngramData)
+    }
+  },
 })
 
 Vue.component('config-file', {
-    template: `
+  template: `
     <div>
       <codemirror v-model="content" :options="options"></codemirror>
       <b-button class="float-right" variant="primary" :disabled="oldContent===content" @click="save">Save</b-button>
     </div>
     `,
-    props: {
-        initialContent: { type: String, default: "" },
+  props: {
+    initialContent: { type: String, default: "" },
+  },
+  data() {
+    return {
+      oldContent: this.initialContent,
+      content: this.initialContent,
+      options: {
+        mode: 'yaml',
+        lineNumbers: true,
+        styleActiveLine: true,
+        autoRefresh: true,
+      }
+    }
+  },
+  watch: {
+    initialContent() {
+      this.oldContent = this.initialContent
+      this.content = this.initialContent
     },
-    data() {
-        return {
-            oldContent: this.initialContent,
-            content: this.initialContent,
-            options: {
-                mode: 'yaml',
-                lineNumbers: true,
-                styleActiveLine: true,
-                autoRefresh: true,
-            }
-        }
+  },
+  methods: {
+    save() {
+      this.oldContent = this.content
+      this.$emit("saved", this.content)
     },
-    watch: {
-        initialContent() {
-            this.oldContent = this.initialContent
-            this.content = this.initialContent
-        },
-    },
-    methods: {
-        save() {
-            this.oldContent = this.content
-            this.$emit("saved", this.content)
-        },
-    },
+  },
 })
 
 
 Vue.component('layout-plot', {
-    template: `
+  template: `
     <pre style="overflow-y: hidden"><code v-html="plotString"></code></pre>
 `,
-    props: {
-        layoutString: { type: String, default: "" },
-        defaultSymbol: { type: String, default: "." },
-        wasm: { type: Object, default: null },
-        layoutConfig: { type: Object, default: null },
-        permutableKeys: { type: Array, default: null },
+  props: {
+    layoutString: { type: String, default: "" },
+    defaultSymbol: { type: String, default: "." },
+    wasm: { type: Object, default: null },
+    layoutConfig: { type: Object, default: null },
+    permutableKeys: { type: Array, default: null },
+  },
+  data() {
+    return {
+      plotString: null,
+      layoutPlotter: null,
+    }
+  },
+  watch: {
+    layoutString() {
+      this.plot()
     },
-    data() {
-        return {
-            plotString: null,
-            layoutPlotter: null,
-        }
+    wasm() {
+      this.update()
     },
-    watch: {
-        layoutString() {
-            this.plot()
-        },
-        wasm() {
-            this.update()
-        },
-        layoutConfig() {
-            this.update()
-        },
-        permutableKeys() {
-            this.update()
-        },
+    layoutConfig() {
+      this.update()
     },
-    mounted() {
-        this.update()
+    permutableKeys() {
+      this.update()
     },
-    methods: {
-        update() {
-            if (this.wasm === null || this.layoutConfig === null || this.permutableKeys === null) return
-            try {
-                this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
-            } catch (err) {
-                this.$bvToast.toast(`Error plotting the layout: ${err}`, { variant: 'danger' })
-            }
-            this.plot()
-        },
-        plot() {
-            if (this.layoutPlotter === null) return ""
+  },
+  mounted() {
+    this.update()
+  },
+  methods: {
+    update() {
+      if (this.wasm === null || this.layoutConfig === null || this.permutableKeys === null) return
+      try {
+        this.layoutPlotter = this.wasm.LayoutPlotter.new(this.layoutConfig)
+      } catch (err) {
+        this.$bvToast.toast(`Error plotting the layout: ${err}`, { variant: 'danger' })
+      }
+      this.plot()
+    },
+    plot() {
+      if (this.layoutPlotter === null) return ""
 
-            const nMissing = this.permutableKeys.length - this.layoutString.length
-            if (nMissing < 0) {
-                // this.$bvToast.toast(`Too many symbols given (${this.layoutString.length} > ${this.permutableKeys.length})`, {variant: "danger"})
-                return
-            }
-            let layout = this.layoutString + Array(nMissing + 1).join(this.defaultSymbol)
-            try {
-                this.plotString = this.layoutPlotter.plot(layout, 0)
-            } catch (err) {
-                // this.$bvToast.toast(`Could not plot layout: ${err}`, {variant: "danger"})
-                return
-            }
-        },
+      const nMissing = this.permutableKeys.length - this.layoutString.length
+      if (nMissing < 0) {
+        // this.$bvToast.toast(`Too many symbols given (${this.layoutString.length} > ${this.permutableKeys.length})`, {variant: "danger"})
+        return
+      }
+      let layout = this.layoutString + Array(nMissing + 1).join(this.defaultSymbol)
+      try {
+        this.plotString = this.layoutPlotter.plot(layout, 0)
+      } catch (err) {
+        // this.$bvToast.toast(`Could not plot layout: ${err}`, {variant: "danger"})
+        return
+      }
     },
+  },
 })
 
 var app = new Vue({
-    el: '#app',
+  el: '#app',
 })
