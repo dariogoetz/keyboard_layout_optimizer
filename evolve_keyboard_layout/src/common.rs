@@ -25,7 +25,7 @@ pub struct Options {
     #[clap(
         short,
         long,
-        default_value = "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
+        default_value = "ngrams/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
     )]
     pub ngrams: String,
 

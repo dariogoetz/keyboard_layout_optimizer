@@ -15,11 +15,11 @@ const evaluator = {
 
   async initNgramProvider(ngramType, evalParams, ngramData) {
     if (ngramType === 'prepared') {
-      let unigrams = await import(`../../../corpus/${ngramData}/1-grams.txt`)
+      let unigrams = await import(`../../../ngrams/${ngramData}/1-grams.txt`)
         .then((ngrams) => ngrams.default)
-      let bigrams = await import(`../../../corpus/${ngramData}/2-grams.txt`)
+      let bigrams = await import(`../../../ngrams/${ngramData}/2-grams.txt`)
         .then((ngrams) => ngrams.default)
-      let trigrams = await import(`../../../corpus/${ngramData}/3-grams.txt`)
+      let trigrams = await import(`../../../ngrams/${ngramData}/3-grams.txt`)
         .then((ngrams) => ngrams.default)
 
       this.ngramProvider = this.wasm.NgramProvider.with_frequencies(

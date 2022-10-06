@@ -12,7 +12,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use serde::Deserialize;
 use std::{path::Path, sync::Arc};
 
-const NGRAMS: &str = "../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4";
+const NGRAMS: &str = "../ngrams/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4";
 const LAYOUT_CONFIG: &str = "../config/keyboard/standard.yml";
 const EVALUATION_PARAMETERS: &str = "../config/evaluation/default.yml";
 

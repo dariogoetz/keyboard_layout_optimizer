@@ -12,19 +12,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--corpora",
         default=[
-            "corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4",
-            "corpus/deu_wiki_0.6_eng_wiki_0.4",
-            "corpus/deu_mixed_0.6_eng_news_typical_0.4",
-            "corpus/deu_web_1m",
-            "corpus/eng_web_1m",
-            "corpus/deu_wiki_1m",
-            "corpus/eng_wiki_1m",
-            "corpus/deu_mixed_1m",
-            "corpus/eng_news_typical_1m",
-            "corpus/arne",
-            "corpus/irc_neo",
+            "ngrams/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4",
+            "ngrams/deu_wiki_0.6_eng_wiki_0.4",
+            "ngrams/deu_mixed_0.6_eng_news_typical_0.4",
+            "ngrams/deu_web_1m",
+            "ngrams/eng_web_1m",
+            "ngrams/deu_wiki_1m",
+            "ngrams/eng_wiki_1m",
+            "ngrams/deu_mixed_1m",
+            "ngrams/eng_news_typical_1m",
+            "ngrams/arne",
+            "ngrams/irc_neo",
         ],
-        help="List of corpus directories to compare",
+        help="List of ngrams directories to compare",
     )
     parser.add_argument(
         "--out", default="layout_by_corpus.png", help="Filename of resulting image"
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         .reindex(layouts)
         .T.reindex(corpora)
     )
-    df.index = df.index.map(lambda c: c.lstrip("corpus/"))
+    df.index = df.index.map(lambda c: c.lstrip("ngrams/"))
 
     df.plot.bar()
     plt.gcf().set_size_inches((16, 9))

@@ -3,24 +3,24 @@ allowed_cors_origins = "http://localhost:8080"
 default_layout_config = "standard"
 eval_parameters = "../../config/evaluation/default.yml"
 layout_configs = [
-    [
-        "standard",
-        "../../config/keyboard/standard.yml",
-    ],
-    [
-        "ortho",
-        "../../config/keyboard/ortho.yml",
-    ],
-    [
-        "moonlander",
-        "../../config/keyboard/moonlander.yml",
-    ],
-    [
-        "crkbd",
-        "../../config/keyboard/crkbd.yml",
-    ],
+  [
+    "standard",
+    "../../config/keyboard/standard.yml",
+  ],
+  [
+    "ortho",
+    "../../config/keyboard/ortho.yml",
+  ],
+  [
+    "moonlander",
+    "../../config/keyboard/moonlander.yml",
+  ],
+  [
+    "crkbd",
+    "../../config/keyboard/crkbd.yml",
+  ],
 ]
-ngrams = "../../corpus/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
+ngrams = "../../ngrams/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
 secret = "super_duper_secret"
 static_dir = "static"
 
