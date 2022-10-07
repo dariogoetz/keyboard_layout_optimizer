@@ -41,7 +41,7 @@ pub struct KeyboardYAML {
     fingers: Vec<Vec<Finger>>,
     key_costs: Vec<Vec<f64>>,
     symmetries: Vec<Vec<u8>>,
-    unbalancing_positions: Vec<Vec<f64>>,
+    unbalancing_positions: Vec<Vec<Position>>,
     plot_template: String,
     plot_template_short: String,
 }

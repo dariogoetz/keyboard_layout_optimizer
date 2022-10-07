@@ -13,20 +13,14 @@ use keyboard_layout::{
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct Parameters {
-    pub unbalancing_after_unbalancing: f64,
-}
+pub struct Parameters {}
 
 #[derive(Clone, Debug)]
-pub struct NoHandSwitchAfterUnbalancingKey {
-    unbalancing_after_unbalancing: f64,
-}
+pub struct NoHandSwitchAfterUnbalancingKey {}
 
 impl NoHandSwitchAfterUnbalancingKey {
-    pub fn new(params: &Parameters) -> Self {
-        Self {
-            unbalancing_after_unbalancing: params.unbalancing_after_unbalancing,
-        }
+    pub fn new(_params: &Parameters) -> Self {
+        Self {}
     }
 }
 
@@ -44,10 +38,7 @@ impl BigramMetric for NoHandSwitchAfterUnbalancingKey {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        let unb1 = k1.key.unbalancing;
-
-        if unb1 <= 0.0  // first key is not unbalancing -> no cost
-            || k1.key.hand != k2.key.hand  // or handswitch occurred -> no cost
+        if k1.key.hand != k2.key.hand  // or handswitch occurred -> no cost
             || k1.key.finger == Finger::Thumb  // or one finger was a thumb -> no cost
             || k2.key.finger == Finger::Thumb
         // or other finger was a thumb -> no cost
@@ -55,19 +46,10 @@ impl BigramMetric for NoHandSwitchAfterUnbalancingKey {
             return Some(0.0);
         }
 
-        let mut cost = unb1;
+        let dunbx = (k1.key.unbalancing.0 - k2.key.unbalancing.0).abs();
+        let dunby = (k1.key.unbalancing.1 - k2.key.unbalancing.1).abs();
 
-        // if the other key is unbalancing too and on the other side of the hand, put extra cost on it depending on their distance
-        let unb2 = k2.key.unbalancing;
-        let is_spaced_apart = k1.key.matrix_position.0.abs_diff(k2.key.matrix_position.0) > 3;
-        let dx = (k1.key.position.0 - k2.key.position.0).abs(); // Vertical distance
-        let dy = (k1.key.position.1 - k2.key.position.1).abs(); // Horizontal distance
-        if unb2 > 0.0 && is_spaced_apart {
-            // second key is also unbalancing -> extra cost
-            cost += unb1 * unb2 * self.unbalancing_after_unbalancing * (dx + dy - 3.0);
-        };
-        cost *= 1.0 + dy * dy;
-
+        let cost = dunbx + dunby;
         Some(weight * cost)
     }
 }

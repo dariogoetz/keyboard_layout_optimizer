@@ -10,7 +10,6 @@ pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;
 pub mod symmetric_handswitches;
-pub mod unbalancing_after_neighboring;
 
 /// BigramMetric is a trait for metrics that iterates over weighted bigrams.
 pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {

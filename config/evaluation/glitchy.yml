@@ -281,17 +281,6 @@ metrics:
       # Additional cost factor if the second key is also unbalancing
       unbalancing_after_unbalancing: 4
 
-  # If (at least) one of the keys corresponding to a bigram is "unbalancing" (as defined in the
-  # keyboard's layout config), a cost is counted based on their distance.
-  unbalancing_after_neighboring:
-    enabled: true
-    weight: 200.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
 
   # trigram metrics
 

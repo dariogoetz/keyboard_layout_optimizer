@@ -34,7 +34,6 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 - **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
 - **hand disbalance** - Are left and right hands similarly loaded?
 - **no handswitch after unbalancing key** - How often does no handswitch occur after a hand needed to move away from the home row?
-- **unbalancing after neighboring** - How often do unbalancing keys occur consecutively?
 - **irregularity** - How often are the first and the second bigram in a trigram "bad" (wrt. to all bigram metrics)?
 - **no handswitch in trigram** - How often does no handswitch happen within a trigram (and have a direction change in between)?
 - **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?

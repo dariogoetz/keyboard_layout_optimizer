@@ -249,6 +249,6 @@ pub struct Key {
     /// Cost value specifying how uncomfortable it is to reach/press the key
     pub cost: f64,
 
-    /// How strongly does the hand need to move away from the home row (start position)
-    pub unbalancing: f64,
+    /// How strongly does the hand need to move away from the home row (start position) horizontally and vertically
+    pub unbalancing: Position,
 }
