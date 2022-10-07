@@ -23,7 +23,7 @@ instant = { version = "^0.1.12", features = ["wasm-bindgen"] }
 js-sys = "0.3.56"
 serde = { version = "^1.0", features = ["derive"] }
 serde_yaml = "0.8.23"
-wasm-bindgen = { version = "0.2.80", features = ["serde-serialize"] }
+wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
 
 argmin = "^0.7.0"
 genevo = { version = "^0.7.0", features = ["wasm-bindgen"] }
