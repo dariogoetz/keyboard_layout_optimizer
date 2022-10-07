@@ -20,7 +20,8 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 
 ## Features
 - evaluation based on unigrams, bigrams, and trigrams
-- support for higher layer characters (e.g. uppercase letters) by expanding ngrams with modifier keys
+- support for higher layer characters (e.g. uppercase letters or symbols) by expanding ngrams with modifier keys
+- arbitrary positioning of modifier keys (e.g. for home-row-mods)
 - flexible configuration options for metrics and keyboards (e.g. configs for ergo-boards)
 - fast evaluation (~100ms per layout including trigram metrics even for large corpora &gt; 100 MB)
 - layout optimization using [various algorithms](#optimization-algorithms)
