@@ -260,23 +260,10 @@ metrics:
       same_row_offset: 0.1
 
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
-  # config), a cost is counted. If the second key is unbalancing as well, an additional cost
-  # depending on the distance to the first key is added.
+  # config), a cost is counted depending on how far the unbalancing takes place.
   no_handswitch_after_unbalancing_key:
     enabled: true
-    weight: 18.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # Additional cost factor if the second key is also unbalancing
-      unbalancing_after_unbalancing: 4
-
-  # If (at least) one of the keys corresponding to a bigram is "unbalancing" (as defined in the
-  # keyboard's layout config), a cost is counted based on their distance.
-  unbalancing_after_neighboring:
-    enabled: true
-    weight: 200.0
+    weight: 36.0
     normalization:
       type: weight_found
       value: 1.0

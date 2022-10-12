@@ -97,8 +97,9 @@ impl TrigramMetric for TrigramRolls {
             return Some(0.0);
         };
 
-        cost /=
-            (1.0 + k1.key.unbalancing) * (1.0 + k2.key.unbalancing) * (1.0 + k3.key.unbalancing);
+        cost *= (1.0 + k1.key.unbalancing.0.abs())
+            * (1.0 + k2.key.unbalancing.0.abs())
+            * (1.0 + k3.key.unbalancing.0.abs());
 
         // log::info!("trigram roll: {}{}{} -> {:4.3}",
         //     k1,

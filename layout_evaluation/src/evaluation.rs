@@ -50,8 +50,6 @@ pub struct MetricParameters {
     pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
     pub no_handswitch_after_unbalancing_key:
         WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
-    pub unbalancing_after_neighboring:
-        WeightedParams<bigram_metrics::unbalancing_after_neighboring::Parameters>,
 
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
     pub no_handswitch_in_trigram:
@@ -203,16 +201,6 @@ impl Evaluator {
                 .normalization
                 .clone(),
             params.no_handswitch_after_unbalancing_key.enabled,
-        );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::unbalancing_after_neighboring::UnbalancingAfterNeighboring::new(
-                    &params.unbalancing_after_neighboring.params,
-                ),
-            ),
-            params.unbalancing_after_neighboring.weight,
-            params.unbalancing_after_neighboring.normalization.clone(),
-            params.unbalancing_after_neighboring.enabled,
         );
         self.bigram_metric(
             Box::new(
