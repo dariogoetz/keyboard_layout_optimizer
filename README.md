@@ -103,7 +103,6 @@ And for the Neo base layout:
 - the symbols that can be generated in each layer over each key
 - keys that can not be permutated
 - modifiers to be used to access each layer
-- cost associated to accessing each layer
 
 Alternatively to `standard.yml`, there are variants for split/ortho keyboards
 (`ortho.yml` - a generic ortholinear split keyboard, `moonlander.yml` - the ZSA moonlander
@@ -112,9 +111,6 @@ base layouts instead of neo (`standard_qwerty_uk.yml` and `standard_qwerty_us.ym
 
 ##### `config/evaluation/default.yml`
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
-
-There is also an alternative evaluation config file named `arnebab.yml` that aims to stay closer to ArneBab's original
-evaluator.
 
 ### Layout Optimization Binary
 The available optimize-binaries include `optimize_genetic.rs`, `optimize_sa.rs`, and `optimize_abc.rs`.
