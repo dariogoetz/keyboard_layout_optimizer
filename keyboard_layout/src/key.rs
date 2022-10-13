@@ -33,7 +33,7 @@ impl Default for Position {
 #[repr(u8)]
 pub enum Finger {
     Thumb,   // 0
-    Pointer, // 1
+    Index, // 1
     Middle,  // 2
     Ring,    // 3
     Pinky,   // 4
@@ -195,7 +195,7 @@ impl<T: Copy> HandFingerMap<T> {
         for hand in &[Hand::Left, Hand::Right] {
             for finger in &[
                 Finger::Thumb,
-                Finger::Pointer,
+                Finger::Index,
                 Finger::Middle,
                 Finger::Ring,
                 Finger::Pinky,
@@ -213,10 +213,10 @@ impl<T: Copy + fmt::Display> fmt::Display for HandFingerMap<T> {
             self.get(&Hand::Left, &Finger::Pinky),
             self.get(&Hand::Left, &Finger::Ring),
             self.get(&Hand::Left, &Finger::Middle),
-            self.get(&Hand::Left, &Finger::Pointer),
+            self.get(&Hand::Left, &Finger::Index),
             self.get(&Hand::Left, &Finger::Thumb),
             self.get(&Hand::Right, &Finger::Thumb),
-            self.get(&Hand::Right, &Finger::Pointer),
+            self.get(&Hand::Right, &Finger::Index),
             self.get(&Hand::Right, &Finger::Middle),
             self.get(&Hand::Right, &Finger::Ring),
             self.get(&Hand::Right, &Finger::Pinky),

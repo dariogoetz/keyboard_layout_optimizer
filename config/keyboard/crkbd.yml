@@ -18,9 +18,9 @@ keyboard:
     - [                        Left, Left, Left,   Right, Right, Right                            ]
 
   fingers:
-    - [Pinky, Pinky, Ring,  Middle, Pointer, Pointer,                 Pointer, Pointer, Middle, Ring,  Pinky, Pinky]
-    - [Pinky, Pinky, Ring,  Middle, Pointer, Pointer,                 Pointer, Pointer, Middle, Ring,  Pinky, Pinky]
-    - [Pinky, Pinky, Ring,  Middle, Pointer, Pointer,                 Pointer, Pointer, Middle, Ring,  Pinky, Pinky]
+    - [Pinky, Pinky, Ring,  Middle, Index, Index,                 Index, Index, Middle, Ring,  Pinky, Pinky]
+    - [Pinky, Pinky, Ring,  Middle, Index, Index,                 Index, Index, Middle, Ring,  Pinky, Pinky]
+    - [Pinky, Pinky, Ring,  Middle, Index, Index,                 Index, Index, Middle, Ring,  Pinky, Pinky]
     - [                             Thumb,   Thumb,   Thumb,   Thumb, Thumb,   Thumb,                              ]
 
   key_costs:

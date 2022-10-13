@@ -88,10 +88,10 @@ metrics:
         [Left, Pinky]: 1.0
         [Left, Ring]: 1.6
         [Left, Middle]: 2.0
-        [Left, Pointer]: 2.0
+        [Left, Index]: 2.0
         [Left, Thumb]: 2.0
         [Right, Thumb]: 2.0
-        [Right, Pointer]: 2.0
+        [Right, Index]: 2.0
         [Right, Middle]: 2.0
         [Right, Ring]: 1.6
         [Right, Pinky]: 1.0
@@ -152,7 +152,7 @@ metrics:
       # Finger-individual weights to be multiplied with the cost
       finger_factors:
         Thumb: 1.2
-        Pointer: 0.8
+        Index: 0.8
         Middle: 1.0
         Ring: 1.1
         Pinky: 1.2
@@ -221,30 +221,30 @@ metrics:
 
         - { from: [Left, Ring],    to: [Left, Pinky],   cost: 12 }
         - { from: [Left, Ring],    to: [Left, Middle],  cost: 6 }
-        - { from: [Left, Ring],    to: [Left, Pointer], cost: 0.1 }
+        - { from: [Left, Ring],    to: [Left, Index], cost: 0.1 }
 
         - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
         - { from: [Left, Middle],  to: [Left, Ring],    cost: 9 }
-        - { from: [Left, Middle],  to: [Left, Pointer], cost: 0.6 }
+        - { from: [Left, Middle],  to: [Left, Index], cost: 0.6 }
 
-        - { from: [Left, Pointer], to: [Left, Pinky],   cost: 0.1 }
-        - { from: [Left, Pointer], to: [Left, Ring],    cost: 0.3 }
-        - { from: [Left, Pointer], to: [Left, Middle],  cost: 0.9 }
+        - { from: [Left, Index], to: [Left, Pinky],   cost: 0.1 }
+        - { from: [Left, Index], to: [Left, Ring],    cost: 0.3 }
+        - { from: [Left, Index], to: [Left, Middle],  cost: 0.9 }
 
         - { from: [Right, Pinky],   to: [Right, Ring],    cost: 8 }
         - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
 
         - { from: [Right, Ring],    to: [Right, Pinky],   cost: 12 }
         - { from: [Right, Ring],    to: [Right, Middle],  cost: 6 }
-        - { from: [Right, Ring],    to: [Right, Pointer], cost: 0.1 }
+        - { from: [Right, Ring],    to: [Right, Index], cost: 0.1 }
 
         - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
         - { from: [Right, Middle],  to: [Right, Ring],    cost: 9 }
-        - { from: [Right, Middle],  to: [Right, Pointer], cost: 0.6 }
+        - { from: [Right, Middle],  to: [Right, Index], cost: 0.6 }
 
-        - { from: [Right, Pointer], to: [Right, Pinky],   cost: 0.1 }
-        - { from: [Right, Pointer], to: [Right, Ring],    cost: 0.3 }
-        - { from: [Right, Pointer], to: [Right, Middle],  cost: 0.9 }
+        - { from: [Right, Index], to: [Right, Pinky],   cost: 0.1 }
+        - { from: [Right, Index], to: [Right, Ring],    cost: 0.3 }
+        - { from: [Right, Index], to: [Right, Middle],  cost: 0.9 }
 
       # Finger lengths
       finger_lengths:
@@ -252,12 +252,12 @@ metrics:
           Pinky: 1
           Ring: 2
           Middle: 3
-          Pointer: 2
+          Index: 2
         Right:
           Pinky: 1
           Ring: 2
           Middle: 3
-          Pointer: 2
+          Index: 2
 
       # If the movement is directed downwards from a short towards a long
       # or upwards from a long towards a short finger,

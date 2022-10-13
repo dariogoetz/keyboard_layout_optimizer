@@ -31,7 +31,7 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 - **finger repeats** - How often are fingers in action consecutively?
 - **finger repeats top and bottom** - How often does the same finger need to move from top to bottom row (or vice versa) consecutively?
 - **movement pattern** - How comfortable is it to type individual bigrams? Which finger follows which? How many rows? Upwards/downwards?
-- **finger balance** - Is each finger suitably loaded? Pinkies less than pointers?
+- **finger balance** - Is each finger suitably loaded? Pinkies less than index fingers?
 - **hand disbalance** - Are left and right hands similarly loaded?
 - **no handswitch after unbalancing key** - How often does no handswitch occur after a hand needed to move away from the home row?
 - **irregularity** - How often are the first and the second bigram in a trigram "bad" (wrt. to all bigram metrics)?
