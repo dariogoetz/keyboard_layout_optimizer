@@ -105,7 +105,7 @@ impl Unigrams {
             if chars.len() != 1 {
                 log::error!("Len of unigram {} is unequad one: {:?}", unigram, chars);
             }
-            let c = *chars.get(0).unwrap_or(&' ');
+            let c = *chars.first().unwrap_or(&' ');
             grams.insert_or_add_weight(c, weight);
         }
 

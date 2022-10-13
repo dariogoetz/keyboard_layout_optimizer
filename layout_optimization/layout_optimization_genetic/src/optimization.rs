@@ -131,7 +131,7 @@ impl GenomeBuilder<Vec<usize>> for FromGivenLayoutBuilder {
     }
 }
 
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub struct NoOpCrossover {}
 impl NoOpCrossover {
     pub fn new() -> Self {
