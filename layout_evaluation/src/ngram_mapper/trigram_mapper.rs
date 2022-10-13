@@ -164,9 +164,9 @@ impl OnDemandTrigramMapper {
                         if (e1 != e2) && (e2 != e3) {
                             // log::trace!(
                             //     "one each:                    {}{}{}",
-                            //     e1,
-                            //     e2,
-                            //     e3,
+                            //     layout.get_layerkey(&e1).symbol,
+                            //     layout.get_layerkey(&e2).symbol,
+                            //     layout.get_layerkey(&e3).symbol,
                             // );
                             trigram_w_map.insert_or_add_weight((e1, e2, e3), w);
                         }
@@ -179,9 +179,9 @@ impl OnDemandTrigramMapper {
                     if (e1 != e2) && (e2 != e3) {
                         // log::trace!(
                         //     "two of first, one of second: {}{}{}",
-                        //     e1,
-                        //     e2,
-                        //     e3,
+                        //     layout.get_layerkey(&e1).symbol,
+                        //     layout.get_layerkey(&e2).symbol,
+                        //     layout.get_layerkey(&e3).symbol,
                         // );
                         trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                     }
@@ -193,9 +193,9 @@ impl OnDemandTrigramMapper {
                     if (e1 != e2) && (e2 != e3) {
                         // log::trace!(
                         //     "one of first, two of second: {}{}{}",
-                        //     e1,
-                        //     e2,
-                        //     e3,
+                        //     layout.get_layerkey(&e1).symbol,
+                        //     layout.get_layerkey(&e2).symbol,
+                        //     layout.get_layerkey(&e3).symbol,
                         // );
                         trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                     }
@@ -207,9 +207,9 @@ impl OnDemandTrigramMapper {
                     if (e1 != e2) && (e2 != e3) {
                         // log::trace!(
                         //     "two of second, one of third: {}{}{}",
-                        //     e1,
-                        //     e2,
-                        //     e3,
+                        //     layout.get_layerkey(&e1).symbol,
+                        //     layout.get_layerkey(&e2).symbol,
+                        //     layout.get_layerkey(&e3).symbol,
                         // );
                         trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                     }
@@ -221,9 +221,9 @@ impl OnDemandTrigramMapper {
                     if (e1 != e2) && (e2 != e3) {
                         // log::trace!(
                         //     "one of second, two of third: {}{}{}",
-                        //     e1,
-                        //     e2,
-                        //     e3,
+                        //     layout.get_layerkey(&e1).symbol,
+                        //     layout.get_layerkey(&e2).symbol,
+                        //     layout.get_layerkey(&e3).symbol,
                         // );
                         trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                     }
@@ -234,9 +234,9 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of first:              {}{}{}",
-                    //     e.0,
-                    //     e.1,
-                    //     e.2,
+                    //     layout.get_layerkey(&e.0).symbol,
+                    //     layout.get_layerkey(&e.1).symbol,
+                    //     layout.get_layerkey(&e.2).symbol,
                     // );
                     trigram_w_map.insert_or_add_weight(e, w);
                 });
@@ -245,9 +245,9 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of second:             {}{}{}",
-                    //     e.0,
-                    //     e.1,
-                    //     e.2,
+                    //     layout.get_layerkey(&e.0).symbol,
+                    //     layout.get_layerkey(&e.1).symbol,
+                    //     layout.get_layerkey(&e.2).symbol,
                     // );
                     trigram_w_map.insert_or_add_weight(e, w);
                 });
@@ -256,28 +256,12 @@ impl OnDemandTrigramMapper {
                 .for_each(|(e, w)| {
                     // log::trace!(
                     //     "three of third:              {}{}{}",
-                    //     e.0,
-                    //     e.1,
-                    //     e.2,
+                    //     layout.get_layerkey(&e.0).symbol,
+                    //     layout.get_layerkey(&e.1).symbol,
+                    //     layout.get_layerkey(&e.2).symbol,
                     // );
                     trigram_w_map.insert_or_add_weight(e, w);
                 });
-
-            // log::debug!(
-            //     "{:>3}{:^3}{:<3} -> {}",
-            //     k1,
-            //     k2,
-            //     k3,
-            //     v.iter()
-            //         .map(|((t1, t2, t3), w)| format!(
-            //             "\n{}{}{} (weight: {:>12.2}) ",
-            //             t1,
-            //             t2,
-            //             t3,
-            //             w
-            //         ))
-            //         .collect::<String>(),
-            // );
         });
 
         trigram_w_map

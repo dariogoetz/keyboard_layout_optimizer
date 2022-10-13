@@ -138,48 +138,40 @@ impl OnDemandBigramMapper {
             let (base2, mods2) = layout.resolve_modifiers(&k2);
 
             bigram_w_map.insert_or_add_weight((base1, base2), w);
+            // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&base1).symbol, layout.get_layerkey(&base2).symbol);
 
             mods1.iter().for_each(|mod1| {
                 // mix mods of k1 with base of k2
-                bigram_w_map.insert_or_add_weight((*mod1, base2), w * 0.5);
+                bigram_w_map.insert_or_add_weight((*mod1, base2), w);
+                // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&base2).symbol);
 
                 // mix mods of k1 and k2
                 mods2.iter().for_each(|mod2| {
                     if mod1 != mod2 {
                         bigram_w_map.insert_or_add_weight((*mod1, *mod2), w);
+                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&mod2).symbol);
                     }
                 });
             });
 
             mods2.iter().for_each(|mod2| {
                 // mix mods of k2 with base of k1
-                bigram_w_map.insert_or_add_weight((base1, *mod2), w * 2.0);
+                bigram_w_map.insert_or_add_weight((base1, *mod2), w);
+                // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&base1).symbol, layout.get_layerkey(&mod2).symbol);
             });
 
             // same key mods
             TakeTwoLayerKey::new(base1, &mods1, w, self.split_modifiers.same_key_mod_factor)
                 .for_each(|(e, w)| {
                     bigram_w_map.insert_or_add_weight(e, w);
+                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
                 });
 
             TakeTwoLayerKey::new(base2, &mods2, w, self.split_modifiers.same_key_mod_factor)
                 .for_each(|(e, w)| {
                     bigram_w_map.insert_or_add_weight(e, w);
+                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
                 });
-
-            // log::debug!(
-            //     "{:>3}{:<3} -> {}",
-            //     k1,
-            //     k2,
-            //     v.iter()
-            //         .map(|((t1, t2), w)| format!(
-            //             "{}{} (weight: {:>12.3}) ",
-            //             t1,
-            //             t2,
-            //             w
-            //         ))
-            //         .collect::<String>(),
-            // );
         });
 
         bigram_w_map
