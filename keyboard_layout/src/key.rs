@@ -32,11 +32,11 @@ impl Default for Position {
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Deserialize, Debug)]
 #[repr(u8)]
 pub enum Finger {
-    Thumb,   // 0
-    Index, // 1
-    Middle,  // 2
-    Ring,    // 3
-    Pinky,   // 4
+    Thumb,  // 0
+    Index,  // 1
+    Middle, // 2
+    Ring,   // 3
+    Pinky,  // 4
 }
 
 impl Default for Finger {
