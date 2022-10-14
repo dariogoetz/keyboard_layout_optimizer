@@ -29,7 +29,6 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 ## Metrics
 - **key costs** - How do the letter frequencies relate to the "cost" associated to the keys?
 - **finger repeats** - How often are fingers in action consecutively?
-- **finger repeats top and bottom** - How often does the same finger need to move from top to bottom row (or vice versa) consecutively?
 - **movement pattern** - How comfortable is it to type individual bigrams? Which finger follows which? How many rows? Upwards/downwards?
 - **finger balance** - Is each finger suitably loaded? Pinkies less than index fingers?
 - **hand disbalance** - Are left and right hands similarly loaded?
