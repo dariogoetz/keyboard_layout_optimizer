@@ -51,6 +51,11 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
     cargo build --release
     ```
     The binaries are then located under `target/release`.
+
+    Alternatively, run the binaries directly using
+    ``` sh
+    cargo run --release --bin [...]
+    ```
 1. Generate documentation with
    ``` sh
    cargo doc
@@ -133,7 +138,7 @@ RUST_LOG=INFO ./target/release/optimize_genetic -s "jduax phlmwqß ctieo bnrsg f
 ```
 
 ##### Simulated Annealing (`optimize_sa.rs`)
-An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing/).
+An explanation of Simulated Annealing can be found [here](https://en.wikipedia.org/wiki/Simulated_annealing).
 
 Example (starting from Bone layout, fixing "," and "."):
 ``` sh
@@ -145,7 +150,7 @@ RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz
 ```
 
 ##### Artificial Bee Colony (`optimize_abc.rs`)
-This algorithm is not regarded "production-ready" and only a few of the options available in the other binaries are implemented.
+This implementation is not regarded "production-ready" and only a few of the options available in the other binaries are implemented.
 
 Example of an optimization (starting from a random layout, fixing "," and "."):
 ``` sh
@@ -223,15 +228,15 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
     The `individual_cost` function returns a "weighted cost" incorporating the `weight` parameter if necessary, e.g. `Some(weight * cost)`.
 
 1. Make the new module accessible by adding a new line
-    ```rust
+    ``` rust
     pub mod my_metric_name;
     ```
-    at the top of the file `layout_evaluation/src/metrics/{layout_|unigram_|bigram_|trigram_}metrics.rs`.
+    at the top of the file `layout_evaluation/src/metrics/{layout|unigram|bigram|trigram}_metrics.rs`.
 
 1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
     - add the line 
-        ```rust
-        pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,
+        ``` rust
+        pub my_metric_name: WeightedParams<{layout_|unigram|bigram|trigram}_metrics::my_metric_name::Parameters>,
         ```
         in the `MetricParameters` struct in order to make the YAML configuration available to your metric
     - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
