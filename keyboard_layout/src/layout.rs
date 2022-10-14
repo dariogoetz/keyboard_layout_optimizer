@@ -7,6 +7,7 @@ use crate::keyboard::{KeyIndex, Keyboard};
 
 use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
+use colored::Colorize;
 use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
@@ -300,16 +301,21 @@ impl Layout {
                 normal_char => normal_char,
             }
         };
-        let key_chars: Vec<char> = self
+        let key_chars: Vec<String> = self
             .key_layers
             .iter()
-            .map(|c| {
-                if c.len() > layer {
-                    fmt_char(self.get_layerkey(&c[layer]).symbol)
-                } else if !c.is_empty() {
-                    fmt_char(self.get_layerkey(&c[c.len() - 1]).symbol)
+            .map(|layers| {
+                if !layers.is_empty() {
+                    // if layer is larger than number of layers on this key, show last layer's value
+                    let l = layer.min(layers.len() - 1);
+                    let k = self.get_layerkey(&layers[l]);
+                    let mut s = fmt_char(k.symbol).to_string();
+                    if !k.is_fixed {
+                        s = s.yellow().bold().to_string();
+                    }
+                    s
                 } else {
-                    ' '
+                    " ".to_string()
                 }
             })
             .collect();
@@ -324,12 +330,12 @@ impl Layout {
 
     /// Plot a compact graphical representation (without borders and only non-fixed keys) of the base (first) layer
     pub fn plot_compact(&self) -> String {
-        let key_chars: Vec<char> = self
+        let key_chars: Vec<String> = self
             .key_layers
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|k| !k.is_fixed)
-            .map(|k| k.symbol)
+            .map(|k| k.symbol.to_string())
             .collect();
         self.keyboard.plot_compact(&key_chars)
     }
@@ -340,7 +346,7 @@ impl Layout {
             .iter()
             .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
             .filter(|k| !k.is_fixed)
-            .map(|k| k.symbol)
+            .map(|k| k.symbol.to_string())
             .collect()
     }
 }

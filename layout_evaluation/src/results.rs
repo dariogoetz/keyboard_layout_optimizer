@@ -1,5 +1,6 @@
 //! The `results` module contains structs representing the results of metric evaluations.
 
+use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::{fmt, slice};
 
@@ -64,7 +65,8 @@ pub struct MetricResults {
 
 impl fmt::Display for MetricResults {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "{:?} metrics:", self.metric_type)?;
+        let header = format!("{:?} metrics:", self.metric_type).bold();
+        writeln!(f, "{}", header)?;
 
         if self.metric_type != MetricType::Layout {
             writeln!(
@@ -77,10 +79,10 @@ impl fmt::Display for MetricResults {
         for metric_cost in self.metric_costs.iter() {
             writeln!(
                 f,
-                "  {:>9.4} (weighted: {:>9.4}) {:<35} | {}",
+                "  {:>9.4} (weighted: {}) {} | {}",
                 metric_cost.unweighted_cost,
-                metric_cost.weighted_cost,
-                metric_cost.core.name,
+                format!("{:>9.4}", metric_cost.weighted_cost).green(),
+                format!("{:<35}", metric_cost.core.name).bold(),
                 metric_cost.core.message.as_ref().unwrap_or(&"".to_string()),
             )?;
         }
@@ -178,8 +180,8 @@ impl fmt::Display for EvaluationResult {
 
         writeln!(
             f,
-            "Cost: {:.4} (optimization score: {})",
-            self.total_cost(),
+            "Cost: {} (optimization score: {})",
+            format!("{:.4}", self.total_cost()).green().bold(),
             self.optimization_score()
         )?;
 

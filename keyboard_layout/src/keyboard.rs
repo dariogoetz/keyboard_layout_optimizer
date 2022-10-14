@@ -143,18 +143,18 @@ impl Keyboard {
     }
 
     /// Plot a graphical representation of the keyboard with given key labels
-    pub fn plot(&self, key_labels: &[char]) -> String {
+    pub fn plot(&self, key_labels: &[String]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: AHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
+        let labels: AHashMap<usize, String> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template, &labels).unwrap()
     }
 
     /// Plot a compact graphical representation of the keyboard with given key labels without borders (compatible with ArneBab's input strings)
-    pub fn plot_compact(&self, key_labels: &[char]) -> String {
+    pub fn plot_compact(&self, key_labels: &[String]) -> String {
         let mut reg = handlebars::Handlebars::new();
         reg.register_escape_fn(handlebars::no_escape);
-        let labels: AHashMap<usize, char> = key_labels.iter().cloned().enumerate().collect();
+        let labels: AHashMap<usize, String> = key_labels.iter().cloned().enumerate().collect();
         reg.render_template(&self.plot_template_short, &labels)
             .unwrap()
     }
