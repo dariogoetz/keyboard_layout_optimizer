@@ -179,7 +179,7 @@ optimization binaries.
   evaluation output. Higher values increase evaluation time. Defaults to `3`.
 
 ## Structure
-The project includes several binaries within the `evolve_keyboard_layout` crate:
+The project includes several binaries within the `keyboard_layout_optimizer` crate:
 1. `plot` - Plots six layers (neo-layouts have six layers) of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)

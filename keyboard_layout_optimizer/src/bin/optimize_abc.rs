@@ -1,4 +1,4 @@
-use evolve_keyboard_layout::common;
+use keyboard_layout_optimizer::common;
 use layout_optimization_abc::optimization;
 
 use clap::Parser;

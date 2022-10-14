@@ -1,17 +1,17 @@
 [workspace]
 members = [
-    "keyboard_layout",
-    "layout_evaluation",
-    "layout_optimization/layout_optimization_common",
-    "layout_optimization/layout_optimization_genetic",
-    "layout_optimization/layout_optimization_sa",
-    "layout_optimization/layout_optimization_abc",
-    "evolve_keyboard_layout",
+  "keyboard_layout",
+  "layout_evaluation",
+  "layout_optimization/layout_optimization_common",
+  "layout_optimization/layout_optimization_genetic",
+  "layout_optimization/layout_optimization_sa",
+  "layout_optimization/layout_optimization_abc",
+  "keyboard_layout_optimizer",
 ]
 
 exclude = [
-    "webui/layouts_webservice",     # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
-    "webui/layout_evaluation_wasm",
+  "webui/layouts_webservice",     # as long as its "rocket_db_pool" dependency is not on crates, it is not part of the workspace
+  "webui/layout_evaluation_wasm",
 ]
 
 [profile.release]

@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use evolve_keyboard_layout::common;
+use keyboard_layout_optimizer::common;
 
 #[derive(Parser, Debug)]
 #[clap(name = "Keyboard layout plotting")]

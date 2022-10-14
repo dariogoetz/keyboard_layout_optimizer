@@ -2,7 +2,7 @@
 authors = ["Dario Götz <dario.goetz@googlemail.com>"]
 edition = "2018"
 license = "GPL-3.0-or-later"
-name = "evolve_keyboard_layout"
+name = "keyboard_layout_optimizer"
 rust-version = "1.60"
 version = "0.1.0"
 

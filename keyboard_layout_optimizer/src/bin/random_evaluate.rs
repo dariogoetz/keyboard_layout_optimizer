@@ -1,7 +1,7 @@
 use clap::Parser;
 use rand::{self, seq::SliceRandom};
 
-use evolve_keyboard_layout::common;
+use keyboard_layout_optimizer::common;
 
 #[derive(Parser, Debug)]
 #[clap(name = "Random keyboard layout evaluation")]

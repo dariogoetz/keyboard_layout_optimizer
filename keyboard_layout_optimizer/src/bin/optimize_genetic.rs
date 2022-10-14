@@ -1,4 +1,4 @@
-use evolve_keyboard_layout::common;
+use keyboard_layout_optimizer::common;
 use layout_evaluation::cache::Cache;
 use layout_optimization_genetic::optimization;
 
