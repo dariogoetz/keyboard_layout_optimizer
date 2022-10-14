@@ -10,10 +10,10 @@ version = "0.1.0"
 
 [dependencies]
 ahash = "0.7.6"
-anyhow = "*"
-handlebars = "*"
-log = "*"
-serde = { version = "^1.0", features = ["derive"] }
-serde_json = "^1.0"
-serde_yaml = "*"
-thiserror = "*"
+anyhow = "1.0.65"
+handlebars = "4.3.5"
+log = "0.4.17"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9.13"
+thiserror = "1.0"

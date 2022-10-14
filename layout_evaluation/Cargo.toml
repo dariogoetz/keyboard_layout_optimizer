@@ -12,19 +12,19 @@ version = "0.1.0"
 keyboard_layout = { path = "../keyboard_layout" }
 
 ahash = { version = "0.7.6", features = ["serde"] }
-anyhow = "*"
-colored = "*"
-env_logger = "*"
-itertools = "*"
-log = "*"
-ordered-float = "*"
+anyhow = "1.0.65"
+colored = "2.0.0"
+env_logger = "0.9.1"
+itertools = "0.10.5"
+log = "0.4.17"
+ordered-float = "3.2.0"
 parking_lot = "0.12.0"
-priority-queue = "*"
-serde = { version = "^1.0", features = ["derive"] }
-serde_yaml = "*"
+priority-queue = "1.2.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9.13"
 
 [dev-dependencies]
-criterion = { version = "*", features = ["html_reports"] }
+criterion = { version = "0.4.0", features = ["html_reports"] }
 
 [[bench]]
 harness = false
