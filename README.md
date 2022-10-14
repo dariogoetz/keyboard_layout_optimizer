@@ -193,3 +193,58 @@ The binaries rely on three library crates providing relevant data structures and
 Additionally, two web-UIs can be generated in the `webui` directory:
 1. `evaluation_wasm` - A static page providing layout evaluation and optimization functionality based on WASM.
 1. `layouts_webservice` - A webserver managing a database for collecting layouts and serving a frontend for exploring and comparing them.
+
+
+# Adding New Metrics
+Adding your own metrics is quite simple if you have some programming knowledge. The code for all metrics resides in `layout_evaluation/src/metrics/{layout_|unigram_|bigram_|trigram_}metrics`. Before starting to code, you should determine, whether your new metric assigns cost values to a unigram (single keypress), bigram (two consecutive keypresses), trigram (three consecutive keypresses), or does not rely on any frequency data and only considers the layout itself.
+
+Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` with the one relevant value in the following.
+
+1. Add a new file `my_metric_name.rs` in the corresponding directory. It will contain the evaluation logic of the metric.
+
+1. The new module should contain
+    - a `Parameters` struct with the parameters that will be configurable in the YAML file and
+    - a `MyMetricName` struct holding data required for the evaluation (usually only the parameters from the `Parameters` struct)
+
+ 1. In order to make the `MyMetricName` struct into a uni-, bi-, or trigram metric, it needs to implement the `{Unigram|Bigram|Trigram}Metric` trait. For that, it is required to implement two functions:
+    - the `name` function that simply returns the metric's name, e.g. `My Metric` and
+    - the `individual_cost` metric that assigns a cost value to a single n-gram.
+    Optionally, you can also implement the `total_cost` function that receives a slice of n-grams, but in most cases the default implementation suffices (it calls the `individual_cost` function for each n-gram).
+
+    If your metric is a layout metric, there is no `individual_cost` function (as there are no individual n-grams to consider). In that case, you need to implement the `total_cost` function.
+
+1. The `MyMetricName` struct should also have a `new` function receiving the `Parameters` for generating a new instance.
+
+1. The main parameters of the `individual_cost` function are one/two/three `LayerKey` elements for the keys that belong to the individual uni-/bi-/trigram and the weight of the bigram (how often it occurs in the corpus).
+
+    A `LayerKey` contains all relevant data about the symbol and associated key, such as the position on the keyboard, which hand and finger are used to hit the key, or the associated cost. It also contains the number of the layer in which the symbol lays on the key. If "splitting modifiers" is enabled, this is always `0`, however, as the higher layers have been resolved by adding appropriate modifier keypresses to the n-grams.
+
+    The `individual_cost` function returns a "weighted cost" incorporating the `weight` parameter if necessary, e.g. `Some(weight * cost)`.
+
+1. Make the new module accessible by adding a new line `pub mod my_metric_name;` at the top of the file `layout_evaluation/src/metrics/{layout_|unigram_|bigram_|trigram_}metrics.rs`.
+
+1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
+    - add the line `pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,` in the `MetricParameters` struct in order to make the YAML configuration available to your metric
+    - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
+    ```rust
+        self.{layout|unigram|bigram|trigram}_metric(
+            Box::new({layout|unigram|bigram|trigram}_metrics::my_metric_name::MyMetricName::new(
+                &params.my_metric_name.params,
+            )),
+            params.my_metric_name.weight,
+            params.my_metric_name.normalization.clone(),
+            params.my_metric_name.enabled,
+        );
+    ```
+
+1. Add a section for the new metric to the config `config/evaluation/default.yml`:
+    ```yaml
+    my_metric_name:
+      enabled: true
+      weight: 1.0
+      normalization:
+        type: weight_found
+        value: 1.0
+      params:
+        null: null
+    ```
