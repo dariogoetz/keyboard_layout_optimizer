@@ -3,7 +3,7 @@
 Keyboard layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
 It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (that are activated by holding corresponding modifiers). 
 
-At the heart of the optimization lies a layout evaluation that involves multiple criteria/metrics on the frequencies of unigrams, bigrams, and trigrams. And with a little bit of Rust-knowledge, new metrics can easily be added.
+At the heart of the optimization lies a layout evaluation that involves multiple criteria/metrics on the frequencies of unigrams, bigrams, and trigrams. And with a little bit of Rust-knowledge, new metrics [can easily be added](#adding-new-metrics).
 
 For the optimization, individual layers can be excluded from permutations, e.g. in the default configuration, permutations are performed in the base layer and layers 2, 5, and 6 whereas layers 3 and 4 remain unchanged (in the spirit of "Neo"-family layouts).
 
