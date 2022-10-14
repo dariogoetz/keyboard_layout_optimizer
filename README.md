@@ -230,21 +230,21 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
 
 1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
     - add the line 
-    ```rust
-    pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,
-    ```
-    in the `MetricParameters` struct in order to make the YAML configuration available to your metric
+        ```rust
+        pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,
+        ```
+        in the `MetricParameters` struct in order to make the YAML configuration available to your metric
     - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
-    ```rust
-        self.{layout|unigram|bigram|trigram}_metric(
-            Box::new({layout|unigram|bigram|trigram}_metrics::my_metric_name::MyMetricName::new(
-                &params.my_metric_name.params,
-            )),
-            params.my_metric_name.weight,
-            params.my_metric_name.normalization.clone(),
-            params.my_metric_name.enabled,
-        );
-    ```
+        ```rust
+            self.{layout|unigram|bigram|trigram}_metric(
+                Box::new({layout|unigram|bigram|trigram}_metrics::my_metric_name::MyMetricName::new(
+                    &params.my_metric_name.params,
+                )),
+                params.my_metric_name.weight,
+                params.my_metric_name.normalization.clone(),
+                params.my_metric_name.enabled,
+            );
+        ```
 
 1. Add a section for the new metric to the config `config/evaluation/default.yml`:
     ```yaml
