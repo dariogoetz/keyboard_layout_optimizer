@@ -202,18 +202,19 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
 
 1. Add a new file `my_metric_name.rs` in the corresponding directory. It will contain the evaluation logic of the metric.
 
-1. The new module should contain
-    - a `Parameters` struct with the parameters that will be configurable in the YAML file and
+1. The new file should contain
+    - a `Parameters` struct with the parameters that will be configurable in the YAML config and
     - a `MyMetricName` struct holding data required for the evaluation (usually only the parameters from the `Parameters` struct)
 
  1. In order to make the `MyMetricName` struct into a uni-, bi-, or trigram metric, it needs to implement the `{Unigram|Bigram|Trigram}Metric` trait. For that, it is required to implement two functions:
-    - the `name` function that simply returns the metric's name, e.g. `My Metric` and
-    - the `individual_cost` metric that assigns a cost value to a single n-gram.
+    - the `name` function that simply returns the metric's name, e.g. `"My Metric"` and
+    - the `individual_cost` function that assigns a cost value to a single n-gram.
+
     Optionally, you can also implement the `total_cost` function that receives a slice of n-grams, but in most cases the default implementation suffices (it calls the `individual_cost` function for each n-gram).
 
     If your metric is a layout metric, there is no `individual_cost` function (as there are no individual n-grams to consider). In that case, you need to implement the `total_cost` function.
 
-1. The `MyMetricName` struct should also have a `new` function receiving the `Parameters` for generating a new instance.
+1. The `MyMetricName` struct should also have a `new` function for generating a new instance. It receives an instance of `Parameters`.
 
 1. The main parameters of the `individual_cost` function are one/two/three `LayerKey` elements for the keys that belong to the individual uni-/bi-/trigram and the weight of the bigram (how often it occurs in the corpus).
 
@@ -221,10 +222,18 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
 
     The `individual_cost` function returns a "weighted cost" incorporating the `weight` parameter if necessary, e.g. `Some(weight * cost)`.
 
-1. Make the new module accessible by adding a new line `pub mod my_metric_name;` at the top of the file `layout_evaluation/src/metrics/{layout_|unigram_|bigram_|trigram_}metrics.rs`.
+1. Make the new module accessible by adding a new line
+    ```rust
+    pub mod my_metric_name;
+    ```
+    at the top of the file `layout_evaluation/src/metrics/{layout_|unigram_|bigram_|trigram_}metrics.rs`.
 
 1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
-    - add the line `pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,` in the `MetricParameters` struct in order to make the YAML configuration available to your metric
+    - add the line 
+    ```rust
+    pub my_metric_name: WeightedParams<{layout_|unigram_|bigram_|trigram_}metrics::my_metric_name::Parameters>,
+    ```
+    in the `MetricParameters` struct in order to make the YAML configuration available to your metric
     - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
     ```rust
         self.{layout|unigram|bigram|trigram}_metric(
