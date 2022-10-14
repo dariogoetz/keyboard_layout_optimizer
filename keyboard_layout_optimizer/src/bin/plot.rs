@@ -27,36 +27,15 @@ fn main() {
             panic!("{:?}", e);
         }
     };
-    println!(
-        "Layout '{}' (layer 1):\n{}",
-        options.layout_str,
-        layout.plot_layer(0)
-    );
-    println!(
-        "Layout '{}' (layer 2):\n{}",
-        options.layout_str,
-        layout.plot_layer(1)
-    );
-    println!(
-        "Layout '{}' (layer 3):\n{}",
-        options.layout_str,
-        layout.plot_layer(2)
-    );
-    println!(
-        "Layout '{}' (layer 4):\n{}",
-        options.layout_str,
-        layout.plot_layer(3)
-    );
-    println!(
-        "Layout '{}' (layer 5):\n{}",
-        options.layout_str,
-        layout.plot_layer(4)
-    );
-    println!(
-        "Layout '{}' (layer 6):\n{}",
-        options.layout_str,
-        layout.plot_layer(5)
-    );
+    let max_layer = layout.layerkeys.iter().map(|k| k.layer).max().unwrap_or(0);
+    for layer in 0..max_layer + 1 {
+        println!(
+            "Layout '{}' (layer {}):\n{}",
+            options.layout_str,
+            layer + 1,
+            layout.plot_layer(layer as usize)
+        );
+    }
     println!("Layout compact: \n{}", layout.plot_compact());
     println!("Layout as text: \n{}", layout);
 }

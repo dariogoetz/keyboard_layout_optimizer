@@ -180,7 +180,7 @@ optimization binaries.
 
 ## Structure
 The project includes several binaries within the `keyboard_layout_optimizer` crate:
-1. `plot` - Plots six layers (neo-layouts have six layers) of a specified layout
+1. `plot` - Plots all layers (neo-layouts have six layers) of a specified layout
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
 1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
