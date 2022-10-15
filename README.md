@@ -200,7 +200,7 @@ Additionally, two web-UIs can be generated in the `webui` directory:
 
 
 ## Adding New Metrics
-Adding your own metrics is quite simple if you have some programming knowledge. The code for all metrics resides in `layout_evaluation/src/metrics/{layout|unigram_|bigram_|trigram_}metrics`. Before starting to code, you should determine, whether your new metric assigns cost values to a unigram (single keypress), bigram (two consecutive keypresses), trigram (three consecutive keypresses), or does not rely on any frequency data and only considers the layout itself.
+Adding your own metrics is quite simple if you have some programming knowledge. The code for all metrics resides in `layout_evaluation/src/metrics/{layout|unigram|bigram|trigram}_metrics`. Before starting to code, you should determine, whether your new metric assigns cost values to a unigram (single keypress), bigram (two consecutive keypresses), trigram (three consecutive keypresses), or does not rely on any frequency data and only considers the layout itself.
 
 Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` with the one relevant value in the following.
 
