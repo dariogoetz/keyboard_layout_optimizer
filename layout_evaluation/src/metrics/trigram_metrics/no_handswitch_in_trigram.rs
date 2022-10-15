@@ -39,7 +39,7 @@ impl NoHandswitchInTrigram {
 
 impl TrigramMetric for NoHandswitchInTrigram {
     fn name(&self) -> &str {
-        "No handswitch in trigram"
+        "No Handswitch in Trigram"
     }
 
     #[inline(always)]
