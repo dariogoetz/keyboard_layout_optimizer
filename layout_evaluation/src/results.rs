@@ -79,9 +79,9 @@ impl fmt::Display for MetricResults {
         for metric_cost in self.metric_costs.iter() {
             writeln!(
                 f,
-                "  {:>9.4} (weighted: {}) {} | {}",
-                metric_cost.unweighted_cost,
-                format!("{:>9.4}", metric_cost.weighted_cost).green(),
+                "  {} {} | {}",
+                // metric_cost.unweighted_cost,
+                format!("{:>7.2}", metric_cost.weighted_cost).green(),
                 format!("{:<35}", metric_cost.core.name).bold(),
                 metric_cost.core.message.as_ref().unwrap_or(&"".to_string()),
             )?;
