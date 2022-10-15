@@ -181,7 +181,7 @@ impl fmt::Display for EvaluationResult {
         writeln!(
             f,
             "Cost: {} (optimization score: {})",
-            format!("{:.4}", self.total_cost()).green().bold(),
+            format!("{:.2}", self.total_cost()).green().bold(),
             self.optimization_score()
         )?;
 
