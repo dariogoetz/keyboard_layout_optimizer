@@ -34,7 +34,7 @@ impl ShortcutKeys {
 
 impl LayoutMetric for ShortcutKeys {
     fn name(&self) -> &str {
-        "Badly positioned shortcut keys"
+        "Badly Positioned Shortcut Keys"
     }
 
     fn total_cost(&self, layout: &Layout) -> (f64, Option<String>) {
