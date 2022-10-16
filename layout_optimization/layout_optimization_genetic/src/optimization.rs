@@ -61,8 +61,7 @@ pub struct FitnessCalc {
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
-        let l = self.layout_generator.generate_layout(genome);
-        let layout_str = self.layout_generator.generate_string(genome);
+        let (layout_str, l) = self.layout_generator.generate_layout(genome);
 
         // Get & return the evaluation-result
         match &self.result_cache {
@@ -248,14 +247,15 @@ pub fn optimize(
                 let best_solution = step.result.best_solution;
                 if let Some(king) = &all_time_best {
                     if best_solution.solution.fitness > king.0 {
-                        let layout = pm.generate_layout(&best_solution.solution.genome);
+                        let (layout_str, layout) =
+                            pm.generate_layout(&best_solution.solution.genome);
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "{}: {} (score: {})\n{}",
                             format!("New best in generation {}:", step.iteration)
                                 .yellow()
                                 .bold(),
-                            layout,
+                            layout_str,
                             format!("{}", evaluation_result.total_cost()).yellow(),
                             layout.plot(),
                         );
@@ -280,18 +280,18 @@ pub fn optimize(
                     all_time_best.as_ref().unwrap().0,
                     step.duration.fmt(),
                     step.processing_time.fmt(),
-                    pm.generate_layout(&best_solution.solution.genome)
+                    pm.generate_layout(&best_solution.solution.genome).0
                 );
             }
             Ok(SimResult::Final(step, processing_time, duration, _stop_reason)) => {
-                let layout = pm.generate_layout(&all_time_best.as_ref().unwrap().1);
+                let (layout_str, layout) = pm.generate_layout(&all_time_best.as_ref().unwrap().1);
                 println!(
                     "{} after generation {}, duration {}, processing time {}\n\n{}\n\n{}\n{}",
                     "Final result".green().bold(),
                     step.iteration,
                     duration.fmt(),
                     processing_time.fmt(),
-                    layout,
+                    layout_str,
                     layout.plot_compact(),
                     layout.plot()
                 );
@@ -304,5 +304,5 @@ pub fn optimize(
         }
     }
 
-    pm.generate_layout(&all_time_best.as_ref().unwrap().1)
+    pm.generate_layout(&all_time_best.as_ref().unwrap().1).1
 }

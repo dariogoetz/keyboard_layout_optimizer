@@ -50,7 +50,7 @@ impl Context for FitnessCalc {
 
     fn make(&self) -> Self::Solution {
         let indices = self.layout_generator.generate_random();
-        self.layout_generator.generate_layout(&indices)
+        self.layout_generator.generate_layout(&indices).1
     }
 
     fn evaluate_fitness(&self, solution: &Self::Solution) -> f64 {

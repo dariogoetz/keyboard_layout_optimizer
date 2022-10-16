@@ -93,9 +93,10 @@ impl PermutationLayoutGenerator {
         indices
     }
 
-    pub fn generate_layout(&self, permutation: &[usize]) -> Layout {
+    pub fn generate_layout(&self, permutation: &[usize]) -> (String, Layout) {
         let s = self.generate_string(permutation);
-        self.layout_generator.generate(&s).unwrap()
+        let layout = self.layout_generator.generate(&s).unwrap();
+        (s, layout)
     }
 
     pub fn get_permutable_indices(&self) -> Vec<usize> {

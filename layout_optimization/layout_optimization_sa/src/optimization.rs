@@ -243,7 +243,7 @@ fn get_cost_sd(
     let mut current_indices = initial_indices.to_owned();
 
     for _ in 0..USED_NEIGHBORS {
-        let layout = layout_generator.generate_layout(&current_indices);
+        let (_, layout) = layout_generator.generate_layout(&current_indices);
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
         current_indices = layout_generator.perform_n_swaps(&current_indices, key_pair_switches);
@@ -379,5 +379,5 @@ pub fn optimize(
     let res = executor.run().unwrap();
 
     let best_layout_param = res.state().get_best_param().unwrap();
-    pm.generate_layout(best_layout_param)
+    pm.generate_layout(best_layout_param).1
 }
