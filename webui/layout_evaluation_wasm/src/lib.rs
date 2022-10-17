@@ -281,18 +281,17 @@ impl LayoutOptimizer {
                     ));
                 }
 
-                let layout = self
+                let (layout_str, layout) = self
                     .permutation_layout_generator
                     .generate_layout(&self.all_time_best.as_ref().unwrap().1);
                 let res = self.evaluator.evaluate_layout(&layout);
                 let printed = Some(format!("{}", res));
                 let plot = Some(layout.plot());
-                let layout_str = Some(layout.as_text());
 
                 let mut res: LayoutEvaluation = res.into();
                 res.printed = printed;
                 res.plot = plot;
-                res.layout = layout_str;
+                res.layout = Some(layout_str);
 
                 Ok(JsValue::from_serde(&Some(res)).unwrap())
             }
