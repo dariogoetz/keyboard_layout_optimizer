@@ -13,6 +13,7 @@ type MatrixPosition = (u8, u8);
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    pub add_mirrored: bool,
     pub matrix_positions: AHashMap<(MatrixPosition, MatrixPosition), f64>,
 }
 
@@ -25,13 +26,15 @@ impl ManualBigramPenalty {
     pub fn new(params: &Parameters) -> Self {
         let mut matrix_positions = params.matrix_positions.clone();
 
-        // add the reversed bigrams as well
-        matrix_positions.extend(
-            params
-                .matrix_positions
-                .iter()
-                .map(|(((x1, y1), (x2, y2)), w)| (((*x2, *y2), (*x1, *y1)), *w)),
-        );
+        // add the reversed bigrams as well, if configured
+        if params.add_mirrored {
+            matrix_positions.extend(
+                params
+                    .matrix_positions
+                    .iter()
+                    .map(|(((x1, y1), (x2, y2)), w)| (((*x2, *y2), (*x1, *y1)), *w)),
+            );
+        }
 
         Self { matrix_positions }
     }

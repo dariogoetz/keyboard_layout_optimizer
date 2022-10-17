@@ -166,11 +166,13 @@ metrics:
       type: weight_found
       value: 1.0
     params:
+      # if mirrored bigrams to the ones in "matrix_positions" below shall be added automatically
+      add_mirrored: true
+
       # key positions as matrix positions and the corresponding costs
       # the format is [column, row]
       # [from_position, to_position]: weight
       matrix_positions:
-        # symmetric ones will be added automatically
         # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2 (not in row 3)
         [[3, 1], [2, 3]]: 1      # QWERTZ: wy
         [[3, 2], [2, 3]]: 0.3    # QWERTZ: sy
