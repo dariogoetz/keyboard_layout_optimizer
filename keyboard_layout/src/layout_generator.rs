@@ -7,6 +7,7 @@ use crate::layout::Layout;
 
 use ahash::{AHashMap, AHashSet};
 use anyhow::Result;
+use core::slice;
 use serde::Deserialize;
 use std::{fs::File, iter::FromIterator, sync::Arc};
 use thiserror::Error;
@@ -25,6 +26,25 @@ pub enum LayoutError {
     WrongKeyNumber(usize, usize),
 }
 
+/// Enum for configuring type of modifier (e.g. whether the modifier has to be held or tapped
+/// for activating a layer)
+#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[serde(tag = "type", content = "value")]
+#[serde(rename_all = "snake_case")]
+pub enum ModifierPositions {
+    Hold(Vec<MatrixPosition>),
+    OneShot(Vec<MatrixPosition>),
+}
+
+impl ModifierPositions {
+    pub fn iter(&self) -> slice::Iter<'_, MatrixPosition> {
+        match self {
+            Self::Hold(v) => v.iter(),
+            Self::OneShot(v) => v.iter(),
+        }
+    }
+}
+
 /// A collection of data (configuration) regarding the Neo layout (and its family)
 /// required to generate Neo layout variants.
 ///
@@ -34,7 +54,7 @@ pub struct BaseLayoutYAML {
     keys: Vec<Vec<Vec<String>>>,
     fixed_keys: Vec<Vec<bool>>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<AHashMap<Hand, Vec<MatrixPosition>>>,
+    modifiers: Vec<AHashMap<Hand, ModifierPositions>>,
 }
 
 impl BaseLayoutYAML {
@@ -61,7 +81,7 @@ pub struct NeoLayoutGenerator {
     fixed_keys: Vec<bool>,
     permutable_key_map: AHashMap<char, u8>,
     fixed_layers: Vec<u8>,
-    modifiers: Vec<AHashMap<Hand, Vec<MatrixPosition>>>,
+    modifiers: Vec<AHashMap<Hand, ModifierPositions>>,
     keyboard: Arc<Keyboard>,
 }
 

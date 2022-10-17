@@ -6,7 +6,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use crate::ngrams::Unigrams;
 
 use ahash::AHashMap;
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
@@ -54,9 +54,13 @@ impl OnDemandUnigramMapper {
 
     /// For a given [`Layout`] generate [`LayerKeyIndex`]-based unigrams, optionally resolving modifiers for higer-layer symbols.
     pub fn layerkey_indices(&self, unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
-        let (unigram_keys_vec, not_found_weight) = map_unigrams(unigrams, layout);
+        let (mut unigram_keys_vec, not_found_weight) = map_unigrams(unigrams, layout);
 
         let unigram_keys = if self.split_modifiers.enabled {
+            if layout.has_one_shot_layers() {
+                unigram_keys_vec = self.process_one_shot_layers(unigram_keys_vec, layout);
+            }
+
             Self::split_unigram_modifiers(unigram_keys_vec, layout)
         } else {
             unigram_keys_vec.into_iter().collect()
@@ -86,6 +90,11 @@ impl OnDemandUnigramMapper {
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
 
+            let mods = match mods {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
+
             // Make sure we don't have any duplicate unigrams by adding them up.
             TakeOneLayerKey::new(base, &mods, w)
                 .for_each(|(idx, w)| idx_w_map.insert_or_add_weight(idx, w));
@@ -106,5 +115,25 @@ impl OnDemandUnigramMapper {
         });
 
         idx_w_map
+    }
+
+    fn process_one_shot_layers(
+        &self,
+        unigrams: UnigramIndicesVec,
+        layout: &Layout,
+    ) -> UnigramIndicesVec {
+        let mut processed_unigrams = Vec::with_capacity(unigrams.len());
+
+        unigrams.into_iter().for_each(|(k, w)| {
+            let (base, mods) = layout.resolve_modifiers(&k);
+            if let Modifiers::OneShot(mods) = mods {
+                processed_unigrams.extend(mods.iter().map(|m| (m.clone(), w)));
+                processed_unigrams.push((base, w));
+            } else {
+                processed_unigrams.push((k, w));
+            }
+        });
+
+        processed_unigrams
     }
 }

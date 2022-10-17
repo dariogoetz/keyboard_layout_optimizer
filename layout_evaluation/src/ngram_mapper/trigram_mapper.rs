@@ -6,7 +6,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use crate::ngrams::Trigrams;
 
 use ahash::AHashMap;
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
@@ -86,10 +86,13 @@ impl OnDemandTrigramMapper {
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (TrigramIndices, f64) {
-        let (trigram_keys_vec, not_found_weight) =
+        let (mut trigram_keys_vec, not_found_weight) =
             map_trigrams(trigrams, layout, exclude_line_breaks);
 
         let trigram_keys = if self.split_modifiers.enabled {
+            if layout.has_one_shot_layers() {
+                trigram_keys_vec = self.process_one_shot_layers(trigram_keys_vec, layout);
+            }
             self.split_trigram_modifiers(trigram_keys_vec, layout)
         } else {
             trigram_keys_vec.into_iter().collect()
@@ -146,6 +149,21 @@ impl OnDemandTrigramMapper {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
             let (base2, mods2) = layout.resolve_modifiers(&k2);
             let (base3, mods3) = layout.resolve_modifiers(&k3);
+
+            let mods1 = match mods1 {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
+
+            let mods2 = match mods2 {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
+
+            let mods3 = match mods3 {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
 
             let k1_take_one = TakeOneLayerKey::new(base1, &mods1, w);
             let k2_take_one = TakeOneLayerKey::new(base2, &mods2, w);
@@ -265,5 +283,51 @@ impl OnDemandTrigramMapper {
         });
 
         trigram_w_map
+    }
+
+    fn process_one_shot_layers(
+        &self,
+        trigrams: TrigramIndicesVec,
+        layout: &Layout,
+    ) -> TrigramIndicesVec {
+        let mut processed_trigrams = Vec::with_capacity(trigrams.len());
+
+        trigrams.into_iter().for_each(|((k1, k2, k3), w)| {
+            let (base1, mods1) = layout.resolve_modifiers(&k1);
+            let (base2, mods2) = layout.resolve_modifiers(&k2);
+            let (base3, mods3) = layout.resolve_modifiers(&k3);
+
+            let mut keys = Vec::new();
+
+            if let Modifiers::OneShot(mods) = mods1 {
+                keys.extend(mods);
+                keys.push(base1);
+            } else {
+                keys.push(k1);
+            };
+
+            if let Modifiers::OneShot(mods) = mods2 {
+                keys.extend(mods);
+                keys.push(base2);
+            } else {
+                keys.push(k2);
+            };
+
+            if let Modifiers::OneShot(mods) = mods3 {
+                keys.extend(mods);
+                keys.push(base3);
+            } else {
+                keys.push(k3);
+            };
+
+            keys.iter()
+                .zip(keys.iter().skip(1))
+                .zip(keys.iter().skip(2))
+                .for_each(|((lk1, lk2), lk3)| {
+                    processed_trigrams.push(((lk1.clone(), lk2.clone(), lk3.clone()), w));
+                });
+        });
+
+        processed_trigrams
     }
 }

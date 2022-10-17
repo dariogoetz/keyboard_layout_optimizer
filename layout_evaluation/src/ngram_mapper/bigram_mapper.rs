@@ -8,7 +8,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
 
 use ahash::AHashMap;
 
@@ -79,9 +79,13 @@ impl OnDemandBigramMapper {
         layout: &Layout,
         exclude_line_breaks: bool,
     ) -> (BigramIndices, f64) {
-        let (bigram_keys_vec, not_found_weight) = map_bigrams(bigrams, layout, exclude_line_breaks);
+        let (mut bigram_keys_vec, not_found_weight) =
+            map_bigrams(bigrams, layout, exclude_line_breaks);
 
         let bigram_keys = if self.split_modifiers.enabled {
+            if layout.has_one_shot_layers() {
+                bigram_keys_vec = self.process_one_shot_layers(bigram_keys_vec, layout);
+            }
             self.split_bigram_modifiers(bigram_keys_vec, layout)
         } else {
             bigram_keys_vec.into_iter().collect()
@@ -137,6 +141,16 @@ impl OnDemandBigramMapper {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
             let (base2, mods2) = layout.resolve_modifiers(&k2);
 
+            let mods1 = match mods1 {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
+
+            let mods2 = match mods2 {
+                Modifiers::Hold(mods) => mods,
+                _ => Vec::new(),
+            };
+
             bigram_w_map.insert_or_add_weight((base1, base2), w);
             // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&base1).symbol, layout.get_layerkey(&base2).symbol);
 
@@ -175,5 +189,40 @@ impl OnDemandBigramMapper {
         });
 
         bigram_w_map
+    }
+
+    fn process_one_shot_layers(
+        &self,
+        bigrams: BigramIndicesVec,
+        layout: &Layout,
+    ) -> BigramIndicesVec {
+        let mut processed_bigrams = Vec::with_capacity(bigrams.len());
+
+        bigrams.into_iter().for_each(|((k1, k2), w)| {
+            let (base1, mods1) = layout.resolve_modifiers(&k1);
+            let (base2, mods2) = layout.resolve_modifiers(&k2);
+
+            let mut keys = Vec::new();
+
+            if let Modifiers::OneShot(mods) = mods1 {
+                keys.extend(mods);
+                keys.push(base1);
+            } else {
+                keys.push(k1);
+            };
+
+            if let Modifiers::OneShot(mods) = mods2 {
+                keys.extend(mods);
+                keys.push(base2);
+            } else {
+                keys.push(k2);
+            };
+
+            keys.iter().zip(keys.iter().skip(1)).for_each(|(lk1, lk2)| {
+                processed_bigrams.push(((lk1.clone(), lk2.clone()), w));
+            });
+        });
+
+        processed_bigrams
     }
 }

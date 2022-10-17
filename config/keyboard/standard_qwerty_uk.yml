@@ -149,5 +149,9 @@ base_layout:
   fixed_layers: []
 
   modifiers:
-    - Left: [[0,3]]
-      Right: [[18,3]]
+    - Left:
+        type: hold
+        value: [[0,3]]
+      Right:
+        type: hold
+        value: [[18,3]]

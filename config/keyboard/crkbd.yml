@@ -121,13 +121,33 @@ base_layout:
   fixed_layers: [2, 3]
 
   modifiers:
-    - Left: [[6,4]]
-      Right: [[6,4]]
-    - Left: [[1,2]]
-      Right: [[18,2]]
-    - Left: [[5,4]]
-      Right: [[14,4]]
-    - Left: [[6,4],[5,4]]
-      Right: [[6,4],[14,4]]
-    - Left: [[1,2],[5,4]]
-      Right: [[18,2],[14,4]]
+    - Left:
+        type: hold
+        value: [[6,4]]
+      Right:
+        type: hold
+        value: [[6,4]]
+    - Left:
+        type: hold
+        value: [[1,2]]
+      Right:
+        type: hold
+        value: [[18,2]]
+    - Left:
+        type: hold
+        value: [[5,4]]
+      Right:
+        type: hold
+        value: [[14,4]]
+    - Left:
+        type: hold
+        value: [[6,4],[5,4]]
+      Right:
+        type: hold
+        value: [[6,4],[14,4]]
+    - Left:
+        type: hold
+        value: [[1,2],[5,4]]
+      Right:
+        type: hold
+        value: [[18,2],[14,4]]
