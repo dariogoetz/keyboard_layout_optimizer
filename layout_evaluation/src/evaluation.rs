@@ -441,12 +441,14 @@ impl Evaluator {
         let mut results: Vec<MetricResults> = Vec::new();
 
         // Layout metrics
-        let metric_costs = self.evaluate_layout_metrics(layout);
-        let mut layout_costs = MetricResults::new(MetricType::Layout, 1.0, 0.0);
-        metric_costs
-            .into_iter()
-            .for_each(|mc| layout_costs.add_result(mc));
-        results.push(layout_costs);
+        if !self.layout_metrics.is_empty() {
+            let metric_costs = self.evaluate_layout_metrics(layout);
+            let mut layout_costs = MetricResults::new(MetricType::Layout, 1.0, 0.0);
+            metric_costs
+                .into_iter()
+                .for_each(|mc| layout_costs.add_result(mc));
+            results.push(layout_costs);
+        }
 
         // Unigram metrics
         if !self.unigram_metrics.is_empty() {
