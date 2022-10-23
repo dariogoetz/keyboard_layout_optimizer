@@ -9,7 +9,6 @@ use crate::layout_generator::ModifierPositions;
 use ahash::AHashMap;
 use anyhow::Result;
 use colored::Colorize;
-use core::slice;
 use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
@@ -28,10 +27,10 @@ pub enum Modifiers {
 }
 
 impl Modifiers {
-    pub fn iter(&self) -> slice::Iter<'_, LayerKeyIndex> {
+    pub fn layerkeys(&self) -> &[LayerKeyIndex] {
         match self {
-            Self::Hold(v) => v.iter(),
-            Self::OneShot(v) => v.iter(),
+            Self::Hold(v) => &v,
+            Self::OneShot(v) => &v,
         }
     }
 }
@@ -255,12 +254,14 @@ impl Layout {
 
                 let entry_modifier_cost: f64 = entry_layerkey
                     .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|i| layerkeys[*i as usize].key.cost)
                     .sum();
 
                 let new_modifier_cost: f64 = layerkey
                     .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|i| layerkeys[*i as usize].key.cost)
                     .sum();

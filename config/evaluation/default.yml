@@ -3,7 +3,7 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: true
+    enabled: false
     weight: 0.35
     normalization:
       type: fixed
@@ -16,7 +16,7 @@ metrics:
 
   # Pairs of keys that shall be placed in related positions to each other
   similar_letters:
-    enabled: true
+    enabled: false
     weight: 3.0
     normalization:
       type: fixed
@@ -48,7 +48,7 @@ metrics:
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
   similar_letter_groups:
-    enabled: true
+    enabled: false
     weight: 10.0
     normalization:
       type: fixed
@@ -68,7 +68,7 @@ metrics:
 
   # Each finger's load shall be relative to the specified weights
   finger_balance:
-    enabled: true
+    enabled: false
     weight: 69.0
     normalization:
       type: fixed
@@ -89,7 +89,7 @@ metrics:
 
   # Each hand's load shall be close to 50%
   hand_disbalance:
-    enabled: true
+    enabled: false
     weight: 40.0
     normalization:
       type: fixed
@@ -99,7 +99,7 @@ metrics:
 
   # Each keystroke incurs a cost (defined in the keyboard's layout config)
   key_costs:
-    enabled: true
+    enabled: false
     weight: 20.0
     normalization:
       type: weight_found
@@ -109,7 +109,7 @@ metrics:
 
   # Informational metric computing loads per row
   row_loads:
-    enabled: true
+    enabled: false
     weight: 0.0
     normalization:
       type: weight_found
@@ -134,7 +134,7 @@ metrics:
   # The cost can be weighted by the individual keys and if they are performed by stretching
   # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
-    enabled: true
+    enabled: false
     weight: 780.0
     normalization:
       type: weight_found
@@ -199,7 +199,7 @@ metrics:
   # how many rows were crossed and in which direction the movement occurs, costs are
   # counted.
   movement_pattern:
-    enabled: true
+    enabled: false
     weight: 50.0
     normalization:
       type: weight_found
@@ -264,7 +264,7 @@ metrics:
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.
   no_handswitch_after_unbalancing_key:
-    enabled: true
+    enabled: false
     weight: 36.0
     normalization:
       type: weight_found
@@ -273,13 +273,43 @@ metrics:
       null: null
 
 
+  kla_distance:
+    enabled: true
+    # 0.020178 =  18 weight * 0.001121 penalty
+    weight: 0.020178 
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      press_distance: 21 
+      modifier_penalty: 10.5 
+      # klatest.kb.js
+      dscoring:
+        Left:
+          Pinky: 4.0
+          Ring: 2.0
+          Middle: 1.0
+          Index: 1.0
+          Thumb: 1.4
+        Right:
+          Pinky: 4.0
+          Ring: 2.0
+          Middle: 1.0
+          Index: 1.0
+          Thumb: 1.4
+
+      hscoring:
+        Left: 1.21
+        Right: 1.0
+
+
   # trigram metrics
 
   # The `irregularity` metric evaluates all bigram metrics that can be computed on individual
   # bigrams (in particular not the finger- and hand-balance metrics) for the first and second half
   # of each trigram. Their cost is multiplied and the square root of the resulting sum is taken.
   irregularity:
-    enabled: true
+    enabled: false
     weight: 8.25
     normalization:
       type: weight_found
@@ -291,7 +321,7 @@ metrics:
   # depending on whether the three keys corresponding to the trigram are "in line" ("rolling
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
-    enabled: true
+    enabled: false
     weight: 200.0
     normalization:
       type: weight_found
@@ -308,7 +338,7 @@ metrics:
   # handswitch or not, factors are applied. Trigrams starting with one of a list of specified
   # symbols are excluded.
   secondary_bigrams:
-    enabled: true
+    enabled: false
     weight: 0.1
     normalization:
       type: weight_found
@@ -371,7 +401,7 @@ ngram_mapper:
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
   # required to activate the layer
   split_modifiers:
-    enabled: true
+    enabled: false
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
