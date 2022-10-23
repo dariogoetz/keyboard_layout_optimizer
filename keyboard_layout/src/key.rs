@@ -23,6 +23,15 @@ pub struct Position(
     pub f64,
 );
 
+impl Position {
+    pub fn distance(&self, other: &Self) -> f64 {
+        let dx = self.0 - other.0;
+        let dy = self.1 - other.1;
+
+        (dx * dx + dy * dy).sqrt()
+    }
+}
+
 impl Default for Position {
     fn default() -> Self {
         Position(0.0, 0.0)
