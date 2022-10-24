@@ -57,14 +57,13 @@ impl UnigramMetric for FingerBalance {
         // NOTE: ArneBab includes the thumb in the computation (in contrast to here). I believe that this is not helpful,
         // as it contains a large discrepancy (only one thumb is used for the spacebar) and the spacebar
         // is a fixed key anyways
-        let mut total_weight = 0.0;
         unigrams
             .iter()
             .filter(|(key, _weight)| key.key.finger != Finger::Thumb)
             .for_each(|(key, weight)| {
                 *finger_loads.get_mut(&key.key.hand, &key.key.finger) += *weight;
-                total_weight += *weight;
             });
+        let total_weight: f64 = finger_loads.iter().sum();
 
         // A version more similar to ArneBab's solution using the standard deviation
         let fractions: Vec<f64> = self
