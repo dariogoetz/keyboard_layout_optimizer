@@ -177,6 +177,21 @@ impl<T: Copy> HandFingerMap<T> {
         (*hand as usize) * 5 + (*finger as usize)
     }
 
+    pub fn keys(&self) -> [(Hand, Finger); 10] {
+        return [
+            (Hand::Left, Finger::Thumb),
+            (Hand::Left, Finger::Index),
+            (Hand::Left, Finger::Middle),
+            (Hand::Left, Finger::Ring),
+            (Hand::Left, Finger::Pinky),
+            (Hand::Right, Finger::Thumb),
+            (Hand::Right, Finger::Index),
+            (Hand::Right, Finger::Middle),
+            (Hand::Right, Finger::Ring),
+            (Hand::Right, Finger::Pinky),
+        ];
+    }
+
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
@@ -201,16 +216,8 @@ impl<T: Copy> HandFingerMap<T> {
     where
         F: Fn(&Hand, &Finger, &mut T),
     {
-        for hand in &[Hand::Left, Hand::Right] {
-            for finger in &[
-                Finger::Thumb,
-                Finger::Index,
-                Finger::Middle,
-                Finger::Ring,
-                Finger::Pinky,
-            ] {
-                f(hand, finger, &mut self.0[Self::index(hand, finger)]);
-            }
+        for (hand, finger) in self.keys() {
+            f(&hand, &finger, &mut self.0[Self::index(&hand, &finger)]);
         }
     }
 }
