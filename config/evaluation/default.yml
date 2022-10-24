@@ -275,31 +275,54 @@ metrics:
 
   kla_distance:
     enabled: true
-    # 0.020178 =  18 weight * 0.001121 penalty
-    weight: 0.020178 
+    weight: 1
     normalization:
       type: weight_found
       value: 1.0
     params:
-      press_distance: 21 
-      modifier_penalty: 10.5 
-      # klatest.kb.js
+      keyup_distance: 10.5263156
+      keydown_distance: 10.5263156
       dscoring:
         Left:
-          Pinky: 4.0
-          Ring: 2.0
-          Middle: 1.0
-          Index: 1.0
-          Thumb: 1.4
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
         Right:
-          Pinky: 4.0
-          Ring: 2.0
-          Middle: 1.0
-          Index: 1.0
-          Thumb: 1.4
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
 
       hscoring:
-        Left: 1.21
+        Left: 1.1
+        Right: 1.0
+
+  kla_finger_usage:
+    enabled: false
+    weight: 1
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      fscoring:
+        Left:
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
+        Right:
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
+
+      hscoring:
+        Left: 1.1
         Right: 1.0
 
 
