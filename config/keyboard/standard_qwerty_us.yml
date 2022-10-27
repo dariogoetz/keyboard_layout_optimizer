@@ -14,10 +14,10 @@ keyboard:
     - [   [ 38.5,225.5],   [101.5,225.5],      [164.5,225.5],                                                   [351.5,225.5],                                         [538.5,225.5],                [601.5,225.5],   [651.5,225.5],   [714.5,225.5]]
 
   hands:
-    - [Left,    Left, Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
-    - [Left,         Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right, Right]
-    - [Left,           Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
-    - [Left,             Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right]
+    - [Left,     Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right, Right]
+    - [Left,       Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right, Right]
+    - [Left,         Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
+    - [Left,           Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right]
     - [Left, Left, Left,                     Right,                      Right, Right, Right, Right]
 
   fingers:

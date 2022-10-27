@@ -275,7 +275,7 @@ metrics:
 
   kla_distance:
     enabled: true
-    weight: 1
+    weight: 0.44 # 40 weight * 0.0011 penalty * 10 ?
     normalization:
       type: weight_all
       value: 1.0
@@ -327,7 +327,7 @@ metrics:
 
   kla_same_finger:
     enabled: true
-    weight: 1
+    weight: 490.2 # 40 weight * 1.23 penalty * 10 ?
     normalization:
       type: weight_all
       value: 1.0

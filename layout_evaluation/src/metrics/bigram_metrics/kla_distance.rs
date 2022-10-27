@@ -72,6 +72,17 @@ impl BigramMetric for KLADistance {
                 .map(|k| layout.get_layerkey(k))
                 .for_each(|k| prev_positions.set(&k.key.hand, &k.key.finger, k.key.position));
 
+            let mut curr_positions = layout.keyboard.home_row_positions.clone();
+            curr_positions.set(
+                &curr_key.key.hand,
+                &curr_key.key.finger,
+                curr_key.key.position,
+            );
+            curr_mods
+                .iter()
+                .map(|k| layout.get_layerkey(k))
+                .for_each(|k| curr_positions.set(&k.key.hand, &k.key.finger, k.key.position));
+
             let released_mods = prev_mods
                 .difference(&curr_mods)
                 .map(|k| layout.get_layerkey(k));
@@ -79,50 +90,48 @@ impl BigramMetric for KLADistance {
                 .difference(&prev_mods)
                 .map(|k| layout.get_layerkey(k));
 
-            println!(
-                "{}{} (weight: {})",
-                prev_key.symbol.escape_debug(),
-                curr_key.symbol.escape_debug(),
-                weight
-            );
-
-            let cost = (dist_to_prev(&curr_key, &prev_positions)
-                + self.keyup_distance
-                + self.keydown_distance)
+            // finger goes to current key and presses and releases it
+            let dist_to_key = (dist_to_prev(&curr_key, &prev_positions)
+                + self.keydown_distance
+                + self.keyup_distance)
                 * weight;
-            *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += cost;
-            println!(
-                "  key {}: {}",
-                curr_key.symbol.escape_debug(),
-                cost / weight
-            );
+            *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += dist_to_key;
 
-            pressed_mods.for_each(|k| {
-                let cost = (dist_to_prev(k, &prev_positions) + self.keydown_distance) * weight;
-                println!(
-                    "  pressed mod {}: {}",
-                    k.symbol.escape_debug(),
-                    cost / weight
-                );
-                *finger_values.get_mut(&k.key.hand, &k.key.finger) += cost;
-            });
+            if curr_key.key.hand != prev_key.key.hand || curr_key.key.finger != prev_key.key.finger
+            {
+                // if the previous key was hit by a different finger,
+                // that finger returns to the home row (or some mod)
+                let dist_return = dist_to_prev(&prev_key, &curr_positions) * weight;
+                *finger_values.get_mut(&prev_key.key.hand, &prev_key.key.finger) += dist_return;
+            }
 
-            released_mods.for_each(|k| {
-                let cost = (dist_to_prev(k, &prev_positions) + self.keyup_distance) * weight;
-                println!(
-                    "  released mod {}: {}",
-                    k.symbol.escape_debug(),
-                    cost / weight
-                );
-                *finger_values.get_mut(&k.key.hand, &k.key.finger) += cost;
-            });
-            println!("");
+            // fingers move to the modifiers (if they did not hit the previous key before)
+            pressed_mods
+                // if the finger pressed the previous key, the movement has been accounted for above
+                .filter(|k| k.key.hand != prev_key.key.hand || k.key.finger != prev_key.key.finger)
+                .for_each(|k| {
+                    let dist = (dist_to_prev(k, &prev_positions)
+                        + self.keydown_distance
+                        + self.keyup_distance)
+                        * weight;
+                    *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist;
+                });
+
+            // fingers from previously pressed mods return to home row
+            // (if they are not used to hit the current key)
+            released_mods
+                // if the finger will press the current key, the movement has been accounted for above
+                .filter(|k| k.key.hand != curr_key.key.hand || k.key.finger != curr_key.key.finger)
+                .for_each(|k| {
+                    let dist_to_homerow = dist_to_prev(k, &curr_positions) * weight;
+                    *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist_to_homerow;
+                });
         });
 
         let total_weight: f64 = finger_values.iter().sum();
 
         let message = format!(
-            "Finger values %: {:3.1} {:3.1} {:3.1} {:3.1} | {:3.1} - {:3.1} | {:3.1} {:3.1} {:3.1} {:3.1}",
+            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:4.1} - {:4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             100.0 * finger_values.get(&Hand::Left, &Finger::Pinky) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Ring) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Middle) / total_weight,
@@ -141,7 +150,6 @@ impl BigramMetric for KLADistance {
             .map(|(l, (hand, finger))| {
                 let fscore = self.dscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                log::info!("{:?} {:?}: {}", hand, finger, l);
                 l * fscore * hscore
             })
             .sum::<f64>();

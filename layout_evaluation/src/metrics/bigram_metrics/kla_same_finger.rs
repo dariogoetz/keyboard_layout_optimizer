@@ -74,12 +74,14 @@ impl BigramMetric for KLASameFinger {
                     if is_same_finger(curr_mod, prev_key) {
                         *finger_values.get_mut(&curr_mod.key.hand, &curr_mod.key.finger) += *weight;
                     }
+
                     // current mods vs. previous mods
                     prev_mods
                         .iter()
                         .map(|k| layout.get_layerkey(k))
                         .for_each(|prev_mod| {
-                            if is_same_finger(curr_mod, prev_mod) {
+                            // if current and previous mods are identical, it is a hold -> no cost
+                            if is_same_finger(curr_mod, prev_mod) && curr_mod != prev_mod {
                                 *finger_values.get_mut(&curr_mod.key.hand, &curr_mod.key.finger) +=
                                     *weight;
                             }
@@ -90,7 +92,7 @@ impl BigramMetric for KLASameFinger {
         let total_weight: f64 = finger_values.iter().sum();
 
         let message = format!(
-            "Finger values %: {:3.1} {:3.1} {:3.1} {:3.1} | {:3.1} - {:3.1} | {:3.1} {:3.1} {:3.1} {:3.1}",
+            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:4.1} - {:4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             100.0 * finger_values.get(&Hand::Left, &Finger::Pinky) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Ring) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Middle) / total_weight,
@@ -109,7 +111,6 @@ impl BigramMetric for KLASameFinger {
             .map(|(l, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                log::info!("{:?} {:?}: {}", hand, finger, l * fscore * hscore);
                 l * fscore * hscore
             })
             .sum::<f64>();
