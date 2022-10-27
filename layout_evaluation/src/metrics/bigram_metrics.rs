@@ -8,6 +8,7 @@ use std::{env, fmt};
 pub mod finger_repeats;
 pub mod kla_distance;
 pub mod kla_finger_usage;
+pub mod kla_same_finger;
 pub mod manual_bigram_penalty;
 pub mod movement_pattern;
 pub mod no_handswitch_after_unbalancing_key;

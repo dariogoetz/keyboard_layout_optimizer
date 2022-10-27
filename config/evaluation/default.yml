@@ -277,7 +277,7 @@ metrics:
     enabled: true
     weight: 1
     normalization:
-      type: weight_found
+      type: weight_all
       value: 1.0
     params:
       keyup_distance: 10.5263156
@@ -304,7 +304,32 @@ metrics:
     enabled: false
     weight: 1
     normalization:
-      type: weight_found
+      type: weight_all
+      value: 1.0
+    params:
+      fscoring:
+        Left:
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
+        Right:
+          Pinky: 3.67
+          Ring: 2.9
+          Middle: 2.0
+          Index: 1.85
+          Thumb: 1.0
+
+      hscoring:
+        Left: 1.1
+        Right: 1.0
+
+  kla_same_finger:
+    enabled: true
+    weight: 1
+    normalization:
+      type: weight_all
       value: 1.0
     params:
       fscoring:
@@ -419,7 +444,7 @@ ngram_mapper:
   # Exclude ngrams that contain a line break, followed by a non-line-break character.
   # This encodes a mental pause which usually comes after hitting the "Enter" key, before
   # continuing to write.
-  exclude_line_breaks: true
+  exclude_line_breaks: false
 
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
   # required to activate the layer
