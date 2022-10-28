@@ -10,12 +10,14 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    pub ignore_modifiers: bool,
     pub fscoring: AHashMap<Hand, AHashMap<Finger, f64>>,
     pub hscoring: AHashMap<Hand, f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct KLAFingerUsage {
+    ignore_modifiers: bool,
     fscoring: HandFingerMap<f64>,
     hscoring: HandMap<f64>,
 }
@@ -23,6 +25,7 @@ pub struct KLAFingerUsage {
 impl KLAFingerUsage {
     pub fn new(params: &Parameters) -> Self {
         Self {
+            ignore_modifiers: params.ignore_modifiers,
             fscoring: HandFingerMap::with_hashmap(&params.fscoring, 1.0),
             hscoring: HandMap::with_hashmap(&params.hscoring, 1.0),
         }
@@ -43,19 +46,21 @@ impl BigramMetric for KLAFingerUsage {
         let mut finger_values: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
-            let prev_mods: AHashSet<LayerKeyIndex> =
-                prev_key.modifiers.layerkeys().iter().cloned().collect();
-            let curr_mods: AHashSet<LayerKeyIndex> =
-                curr_key.modifiers.layerkeys().iter().cloned().collect();
-
-            let pressed_mods = curr_mods
-                .difference(&prev_mods)
-                .map(|k| layout.get_layerkey(k));
-
-            pressed_mods
-                .for_each(|k| *finger_values.get_mut(&k.key.hand, &k.key.finger) += *weight);
-
             *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
+
+            if !self.ignore_modifiers {
+                let prev_mods: AHashSet<LayerKeyIndex> =
+                    prev_key.modifiers.layerkeys().iter().cloned().collect();
+                let curr_mods: AHashSet<LayerKeyIndex> =
+                    curr_key.modifiers.layerkeys().iter().cloned().collect();
+
+                let pressed_mods = curr_mods
+                    .difference(&prev_mods)
+                    .map(|k| layout.get_layerkey(k));
+
+                pressed_mods
+                    .for_each(|k| *finger_values.get_mut(&k.key.hand, &k.key.finger) += *weight);
+            }
         });
 
         let message = format!(

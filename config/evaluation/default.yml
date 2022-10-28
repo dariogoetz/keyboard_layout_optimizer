@@ -280,6 +280,7 @@ metrics:
       type: weight_all
       value: 1.0
     params:
+      ignore_modifiers: false
       keyup_distance: 10.5263156
       keydown_distance: 10.5263156
       dscoring:
@@ -307,6 +308,7 @@ metrics:
       type: weight_all
       value: 1.0
     params:
+      ignore_modifiers: false
       fscoring:
         Left:
           Pinky: 3.67

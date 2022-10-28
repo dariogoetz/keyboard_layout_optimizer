@@ -10,6 +10,7 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    pub ignore_modifiers: bool,
     pub keyup_distance: f64,
     pub keydown_distance: f64,
     pub dscoring: AHashMap<Hand, AHashMap<Finger, f64>>,
@@ -18,6 +19,7 @@ pub struct Parameters {
 
 #[derive(Clone, Debug)]
 pub struct KLADistance {
+    ignore_modifiers: bool,
     keyup_distance: f64,
     keydown_distance: f64,
     dscoring: HandFingerMap<f64>,
@@ -27,6 +29,7 @@ pub struct KLADistance {
 impl KLADistance {
     pub fn new(params: &Parameters) -> Self {
         Self {
+            ignore_modifiers: params.ignore_modifiers,
             keyup_distance: params.keyup_distance,
             keydown_distance: params.keydown_distance,
             dscoring: HandFingerMap::with_hashmap(&params.dscoring, 1.0),
@@ -67,10 +70,12 @@ impl BigramMetric for KLADistance {
                 &prev_key.key.finger,
                 prev_key.key.position,
             );
-            prev_mods
-                .iter()
-                .map(|k| layout.get_layerkey(k))
-                .for_each(|k| prev_positions.set(&k.key.hand, &k.key.finger, k.key.position));
+            if !self.ignore_modifiers {
+                prev_mods
+                    .iter()
+                    .map(|k| layout.get_layerkey(k))
+                    .for_each(|k| prev_positions.set(&k.key.hand, &k.key.finger, k.key.position));
+            }
 
             let mut curr_positions = layout.keyboard.home_row_positions.clone();
             curr_positions.set(
@@ -78,17 +83,12 @@ impl BigramMetric for KLADistance {
                 &curr_key.key.finger,
                 curr_key.key.position,
             );
-            curr_mods
-                .iter()
-                .map(|k| layout.get_layerkey(k))
-                .for_each(|k| curr_positions.set(&k.key.hand, &k.key.finger, k.key.position));
-
-            let released_mods = prev_mods
-                .difference(&curr_mods)
-                .map(|k| layout.get_layerkey(k));
-            let pressed_mods = curr_mods
-                .difference(&prev_mods)
-                .map(|k| layout.get_layerkey(k));
+            if !self.ignore_modifiers {
+                curr_mods
+                    .iter()
+                    .map(|k| layout.get_layerkey(k))
+                    .for_each(|k| curr_positions.set(&k.key.hand, &k.key.finger, k.key.position));
+            }
 
             // finger goes to current key and presses and releases it
             let dist_to_key = (dist_to_prev(&curr_key, &prev_positions)
@@ -105,27 +105,40 @@ impl BigramMetric for KLADistance {
                 *finger_values.get_mut(&prev_key.key.hand, &prev_key.key.finger) += dist_return;
             }
 
-            // fingers move to the modifiers (if they did not hit the previous key before)
-            pressed_mods
-                // if the finger pressed the previous key, the movement has been accounted for above
-                .filter(|k| k.key.hand != prev_key.key.hand || k.key.finger != prev_key.key.finger)
-                .for_each(|k| {
-                    let dist = (dist_to_prev(k, &prev_positions)
-                        + self.keydown_distance
-                        + self.keyup_distance)
-                        * weight;
-                    *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist;
-                });
+            if !self.ignore_modifiers {
+                let released_mods = prev_mods
+                    .difference(&curr_mods)
+                    .map(|k| layout.get_layerkey(k));
+                let pressed_mods = curr_mods
+                    .difference(&prev_mods)
+                    .map(|k| layout.get_layerkey(k));
 
-            // fingers from previously pressed mods return to home row
-            // (if they are not used to hit the current key)
-            released_mods
-                // if the finger will press the current key, the movement has been accounted for above
-                .filter(|k| k.key.hand != curr_key.key.hand || k.key.finger != curr_key.key.finger)
-                .for_each(|k| {
-                    let dist_to_homerow = dist_to_prev(k, &curr_positions) * weight;
-                    *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist_to_homerow;
-                });
+                // fingers move to the modifiers (if they did not hit the previous key before)
+                pressed_mods
+                    // if the finger pressed the previous key, the movement has been accounted for above
+                    .filter(|k| {
+                        k.key.hand != prev_key.key.hand || k.key.finger != prev_key.key.finger
+                    })
+                    .for_each(|k| {
+                        let dist = (dist_to_prev(k, &prev_positions)
+                            + self.keydown_distance
+                            + self.keyup_distance)
+                            * weight;
+                        *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist;
+                    });
+
+                // fingers from previously pressed mods return to home row
+                // (if they are not used to hit the current key)
+                released_mods
+                    // if the finger will press the current key, the movement has been accounted for above
+                    .filter(|k| {
+                        k.key.hand != curr_key.key.hand || k.key.finger != curr_key.key.finger
+                    })
+                    .for_each(|k| {
+                        let dist_to_homerow = dist_to_prev(k, &curr_positions) * weight;
+                        *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist_to_homerow;
+                    });
+            }
         });
 
         let message = format!(
