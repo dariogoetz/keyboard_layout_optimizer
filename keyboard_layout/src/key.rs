@@ -108,6 +108,10 @@ impl<T: Copy> HandMap<T> {
         self.0.iter()
     }
 
+    pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
+        self.0.iter_mut()
+    }
+
     pub fn get(&self, hand: &Hand) -> &T {
         &self.0[*hand as usize]
     }
@@ -156,6 +160,10 @@ impl<T: Copy> FingerMap<T> {
 
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
+        self.0.iter_mut()
     }
 
     pub fn get(&self, finger: &Finger) -> &T {
