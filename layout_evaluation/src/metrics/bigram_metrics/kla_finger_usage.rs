@@ -40,7 +40,7 @@ impl BigramMetric for KLAFingerUsage {
         _total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let mut finger_loads: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
+        let mut finger_values: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
             let prev_mods: AHashSet<LayerKeyIndex> =
@@ -52,37 +52,37 @@ impl BigramMetric for KLAFingerUsage {
                 .difference(&prev_mods)
                 .map(|k| layout.get_layerkey(k));
 
-            pressed_mods.for_each(|k| *finger_loads.get_mut(&k.key.hand, &k.key.finger) += *weight);
+            pressed_mods
+                .for_each(|k| *finger_values.get_mut(&k.key.hand, &k.key.finger) += *weight);
 
-            *finger_loads.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
+            *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
         });
 
-        let total_weight: f64 = finger_loads.iter().sum();
-
         let message = format!(
-            "Finger loads %: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
-            100.0 * finger_loads.get(&Hand::Left, &Finger::Pinky) / total_weight,
-            100.0 * finger_loads.get(&Hand::Left, &Finger::Ring) / total_weight,
-            100.0 * finger_loads.get(&Hand::Left, &Finger::Middle) / total_weight,
-            100.0 * finger_loads.get(&Hand::Left, &Finger::Index) / total_weight,
-            100.0 * finger_loads.get(&Hand::Left, &Finger::Thumb) / total_weight,
-            100.0 * finger_loads.get(&Hand::Right, &Finger::Thumb) / total_weight,
-            100.0 * finger_loads.get(&Hand::Right, &Finger::Index) / total_weight,
-            100.0 * finger_loads.get(&Hand::Right, &Finger::Middle) / total_weight,
-            100.0 * finger_loads.get(&Hand::Right, &Finger::Ring) / total_weight,
-            100.0 * finger_loads.get(&Hand::Right, &Finger::Pinky) / total_weight,
+            "Finger loads: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            finger_values.get(&Hand::Left, &Finger::Pinky),
+            finger_values.get(&Hand::Left, &Finger::Ring),
+            finger_values.get(&Hand::Left, &Finger::Middle),
+            finger_values.get(&Hand::Left, &Finger::Index),
+            finger_values.get(&Hand::Left, &Finger::Thumb),
+            finger_values.get(&Hand::Right, &Finger::Thumb),
+            finger_values.get(&Hand::Right, &Finger::Index),
+            finger_values.get(&Hand::Right, &Finger::Middle),
+            finger_values.get(&Hand::Right, &Finger::Ring),
+            finger_values.get(&Hand::Right, &Finger::Pinky),
         );
 
-        let cost = finger_loads
-            .iter()
-            .zip(finger_loads.keys().iter())
-            .map(|(l, (hand, finger))| {
+        let keys = finger_values.keys();
+        finger_values
+            .iter_mut()
+            .zip(keys.iter())
+            .for_each(|(c, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                log::info!("{:?} {:?}: {}", hand, finger, l * fscore * hscore);
-                l * fscore * hscore
-            })
-            .sum::<f64>();
+                *c *= fscore * hscore
+            });
+
+        let cost = finger_values.iter().sum();
 
         (cost, Some(message))
     }

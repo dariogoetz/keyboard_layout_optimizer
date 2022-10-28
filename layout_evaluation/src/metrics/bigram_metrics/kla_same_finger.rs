@@ -105,31 +105,31 @@ impl BigramMetric for KLASameFinger {
                 });
         });
 
-        let total_weight: f64 = finger_values.iter().sum();
-
         let message = format!(
-            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
-            100.0 * finger_values.get(&Hand::Left, &Finger::Pinky) / total_weight,
-            100.0 * finger_values.get(&Hand::Left, &Finger::Ring) / total_weight,
-            100.0 * finger_values.get(&Hand::Left, &Finger::Middle) / total_weight,
-            100.0 * finger_values.get(&Hand::Left, &Finger::Index) / total_weight,
-            100.0 * finger_values.get(&Hand::Left, &Finger::Thumb) / total_weight,
-            100.0 * finger_values.get(&Hand::Right, &Finger::Thumb) / total_weight,
-            100.0 * finger_values.get(&Hand::Right, &Finger::Index) / total_weight,
-            100.0 * finger_values.get(&Hand::Right, &Finger::Middle) / total_weight,
-            100.0 * finger_values.get(&Hand::Right, &Finger::Ring) / total_weight,
-            100.0 * finger_values.get(&Hand::Right, &Finger::Pinky) / total_weight,
+            "Finger values: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            finger_values.get(&Hand::Left, &Finger::Pinky),
+            finger_values.get(&Hand::Left, &Finger::Ring),
+            finger_values.get(&Hand::Left, &Finger::Middle),
+            finger_values.get(&Hand::Left, &Finger::Index),
+            finger_values.get(&Hand::Left, &Finger::Thumb),
+            finger_values.get(&Hand::Right, &Finger::Thumb),
+            finger_values.get(&Hand::Right, &Finger::Index),
+            finger_values.get(&Hand::Right, &Finger::Middle),
+            finger_values.get(&Hand::Right, &Finger::Ring),
+            finger_values.get(&Hand::Right, &Finger::Pinky),
         );
 
-        let cost = finger_values
-            .iter()
-            .zip(finger_values.keys().iter())
-            .map(|(c, (hand, finger))| {
+        let keys = finger_values.keys();
+        finger_values
+            .iter_mut()
+            .zip(keys.iter())
+            .for_each(|(c, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                c * fscore * hscore
-            })
-            .sum::<f64>();
+                *c *= fscore * hscore
+            });
+
+        let cost = finger_values.iter().sum();
 
         (cost, Some(message))
     }

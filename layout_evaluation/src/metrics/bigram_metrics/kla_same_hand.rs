@@ -85,19 +85,22 @@ impl BigramMetric for KLASameHand {
                 });
         });
 
-        let total_weight: f64 = hand_values.iter().sum();
-
         let message = format!(
-            "Finger loads %: {:>4.1} - {:<4.1}",
-            100.0 * hand_values.get(&Hand::Left) / total_weight,
-            100.0 * hand_values.get(&Hand::Right) / total_weight,
+            "Finger loads: {:>4.1} - {:<4.1}",
+            hand_values.get(&Hand::Left),
+            hand_values.get(&Hand::Right),
         );
 
-        let cost = hand_values
-            .iter()
-            .zip(hand_values.keys().iter())
-            .map(|(c, hand)| c * self.hscoring.get(&hand))
-            .sum::<f64>();
+        let keys = hand_values.keys();
+        hand_values
+            .iter_mut()
+            .zip(keys.iter())
+            .for_each(|(c, hand)| {
+                let hscore = self.hscoring.get(&hand);
+                *c *= hscore
+            });
+
+        let cost = hand_values.iter().sum();
 
         (cost, Some(message))
     }
