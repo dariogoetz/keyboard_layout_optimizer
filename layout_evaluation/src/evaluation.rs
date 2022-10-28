@@ -54,6 +54,7 @@ pub struct MetricParameters {
     pub kla_distance: WeightedParams<bigram_metrics::kla_distance::Parameters>,
     pub kla_finger_usage: WeightedParams<bigram_metrics::kla_finger_usage::Parameters>,
     pub kla_same_finger: WeightedParams<bigram_metrics::kla_same_finger::Parameters>,
+    pub kla_same_hand: WeightedParams<bigram_metrics::kla_same_hand::Parameters>,
 
     pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
     pub no_handswitch_in_trigram:
@@ -239,6 +240,14 @@ impl Evaluator {
             params.kla_same_finger.weight,
             params.kla_same_finger.normalization.clone(),
             params.kla_same_finger.enabled,
+        );
+        self.bigram_metric(
+            Box::new(bigram_metrics::kla_same_hand::KLASameHand::new(
+                &params.kla_same_hand.params,
+            )),
+            params.kla_same_hand.weight,
+            params.kla_same_hand.normalization.clone(),
+            params.kla_same_hand.enabled,
         );
 
         // trigram_metrics

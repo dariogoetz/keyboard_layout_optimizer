@@ -100,6 +100,10 @@ impl<T: Copy> HandMap<T> {
         Self(data)
     }
 
+    pub fn keys(&self) -> [Hand; 2] {
+        return [Hand::Left, Hand::Right];
+    }
+
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
@@ -138,6 +142,16 @@ impl<T: Copy> FingerMap<T> {
             data[*finger as usize] = *elem;
         }
         Self(data)
+    }
+
+    pub fn keys(&self) -> [Finger; 5] {
+        return [
+            Finger::Thumb,
+            Finger::Index,
+            Finger::Middle,
+            Finger::Ring,
+            Finger::Pinky,
+        ];
     }
 
     pub fn iter(&self) -> slice::Iter<'_, T> {

@@ -332,6 +332,7 @@ metrics:
       type: weight_all
       value: 1.0
     params:
+      ignore_modifiers: false
       fscoring:
         Left:
           Pinky: 3.67
@@ -346,6 +347,19 @@ metrics:
           Index: 1.85
           Thumb: 1.0
 
+      hscoring:
+        Left: 1.1
+        Right: 1.0
+
+  kla_same_hand:
+    enabled: true
+    weight: 68.2 # 20 weight * 0.341 penalty * 10 * 0.5?
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      ignore_modifiers: false
+      ignore_thumb: false
       hscoring:
         Left: 1.1
         Right: 1.0

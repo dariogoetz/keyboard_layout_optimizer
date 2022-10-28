@@ -131,7 +131,7 @@ impl BigramMetric for KLADistance {
         let total_weight: f64 = finger_values.iter().sum();
 
         let message = format!(
-            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:4.1} - {:4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             100.0 * finger_values.get(&Hand::Left, &Finger::Pinky) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Ring) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Middle) / total_weight,
@@ -147,10 +147,10 @@ impl BigramMetric for KLADistance {
         let cost = finger_values
             .iter()
             .zip(finger_values.keys().iter())
-            .map(|(l, (hand, finger))| {
+            .map(|(c, (hand, finger))| {
                 let fscore = self.dscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                l * fscore * hscore
+                c * fscore * hscore
             })
             .sum::<f64>();
 

@@ -60,7 +60,7 @@ impl BigramMetric for KLAFingerUsage {
         let total_weight: f64 = finger_loads.iter().sum();
 
         let message = format!(
-            "Finger loads %: {:.1} {:.1} {:.1} {:.1} | {:.1} - {:.1} | {:.1} {:.1} {:.1} {:.1}",
+            "Finger loads %: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             100.0 * finger_loads.get(&Hand::Left, &Finger::Pinky) / total_weight,
             100.0 * finger_loads.get(&Hand::Left, &Finger::Ring) / total_weight,
             100.0 * finger_loads.get(&Hand::Left, &Finger::Middle) / total_weight,

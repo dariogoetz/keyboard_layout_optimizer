@@ -10,12 +10,14 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
+    pub ignore_modifiers: bool,
     pub fscoring: AHashMap<Hand, AHashMap<Finger, f64>>,
     pub hscoring: AHashMap<Hand, f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct KLASameFinger {
+    ignore_modifiers: bool,
     fscoring: HandFingerMap<f64>,
     hscoring: HandMap<f64>,
 }
@@ -23,6 +25,7 @@ pub struct KLASameFinger {
 impl KLASameFinger {
     pub fn new(params: &Parameters) -> Self {
         Self {
+            ignore_modifiers: params.ignore_modifiers,
             fscoring: HandFingerMap::with_hashmap(&params.fscoring, 1.0),
             hscoring: HandMap::with_hashmap(&params.hscoring, 1.0),
         }
@@ -42,57 +45,70 @@ impl BigramMetric for KLASameFinger {
     ) -> (f64, Option<String>) {
         let mut finger_values: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
 
-        let is_same_finger = |k1: &LayerKey, k2: &LayerKey| {
-            k1.key.hand == k2.key.hand && k1.key.finger == k2.key.finger
-        };
-
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
             let prev_mods: AHashSet<LayerKeyIndex> =
                 prev_key.modifiers.layerkeys().iter().cloned().collect();
             let curr_mods: AHashSet<LayerKeyIndex> =
                 curr_key.modifiers.layerkeys().iter().cloned().collect();
 
-            // current key vs. prev key
-            if is_same_finger(curr_key, prev_key) {
-                *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
+            let mut prev_fingers_used: HandFingerMap<Option<(&LayerKey, bool)>> =
+                HandFingerMap::with_default(None);
+            prev_fingers_used.set(
+                &prev_key.key.hand,
+                &prev_key.key.finger,
+                Some((prev_key, false)),
+            );
+            if !self.ignore_modifiers {
+                prev_mods
+                    .iter()
+                    .map(|k| layout.get_layerkey(k))
+                    .for_each(|k| {
+                        prev_fingers_used.set(&k.key.hand, &k.key.finger, Some((k, true)))
+                    });
             }
-            // current key vs. previous mods
-            prev_mods
-                .iter()
-                .map(|k| layout.get_layerkey(k))
-                .for_each(|prev_mod| {
-                    if is_same_finger(curr_key, prev_mod) {
-                        *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
-                    }
-                });
 
-            curr_mods
-                .iter()
-                .map(|k| layout.get_layerkey(k))
-                .for_each(|curr_mod| {
-                    // current mod vs. previous key
-                    if is_same_finger(curr_mod, prev_key) {
-                        *finger_values.get_mut(&curr_mod.key.hand, &curr_mod.key.finger) += *weight;
-                    }
+            let mut curr_fingers_used: HandFingerMap<Option<(&LayerKey, bool)>> =
+                HandFingerMap::with_default(None);
+            curr_fingers_used.set(
+                &curr_key.key.hand,
+                &curr_key.key.finger,
+                Some((curr_key, false)),
+            );
+            if !self.ignore_modifiers {
+                curr_mods
+                    .iter()
+                    .map(|k| layout.get_layerkey(k))
+                    .for_each(|k| {
+                        curr_fingers_used.set(&k.key.hand, &k.key.finger, Some((k, true)))
+                    });
+            }
 
-                    // current mods vs. previous mods
-                    prev_mods
-                        .iter()
-                        .map(|k| layout.get_layerkey(k))
-                        .for_each(|prev_mod| {
-                            // if current and previous mods are identical, it is a hold -> no cost
-                            if is_same_finger(curr_mod, prev_mod) && curr_mod != prev_mod {
-                                *finger_values.get_mut(&curr_mod.key.hand, &curr_mod.key.finger) +=
-                                    *weight;
-                            }
-                        });
+            // check for same finger activations
+            prev_fingers_used
+                .iter()
+                .zip(curr_fingers_used.iter())
+                .zip(curr_fingers_used.keys())
+                .for_each(|((prev_used, curr_used), (hand, finger))| {
+                    if let (
+                        Some((prev_used_key, prev_used_is_mod)), // prev finger was used
+                        Some((curr_used_key, curr_used_is_mod)), // curr finger is used
+                    ) = (prev_used, curr_used)
+                    {
+                        if prev_used_key != curr_used_key // used for a different key (same key and modifier would be a hold)
+                            || !prev_used_is_mod // or one of prev...
+                            || !curr_used_is_mod
+                        // or current key is a modifier
+                        {
+                            *finger_values.get_mut(&hand, &finger) += *weight;
+                        }
+                    }
                 });
         });
 
         let total_weight: f64 = finger_values.iter().sum();
 
         let message = format!(
-            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:4.1} - {:4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            "Finger values %: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             100.0 * finger_values.get(&Hand::Left, &Finger::Pinky) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Ring) / total_weight,
             100.0 * finger_values.get(&Hand::Left, &Finger::Middle) / total_weight,
@@ -108,10 +124,10 @@ impl BigramMetric for KLASameFinger {
         let cost = finger_values
             .iter()
             .zip(finger_values.keys().iter())
-            .map(|(l, (hand, finger))| {
+            .map(|(c, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
-                l * fscore * hscore
+                c * fscore * hscore
             })
             .sum::<f64>();
 
