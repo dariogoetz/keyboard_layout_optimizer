@@ -359,7 +359,7 @@ metrics:
       value: 1.0
     params:
       ignore_modifiers: false
-      ignore_thumb: false
+      ignore_thumbs: false
       hscoring:
         Left: 1.1
         Right: 1.0

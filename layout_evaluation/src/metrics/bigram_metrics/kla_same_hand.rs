@@ -11,14 +11,14 @@ use serde::Deserialize;
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     pub ignore_modifiers: bool,
-    pub ignore_thumb: bool,
+    pub ignore_thumbs: bool,
     pub hscoring: AHashMap<Hand, f64>,
 }
 
 #[derive(Clone, Debug)]
 pub struct KLASameHand {
     ignore_modifiers: bool,
-    ignore_thumb: bool,
+    ignore_thumbs: bool,
     hscoring: HandMap<f64>,
 }
 
@@ -26,7 +26,7 @@ impl KLASameHand {
     pub fn new(params: &Parameters) -> Self {
         Self {
             ignore_modifiers: params.ignore_modifiers,
-            ignore_thumb: params.ignore_thumb,
+            ignore_thumbs: params.ignore_thumbs,
             hscoring: HandMap::with_hashmap(&params.hscoring, 1.0),
         }
     }
@@ -52,7 +52,7 @@ impl BigramMetric for KLASameHand {
                 curr_key.modifiers.layerkeys().iter().cloned().collect();
 
             let mut prev_hands_used: HandMap<bool> = HandMap::with_default(false);
-            if !(self.ignore_thumb && prev_key.key.finger == Finger::Thumb) {
+            if !(self.ignore_thumbs && prev_key.key.finger == Finger::Thumb) {
                 prev_hands_used.set(&prev_key.key.hand, true);
             }
             if !self.ignore_modifiers {
@@ -63,7 +63,7 @@ impl BigramMetric for KLASameHand {
             }
 
             let mut curr_hands_used: HandMap<bool> = HandMap::with_default(false);
-            if !(self.ignore_thumb && curr_key.key.finger == Finger::Thumb) {
+            if !(self.ignore_thumbs && curr_key.key.finger == Finger::Thumb) {
                 curr_hands_used.set(&curr_key.key.hand, true);
             }
             if !self.ignore_modifiers {
