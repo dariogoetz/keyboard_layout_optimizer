@@ -86,7 +86,7 @@ impl BigramMetric for KLASameHand {
         });
 
         let message = format!(
-            "Finger loads: {:>4.1} - {:<4.1}",
+            "Per hand (unweighted): {:>4.1} - {:<4.1}",
             hand_values.get(&Hand::Left),
             hand_values.get(&Hand::Right),
         );

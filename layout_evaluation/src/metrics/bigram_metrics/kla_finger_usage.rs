@@ -59,7 +59,7 @@ impl BigramMetric for KLAFingerUsage {
         });
 
         let message = format!(
-            "Finger loads: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            "Per finger (unweighted): {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             finger_values.get(&Hand::Left, &Finger::Pinky),
             finger_values.get(&Hand::Left, &Finger::Ring),
             finger_values.get(&Hand::Left, &Finger::Middle),

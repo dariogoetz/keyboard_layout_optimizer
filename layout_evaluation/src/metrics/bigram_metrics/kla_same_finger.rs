@@ -106,7 +106,7 @@ impl BigramMetric for KLASameFinger {
         });
 
         let message = format!(
-            "Finger values: {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
+            "Per finger (unweighted): {:4.1} {:4.1} {:4.1} {:4.1} | {:>4.1} - {:<4.1} | {:4.1} {:4.1} {:4.1} {:4.1}",
             finger_values.get(&Hand::Left, &Finger::Pinky),
             finger_values.get(&Hand::Left, &Finger::Ring),
             finger_values.get(&Hand::Left, &Finger::Middle),
