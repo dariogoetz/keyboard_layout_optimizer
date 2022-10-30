@@ -1,9 +1,9 @@
 use super::BigramMetric;
 
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
 use keyboard_layout::{
     key::{Finger, Hand, HandFingerMap, HandMap},
-    layout::{LayerKey, LayerKeyIndex, Layout},
+    layout::{LayerKey, Layout},
 };
 
 use serde::Deserialize;
@@ -46,60 +46,47 @@ impl BigramMetric for KLASameFinger {
         let mut finger_values: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
-            let prev_mods: AHashSet<LayerKeyIndex> =
-                prev_key.modifiers.layerkeys().iter().cloned().collect();
-            let curr_mods: AHashSet<LayerKeyIndex> =
-                curr_key.modifiers.layerkeys().iter().cloned().collect();
-
-            let mut prev_fingers_used: HandFingerMap<Option<(&LayerKey, bool)>> =
+            // collect used fingers and keys for previous symbol
+            let mut prev_keys_per_finger: HandFingerMap<Option<&LayerKey>> =
                 HandFingerMap::with_default(None);
-            prev_fingers_used.set(
-                &prev_key.key.hand,
-                &prev_key.key.finger,
-                Some((prev_key, false)),
-            );
+            prev_keys_per_finger.set(&prev_key.key.hand, &prev_key.key.finger, Some(prev_key));
             if !self.ignore_modifiers {
-                prev_mods
+                prev_key
+                    .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
-                    .for_each(|k| {
-                        prev_fingers_used.set(&k.key.hand, &k.key.finger, Some((k, true)))
-                    });
+                    .for_each(|k| prev_keys_per_finger.set(&k.key.hand, &k.key.finger, Some(k)));
             }
 
-            let mut curr_fingers_used: HandFingerMap<Option<(&LayerKey, bool)>> =
+            // collect used fingers and keys for current symbol
+            let mut curr_keys_per_finger: HandFingerMap<Option<&LayerKey>> =
                 HandFingerMap::with_default(None);
-            curr_fingers_used.set(
-                &curr_key.key.hand,
-                &curr_key.key.finger,
-                Some((curr_key, false)),
-            );
+            curr_keys_per_finger.set(&curr_key.key.hand, &curr_key.key.finger, Some(curr_key));
             if !self.ignore_modifiers {
-                curr_mods
+                curr_key
+                    .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
-                    .for_each(|k| {
-                        curr_fingers_used.set(&k.key.hand, &k.key.finger, Some((k, true)))
-                    });
+                    .for_each(|k| curr_keys_per_finger.set(&k.key.hand, &k.key.finger, Some(k)));
             }
 
             // check for same finger activations
-            prev_fingers_used
+            prev_keys_per_finger
                 .iter()
-                .zip(curr_fingers_used.iter())
-                .zip(HandFingerMap::<f64>::keys())
-                .for_each(|((prev_used, curr_used), (hand, finger))| {
+                .zip(curr_keys_per_finger.iter())
+                .for_each(|(prev_used, curr_used)| {
                     if let (
-                        Some((prev_used_key, prev_used_is_mod)), // prev finger was used
-                        Some((curr_used_key, curr_used_is_mod)), // curr finger is used
+                        Some(prev_used_key), // finger was used for previous symbol
+                        Some(curr_used_key), // and finger was used for current symbol
                     ) = (prev_used, curr_used)
                     {
-                        if prev_used_key != curr_used_key // used for a different key (same key and modifier would be a hold)
-                            || !prev_used_is_mod // or one of prev...
-                            || !curr_used_is_mod
-                        // or current key is a modifier
-                        {
-                            *finger_values.get_mut(&hand, &finger) += *weight;
+                        // if both keys are identical and are mods it is a hold -> no cost
+                        if !(prev_used_key == curr_used_key && curr_used_key.is_modifier) {
+                            *finger_values
+                                .get_mut(&curr_used_key.key.hand, &curr_used_key.key.finger) +=
+                                *weight;
                         }
                     }
                 });

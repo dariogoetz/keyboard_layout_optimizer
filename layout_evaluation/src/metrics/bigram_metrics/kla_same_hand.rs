@@ -1,9 +1,9 @@
 use super::BigramMetric;
 
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
 use keyboard_layout::{
     key::{Finger, Hand, HandMap},
-    layout::{LayerKey, LayerKeyIndex, Layout},
+    layout::{LayerKey, Layout},
 };
 
 use serde::Deserialize;
@@ -46,17 +46,14 @@ impl BigramMetric for KLASameHand {
         let mut hand_values: HandMap<f64> = HandMap::with_default(0.0);
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
-            let prev_mods: AHashSet<LayerKeyIndex> =
-                prev_key.modifiers.layerkeys().iter().cloned().collect();
-            let curr_mods: AHashSet<LayerKeyIndex> =
-                curr_key.modifiers.layerkeys().iter().cloned().collect();
-
             let mut prev_hands_used: HandMap<bool> = HandMap::with_default(false);
             if !(self.ignore_thumbs && prev_key.key.finger == Finger::Thumb) {
                 prev_hands_used.set(&prev_key.key.hand, true);
             }
             if !self.ignore_modifiers {
-                prev_mods
+                prev_key
+                    .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| prev_hands_used.set(&k.key.hand, true));
@@ -67,7 +64,9 @@ impl BigramMetric for KLASameHand {
                 curr_hands_used.set(&curr_key.key.hand, true);
             }
             if !self.ignore_modifiers {
-                curr_mods
+                curr_key
+                    .modifiers
+                    .layerkeys()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| curr_hands_used.set(&k.key.hand, true));

@@ -2,10 +2,10 @@ use core::slice;
 
 use super::BigramMetric;
 
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
 use keyboard_layout::{
     key::{Finger, Hand, HandFingerMap, HandMap, Position},
-    layout::{LayerKey, LayerKeyIndex, Layout},
+    layout::{LayerKey, Layout},
 };
 
 use serde::Deserialize;
@@ -87,16 +87,11 @@ impl BigramMetric for KLADistance {
         let home_row_positions = FingerStates::with_positions(&layout.keyboard.home_row_positions);
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
-            let prev_mods: AHashSet<LayerKeyIndex> =
-                prev_key.modifiers.layerkeys().iter().cloned().collect();
-            let curr_mods: AHashSet<LayerKeyIndex> =
-                curr_key.modifiers.layerkeys().iter().cloned().collect();
-
             // collect used fingers and keys for previous symbol
             let mut prev_used_keys = home_row_positions.clone();
             prev_used_keys.register_key(prev_key);
             if !self.ignore_modifiers {
-                prev_mods.iter().for_each(|k| {
+                prev_key.modifiers.layerkeys().iter().for_each(|k| {
                     prev_used_keys.register_key(layout.get_layerkey(k));
                 });
             }
@@ -105,7 +100,7 @@ impl BigramMetric for KLADistance {
             let mut curr_used_keys = home_row_positions.clone();
             curr_used_keys.register_key(curr_key);
             if !self.ignore_modifiers {
-                curr_mods.iter().for_each(|k| {
+                curr_key.modifiers.layerkeys().iter().for_each(|k| {
                     curr_used_keys.register_key(layout.get_layerkey(k));
                 });
             }
