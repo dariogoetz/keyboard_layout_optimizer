@@ -38,6 +38,26 @@ impl KLADistance {
     }
 }
 
+#[derive(Copy, Clone, Debug)]
+enum KeyUsage<'a> {
+    Idle(Position),
+    Used(&'a LayerKey),
+}
+
+struct FingerStates<'a>(HandFingerMap<KeyUsage<'a>>);
+
+impl<'a> FingerStates<'a> {
+    fn with_positions(positions: &HandFingerMap<Position>) -> Self {
+        let mut data = HandFingerMap::with_default(KeyUsage::Idle(Position(0.0, 0.0)));
+        positions
+            .iter()
+            .zip(positions.keys())
+            .for_each(|(p, (hand, finger))| data.set(&hand, &finger, KeyUsage::Idle(*p)));
+
+        Self(data)
+    }
+}
+
 impl BigramMetric for KLADistance {
     fn name(&self) -> &str {
         "Distance"
@@ -51,94 +71,86 @@ impl BigramMetric for KLADistance {
     ) -> (f64, Option<String>) {
         let mut finger_values: HandFingerMap<f64> = HandFingerMap::with_default(0.0);
 
-        // distance to either the previous key (if it was the same finger) or the finger's home-row key
-        let dist_to_prev = |curr_key: &LayerKey, prev_positions: &HandFingerMap<Position>| {
-            prev_positions
-                .get(&curr_key.key.hand, &curr_key.key.finger)
-                .distance(&curr_key.key.position)
-        };
-
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
             let prev_mods: AHashSet<LayerKeyIndex> =
                 prev_key.modifiers.layerkeys().iter().cloned().collect();
             let curr_mods: AHashSet<LayerKeyIndex> =
                 curr_key.modifiers.layerkeys().iter().cloned().collect();
 
-            let mut prev_positions = layout.keyboard.home_row_positions.clone();
-            prev_positions.set(
+            let mut prev_used_keys =
+                FingerStates::with_positions(&layout.keyboard.home_row_positions);
+            prev_used_keys.0.set(
                 &prev_key.key.hand,
                 &prev_key.key.finger,
-                prev_key.key.position,
+                KeyUsage::Used(*prev_key),
             );
             if !self.ignore_modifiers {
                 prev_mods
                     .iter()
                     .map(|k| layout.get_layerkey(k))
-                    .for_each(|k| prev_positions.set(&k.key.hand, &k.key.finger, k.key.position));
+                    .for_each(|k| {
+                        prev_used_keys
+                            .0
+                            .set(&k.key.hand, &k.key.finger, KeyUsage::Used(k))
+                    });
             }
 
-            let mut curr_positions = layout.keyboard.home_row_positions.clone();
-            curr_positions.set(
+            let mut curr_used_keys =
+                FingerStates::with_positions(&layout.keyboard.home_row_positions);
+            curr_used_keys.0.set(
                 &curr_key.key.hand,
                 &curr_key.key.finger,
-                curr_key.key.position,
+                KeyUsage::Used(*curr_key),
             );
             if !self.ignore_modifiers {
                 curr_mods
                     .iter()
                     .map(|k| layout.get_layerkey(k))
-                    .for_each(|k| curr_positions.set(&k.key.hand, &k.key.finger, k.key.position));
-            }
-
-            // finger goes to current key and presses and releases it
-            let dist_to_key = (dist_to_prev(&curr_key, &prev_positions)
-                + self.keydown_distance
-                + self.keyup_distance)
-                * weight;
-            *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += dist_to_key;
-
-            if curr_key.key.hand != prev_key.key.hand || curr_key.key.finger != prev_key.key.finger
-            {
-                // if the previous key was hit by a different finger,
-                // that finger returns to the home row (or some mod)
-                let dist_return = dist_to_prev(&prev_key, &curr_positions) * weight;
-                *finger_values.get_mut(&prev_key.key.hand, &prev_key.key.finger) += dist_return;
-            }
-
-            if !self.ignore_modifiers {
-                let released_mods = prev_mods
-                    .difference(&curr_mods)
-                    .map(|k| layout.get_layerkey(k));
-                let pressed_mods = curr_mods
-                    .difference(&prev_mods)
-                    .map(|k| layout.get_layerkey(k));
-
-                // fingers move to the modifiers (if they did not hit the previous key before)
-                pressed_mods
-                    // if the finger pressed the previous key, the movement has been accounted for above
-                    .filter(|k| {
-                        k.key.hand != prev_key.key.hand || k.key.finger != prev_key.key.finger
-                    })
                     .for_each(|k| {
-                        let dist = (dist_to_prev(k, &prev_positions)
-                            + self.keydown_distance
-                            + self.keyup_distance)
-                            * weight;
-                        *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist;
-                    });
-
-                // fingers from previously pressed mods return to home row
-                // (if they are not used to hit the current key)
-                released_mods
-                    // if the finger will press the current key, the movement has been accounted for above
-                    .filter(|k| {
-                        k.key.hand != curr_key.key.hand || k.key.finger != curr_key.key.finger
-                    })
-                    .for_each(|k| {
-                        let dist_to_homerow = dist_to_prev(k, &curr_positions) * weight;
-                        *finger_values.get_mut(&k.key.hand, &k.key.finger) += dist_to_homerow;
+                        curr_used_keys
+                            .0
+                            .set(&k.key.hand, &k.key.finger, KeyUsage::Used(k))
                     });
             }
+
+            prev_used_keys
+                .0
+                .iter()
+                .zip(curr_used_keys.0.iter())
+                .for_each(|(prev_used, curr_used)| {
+                    match (prev_used, curr_used) {
+                        // finger remains idle
+                        (KeyUsage::Idle(_), KeyUsage::Idle(_)) => (),
+
+                        // move previously idle finger to key press it
+                        (KeyUsage::Idle(prev_pos), KeyUsage::Used(curr_key)) => {
+                            let dist = prev_pos.distance(&curr_key.key.position)
+                                + self.keydown_distance
+                                + self.keyup_distance;
+                            *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) +=
+                                dist * weight;
+                        }
+
+                        // return finger from previous key press to home row
+                        (KeyUsage::Used(prev_key), KeyUsage::Idle(curr_pos)) => {
+                            let dist = prev_key.key.position.distance(&curr_pos);
+                            *finger_values.get_mut(&prev_key.key.hand, &prev_key.key.finger) +=
+                                dist * weight;
+                        }
+
+                        // move finger from previous keypress to key and press it (same finger activation)
+                        (KeyUsage::Used(prev_key), KeyUsage::Used(curr_key)) => {
+                            // if both keys are identical and are mods it is a hold -> no cost
+                            if !(prev_key == curr_key && curr_key.is_modifier) {
+                                let dist = curr_key.key.position.distance(&prev_key.key.position)
+                                    + self.keydown_distance
+                                    + self.keyup_distance;
+                                *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) +=
+                                    dist * weight;
+                            }
+                        }
+                    };
+                });
         });
 
         let message = format!(
