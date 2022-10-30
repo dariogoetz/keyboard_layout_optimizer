@@ -77,7 +77,7 @@ impl BigramMetric for KLASameHand {
             prev_hands_used
                 .iter()
                 .zip(curr_hands_used.iter())
-                .zip(curr_hands_used.keys())
+                .zip(HandMap::<f64>::keys())
                 .for_each(|((prev_used, curr_used), hand)| {
                     if *prev_used && *curr_used {
                         *hand_values.get_mut(&hand) += *weight;
@@ -91,10 +91,9 @@ impl BigramMetric for KLASameHand {
             hand_values.get(&Hand::Right),
         );
 
-        let keys = hand_values.keys();
         hand_values
             .iter_mut()
-            .zip(keys.iter())
+            .zip(HandMap::<f64>::keys().iter())
             .for_each(|(c, hand)| {
                 let hscore = self.hscoring.get(&hand);
                 *c *= hscore

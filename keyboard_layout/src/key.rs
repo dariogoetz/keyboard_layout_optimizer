@@ -24,6 +24,7 @@ pub struct Position(
 );
 
 impl Position {
+    #[inline(always)]
     pub fn distance(&self, other: &Self) -> f64 {
         let dx = self.0 - other.0;
         let dy = self.1 - other.1;
@@ -56,6 +57,7 @@ impl Default for Finger {
 
 impl Finger {
     /// Counting distance between fingers (neighboring fingers have a distance of one)
+    #[inline(always)]
     pub fn distance(&self, other: &Finger) -> u8 {
         (*self as u8).abs_diff(*other as u8)
     }
@@ -75,6 +77,7 @@ impl Default for Hand {
 }
 
 impl Hand {
+    #[inline(always)]
     pub fn other(&self) -> Self {
         match self {
             Hand::Left => Hand::Right,
@@ -100,26 +103,32 @@ impl<T: Copy> HandMap<T> {
         Self(data)
     }
 
-    pub fn keys(&self) -> [Hand; 2] {
+    #[inline(always)]
+    pub fn keys() -> [Hand; 2] {
         return [Hand::Left, Hand::Right];
     }
 
+    #[inline(always)]
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
+    #[inline(always)]
     pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
         self.0.iter_mut()
     }
 
+    #[inline(always)]
     pub fn get(&self, hand: &Hand) -> &T {
         &self.0[*hand as usize]
     }
 
+    #[inline(always)]
     pub fn get_mut(&mut self, hand: &Hand) -> &mut T {
         &mut self.0[*hand as usize]
     }
 
+    #[inline(always)]
     pub fn set(&mut self, hand: &Hand, val: T) {
         self.0[*hand as usize] = val;
     }
@@ -148,7 +157,8 @@ impl<T: Copy> FingerMap<T> {
         Self(data)
     }
 
-    pub fn keys(&self) -> [Finger; 5] {
+    #[inline(always)]
+    pub fn keys() -> [Finger; 5] {
         return [
             Finger::Thumb,
             Finger::Index,
@@ -158,18 +168,22 @@ impl<T: Copy> FingerMap<T> {
         ];
     }
 
+    #[inline(always)]
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
+    #[inline(always)]
     pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
         self.0.iter_mut()
     }
 
+    #[inline(always)]
     pub fn get(&self, finger: &Finger) -> &T {
         &self.0[*finger as usize]
     }
 
+    #[inline(always)]
     pub fn set(&mut self, finger: &Finger, val: T) {
         self.0[*finger as usize] = val
     }
@@ -199,7 +213,8 @@ impl<T: Copy> HandFingerMap<T> {
         (*hand as usize) * 5 + (*finger as usize)
     }
 
-    pub fn keys(&self) -> [(Hand, Finger); 10] {
+    #[inline(always)]
+    pub fn keys() -> [(Hand, Finger); 10] {
         return [
             (Hand::Left, Finger::Thumb),
             (Hand::Left, Finger::Index),
@@ -214,31 +229,37 @@ impl<T: Copy> HandFingerMap<T> {
         ];
     }
 
+    #[inline(always)]
     pub fn iter(&self) -> slice::Iter<'_, T> {
         self.0.iter()
     }
 
+    #[inline(always)]
     pub fn iter_mut(&mut self) -> slice::IterMut<'_, T> {
         self.0.iter_mut()
     }
 
+    #[inline(always)]
     pub fn set(&mut self, hand: &Hand, finger: &Finger, val: T) {
         self.0[Self::index(hand, finger)] = val;
     }
 
+    #[inline(always)]
     pub fn get(&self, hand: &Hand, finger: &Finger) -> &T {
         &self.0[Self::index(hand, finger)]
     }
 
+    #[inline(always)]
     pub fn get_mut(&mut self, hand: &Hand, finger: &Finger) -> &mut T {
         &mut self.0[Self::index(hand, finger)]
     }
 
+    #[inline(always)]
     pub fn each_mut<F>(&mut self, f: F)
     where
         F: Fn(&Hand, &Finger, &mut T),
     {
-        for (hand, finger) in self.keys() {
+        for (hand, finger) in Self::keys() {
             f(&hand, &finger, &mut self.0[Self::index(&hand, &finger)]);
         }
     }

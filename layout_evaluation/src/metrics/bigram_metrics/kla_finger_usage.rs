@@ -77,10 +77,9 @@ impl BigramMetric for KLAFingerUsage {
             finger_values.get(&Hand::Right, &Finger::Pinky),
         );
 
-        let keys = finger_values.keys();
         finger_values
             .iter_mut()
-            .zip(keys.iter())
+            .zip(HandFingerMap::<f64>::keys().iter())
             .for_each(|(c, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);

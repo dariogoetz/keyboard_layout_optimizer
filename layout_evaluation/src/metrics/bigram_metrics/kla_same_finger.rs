@@ -87,7 +87,7 @@ impl BigramMetric for KLASameFinger {
             prev_fingers_used
                 .iter()
                 .zip(curr_fingers_used.iter())
-                .zip(curr_fingers_used.keys())
+                .zip(HandFingerMap::<f64>::keys())
                 .for_each(|((prev_used, curr_used), (hand, finger))| {
                     if let (
                         Some((prev_used_key, prev_used_is_mod)), // prev finger was used
@@ -119,10 +119,9 @@ impl BigramMetric for KLASameFinger {
             finger_values.get(&Hand::Right, &Finger::Pinky),
         );
 
-        let keys = finger_values.keys();
         finger_values
             .iter_mut()
-            .zip(keys.iter())
+            .zip(HandFingerMap::<f64>::keys().iter())
             .for_each(|(c, (hand, finger))| {
                 let fscore = self.fscoring.get(&hand, &finger);
                 let hscore = self.hscoring.get(&hand);
