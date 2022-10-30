@@ -3,7 +3,7 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: true
+    enabled: false
     weight: 0.35
     normalization:
       type: fixed
@@ -16,7 +16,7 @@ metrics:
 
   # Pairs of keys that shall be placed in related positions to each other
   similar_letters:
-    enabled: true
+    enabled: false
     weight: 3.0
     normalization:
       type: fixed
@@ -48,7 +48,7 @@ metrics:
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
   similar_letter_groups:
-    enabled: true
+    enabled: false
     weight: 10.0
     normalization:
       type: fixed
@@ -68,7 +68,7 @@ metrics:
 
   # Each finger's load shall be relative to the specified weights
   finger_balance:
-    enabled: true
+    enabled: false
     weight: 69.0
     normalization:
       type: fixed
@@ -89,7 +89,7 @@ metrics:
 
   # Each hand's load shall be close to 50%
   hand_disbalance:
-    enabled: true
+    enabled: false
     weight: 40.0
     normalization:
       type: fixed
@@ -99,7 +99,7 @@ metrics:
 
   # Each keystroke incurs a cost (defined in the keyboard's layout config)
   key_costs:
-    enabled: true
+    enabled: false
     weight: 20.0
     normalization:
       type: weight_found
@@ -109,7 +109,7 @@ metrics:
 
   # Informational metric computing loads per row
   row_loads:
-    enabled: true
+    enabled: false
     weight: 0.0
     normalization:
       type: weight_found
@@ -134,7 +134,7 @@ metrics:
   # The cost can be weighted by the individual keys and if they are performed by stretching
   # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
-    enabled: true
+    enabled: false
     weight: 780.0
     normalization:
       type: weight_found
@@ -199,7 +199,7 @@ metrics:
   # how many rows were crossed and in which direction the movement occurs, costs are
   # counted.
   movement_pattern:
-    enabled: true
+    enabled: false
     weight: 50.0
     normalization:
       type: weight_found
@@ -264,7 +264,7 @@ metrics:
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.
   no_handswitch_after_unbalancing_key:
-    enabled: true
+    enabled: false
     weight: 36.0
     normalization:
       type: weight_found
@@ -272,10 +272,9 @@ metrics:
     params:
       null: null
 
-
   # Distance metric that tries to resemble the one on klanext.keyboard-design.com
   kla_distance:
-    enabled: false
+    enabled: true
     weight: 0.44 # 40 weight * 0.0011 penalty * 10 ?
     normalization:
       type: weight_all
@@ -331,7 +330,7 @@ metrics:
 
   # Same finger metric that tries to resemble the one on klanext.keyboard-design.com
   kla_same_finger:
-    enabled: false
+    enabled: true
     weight: 490.2 # 40 weight * 1.23 penalty * 10 ?
     normalization:
       type: weight_all
@@ -358,7 +357,7 @@ metrics:
 
   # Same hand metric that tries to resemble the one on klanext.keyboard-design.com
   kla_same_hand:
-    enabled: false
+    enabled: true
     weight: 68.2 # 20 weight * 0.341 penalty * 10 * 0.5?
     normalization:
       type: weight_all
@@ -377,7 +376,7 @@ metrics:
   # bigrams (in particular not the finger- and hand-balance metrics) for the first and second half
   # of each trigram. Their cost is multiplied and the square root of the resulting sum is taken.
   irregularity:
-    enabled: true
+    enabled: false
     weight: 8.25
     normalization:
       type: weight_found
@@ -389,7 +388,7 @@ metrics:
   # depending on whether the three keys corresponding to the trigram are "in line" ("rolling
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
-    enabled: true
+    enabled: false
     weight: 200.0
     normalization:
       type: weight_found
@@ -406,7 +405,7 @@ metrics:
   # handswitch or not, factors are applied. Trigrams starting with one of a list of specified
   # symbols are excluded.
   secondary_bigrams:
-    enabled: true
+    enabled: false
     weight: 0.1
     normalization:
       type: weight_found
@@ -464,12 +463,12 @@ ngram_mapper:
   # Exclude ngrams that contain a line break, followed by a non-line-break character.
   # This encodes a mental pause which usually comes after hitting the "Enter" key, before
   # continuing to write.
-  exclude_line_breaks: true
+  exclude_line_breaks: false
 
   # Split symbols belonging to higher layers of the layout into combinations involving modifiers
   # required to activate the layer
   split_modifiers:
-    enabled: true
+    enabled: false
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
