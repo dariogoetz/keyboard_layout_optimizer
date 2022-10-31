@@ -201,7 +201,7 @@ base_layout:
         value: ["`"]
     - Left:
         type: one_shot
-        value: ["„"]
+        value: ["´"]
       Right:
         type: one_shot
-        value: ["„"]
+        value: ["´"]
