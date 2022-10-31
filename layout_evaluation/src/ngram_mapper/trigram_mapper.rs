@@ -89,10 +89,11 @@ impl OnDemandTrigramMapper {
         let (mut trigram_keys_vec, not_found_weight) =
             map_trigrams(trigrams, layout, exclude_line_breaks);
 
+        if layout.has_one_shot_layers() {
+            trigram_keys_vec = self.process_one_shot_layers(trigram_keys_vec, layout);
+        }
+
         let trigram_keys = if self.split_modifiers.enabled {
-            if layout.has_one_shot_layers() {
-                trigram_keys_vec = self.process_one_shot_layers(trigram_keys_vec, layout);
-            }
             self.split_trigram_modifiers(trigram_keys_vec, layout)
         } else {
             trigram_keys_vec.into_iter().collect()

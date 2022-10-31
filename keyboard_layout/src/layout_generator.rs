@@ -26,18 +26,25 @@ pub enum LayoutError {
     WrongKeyNumber(usize, usize),
 }
 
+#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[serde(untagged)]
+pub enum ModifierPosition {
+    Position(MatrixPosition),
+    Symbol(char),
+}
+
 /// Enum for configuring type of modifier (e.g. whether the modifier has to be held or tapped
 /// for activating a layer)
 #[derive(Deserialize, Clone, PartialEq, Debug)]
 #[serde(tag = "type", content = "value")]
 #[serde(rename_all = "snake_case")]
 pub enum ModifierPositions {
-    Hold(Vec<MatrixPosition>),
-    OneShot(Vec<MatrixPosition>),
+    Hold(Vec<ModifierPosition>),
+    OneShot(Vec<ModifierPosition>),
 }
 
 impl ModifierPositions {
-    pub fn iter(&self) -> slice::Iter<'_, MatrixPosition> {
+    pub fn iter(&self) -> slice::Iter<'_, ModifierPosition> {
         match self {
             Self::Hold(v) => v.iter(),
             Self::OneShot(v) => v.iter(),

@@ -56,11 +56,11 @@ impl OnDemandUnigramMapper {
     pub fn layerkey_indices(&self, unigrams: &Unigrams, layout: &Layout) -> (UnigramIndices, f64) {
         let (mut unigram_keys_vec, not_found_weight) = map_unigrams(unigrams, layout);
 
-        let unigram_keys = if self.split_modifiers.enabled {
-            if layout.has_one_shot_layers() {
-                unigram_keys_vec = self.process_one_shot_layers(unigram_keys_vec, layout);
-            }
+        if layout.has_one_shot_layers() {
+            unigram_keys_vec = self.process_one_shot_layers(unigram_keys_vec, layout);
+        }
 
+        let unigram_keys = if self.split_modifiers.enabled {
             Self::split_unigram_modifiers(unigram_keys_vec, layout)
         } else {
             unigram_keys_vec.into_iter().collect()
@@ -89,6 +89,8 @@ impl OnDemandUnigramMapper {
         let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
+            log::info!("{:?}", layout.get_layerkey(&base));
+            log::info!("{:?}", mods);
 
             let mods = match mods {
                 Modifiers::Hold(mods) => mods,

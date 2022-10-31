@@ -82,10 +82,11 @@ impl OnDemandBigramMapper {
         let (mut bigram_keys_vec, not_found_weight) =
             map_bigrams(bigrams, layout, exclude_line_breaks);
 
+        if layout.has_one_shot_layers() {
+            bigram_keys_vec = self.process_one_shot_layers(bigram_keys_vec, layout);
+        }
+
         let bigram_keys = if self.split_modifiers.enabled {
-            if layout.has_one_shot_layers() {
-                bigram_keys_vec = self.process_one_shot_layers(bigram_keys_vec, layout);
-            }
             self.split_bigram_modifiers(bigram_keys_vec, layout)
         } else {
             bigram_keys_vec.into_iter().collect()

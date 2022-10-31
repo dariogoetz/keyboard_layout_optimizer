@@ -4,7 +4,7 @@
 
 use crate::key::{Hand, Key, MatrixPosition};
 use crate::keyboard::{KeyIndex, Keyboard};
-use crate::layout_generator::ModifierPositions;
+use crate::layout_generator::{ModifierPosition, ModifierPositions};
 
 use ahash::AHashMap;
 use anyhow::Result;
@@ -132,6 +132,7 @@ impl Layout {
         // generate layer keys
         let mut layerkeys = Vec::new();
         let mut layerkey_to_key_index = Vec::new();
+        let mut char2layerkey_index: AHashMap<char, LayerKeyIndex> = AHashMap::default();
         let mut pos2layerkey_index: AHashMap<MatrixPosition, LayerKeyIndex> = AHashMap::default();
         let mut layerkey_index = 0;
         let key_layers: Vec<Vec<LayerKeyIndex>> = key_chars
@@ -159,6 +160,13 @@ impl Layout {
                             .entry(key.matrix_position)
                             .or_insert(layerkey_index);
 
+                        // use layerkey with lowest layer for char2layerkey_index
+                        let entry = char2layerkey_index.entry(*c).or_insert(layerkey_index);
+                        let entry_layerkey = &layerkeys[*entry as usize];
+                        if layer_id < entry_layerkey.layer as usize {
+                            char2layerkey_index.insert(*c, layerkey_index);
+                        }
+
                         layerkey_index += 1;
                         layerkey_index - 1
                     })
@@ -173,32 +181,62 @@ impl Layout {
 
         // add modifier keys as layerkeys
         let mut pos2mod_index: AHashMap<MatrixPosition, LayerKeyIndex> = AHashMap::default();
+        let mut char2mod_index: AHashMap<char, LayerKeyIndex> = AHashMap::default();
         for mods_per_hand in modifiers.iter() {
             let mut resolved_mods_per_hand = AHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {
                 let mut resolved_mods_vec = Vec::new();
                 for mp in mods.iter() {
-                    let base_key_idx = *pos2layerkey_index
-                        .get(mp)
-                        .ok_or(format!("Modifier position '{:?}' not a found", mp))
-                        .map_err(anyhow::Error::msg)?;
-                    let mod_idx = *pos2mod_index.entry(mp.clone()).or_insert_with(|| {
-                        let base_layerkey = &layerkeys[base_key_idx as usize];
-                        layerkeys.push(LayerKey::new(
-                            0,
-                            base_layerkey.key.clone(),
-                            base_layerkey.symbol.clone(),
-                            Modifiers::default(),
-                            base_layerkey.is_fixed.clone(),
-                            true,
-                        ));
-                        layerkey_to_key_index.push(layerkey_to_key_index[base_key_idx as usize]);
+                    match mp {
+                        ModifierPosition::Position(mp) => {
+                            let base_key_idx = *pos2layerkey_index
+                                .get(mp)
+                                .ok_or(format!("Modifier position '{:?}' not a found", mp))
+                                .map_err(anyhow::Error::msg)?;
+                            let mod_idx = *pos2mod_index.entry(mp.clone()).or_insert_with(|| {
+                                let base_layerkey = &layerkeys[base_key_idx as usize];
+                                layerkeys.push(LayerKey::new(
+                                    0,
+                                    base_layerkey.key.clone(),
+                                    base_layerkey.symbol.clone(),
+                                    Modifiers::default(),
+                                    base_layerkey.is_fixed.clone(),
+                                    true,
+                                ));
+                                layerkey_to_key_index
+                                    .push(layerkey_to_key_index[base_key_idx as usize]);
 
-                        layerkey_index += 1;
-                        layerkey_index - 1
-                    });
+                                layerkey_index += 1;
+                                layerkey_index - 1
+                            });
 
-                    resolved_mods_vec.push(mod_idx);
+                            resolved_mods_vec.push(mod_idx);
+                        }
+                        ModifierPosition::Symbol(c) => {
+                            let base_key_idx = *char2layerkey_index
+                                .get(c)
+                                .ok_or(format!("Modifier char '{:?}' not a found", c))
+                                .map_err(anyhow::Error::msg)?;
+                            let mod_idx = *char2mod_index.entry(*c).or_insert_with(|| {
+                                let base_layerkey = &layerkeys[base_key_idx as usize];
+                                layerkeys.push(LayerKey::new(
+                                    base_layerkey.layer,
+                                    base_layerkey.key.clone(),
+                                    base_layerkey.symbol.clone(),
+                                    base_layerkey.modifiers.clone(),
+                                    base_layerkey.is_fixed.clone(),
+                                    true,
+                                ));
+                                layerkey_to_key_index
+                                    .push(layerkey_to_key_index[base_key_idx as usize]);
+
+                                layerkey_index += 1;
+                                layerkey_index - 1
+                            });
+
+                            resolved_mods_vec.push(mod_idx);
+                        }
+                    }
                 }
                 let resolved_mods = match mods {
                     ModifierPositions::Hold(_) => Modifiers::Hold(resolved_mods_vec),
@@ -312,13 +350,9 @@ impl Layout {
     #[inline(always)]
     pub fn resolve_modifiers(&self, k: &LayerKeyIndex) -> (LayerKeyIndex, Modifiers) {
         let lk = self.get_layerkey(k);
-        if lk.is_modifier {
-            (k.clone(), Modifiers::default())
-        } else {
-            let base = self.get_base_layerkey_index(k);
-            let mods = lk.modifiers.clone();
-            (base, mods)
-        }
+        let base = self.get_base_layerkey_index(k);
+        let mods = lk.modifiers.clone();
+        (base, mods)
     }
 
     /// If the layout has at least one layer configured as one-shot layer
