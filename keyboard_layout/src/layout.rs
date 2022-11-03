@@ -4,11 +4,12 @@
 
 use crate::key::{Hand, Key, MatrixPosition};
 use crate::keyboard::{KeyIndex, Keyboard};
-use crate::layout_generator::{ModifierPosition, ModifierPositions};
 
 use ahash::AHashMap;
 use anyhow::Result;
 use colored::Colorize;
+use core::slice;
+use serde::Deserialize;
 use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
@@ -18,15 +19,47 @@ use std::{fmt, sync::Arc};
 /// Therefore, this is not a [`usize`] or larger.
 pub type LayerKeyIndex = u16;
 
+/// Enum for specifying the location of a modifier relative to the keyboard.
+///
+/// This can be a `MatrixPosition` provided by the keyboard or a symbol that a corresponding layout
+/// can genenrate (this should not belong to the same layer that the modifier is used for).
+/// If multiple locations in the layout generate that symbol, one of those on the lowest layer is
+/// used.
+#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[serde(untagged)]
+pub enum ModifierLocation {
+    Position(MatrixPosition),
+    Symbol(char),
+}
+
+/// Enum for configuring the way how the modifiers shall be used to access a layer.
+/// (e.g. whether the modifiers has to be held or tapped for activating a layer)
+#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[serde(tag = "type", content = "value")]
+#[serde(rename_all = "snake_case")]
+pub enum LayerModifierLocations {
+    Hold(Vec<ModifierLocation>),
+    OneShot(Vec<ModifierLocation>),
+}
+
+impl LayerModifierLocations {
+    pub fn iter(&self) -> slice::Iter<'_, ModifierLocation> {
+        match self {
+            Self::Hold(v) => v.iter(),
+            Self::OneShot(v) => v.iter(),
+        }
+    }
+}
+
 /// Enumeration describing the various modifier types (e.g. whether the modifier has to be held or tapped
 /// for activating a layer)
 #[derive(Clone, PartialEq, Debug)]
-pub enum Modifiers {
+pub enum LayerModifiers {
     Hold(Vec<LayerKeyIndex>),
     OneShot(Vec<LayerKeyIndex>),
 }
 
-impl Modifiers {
+impl LayerModifiers {
     pub fn layerkeys(&self) -> &[LayerKeyIndex] {
         match self {
             Self::Hold(v) => &v,
@@ -35,7 +68,7 @@ impl Modifiers {
     }
 }
 
-impl Default for Modifiers {
+impl Default for LayerModifiers {
     fn default() -> Self {
         Self::Hold(Vec::new())
     }
@@ -55,7 +88,7 @@ pub struct LayerKey {
     /// Symbol belonging to a layout
     pub symbol: char,
     /// Vec of modifiers required to activate the layer (in terms of a [`LayerKeyIndex`] for a layout)
-    pub modifiers: Modifiers,
+    pub modifiers: LayerModifiers,
     /// If the key shall not be permutated for optimization
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
@@ -77,7 +110,7 @@ impl LayerKey {
         layer: u8,
         key: Key,
         symbol: char,
-        modifiers: Modifiers,
+        modifiers: LayerModifiers,
         is_fixed: bool,
         is_modifier: bool,
     ) -> Self {
@@ -127,7 +160,7 @@ impl Layout {
         key_chars: Vec<Vec<char>>,
         fixed_keys: Vec<bool>,
         keyboard: Arc<Keyboard>,
-        modifiers: Vec<AHashMap<Hand, ModifierPositions>>,
+        modifiers: Vec<AHashMap<Hand, LayerModifierLocations>>,
     ) -> Result<Self> {
         // generate layer keys
         let mut layerkeys = Vec::new();
@@ -150,7 +183,7 @@ impl Layout {
                             layer_id as u8,
                             key.clone(),
                             *c,
-                            Modifiers::default(),
+                            LayerModifiers::default(),
                             *fixed,
                             false,
                         ));
@@ -177,7 +210,7 @@ impl Layout {
             .collect();
 
         // a vec that provides the `modifiers` in terms of LayerKeyIndex for each layer
-        let mut mod_map: Vec<AHashMap<Hand, Modifiers>> = Vec::with_capacity(modifiers.len());
+        let mut mod_map: Vec<AHashMap<Hand, LayerModifiers>> = Vec::with_capacity(modifiers.len());
 
         // add modifier keys as layerkeys
         let mut pos2mod_index: AHashMap<MatrixPosition, LayerKeyIndex> = AHashMap::default();
@@ -188,7 +221,7 @@ impl Layout {
                 let mut resolved_mods_vec = Vec::new();
                 for mp in mods.iter() {
                     match mp {
-                        ModifierPosition::Position(mp) => {
+                        ModifierLocation::Position(mp) => {
                             let base_key_idx = *pos2layerkey_index
                                 .get(mp)
                                 .ok_or(format!("Modifier position '{:?}' not a found", mp))
@@ -199,7 +232,7 @@ impl Layout {
                                     0,
                                     base_layerkey.key.clone(),
                                     base_layerkey.symbol.clone(),
-                                    Modifiers::default(),
+                                    LayerModifiers::default(),
                                     base_layerkey.is_fixed.clone(),
                                     true,
                                 ));
@@ -212,7 +245,7 @@ impl Layout {
 
                             resolved_mods_vec.push(mod_idx);
                         }
-                        ModifierPosition::Symbol(c) => {
+                        ModifierLocation::Symbol(c) => {
                             let base_key_idx = *char2layerkey_index
                                 .get(c)
                                 .ok_or(format!("Modifier char '{:?}' not a found", c))
@@ -239,8 +272,10 @@ impl Layout {
                     }
                 }
                 let resolved_mods = match mods {
-                    ModifierPositions::Hold(_) => Modifiers::Hold(resolved_mods_vec),
-                    ModifierPositions::OneShot(_) => Modifiers::OneShot(resolved_mods_vec),
+                    LayerModifierLocations::Hold(_) => LayerModifiers::Hold(resolved_mods_vec),
+                    LayerModifierLocations::OneShot(_) => {
+                        LayerModifiers::OneShot(resolved_mods_vec)
+                    }
                 };
                 resolved_mods_per_hand.insert(*hand, resolved_mods);
             }
@@ -257,7 +292,7 @@ impl Layout {
                     .map(|mods| mods.clone())
                     .unwrap_or_default()
             } else {
-                Modifiers::default()
+                LayerModifiers::default()
             };
 
             k.modifiers = mods;
@@ -348,7 +383,7 @@ impl Layout {
 
     /// Get a list of modifiers required to generate a given [`LayerKey`] as a Vec of [`LayerKey`]s
     #[inline(always)]
-    pub fn resolve_modifiers(&self, k: &LayerKeyIndex) -> (LayerKeyIndex, Modifiers) {
+    pub fn resolve_modifiers(&self, k: &LayerKeyIndex) -> (LayerKeyIndex, LayerModifiers) {
         let lk = self.get_layerkey(k);
         let base = self.get_base_layerkey_index(k);
         let mods = lk.modifiers.clone();
@@ -359,7 +394,7 @@ impl Layout {
     pub fn has_one_shot_layers(&self) -> bool {
         self.layerkeys
             .iter()
-            .any(|lk| std::matches!(lk.modifiers, Modifiers::OneShot(_)))
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)))
     }
 
     /// Plot a graphical representation of a layer

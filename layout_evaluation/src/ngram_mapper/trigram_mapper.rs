@@ -6,7 +6,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use crate::ngrams::Trigrams;
 
 use ahash::AHashMap;
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, LayerModifiers, Layout};
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
@@ -152,17 +152,17 @@ impl OnDemandTrigramMapper {
             let (base3, mods3) = layout.resolve_modifiers(&k3);
 
             let mods1 = match mods1 {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
             let mods2 = match mods2 {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
             let mods3 = match mods3 {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
@@ -300,21 +300,21 @@ impl OnDemandTrigramMapper {
 
             let mut keys = Vec::new();
 
-            if let Modifiers::OneShot(mods) = mods1 {
+            if let LayerModifiers::OneShot(mods) = mods1 {
                 keys.extend(mods);
                 keys.push(base1);
             } else {
                 keys.push(k1);
             };
 
-            if let Modifiers::OneShot(mods) = mods2 {
+            if let LayerModifiers::OneShot(mods) = mods2 {
                 keys.extend(mods);
                 keys.push(base2);
             } else {
                 keys.push(k2);
             };
 
-            if let Modifiers::OneShot(mods) = mods3 {
+            if let LayerModifiers::OneShot(mods) = mods3 {
                 keys.extend(mods);
                 keys.push(base3);
             } else {

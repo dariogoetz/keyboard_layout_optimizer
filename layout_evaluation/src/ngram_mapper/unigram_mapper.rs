@@ -6,7 +6,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 use crate::ngrams::Unigrams;
 
 use ahash::AHashMap;
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, LayerModifiers, Layout};
 
 // Before passing the resulting LayerKey-based ngrams as a result, smaller LayerKeyIndex-based
 // ones are used because they are smaller than a reference (u16 vs usize) and yield better
@@ -89,11 +89,9 @@ impl OnDemandUnigramMapper {
         let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
-            log::info!("{:?}", layout.get_layerkey(&base));
-            log::info!("{:?}", mods);
 
             let mods = match mods {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
@@ -128,7 +126,7 @@ impl OnDemandUnigramMapper {
 
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
-            if let Modifiers::OneShot(mods) = mods {
+            if let LayerModifiers::OneShot(mods) = mods {
                 processed_unigrams.extend(mods.iter().map(|m| (m.clone(), w)));
                 processed_unigrams.push((base, w));
             } else {

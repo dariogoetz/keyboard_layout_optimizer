@@ -8,7 +8,7 @@ use super::{common::*, on_demand_ngram_mapper::SplitModifiersConfig};
 
 use crate::ngrams::Bigrams;
 
-use keyboard_layout::layout::{LayerKey, LayerKeyIndex, Layout, Modifiers};
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, LayerModifiers, Layout};
 
 use ahash::AHashMap;
 
@@ -143,12 +143,12 @@ impl OnDemandBigramMapper {
             let (base2, mods2) = layout.resolve_modifiers(&k2);
 
             let mods1 = match mods1 {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
             let mods2 = match mods2 {
-                Modifiers::Hold(mods) => mods,
+                LayerModifiers::Hold(mods) => mods,
                 _ => Vec::new(),
             };
 
@@ -205,14 +205,14 @@ impl OnDemandBigramMapper {
 
             let mut keys = Vec::new();
 
-            if let Modifiers::OneShot(mods) = mods1 {
+            if let LayerModifiers::OneShot(mods) = mods1 {
                 keys.extend(mods);
                 keys.push(base1);
             } else {
                 keys.push(k1);
             };
 
-            if let Modifiers::OneShot(mods) = mods2 {
+            if let LayerModifiers::OneShot(mods) = mods2 {
                 keys.extend(mods);
                 keys.push(base2);
             } else {
