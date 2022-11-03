@@ -94,7 +94,7 @@ impl BigramMetric for KLASameHand {
             .iter_mut()
             .zip(HandMap::<f64>::keys().iter())
             .for_each(|(c, hand)| {
-                let hscore = self.hscoring.get(&hand);
+                let hscore = self.hscoring.get(hand);
                 *c *= hscore
             });
 

@@ -325,7 +325,7 @@ impl OnDemandTrigramMapper {
                 .zip(keys.iter().skip(1))
                 .zip(keys.iter().skip(2))
                 .for_each(|((lk1, lk2), lk3)| {
-                    processed_trigrams.push(((lk1.clone(), lk2.clone(), lk3.clone()), w));
+                    processed_trigrams.push(((*lk1, *lk2, *lk3), w));
                 });
         });
 

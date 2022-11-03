@@ -105,7 +105,7 @@ impl<T: Copy> HandMap<T> {
 
     #[inline(always)]
     pub fn keys() -> [Hand; 2] {
-        return [Hand::Left, Hand::Right];
+        [Hand::Left, Hand::Right]
     }
 
     #[inline(always)]
@@ -159,13 +159,13 @@ impl<T: Copy> FingerMap<T> {
 
     #[inline(always)]
     pub fn keys() -> [Finger; 5] {
-        return [
+        [
             Finger::Thumb,
             Finger::Index,
             Finger::Middle,
             Finger::Ring,
             Finger::Pinky,
-        ];
+        ]
     }
 
     #[inline(always)]
@@ -215,7 +215,7 @@ impl<T: Copy> HandFingerMap<T> {
 
     #[inline(always)]
     pub fn keys() -> [(Hand, Finger); 10] {
-        return [
+        [
             (Hand::Left, Finger::Thumb),
             (Hand::Left, Finger::Index),
             (Hand::Left, Finger::Middle),
@@ -226,7 +226,7 @@ impl<T: Copy> HandFingerMap<T> {
             (Hand::Right, Finger::Middle),
             (Hand::Right, Finger::Ring),
             (Hand::Right, Finger::Pinky),
-        ];
+        ]
     }
 
     #[inline(always)]

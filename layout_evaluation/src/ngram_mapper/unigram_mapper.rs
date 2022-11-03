@@ -127,7 +127,7 @@ impl OnDemandUnigramMapper {
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
             if let LayerModifiers::OneShot(mods) = mods {
-                processed_unigrams.extend(mods.iter().map(|m| (m.clone(), w)));
+                processed_unigrams.extend(mods.iter().map(|m| (*m, w)));
                 processed_unigrams.push((base, w));
             } else {
                 processed_unigrams.push((k, w));

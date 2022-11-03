@@ -25,7 +25,7 @@ pub type LayerKeyIndex = u16;
 /// can genenrate (this should not belong to the same layer that the modifier is used for).
 /// If multiple locations in the layout generate that symbol, one of those on the lowest layer is
 /// used.
-#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[derive(Deserialize, Clone, PartialEq, Eq, Debug)]
 #[serde(untagged)]
 pub enum ModifierLocation {
     Position(MatrixPosition),
@@ -34,7 +34,7 @@ pub enum ModifierLocation {
 
 /// Enum for configuring the way how the modifiers shall be used to access a layer.
 /// (e.g. whether the modifiers has to be held or tapped for activating a layer)
-#[derive(Deserialize, Clone, PartialEq, Debug)]
+#[derive(Deserialize, Clone, PartialEq, Eq, Debug)]
 #[serde(tag = "type", content = "value")]
 #[serde(rename_all = "snake_case")]
 pub enum LayerModifierLocations {
@@ -53,7 +53,7 @@ impl LayerModifierLocations {
 
 /// Enumeration describing the various modifier types (e.g. whether the modifier has to be held or tapped
 /// for activating a layer)
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum LayerModifiers {
     Hold(Vec<LayerKeyIndex>),
     OneShot(Vec<LayerKeyIndex>),
@@ -62,8 +62,8 @@ pub enum LayerModifiers {
 impl LayerModifiers {
     pub fn layerkeys(&self) -> &[LayerKeyIndex] {
         match self {
-            Self::Hold(v) => &v,
-            Self::OneShot(v) => &v,
+            Self::Hold(v) => v,
+            Self::OneShot(v) => v,
         }
     }
 }
@@ -226,14 +226,14 @@ impl Layout {
                                 .get(mp)
                                 .ok_or(format!("Modifier position '{:?}' not a found", mp))
                                 .map_err(anyhow::Error::msg)?;
-                            let mod_idx = *pos2mod_index.entry(mp.clone()).or_insert_with(|| {
+                            let mod_idx = *pos2mod_index.entry(*mp).or_insert_with(|| {
                                 let base_layerkey = &layerkeys[base_key_idx as usize];
                                 layerkeys.push(LayerKey::new(
                                     0,
                                     base_layerkey.key.clone(),
-                                    base_layerkey.symbol.clone(),
+                                    base_layerkey.symbol,
                                     LayerModifiers::default(),
-                                    base_layerkey.is_fixed.clone(),
+                                    base_layerkey.is_fixed,
                                     true,
                                 ));
                                 layerkey_to_key_index
@@ -255,9 +255,9 @@ impl Layout {
                                 layerkeys.push(LayerKey::new(
                                     base_layerkey.layer,
                                     base_layerkey.key.clone(),
-                                    base_layerkey.symbol.clone(),
+                                    base_layerkey.symbol,
                                     base_layerkey.modifiers.clone(),
-                                    base_layerkey.is_fixed.clone(),
+                                    base_layerkey.is_fixed,
                                     true,
                                 ));
                                 layerkey_to_key_index
@@ -289,7 +289,7 @@ impl Layout {
                     .get((k.layer - 1) as usize)
                     .unwrap() // can not fail due to above check
                     .get(&k.key.hand.other())
-                    .map(|mods| mods.clone())
+                    .cloned()
                     .unwrap_or_default()
             } else {
                 LayerModifiers::default()

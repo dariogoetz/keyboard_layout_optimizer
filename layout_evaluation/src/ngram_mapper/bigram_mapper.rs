@@ -220,7 +220,7 @@ impl OnDemandBigramMapper {
             };
 
             keys.iter().zip(keys.iter().skip(1)).for_each(|(lk1, lk2)| {
-                processed_bigrams.push(((lk1.clone(), lk2.clone()), w));
+                processed_bigrams.push(((*lk1, *lk2), w));
             });
         });
 

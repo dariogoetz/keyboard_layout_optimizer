@@ -110,8 +110,8 @@ impl BigramMetric for KLASameFinger {
             .iter_mut()
             .zip(HandFingerMap::<f64>::keys().iter())
             .for_each(|(c, (hand, finger))| {
-                let fscore = self.fscoring.get(&hand, &finger);
-                let hscore = self.hscoring.get(&hand);
+                let fscore = self.fscoring.get(hand, finger);
+                let hscore = self.hscoring.get(hand);
                 *c *= fscore * hscore
             });
 

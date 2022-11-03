@@ -88,7 +88,7 @@ impl BigramMetric for KLADistance {
 
         bigrams.iter().for_each(|((prev_key, curr_key), weight)| {
             // collect used fingers and keys for previous symbol
-            let mut prev_used_keys = home_row_positions.clone();
+            let mut prev_used_keys = home_row_positions;
             prev_used_keys.register_key(prev_key);
             if !self.ignore_modifiers {
                 prev_key.modifiers.layerkeys().iter().for_each(|k| {
@@ -97,7 +97,7 @@ impl BigramMetric for KLADistance {
             }
 
             // collect used fingers and keys for currend symbol
-            let mut curr_used_keys = home_row_positions.clone();
+            let mut curr_used_keys = home_row_positions;
             curr_used_keys.register_key(curr_key);
             if !self.ignore_modifiers {
                 curr_key.modifiers.layerkeys().iter().for_each(|k| {
@@ -124,7 +124,7 @@ impl BigramMetric for KLADistance {
 
                         // return finger from previous key press to home row
                         (KeyUsage::Used(prev_key), KeyUsage::Idle(curr_pos)) => {
-                            let dist = prev_key.key.position.distance(&curr_pos);
+                            let dist = prev_key.key.position.distance(curr_pos);
                             *finger_values.get_mut(&prev_key.key.hand, &prev_key.key.finger) +=
                                 dist * weight;
                         }
@@ -162,8 +162,8 @@ impl BigramMetric for KLADistance {
             .iter_mut()
             .zip(HandFingerMap::<f64>::keys().iter())
             .for_each(|(c, (hand, finger))| {
-                let fscore = self.dscoring.get(&hand, &finger);
-                let hscore = self.hscoring.get(&hand);
+                let fscore = self.dscoring.get(hand, finger);
+                let hscore = self.hscoring.get(hand);
                 *c *= fscore * hscore
             });
 
