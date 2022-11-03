@@ -25,6 +25,8 @@ pub type LayerKeyIndex = u16;
 /// can genenrate (this should not belong to the same layer that the modifier is used for).
 /// If multiple locations in the layout generate that symbol, one of those on the lowest layer is
 /// used.
+/// Note that if `Symbol(char)` is used, the modifier location may move with the symbol during an
+/// optimization.
 #[derive(Deserialize, Clone, PartialEq, Eq, Debug)]
 #[serde(untagged)]
 pub enum ModifierLocation {
