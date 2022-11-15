@@ -7,9 +7,9 @@ use std::{env, fmt};
 
 pub mod irregularity;
 pub mod no_handswitch_in_trigram;
-pub mod rolls;
 pub mod secondary_bigrams;
 pub mod trigram_finger_repeats;
+pub mod trigram_rolls;
 
 /// TrigramMetric is a trait for metrics that iterates over weighted trigrams.
 pub trait TrigramMetric: Send + Sync + TrigramMetricClone + fmt::Debug {
