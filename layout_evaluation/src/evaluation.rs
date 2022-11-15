@@ -10,7 +10,10 @@
 use crate::results::{
     EvaluationResult, MetricResult, MetricResults, MetricType, NormalizationType,
 };
-use crate::{metrics::*, ngram_mapper::NgramMapper};
+use crate::{
+    metrics::{bigram_metrics::*, layout_metrics::*, trigram_metrics::*, unigram_metrics::*},
+    ngram_mapper::NgramMapper,
+};
 
 use keyboard_layout::layout::{LayerKey, Layout};
 
@@ -35,59 +38,42 @@ pub struct WeightedParams<T> {
 /// This is usually read from a config file.
 #[derive(Clone, Deserialize, Debug)]
 pub struct MetricParameters {
-    pub shortcut_keys: WeightedParams<layout_metrics::shortcut_keys::Parameters>,
-    pub similar_letters: WeightedParams<layout_metrics::similar_letters::Parameters>,
-    pub similar_letter_groups: WeightedParams<layout_metrics::similar_letter_groups::Parameters>,
+    pub shortcut_keys: Option<WeightedParams<shortcut_keys::Parameters>>,
+    pub similar_letters: Option<WeightedParams<similar_letters::Parameters>>,
+    pub similar_letter_groups: Option<WeightedParams<similar_letter_groups::Parameters>>,
 
-    pub finger_balance: WeightedParams<unigram_metrics::finger_balance::Parameters>,
-    pub hand_disbalance: WeightedParams<unigram_metrics::hand_disbalance::Parameters>,
-    pub row_loads: WeightedParams<unigram_metrics::row_loads::Parameters>,
-    pub key_costs: WeightedParams<unigram_metrics::key_costs::Parameters>,
+    pub finger_balance: Option<WeightedParams<finger_balance::Parameters>>,
+    pub hand_disbalance: Option<WeightedParams<hand_disbalance::Parameters>>,
+    pub row_loads: Option<WeightedParams<row_loads::Parameters>>,
+    pub key_costs: Option<WeightedParams<key_costs::Parameters>>,
 
-    pub symmetric_handswitches: WeightedParams<bigram_metrics::symmetric_handswitches::Parameters>,
-    pub finger_repeats: WeightedParams<bigram_metrics::finger_repeats::Parameters>,
-    pub manual_bigram_penalty: WeightedParams<bigram_metrics::manual_bigram_penalty::Parameters>,
-    pub movement_pattern: WeightedParams<bigram_metrics::movement_pattern::Parameters>,
+    pub symmetric_handswitches: Option<WeightedParams<symmetric_handswitches::Parameters>>,
+    pub finger_repeats: Option<WeightedParams<finger_repeats::Parameters>>,
+    pub manual_bigram_penalty: Option<WeightedParams<manual_bigram_penalty::Parameters>>,
+    pub movement_pattern: Option<WeightedParams<movement_pattern::Parameters>>,
     pub no_handswitch_after_unbalancing_key:
-        WeightedParams<bigram_metrics::no_handswitch_after_unbalancing_key::Parameters>,
+        Option<WeightedParams<no_handswitch_after_unbalancing_key::Parameters>>,
 
-    pub kla_distance: WeightedParams<bigram_metrics::kla_distance::Parameters>,
-    pub kla_finger_usage: WeightedParams<bigram_metrics::kla_finger_usage::Parameters>,
-    pub kla_same_finger: WeightedParams<bigram_metrics::kla_same_finger::Parameters>,
-    pub kla_same_hand: WeightedParams<bigram_metrics::kla_same_hand::Parameters>,
+    pub kla_distance: Option<WeightedParams<kla_distance::Parameters>>,
+    pub kla_finger_usage: Option<WeightedParams<kla_finger_usage::Parameters>>,
+    pub kla_same_finger: Option<WeightedParams<kla_same_finger::Parameters>>,
+    pub kla_same_hand: Option<WeightedParams<kla_same_hand::Parameters>>,
 
-    pub irregularity: WeightedParams<trigram_metrics::irregularity::Parameters>,
-    pub no_handswitch_in_trigram:
-        WeightedParams<trigram_metrics::no_handswitch_in_trigram::Parameters>,
-    pub secondary_bigrams: WeightedParams<trigram_metrics::secondary_bigrams::Parameters>,
-    pub trigram_finger_repeats: WeightedParams<trigram_metrics::trigram_finger_repeats::Parameters>,
-    pub trigram_rolls: WeightedParams<trigram_metrics::rolls::Parameters>,
+    pub irregularity: Option<WeightedParams<irregularity::Parameters>>,
+    pub no_handswitch_in_trigram: Option<WeightedParams<no_handswitch_in_trigram::Parameters>>,
+    pub secondary_bigrams: Option<WeightedParams<secondary_bigrams::Parameters>>,
+    pub trigram_finger_repeats: Option<WeightedParams<trigram_finger_repeats::Parameters>>,
+    pub trigram_rolls: Option<WeightedParams<rolls::Parameters>>,
 }
 
 /// The [`Evaluator`] object is responsible for evaluating multiple metrics with respect to given ngram data.
 /// The metrics are handled as dynamically dispatched trait objects for the metric traits in the `metrics` module.
 #[derive(Clone, Debug)]
 pub struct Evaluator {
-    layout_metrics: Vec<(
-        f64,
-        NormalizationType,
-        Box<dyn layout_metrics::LayoutMetric>,
-    )>,
-    unigram_metrics: Vec<(
-        f64,
-        NormalizationType,
-        Box<dyn unigram_metrics::UnigramMetric>,
-    )>,
-    bigram_metrics: Vec<(
-        f64,
-        NormalizationType,
-        Box<dyn bigram_metrics::BigramMetric>,
-    )>,
-    trigram_metrics: Vec<(
-        f64,
-        NormalizationType,
-        Box<dyn trigram_metrics::TrigramMetric>,
-    )>,
+    layout_metrics: Vec<(f64, NormalizationType, Box<dyn LayoutMetric>)>,
+    unigram_metrics: Vec<(f64, NormalizationType, Box<dyn UnigramMetric>)>,
+    bigram_metrics: Vec<(f64, NormalizationType, Box<dyn BigramMetric>)>,
+    trigram_metrics: Vec<(f64, NormalizationType, Box<dyn TrigramMetric>)>,
     ngram_mapper: Box<dyn NgramMapper>,
 }
 
@@ -106,196 +92,126 @@ impl Evaluator {
     /// Add all "default" metrics to the evaluator.
     pub fn default_metrics(mut self, params: &MetricParameters) -> Self {
         // layout metrics
-        self.layout_metric(
-            Box::new(layout_metrics::shortcut_keys::ShortcutKeys::new(
-                &params.shortcut_keys.params,
-            )),
-            params.shortcut_keys.weight,
-            params.shortcut_keys.normalization.clone(),
-            params.shortcut_keys.enabled,
-        );
-        self.layout_metric(
-            Box::new(layout_metrics::similar_letters::SimilarLetters::new(
-                &params.similar_letters.params,
-            )),
-            params.similar_letters.weight,
-            params.similar_letters.normalization.clone(),
-            params.similar_letters.enabled,
-        );
-        self.layout_metric(
-            Box::new(
-                layout_metrics::similar_letter_groups::SimilarLetterGroups::new(
-                    &params.similar_letter_groups.params,
-                ),
-            ),
-            params.similar_letter_groups.weight,
-            params.similar_letter_groups.normalization.clone(),
-            params.similar_letter_groups.enabled,
+        macro_rules! layout_metric {
+            ($params:expr, $metric_struct:ty) => {
+                if let Some(p) = &$params {
+                    if p.enabled {
+                        self.layout_metric(
+                            Box::new(<$metric_struct>::new(&p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+        }
+
+        layout_metric!(params.shortcut_keys, shortcut_keys::ShortcutKeys);
+        layout_metric!(params.similar_letters, similar_letters::SimilarLetters);
+        layout_metric!(
+            params.similar_letter_groups,
+            similar_letter_groups::SimilarLetterGroups
         );
 
         // unigram metrics
-        self.unigram_metric(
-            Box::new(unigram_metrics::finger_balance::FingerBalance::new(
-                &params.finger_balance.params,
-            )),
-            params.finger_balance.weight,
-            params.finger_balance.normalization.clone(),
-            params.finger_balance.enabled,
-        );
-        self.unigram_metric(
-            Box::new(unigram_metrics::hand_disbalance::HandDisbalance::new(
-                &params.hand_disbalance.params,
-            )),
-            params.hand_disbalance.weight,
-            params.hand_disbalance.normalization.clone(),
-            params.hand_disbalance.enabled,
-        );
-        self.unigram_metric(
-            Box::new(unigram_metrics::row_loads::RowLoads::new(
-                &params.row_loads.params,
-            )),
-            params.row_loads.weight,
-            params.row_loads.normalization.clone(),
-            params.row_loads.enabled,
-        );
-        self.unigram_metric(
-            Box::new(unigram_metrics::key_costs::KeyCost::new(
-                &params.key_costs.params,
-            )),
-            params.key_costs.weight,
-            params.key_costs.normalization.clone(),
-            params.key_costs.enabled,
-        );
+        macro_rules! unigram_metric {
+            ($params:expr, $metric_struct:ty) => {
+                if let Some(p) = &$params {
+                    if p.enabled {
+                        self.unigram_metric(
+                            Box::new(<$metric_struct>::new(&p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+        }
+
+        unigram_metric!(params.finger_balance, finger_balance::FingerBalance);
+        unigram_metric!(params.hand_disbalance, hand_disbalance::HandDisbalance);
+        unigram_metric!(params.row_loads, row_loads::RowLoads);
+        unigram_metric!(params.key_costs, key_costs::KeyCost);
+        unigram_metric!(params.finger_balance, finger_balance::FingerBalance);
 
         // bigram metrics
-        self.bigram_metric(
-            Box::new(bigram_metrics::finger_repeats::FingerRepeats::new(
-                &params.finger_repeats.params,
-            )),
-            params.finger_repeats.weight,
-            params.finger_repeats.normalization.clone(),
-            params.finger_repeats.enabled,
+        macro_rules! bigram_metric {
+            ($params:expr, $metric_struct:ty) => {
+                if let Some(p) = &$params {
+                    if p.enabled {
+                        self.bigram_metric(
+                            Box::new(<$metric_struct>::new(&p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+        }
+
+        bigram_metric!(params.finger_repeats, finger_repeats::FingerRepeats);
+        bigram_metric!(
+            params.manual_bigram_penalty,
+            manual_bigram_penalty::ManualBigramPenalty
         );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::manual_bigram_penalty::ManualBigramPenalty::new(
-                    &params.manual_bigram_penalty.params,
-                ),
-            ),
-            params.manual_bigram_penalty.weight,
-            params.manual_bigram_penalty.normalization.clone(),
-            params.manual_bigram_penalty.enabled,
+        bigram_metric!(params.movement_pattern, movement_pattern::MovementPattern);
+        bigram_metric!(
+            params.no_handswitch_after_unbalancing_key,
+            no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey
         );
-        self.bigram_metric(
-            Box::new(bigram_metrics::movement_pattern::MovementPattern::new(
-                &params.movement_pattern.params,
-            )),
-            params.movement_pattern.weight,
-            params.movement_pattern.normalization.clone(),
-            params.movement_pattern.enabled,
+        bigram_metric!(
+            params.symmetric_handswitches,
+            symmetric_handswitches::SymmetricHandswitches
         );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey::new(
-                    &params.no_handswitch_after_unbalancing_key.params,
-                ),
-            ),
-            params.no_handswitch_after_unbalancing_key.weight,
-            params
-                .no_handswitch_after_unbalancing_key
-                .normalization
-                .clone(),
-            params.no_handswitch_after_unbalancing_key.enabled,
-        );
-        self.bigram_metric(
-            Box::new(
-                bigram_metrics::symmetric_handswitches::SymmetricHandswitches::new(
-                    &params.symmetric_handswitches.params,
-                ),
-            ),
-            params.symmetric_handswitches.weight,
-            params.symmetric_handswitches.normalization.clone(),
-            params.symmetric_handswitches.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::kla_distance::KLADistance::new(
-                &params.kla_distance.params,
-            )),
-            params.kla_distance.weight,
-            params.kla_distance.normalization.clone(),
-            params.kla_distance.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::kla_finger_usage::KLAFingerUsage::new(
-                &params.kla_finger_usage.params,
-            )),
-            params.kla_finger_usage.weight,
-            params.kla_finger_usage.normalization.clone(),
-            params.kla_finger_usage.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::kla_same_finger::KLASameFinger::new(
-                &params.kla_same_finger.params,
-            )),
-            params.kla_same_finger.weight,
-            params.kla_same_finger.normalization.clone(),
-            params.kla_same_finger.enabled,
-        );
-        self.bigram_metric(
-            Box::new(bigram_metrics::kla_same_hand::KLASameHand::new(
-                &params.kla_same_hand.params,
-            )),
-            params.kla_same_hand.weight,
-            params.kla_same_hand.normalization.clone(),
-            params.kla_same_hand.enabled,
-        );
+        bigram_metric!(params.kla_distance, kla_distance::KLADistance);
+        bigram_metric!(params.kla_finger_usage, kla_finger_usage::KLAFingerUsage);
+        bigram_metric!(params.kla_same_finger, kla_same_finger::KLASameFinger);
+        bigram_metric!(params.kla_same_hand, kla_same_hand::KLASameHand);
 
         // trigram_metrics
-        self.trigram_metric(
-            Box::new(trigram_metrics::irregularity::Irregularity::new(
-                self.bigram_metrics.clone(),
-                &params.irregularity.params,
-            )),
-            params.irregularity.weight,
-            params.irregularity.normalization.clone(),
-            params.irregularity.enabled,
+        macro_rules! trigram_metric {
+            ($params:expr, $metric_struct:ty) => {
+                if let Some(p) = &$params {
+                    if p.enabled {
+                        self.trigram_metric(
+                            Box::new(<$metric_struct>::new(&p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+            ($params:expr, $metric_struct:ty, $bigram_data:expr) => {
+                if let Some(p) = &$params {
+                    if p.enabled {
+                        self.trigram_metric(
+                            Box::new(<$metric_struct>::new($bigram_data.clone(), &p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+        }
+
+        trigram_metric!(
+            params.no_handswitch_in_trigram,
+            no_handswitch_in_trigram::NoHandswitchInTrigram
         );
-        self.trigram_metric(
-            Box::new(
-                trigram_metrics::no_handswitch_in_trigram::NoHandswitchInTrigram::new(
-                    &params.no_handswitch_in_trigram.params,
-                ),
-            ),
-            params.no_handswitch_in_trigram.weight,
-            params.no_handswitch_in_trigram.normalization.clone(),
-            params.no_handswitch_in_trigram.enabled,
+        trigram_metric!(
+            params.trigram_finger_repeats,
+            trigram_finger_repeats::TrigramFingerRepeats
         );
-        self.trigram_metric(
-            Box::new(trigram_metrics::secondary_bigrams::SecondaryBigrams::new(
-                self.bigram_metrics.clone(),
-                &params.secondary_bigrams.params,
-            )),
-            params.secondary_bigrams.weight,
-            params.secondary_bigrams.normalization.clone(),
-            params.secondary_bigrams.enabled,
+        trigram_metric!(params.trigram_rolls, rolls::TrigramRolls);
+        trigram_metric!(
+            params.irregularity,
+            irregularity::Irregularity,
+            self.bigram_metrics
         );
-        self.trigram_metric(
-            Box::new(
-                trigram_metrics::trigram_finger_repeats::TrigramFingerRepeats::new(
-                    &params.trigram_finger_repeats.params,
-                ),
-            ),
-            params.trigram_finger_repeats.weight,
-            params.trigram_finger_repeats.normalization.clone(),
-            params.trigram_finger_repeats.enabled,
-        );
-        self.trigram_metric(
-            Box::new(trigram_metrics::rolls::TrigramRolls::new(
-                &params.trigram_rolls.params,
-            )),
-            params.trigram_rolls.weight,
-            params.trigram_rolls.normalization.clone(),
-            params.trigram_rolls.enabled,
+        trigram_metric!(
+            params.secondary_bigrams,
+            secondary_bigrams::SecondaryBigrams,
+            self.bigram_metrics
         );
 
         self
@@ -304,53 +220,41 @@ impl Evaluator {
     /// Add a metric that operates only on the layout itself ("layout metric").
     pub fn layout_metric(
         &mut self,
-        metric: Box<dyn layout_metrics::LayoutMetric>,
+        metric: Box<dyn LayoutMetric>,
         weight: f64,
         normalization: NormalizationType,
-        enabled: bool,
     ) {
-        if enabled {
-            self.layout_metrics.push((weight, normalization, metric));
-        }
+        self.layout_metrics.push((weight, normalization, metric));
     }
 
     /// Add a metric that operates on the unigram data ("unigram metric").
     pub fn unigram_metric(
         &mut self,
-        metric: Box<dyn unigram_metrics::UnigramMetric>,
+        metric: Box<dyn UnigramMetric>,
         weight: f64,
         normalization: NormalizationType,
-        enabled: bool,
     ) {
-        if enabled {
-            self.unigram_metrics.push((weight, normalization, metric));
-        }
+        self.unigram_metrics.push((weight, normalization, metric));
     }
 
     /// Add a metric that operates on the bigram data ("bigram metric").
     pub fn bigram_metric(
         &mut self,
-        metric: Box<dyn bigram_metrics::BigramMetric>,
+        metric: Box<dyn BigramMetric>,
         weight: f64,
         normalization: NormalizationType,
-        enabled: bool,
     ) {
-        if enabled {
-            self.bigram_metrics.push((weight, normalization, metric));
-        }
+        self.bigram_metrics.push((weight, normalization, metric));
     }
 
     /// Add a metric that operates on the trigram data ("trigram metric").
     pub fn trigram_metric(
         &mut self,
-        metric: Box<dyn trigram_metrics::TrigramMetric>,
+        metric: Box<dyn TrigramMetric>,
         weight: f64,
         normalization: NormalizationType,
-        enabled: bool,
     ) {
-        if enabled {
-            self.trigram_metrics.push((weight, normalization, metric));
-        }
+        self.trigram_metrics.push((weight, normalization, metric));
     }
 
     /// Evaluate all layout metrics for a layout.
