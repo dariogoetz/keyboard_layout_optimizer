@@ -65,7 +65,7 @@ pub struct MetricParameters {
     pub no_handswitch_in_trigram: Option<WeightedParams<no_handswitch_in_trigram::Parameters>>,
     pub secondary_bigrams: Option<WeightedParams<secondary_bigrams::Parameters>>,
     pub trigram_finger_repeats: Option<WeightedParams<trigram_finger_repeats::Parameters>>,
-    pub trigram_rolls: Option<WeightedParams<rolls::Parameters>>,
+    pub trigram_rolls: Option<WeightedParams<trigram_rolls::Parameters>>,
 }
 
 /// The [`Evaluator`] object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -93,13 +93,26 @@ impl Evaluator {
 
     /// Add all "default" metrics to the evaluator.
     pub fn default_metrics(mut self, params: &MetricParameters) -> Self {
-        // layout metrics
-        macro_rules! layout_metric {
-            ($params:expr, $metric_struct:ty) => {
-                if let Some(p) = &$params {
+        macro_rules! add_metric {
+            ($metric_type:ident, $metric_name:ident, $metric_struct:ident) => {
+                if let Some(p) = &params.$metric_name {
                     if p.enabled {
-                        self.layout_metric(
-                            Box::new(<$metric_struct>::new(&p.params)),
+                        self.$metric_type(
+                            Box::new($metric_name::$metric_struct::new(&p.params)),
+                            p.weight,
+                            p.normalization.clone(),
+                        );
+                    }
+                }
+            };
+            ($metric_type:ident, $metric_name:ident, $metric_struct:ident, "add_bigram_metrics") => {
+                if let Some(p) = &params.$metric_name {
+                    if p.enabled {
+                        self.$metric_type(
+                            Box::new($metric_name::$metric_struct::new(
+                                self.bigram_metrics.clone(),
+                                &p.params,
+                            )),
                             p.weight,
                             p.normalization.clone(),
                         );
@@ -108,120 +121,54 @@ impl Evaluator {
             };
         }
 
-        layout_metric!(params.shortcut_keys, shortcut_keys::ShortcutKeys);
-        layout_metric!(params.similar_letters, similar_letters::SimilarLetters);
-        layout_metric!(
-            params.similar_letter_groups,
-            similar_letter_groups::SimilarLetterGroups
-        );
-        layout_metric!(
-            params.kla_same_finger_words,
-            kla_same_finger_words::KLASameFingerWords
-        );
-        layout_metric!(
-            params.kla_home_key_words,
-            kla_home_key_words::KLAHomeKeyWords
-        );
+        // layout metrics
+        add_metric!(layout_metric, shortcut_keys, ShortcutKeys);
+        add_metric!(layout_metric, similar_letters, SimilarLetters);
+        add_metric!(layout_metric, similar_letter_groups, SimilarLetterGroups);
+        add_metric!(layout_metric, kla_same_finger_words, KLASameFingerWords);
+        add_metric!(layout_metric, kla_home_key_words, KLAHomeKeyWords);
 
         // unigram metrics
-        macro_rules! unigram_metric {
-            ($params:expr, $metric_struct:ty) => {
-                if let Some(p) = &$params {
-                    if p.enabled {
-                        self.unigram_metric(
-                            Box::new(<$metric_struct>::new(&p.params)),
-                            p.weight,
-                            p.normalization.clone(),
-                        );
-                    }
-                }
-            };
-        }
-
-        unigram_metric!(params.finger_balance, finger_balance::FingerBalance);
-        unigram_metric!(params.hand_disbalance, hand_disbalance::HandDisbalance);
-        unigram_metric!(params.row_loads, row_loads::RowLoads);
-        unigram_metric!(params.key_costs, key_costs::KeyCost);
-        unigram_metric!(params.finger_balance, finger_balance::FingerBalance);
+        add_metric!(unigram_metric, finger_balance, FingerBalance);
+        add_metric!(unigram_metric, hand_disbalance, HandDisbalance);
+        add_metric!(unigram_metric, row_loads, RowLoads);
+        add_metric!(unigram_metric, key_costs, KeyCost);
+        add_metric!(unigram_metric, finger_balance, FingerBalance);
 
         // bigram metrics
-        macro_rules! bigram_metric {
-            ($params:expr, $metric_struct:ty) => {
-                if let Some(p) = &$params {
-                    if p.enabled {
-                        self.bigram_metric(
-                            Box::new(<$metric_struct>::new(&p.params)),
-                            p.weight,
-                            p.normalization.clone(),
-                        );
-                    }
-                }
-            };
-        }
-
-        bigram_metric!(params.finger_repeats, finger_repeats::FingerRepeats);
-        bigram_metric!(
-            params.manual_bigram_penalty,
-            manual_bigram_penalty::ManualBigramPenalty
+        add_metric!(bigram_metric, finger_repeats, FingerRepeats);
+        add_metric!(bigram_metric, manual_bigram_penalty, ManualBigramPenalty);
+        add_metric!(bigram_metric, movement_pattern, MovementPattern);
+        add_metric!(
+            bigram_metric,
+            no_handswitch_after_unbalancing_key,
+            NoHandSwitchAfterUnbalancingKey
         );
-        bigram_metric!(params.movement_pattern, movement_pattern::MovementPattern);
-        bigram_metric!(
-            params.no_handswitch_after_unbalancing_key,
-            no_handswitch_after_unbalancing_key::NoHandSwitchAfterUnbalancingKey
-        );
-        bigram_metric!(
-            params.symmetric_handswitches,
-            symmetric_handswitches::SymmetricHandswitches
-        );
-        bigram_metric!(params.kla_distance, kla_distance::KLADistance);
-        bigram_metric!(params.kla_finger_usage, kla_finger_usage::KLAFingerUsage);
-        bigram_metric!(params.kla_same_finger, kla_same_finger::KLASameFinger);
-        bigram_metric!(params.kla_same_hand, kla_same_hand::KLASameHand);
+        add_metric!(bigram_metric, symmetric_handswitches, SymmetricHandswitches);
+        add_metric!(bigram_metric, kla_distance, KLADistance);
+        add_metric!(bigram_metric, kla_finger_usage, KLAFingerUsage);
+        add_metric!(bigram_metric, kla_same_finger, KLASameFinger);
+        add_metric!(bigram_metric, kla_same_hand, KLASameHand);
 
         // trigram_metrics
-        macro_rules! trigram_metric {
-            ($params:expr, $metric_struct:ty) => {
-                if let Some(p) = &$params {
-                    if p.enabled {
-                        self.trigram_metric(
-                            Box::new(<$metric_struct>::new(&p.params)),
-                            p.weight,
-                            p.normalization.clone(),
-                        );
-                    }
-                }
-            };
-            ($params:expr, $metric_struct:ty, $bigram_data:expr) => {
-                if let Some(p) = &$params {
-                    if p.enabled {
-                        self.trigram_metric(
-                            Box::new(<$metric_struct>::new($bigram_data.clone(), &p.params)),
-                            p.weight,
-                            p.normalization.clone(),
-                        );
-                    }
-                }
-            };
-        }
-
-        trigram_metric!(
-            params.no_handswitch_in_trigram,
-            no_handswitch_in_trigram::NoHandswitchInTrigram
+        add_metric!(
+            trigram_metric,
+            no_handswitch_in_trigram,
+            NoHandswitchInTrigram
         );
-        trigram_metric!(
-            params.trigram_finger_repeats,
-            trigram_finger_repeats::TrigramFingerRepeats
+        add_metric!(trigram_metric, trigram_finger_repeats, TrigramFingerRepeats);
+        add_metric!(trigram_metric, trigram_rolls, TrigramRolls);
+        add_metric!(
+            trigram_metric,
+            irregularity,
+            Irregularity,
+            "add_bigram_metrics"
         );
-        trigram_metric!(params.trigram_rolls, rolls::TrigramRolls);
-        trigram_metric!(
-            params.irregularity,
-            irregularity::Irregularity,
-            self.bigram_metrics
-        );
-        trigram_metric!(
-            params.secondary_bigrams,
-            secondary_bigrams::SecondaryBigrams,
-            self.bigram_metrics
+        add_metric!(
+            trigram_metric,
+            secondary_bigrams,
+            SecondaryBigrams,
+            "add_bigram_metrics"
         );
 
         self
