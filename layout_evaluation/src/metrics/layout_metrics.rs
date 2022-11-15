@@ -3,6 +3,8 @@ use keyboard_layout::layout::Layout;
 
 use std::fmt;
 
+pub mod kla_home_key_words;
+pub mod kla_same_finger_words;
 pub mod shortcut_keys;
 pub mod similar_letter_groups;
 pub mod similar_letters;

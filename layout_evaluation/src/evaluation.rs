@@ -54,6 +54,8 @@ pub struct MetricParameters {
     pub no_handswitch_after_unbalancing_key:
         Option<WeightedParams<no_handswitch_after_unbalancing_key::Parameters>>,
 
+    pub kla_home_key_words: Option<WeightedParams<kla_home_key_words::Parameters>>,
+    pub kla_same_finger_words: Option<WeightedParams<kla_same_finger_words::Parameters>>,
     pub kla_distance: Option<WeightedParams<kla_distance::Parameters>>,
     pub kla_finger_usage: Option<WeightedParams<kla_finger_usage::Parameters>>,
     pub kla_same_finger: Option<WeightedParams<kla_same_finger::Parameters>>,
@@ -111,6 +113,14 @@ impl Evaluator {
         layout_metric!(
             params.similar_letter_groups,
             similar_letter_groups::SimilarLetterGroups
+        );
+        layout_metric!(
+            params.kla_same_finger_words,
+            kla_same_finger_words::KLASameFingerWords
+        );
+        layout_metric!(
+            params.kla_home_key_words,
+            kla_home_key_words::KLAHomeKeyWords
         );
 
         // unigram metrics

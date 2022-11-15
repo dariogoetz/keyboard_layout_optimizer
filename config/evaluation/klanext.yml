@@ -1,276 +1,34 @@
 metrics:
   # layout metrics
 
-  # Specified symbols shall be located within the leftmost "n" columns of the left hand
-  shortcut_keys:
+  kla_home_key_words:
     enabled: false
-    weight: 0.35
+    weight: 500.0
     normalization:
-      type: fixed
+      type: weight_all
       value: 1.0
     params:
-      # symbols that shall be considered "shortcut keys"
-      shortcut_chars: cvx
-      cost: 1.0
-      within_n_leftmost_cols: 5
+      words_filename: "./english-words-30000.csv"
+      min_word_length: 3
+      home_row_positions:
+        - [2,2]
+        - [3,2]
+        - [4,2]
+        - [5,2]
+        - [14,2]
+        - [15,2]
+        - [16,2]
+        - [17,2]
 
-  # Pairs of keys that shall be placed in related positions to each other
-  similar_letters:
-    enabled: false
-    weight: 3.0
+  kla_same_finger_words:
+    enabled: true
+    weight: 17.0
     normalization:
-      type: fixed
+      type: weight_all
       value: 1.0
     params:
-      letter_pairs_ratings:
-        # The cost for not complying with any of the criteria is 1.0
-        - same_key_cost: 0.0
-          neighboring_cost: 0.0
-          same_column_cost: 0.0
-          symmetric_cost: 0.4
-          letter_pairs:
-            # List of pairs of letters that shall be placed in related positions to each other
-            # Diacritics
-            - ["a", "ä"]
-            - ["o", "ö"]
-            - ["u", "ü"]
-        # - same_key_cost: 0.5
-        #   neighboring_cost: 0.5
-        #   same_column_cost: 0.8
-        #   symmetric_cost: 0.7
-        #   letter_pairs:
-        #     # Similar letters
-        #     - ["g", "k"]
-        #     - ["p", "b"]
-        #     - ["d", "t"]
-        #     - ["m", "n"]
-
-  # Symbols of specified groups shall have the same relative location to each others.
-  # Used to be called `asymmetric_keys`.
-  similar_letter_groups:
-    enabled: false
-    weight: 10.0
-    normalization:
-      type: fixed
-      value: 1.0
-    params:
-      # List of pairs of symbol groups for which the keys shall have the same relative position
-      # e.g. ["auo", "äüö"] means that the relative location of a -> ä shall be identical to u -> ü
-      # and o -> ö. Otherwise, a cost is counted.
-      letter_group_pairs:
-        - ["auo", "äüö"]
-        # - ["auo", "äüö"]
-        # - ["gbd", "kpt"]
-        # - ["gbdw", "kptf"]
-        # - ["sfdn", "tpbm"]
-
-  # unigram metrics
-
-  # Each finger's load shall be relative to the specified weights
-  finger_balance:
-    enabled: false
-    weight: 69.0
-    normalization:
-      type: fixed
-      value: 1.0
-    params:
-      # Intended factors for finger load. Thumb values are ignored.
-      intended_loads:
-        [Left, Pinky]: 1.0
-        [Left, Ring]: 1.6
-        [Left, Middle]: 2.0
-        [Left, Index]: 2.5
-        [Left, Thumb]: 2.0
-        [Right, Thumb]: 2.0
-        [Right, Index]: 2.5
-        [Right, Middle]: 2.0
-        [Right, Ring]: 1.6
-        [Right, Pinky]: 1.0
-
-  # Each hand's load shall be close to 50%
-  hand_disbalance:
-    enabled: false
-    weight: 40.0
-    normalization:
-      type: fixed
-      value: 1.0
-    params:
-      null: null
-
-  # Each keystroke incurs a cost (defined in the keyboard's layout config)
-  key_costs:
-    enabled: false
-    weight: 20.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
-  # Informational metric computing loads per row
-  row_loads:
-    enabled: false
-    weight: 0.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
-  # bigram metrics
-
-  # If the keys corresponding to a bigram are not symmetrical on left and right hand, a cost is
-  # counted.
-  symmetric_handswitches:
-    enabled: false
-    weight: 1.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
-
-  # If both keys corresponding to a bigram belong to the same finger, a cost is counted.
-  # The cost can be weighted by the individual keys and if they are performed by stretching
-  # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
-  finger_repeats:
-    enabled: false
-    weight: 780.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # Finger-individual weights to be multiplied with the cost
-      finger_factors:
-        Thumb: 1.2
-        Index: 0.8
-        Middle: 1.0
-        Ring: 1.1
-        Pinky: 1.2
-      # Factor applied if the repeat consists of a movement
-      # in line of the finger "outwards", i.e. by stretching the finger
-      stretch_factor: 1.2
-      # Factor applied if the repeat consists of a movement
-      # in line of the finger "inwards", i.e. by curling the finger
-      curl_factor: 1.1
-      # Factor applied if the repeat consists of a lateral movement
-      lateral_factor: 1.5
-      # Cost to apply if the finger repeat happens on the same key
-      same_key_offset: 0.5
-
-  # Put costs on some key combinations that are hard to describe otherwise
-  manual_bigram_penalty:
-    enabled: false
-    weight: 2100.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # if mirrored bigrams to the ones in "matrix_positions" below shall be added automatically
-      add_mirrored: true
-
-      # key positions as matrix positions and the corresponding costs
-      # the format is [column, row]
-      # [from_position, to_position]: weight
-      matrix_positions:
-        # NOTE: in contrast to ArneBab's layout, we skip one column in rows 0, 1, 2 (not in row 3)
-        [[3, 1], [2, 3]]: 1      # QWERTZ: wy
-        [[3, 2], [2, 3]]: 0.3    # QWERTZ: sy
-        [[4, 2], [3, 3]]: 0.2    # QWERTZ: dx
-        [[2, 1], [3, 3]]: 0.2    # QWERTZ: qx
-        [[2, 1], [4, 3]]: 0.1    # QWERTZ: qc
-
-        [[17, 3], [13, 1]]: 0.1   # QWERTZ: -z
-        [[2, 3], [6, 1]]: 0.1    # QWERTZ: yt
-
-        [[2, 3], [5, 3]]: -0.01  # QWERTZ: yv
-        [[14, 3], [17, 3]]: -0.01 # QWERTZ: m-
-
-        # Finger repeats on same key
-        # pinkies
-        [[2, 1], [2, 1]]: 0.5
-        [[2, 2], [2, 2]]: 0.3
-        [[2, 3], [2, 3]]: 0.5
-        [[17, 1], [17, 1]]: 0.5
-        [[17, 2], [17, 2]]: 0.3
-        [[17, 3], [17, 3]]: 0.5
-
-  # Depending on which fingers of the same hand are used to hit the keys of a bigram,
-  # how many rows were crossed and in which direction the movement occurs, costs are
-  # counted.
-  movement_pattern:
-    enabled: false
-    weight: 50.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      # from: Finger for first symbol of the bigram
-      # to: Finger for second symbol of the bigram
-      # cost: Cost to count for such a movement
-      finger_switch_factor:
-        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 8 }
-        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
-
-        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 12 }
-        - { from: [Left, Ring],    to: [Left, Middle],  cost: 6 }
-        - { from: [Left, Ring],    to: [Left, Index], cost: 0.1 }
-
-        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
-        - { from: [Left, Middle],  to: [Left, Ring],    cost: 9 }
-        - { from: [Left, Middle],  to: [Left, Index], cost: 0.6 }
-
-        - { from: [Left, Index], to: [Left, Pinky],   cost: 0.1 }
-        - { from: [Left, Index], to: [Left, Ring],    cost: 0.3 }
-        - { from: [Left, Index], to: [Left, Middle],  cost: 0.9 }
-
-        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 8 }
-        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
-
-        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 12 }
-        - { from: [Right, Ring],    to: [Right, Middle],  cost: 6 }
-        - { from: [Right, Ring],    to: [Right, Index], cost: 0.1 }
-
-        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
-        - { from: [Right, Middle],  to: [Right, Ring],    cost: 9 }
-        - { from: [Right, Middle],  to: [Right, Index], cost: 0.6 }
-
-        - { from: [Right, Index], to: [Right, Pinky],   cost: 0.1 }
-        - { from: [Right, Index], to: [Right, Ring],    cost: 0.3 }
-        - { from: [Right, Index], to: [Right, Middle],  cost: 0.9 }
-
-      # Finger lengths
-      finger_lengths:
-        Left:
-          Pinky: 1
-          Ring: 2
-          Middle: 3
-          Index: 2
-        Right:
-          Pinky: 1
-          Ring: 2
-          Middle: 3
-          Index: 2
-
-      # If the movement is directed downwards from a short towards a long
-      # or upwards from a long towards a short finger,
-      # the cost is multiplied by this factor
-      short_down_to_long_or_long_up_to_short_factor: 2.0
-
-      # The cost is multiplied by the same_row_offset plus number of crossed rows.
-      # If same_row_offset is zero, movement patterns on the same row have zero cost.
-      same_row_offset: 0.1
-
-  # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
-  # config), a cost is counted depending on how far the unbalancing takes place.
-  no_handswitch_after_unbalancing_key:
-    enabled: false
-    weight: 36.0
-    normalization:
-      type: weight_found
-      value: 1.0
-    params:
-      null: null
+      words_filename: "./english-words-30000.csv"
+      min_word_length: 3
 
   # Distance metric that tries to resemble the one on klanext.keyboard-design.com
   kla_distance:
@@ -472,3 +230,5 @@ ngram_mapper:
     # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
     # modifiers that are required for the same symbol
     same_key_mod_factor: 0.03125
+
+
