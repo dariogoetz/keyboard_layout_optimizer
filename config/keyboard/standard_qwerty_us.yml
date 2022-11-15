@@ -18,7 +18,7 @@ keyboard:
     - [Left,       Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right, Right]
     - [Left,         Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right, Right]
     - [Left,           Left, Left, Left, Left, Left,   Right, Right, Right, Right, Right, Right]
-    - [Left, Left, Left,                     Right,                      Right, Right, Right, Right]
+    - [Left, Left, Left,                     Left,                      Right, Right, Right, Right]
 
   fingers:
     - [Pinky,    Pinky, Ring, Middle, Index, Index,   Index, Index, Middle, Ring, Pinky, Pinky, Pinky, Pinky]
