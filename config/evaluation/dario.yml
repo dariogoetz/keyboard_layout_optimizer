@@ -1,0 +1,261 @@
+metrics:
+  # layout metrics
+
+  # Specified symbols shall be located within the leftmost "n" columns of the left hand
+  shortcut_keys:
+    enabled: false
+    weight: 0.35
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      # symbols that shall be considered "shortcut keys"
+      shortcut_chars: cvx
+      cost: 1.0
+      within_n_leftmost_cols: 5
+
+  # unigram metrics
+
+  # Each finger's load shall be relative to the specified weights
+  finger_balance:
+    enabled: true
+    weight: 50.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      # Intended factors for finger load. Thumb values are ignored.
+      intended_loads:
+        [Left, Pinky]: 1.0
+        [Left, Ring]: 1.6
+        [Left, Middle]: 2.0
+        [Left, Index]: 2.5
+        [Left, Thumb]: 2.0
+        [Right, Thumb]: 2.0
+        [Right, Index]: 2.5
+        [Right, Middle]: 2.0
+        [Right, Ring]: 1.6
+        [Right, Pinky]: 1.0
+
+  # Each hand's load shall be close to 50%
+  hand_disbalance:
+    enabled: true
+    weight: 40.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      null: null
+
+  # Each keystroke incurs a cost (defined in the keyboard's layout config)
+  key_costs:
+    enabled: true
+    weight: 20.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  # Informational metric computing loads per row
+  row_loads:
+    enabled: true
+    weight: 0.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  # bigram metrics
+
+  # If both keys corresponding to a bigram belong to the same finger, a cost is counted.
+  # The cost can be weighted by the individual keys and if they are performed by stretching
+  # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
+  finger_repeats:
+    enabled: true
+    weight: 780.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Finger-individual weights to be multiplied with the cost
+      finger_factors:
+        Thumb: 1.2
+        Index: 0.8
+        Middle: 1.0
+        Ring: 1.1
+        Pinky: 1.2
+      # Factor applied if the repeat consists of a movement
+      # in line of the finger "outwards", i.e. by stretching the finger
+      stretch_factor: 1.2
+      # Factor applied if the repeat consists of a movement
+      # in line of the finger "inwards", i.e. by curling the finger
+      curl_factor: 1.1
+      # Factor applied if the repeat consists of a lateral movement
+      lateral_factor: 1.5
+      # Cost to apply if the finger repeat happens on the same key
+      same_key_offset: 0.5
+
+  # Depending on which fingers of the same hand are used to hit the keys of a bigram,
+  # how many rows were crossed and in which direction the movement occurs, costs are
+  # counted.
+  movement_pattern:
+    enabled: true
+    weight: 50.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # from: Finger for first symbol of the bigram
+      # to: Finger for second symbol of the bigram
+      # cost: Cost to count for such a movement
+      finger_switch_factor:
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 6 }
+        - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
+
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 8 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 3 }
+        - { from: [Left, Ring],    to: [Left, Index], cost: 0.1 }
+
+        - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 5 }
+        - { from: [Left, Middle],  to: [Left, Index], cost: 0.6 }
+
+        - { from: [Left, Index], to: [Left, Pinky],   cost: 0.1 }
+        - { from: [Left, Index], to: [Left, Ring],    cost: 0.3 }
+        - { from: [Left, Index], to: [Left, Middle],  cost: 0.9 }
+
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 6 }
+        - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
+
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 8 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 3 }
+        - { from: [Right, Ring],    to: [Right, Index], cost: 0.1 }
+
+        - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 5 }
+        - { from: [Right, Middle],  to: [Right, Index], cost: 0.6 }
+
+        - { from: [Right, Index], to: [Right, Pinky],   cost: 0.1 }
+        - { from: [Right, Index], to: [Right, Ring],    cost: 0.3 }
+        - { from: [Right, Index], to: [Right, Middle],  cost: 0.9 }
+
+      # Finger lengths
+      finger_lengths:
+        Left:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Index: 2
+        Right:
+          Pinky: 1
+          Ring: 2
+          Middle: 3
+          Index: 2
+
+      # If the movement is directed downwards from a short towards a long
+      # or upwards from a long towards a short finger,
+      # the cost is multiplied by this factor
+      short_down_to_long_or_long_up_to_short_factor: 2.0
+
+      # The cost is multiplied by the same_row_offset plus number of crossed rows.
+      # If same_row_offset is zero, movement patterns on the same row have zero cost.
+      same_row_offset: 0.1
+
+  # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
+  # config), a cost is counted depending on how far the unbalancing takes place.
+  no_handswitch_after_unbalancing_key:
+    enabled: true
+    weight: 36.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+
+  # trigram metrics
+
+  # The `irregularity` metric evaluates all bigram metrics that can be computed on individual
+  # bigrams (in particular not the finger- and hand-balance metrics) for the first and second half
+  # of each trigram. Their cost is multiplied and the square root of the resulting sum is taken.
+  irregularity:
+    enabled: true
+    weight: 8.25
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      null: null
+
+  # If there is no handswitch in a trigram, a cost is counted. The cost is multiplied by factors
+  # depending on whether the three keys corresponding to the trigram are "in line" ("rolling
+  # movement") or if there is a directional change.
+  no_handswitch_in_trigram:
+    enabled: true
+    weight: 300.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Count this factor if there is a direction change in the trigram
+      factor_with_direction_change: 1.0
+      # Count this factor if there is no direction change in the trigram
+      factor_without_direction_change: 0.0
+      # Count this factor if all characters of the trigram lie on the same key
+      factor_same_key: 0.0
+      # Count this factor if the trigram contains at least finger repeats
+      factor_contains_finger_repeat: 1.0
+      # Count this factor if the starting and end key are the same (but no finger repeat)
+      factor_same_key_start_end: 0.5
+
+  # The `secondary_bigrams` metric evaluates all bigram metrics that can be computed on individual
+  # bigrams (in particular not the finger- and hand-balance metrics) for the bigram resulting from
+  # the first and last symbol of the trigram. Depending on whether the trigram involves a
+  # handswitch or not, factors are applied. Trigrams starting with one of a list of specified
+  # symbols are excluded.
+  secondary_bigrams:
+    enabled: true
+    weight: 0.1
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      # Multiply the cost with this factor if no handswitch occurs in the trigram
+      factor_no_handswitch: 0.7
+      # Multiply the cost with this factor if a handswitch occurs in the trigram
+      factor_handswitch: 0.8
+      # Mental pauses:
+      # Exclude the trirgrams which contain a mental pause and a follow up with a non-pause symbol.
+      # These trigrams do not need to be optimized, because they're "designed" to contain a pause.
+      # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
+      # some kind of whitespace.
+      initial_pause_indicators: [",", "."]
+
+ngrams:
+  # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
+  # specified thresholds.
+  increase_common_ngrams:
+    enabled: false
+    # Bigrams with a relative weight exceeding this threshold are considered
+    critical_fraction: 0.001
+    # The weight for bigrams exceeding both thresholds is multiplied by this factor
+    factor: 2.0
+    # Bigrams with an absolute weight exceeding this threshold are considered
+    total_weight_threshold: 20.0
+
+
+ngram_mapper:
+  # Exclude ngrams that contain a line break, followed by a non-line-break character.
+  # This encodes a mental pause which usually comes after hitting the "Enter" key, before
+  # continuing to write.
+  exclude_line_breaks: true
+
+  # Split symbols belonging to higher layers of the layout into combinations involving modifiers
+  # required to activate the layer
+  split_modifiers:
+    enabled: true
+    # Multiply the ngram's weight with this factor whenever the resulting ngram involves two
+    # modifiers that are required for the same symbol
+    same_key_mod_factor: 0.03125
