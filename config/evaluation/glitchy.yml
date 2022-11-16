@@ -312,6 +312,12 @@ metrics:
       factor_with_direction_change: 1.0
       # Count this factor if there is no direction change in the trigram
       factor_without_direction_change: 0.0
+      # Count this factor if all characters of the trigram lie on the same key
+      factor_same_key: 0.0
+      # Count this factor if the trigram contains at least finger repeats
+      factor_contains_finger_repeat: 1.0
+      # Count this factor if the starting and end key are the same (but no finger repeat)
+      factor_same_key_start_end: 0.5
 
   # The `secondary_bigrams` metric evaluates all bigram metrics that can be computed on individual
   # bigrams (in particular not the finger- and hand-balance metrics) for the bigram resulting from
