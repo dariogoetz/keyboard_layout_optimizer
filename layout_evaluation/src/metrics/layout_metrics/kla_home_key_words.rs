@@ -94,7 +94,10 @@ impl LayoutMetric for KLAHomeKeyWords {
             .map(|(_word, (_chars, _len, weight))| *weight)
             .sum();
 
-        let message = format!("{} out of {} words", found_words, total_words);
+        let message = format!(
+            "{} out of {} (distinct lowercase) words",
+            found_words, total_words
+        );
 
         let cost = -(found_weight / total_weight);
 
