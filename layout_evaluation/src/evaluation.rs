@@ -133,7 +133,6 @@ impl Evaluator {
         add_metric!(unigram_metric, hand_disbalance, HandDisbalance);
         add_metric!(unigram_metric, row_loads, RowLoads);
         add_metric!(unigram_metric, key_costs, KeyCost);
-        add_metric!(unigram_metric, finger_balance, FingerBalance);
 
         // bigram metrics
         add_metric!(bigram_metric, finger_repeats, FingerRepeats);
