@@ -72,7 +72,7 @@ impl LayoutMetric for KLAHomeKeyWords {
             .layerkeys
             .iter()
             .filter_map(|k| {
-                if self.home_row_positions.contains(&k.key.matrix_position) {
+                if k.layer == 0 && self.home_row_positions.contains(&k.key.matrix_position) {
                     Some(k.symbol)
                 } else {
                     None
