@@ -12,7 +12,7 @@ There is a webapp providing (a significant subset of) the evaluation and optimiz
 
 The corresponding webapp implementation is located in the `webui/layout_evaluation_wasm` crate.
 
-## Webapp - Result Exploration
+## Webapp - Result Exploration (soon offline due to Heroku shutting down the free service)
 
 Published results can be explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
 
