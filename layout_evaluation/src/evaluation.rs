@@ -54,6 +54,12 @@ pub struct MetricParameters {
     pub no_handswitch_after_unbalancing_key:
         Option<WeightedParams<no_handswitch_after_unbalancing_key::Parameters>>,
 
+    pub irregularity: Option<WeightedParams<irregularity::Parameters>>,
+    pub no_handswitch_in_trigram: Option<WeightedParams<no_handswitch_in_trigram::Parameters>>,
+    pub secondary_bigrams: Option<WeightedParams<secondary_bigrams::Parameters>>,
+    pub trigram_finger_repeats: Option<WeightedParams<trigram_finger_repeats::Parameters>>,
+    pub trigram_rolls: Option<WeightedParams<trigram_rolls::Parameters>>,
+
     pub kla_home_key_words: Option<WeightedParams<kla_home_key_words::Parameters>>,
     pub kla_same_finger_words: Option<WeightedParams<kla_same_finger_words::Parameters>>,
     pub kla_distance: Option<WeightedParams<kla_distance::Parameters>>,
@@ -61,11 +67,11 @@ pub struct MetricParameters {
     pub kla_same_finger: Option<WeightedParams<kla_same_finger::Parameters>>,
     pub kla_same_hand: Option<WeightedParams<kla_same_hand::Parameters>>,
 
-    pub irregularity: Option<WeightedParams<irregularity::Parameters>>,
-    pub no_handswitch_in_trigram: Option<WeightedParams<no_handswitch_in_trigram::Parameters>>,
-    pub secondary_bigrams: Option<WeightedParams<secondary_bigrams::Parameters>>,
-    pub trigram_finger_repeats: Option<WeightedParams<trigram_finger_repeats::Parameters>>,
-    pub trigram_rolls: Option<WeightedParams<trigram_rolls::Parameters>>,
+    pub oxey_inward_rolls: Option<WeightedParams<oxey_inward_rolls::Parameters>>,
+    pub oxey_outward_rolls: Option<WeightedParams<oxey_outward_rolls::Parameters>>,
+    pub oxey_onehands: Option<WeightedParams<oxey_onehands::Parameters>>,
+    pub oxey_alternates: Option<WeightedParams<oxey_alternates::Parameters>>,
+    pub oxey_alternates_sfs: Option<WeightedParams<oxey_alternates_sfs::Parameters>>,
 }
 
 /// The [`Evaluator`] object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -125,8 +131,6 @@ impl Evaluator {
         add_metric!(layout_metric, shortcut_keys, ShortcutKeys);
         add_metric!(layout_metric, similar_letters, SimilarLetters);
         add_metric!(layout_metric, similar_letter_groups, SimilarLetterGroups);
-        add_metric!(layout_metric, kla_same_finger_words, KLASameFingerWords);
-        add_metric!(layout_metric, kla_home_key_words, KLAHomeKeyWords);
 
         // unigram metrics
         add_metric!(unigram_metric, finger_balance, FingerBalance);
@@ -144,10 +148,6 @@ impl Evaluator {
             NoHandSwitchAfterUnbalancingKey
         );
         add_metric!(bigram_metric, symmetric_handswitches, SymmetricHandswitches);
-        add_metric!(bigram_metric, kla_distance, KLADistance);
-        add_metric!(bigram_metric, kla_finger_usage, KLAFingerUsage);
-        add_metric!(bigram_metric, kla_same_finger, KLASameFinger);
-        add_metric!(bigram_metric, kla_same_hand, KLASameHand);
 
         // trigram_metrics
         add_metric!(
@@ -169,6 +169,20 @@ impl Evaluator {
             SecondaryBigrams,
             "add_bigram_metrics"
         );
+
+        add_metric!(layout_metric, kla_same_finger_words, KLASameFingerWords);
+        add_metric!(layout_metric, kla_home_key_words, KLAHomeKeyWords);
+
+        add_metric!(bigram_metric, kla_distance, KLADistance);
+        add_metric!(bigram_metric, kla_finger_usage, KLAFingerUsage);
+        add_metric!(bigram_metric, kla_same_finger, KLASameFinger);
+        add_metric!(bigram_metric, kla_same_hand, KLASameHand);
+
+        add_metric!(trigram_metric, oxey_inward_rolls, OxeyInwardRolls);
+        add_metric!(trigram_metric, oxey_outward_rolls, OxeyOutwardRolls);
+        add_metric!(trigram_metric, oxey_onehands, OxeyOnehands);
+        add_metric!(trigram_metric, oxey_alternates, OxeyAlternates);
+        add_metric!(trigram_metric, oxey_alternates_sfs, OxeyAlternatesSfs);
 
         self
     }
