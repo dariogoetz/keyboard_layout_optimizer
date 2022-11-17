@@ -72,12 +72,7 @@ impl NeoLayoutGenerator {
             .keys
             .iter()
             .flatten()
-            .map(|layers| {
-                layers
-                    .iter()
-                    .map(|l| l.chars().next().unwrap_or('␡'))
-                    .collect()
-            })
+            .map(|layers| layers.iter().filter_map(|l| l.chars().next()).collect())
             .collect();
         let fixed_keys: Vec<bool> = base.fixed_keys.iter().flatten().cloned().collect();
 
@@ -145,11 +140,11 @@ impl NeoLayoutGenerator {
                 let new_key_layers = given_key_layers
                     .iter()
                     .enumerate()
-                    .map(|(layer_id, c)| {
+                    .filter_map(|(layer_id, c)| {
                         if !self.fixed_layers.contains(&(layer_id as u8)) {
-                            *c
+                            Some(*c)
                         } else {
-                            *key_layers.get(layer_id).unwrap_or(&'␡')
+                            key_layers.get(layer_id).cloned()
                         }
                     })
                     .collect();

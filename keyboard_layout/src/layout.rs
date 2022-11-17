@@ -407,7 +407,6 @@ impl Layout {
                 '\n' => '\u{23ce}',
                 '\t' => '\u{21e5}',
                 '' => '\u{2327}',
-                '␡' => ' ',
                 normal_char => normal_char,
             }
         };
@@ -443,7 +442,7 @@ impl Layout {
         let key_chars: Vec<String> = self
             .key_layers
             .iter()
-            .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
+            .filter_map(|layerkeys| layerkeys.get(0).map(|lk| self.get_layerkey(&lk)))
             .filter(|k| !k.is_fixed)
             .map(|k| k.symbol.to_string())
             .collect();
@@ -454,7 +453,7 @@ impl Layout {
     pub fn as_text(&self) -> String {
         self.key_layers
             .iter()
-            .map(|layerkeys| self.get_layerkey(&layerkeys[0]))
+            .filter_map(|layerkeys| layerkeys.get(0).map(|lk| self.get_layerkey(&lk)))
             .filter(|k| !k.is_fixed)
             .map(|k| k.symbol.to_string())
             .collect()
