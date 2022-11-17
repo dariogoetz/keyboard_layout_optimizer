@@ -39,6 +39,8 @@ The corresponding webserver's implementation is located in the `webui/layouts_we
 - **badly positioned shortcut keys** - How many shorcut keys are not easily reachable with the left hand?
 - **similar letters** - (learnability) Which keys are similar (in some sense), but lie in unsimilar locations (e.g. "a" - "ä" or "b" - "p")?
 - **similar letter-groups** - (learnability) Which groups of keys are similar (in some sense), but lie in non-consistent locations (e.g. "aou" - "äüö")?<br>Used to be called "asymmetric keys".
+- **KLAnext metrics (distance, same-hand, same-finger)** - A re-implementation of the metrics used by the [KLAnext layout evaluator](klanext.keyboard-design.com)
+- **word-based metrics used in the [Internet Letter Layout DB](https://keyboard-design.com/internet-letter-layout-db.html)** - How many of the most used 30,000 words can be written without a finger repeat / on the home-row?
 
 ## Installation
 1. Clone the repository
