@@ -64,12 +64,8 @@ impl TrigramMetric for Irregularity {
             })
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
 
-        if costs.0 < 0.0 || costs.1 < 0.0 {
-            // do not return the result of negative costs
-            Some(0.0)
-        } else {
-            Some((1.0 + costs.0) * (1.0 + costs.1))
-        }
+        let cost = (1.0 + costs.0) * (1.0 + costs.1) - 1.0;
+        Some(cost.max(0.0))
     }
 
     fn total_cost(
