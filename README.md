@@ -1,7 +1,7 @@
 # Keyboard Layout Optimizer
 
 Keyboard layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
-It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (that are activated by holding corresponding modifiers). 
+It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (that are activated by holding corresponding modifiers).
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria/metrics on the frequencies of unigrams, bigrams, and trigrams. And with a little bit of Rust-knowledge, new metrics [can easily be added](#adding-new-metrics).
 
@@ -233,21 +233,14 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
     at the top of the file `layout_evaluation/src/metrics/{layout|unigram|bigram|trigram}_metrics.rs`.
 
 1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
-    - add the line 
+    - add the line
         ``` rust
         pub my_metric_name: WeightedParams<{layout_|unigram|bigram|trigram}_metrics::my_metric_name::Parameters>,
         ```
         in the `MetricParameters` struct in order to make the YAML configuration available to your metric
     - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
         ```rust
-            self.{layout|unigram|bigram|trigram}_metric(
-                Box::new({layout|unigram|bigram|trigram}_metrics::my_metric_name::MyMetricName::new(
-                    &params.my_metric_name.params,
-                )),
-                params.my_metric_name.weight,
-                params.my_metric_name.normalization.clone(),
-                params.my_metric_name.enabled,
-            );
+            add_metric!({layout|unigram|bigram|trigram}_metric, my_metric_name, MyMetricName);
         ```
 
 1. Add a section for the new metric to the config `config/evaluation/default.yml`:
