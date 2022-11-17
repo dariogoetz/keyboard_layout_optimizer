@@ -237,7 +237,7 @@ Depending on the choice of metric, replace `{layout|unigram|bigram|trigram}` wit
 1. Register the new metric to be used in the `Evaluator` in `layout_evaluation/src/evaluation.rs`. For that,
     - add the line
         ``` rust
-        pub my_metric_name: WeightedParams<{layout_|unigram|bigram|trigram}_metrics::my_metric_name::Parameters>,
+        pub my_metric_name: Option<WeightedParams<{layout_|unigram|bigram|trigram}_metrics::my_metric_name::Parameters>>,
         ```
         in the `MetricParameters` struct in order to make the YAML configuration available to your metric
     - generate an instance of your metric by adding the following to the `default_metrics` function of the `Evaluator`:
