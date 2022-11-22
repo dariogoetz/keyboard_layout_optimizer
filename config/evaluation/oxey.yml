@@ -1,5 +1,32 @@
 metrics:
 
+  oxey_sfbs:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      exclude_thumbs: false
+
+  oxey_lsbs:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      null: null
+
+  oxey_dsfbs:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      exclude_thumbs: false
+
   oxey_inward_rolls:
     enabled: true
     weight: 100.0
@@ -37,6 +64,24 @@ metrics:
       exclude_thumbs: false
 
   oxey_alternates_sfs:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      exclude_thumbs: false
+
+  oxey_redirects:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      exclude_thumbs: false
+
+  oxey_bad_redirects:
     enabled: true
     weight: 100.0
     normalization:

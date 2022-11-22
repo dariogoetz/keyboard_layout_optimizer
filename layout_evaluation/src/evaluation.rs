@@ -67,11 +67,16 @@ pub struct MetricParameters {
     pub kla_same_finger: Option<WeightedParams<kla_same_finger::Parameters>>,
     pub kla_same_hand: Option<WeightedParams<kla_same_hand::Parameters>>,
 
+    pub oxey_sfbs: Option<WeightedParams<oxey_sfbs::Parameters>>,
+    pub oxey_lsbs: Option<WeightedParams<oxey_lsbs::Parameters>>,
+    pub oxey_dsfbs: Option<WeightedParams<oxey_dsfbs::Parameters>>,
     pub oxey_inward_rolls: Option<WeightedParams<oxey_inward_rolls::Parameters>>,
     pub oxey_outward_rolls: Option<WeightedParams<oxey_outward_rolls::Parameters>>,
     pub oxey_onehands: Option<WeightedParams<oxey_onehands::Parameters>>,
     pub oxey_alternates: Option<WeightedParams<oxey_alternates::Parameters>>,
     pub oxey_alternates_sfs: Option<WeightedParams<oxey_alternates_sfs::Parameters>>,
+    pub oxey_redirects: Option<WeightedParams<oxey_redirects::Parameters>>,
+    pub oxey_bad_redirects: Option<WeightedParams<oxey_bad_redirects::Parameters>>,
 }
 
 /// The [`Evaluator`] object is responsible for evaluating multiple metrics with respect to given ngram data.
@@ -178,11 +183,16 @@ impl Evaluator {
         add_metric!(bigram_metric, kla_same_finger, KLASameFinger);
         add_metric!(bigram_metric, kla_same_hand, KLASameHand);
 
+        add_metric!(bigram_metric, oxey_sfbs, OxeySfbs);
+        add_metric!(bigram_metric, oxey_lsbs, OxeyLsbs);
+        add_metric!(trigram_metric, oxey_dsfbs, OxeyDsfbs);
         add_metric!(trigram_metric, oxey_inward_rolls, OxeyInwardRolls);
         add_metric!(trigram_metric, oxey_outward_rolls, OxeyOutwardRolls);
         add_metric!(trigram_metric, oxey_onehands, OxeyOnehands);
         add_metric!(trigram_metric, oxey_alternates, OxeyAlternates);
         add_metric!(trigram_metric, oxey_alternates_sfs, OxeyAlternatesSfs);
+        add_metric!(trigram_metric, oxey_redirects, OxeyRedirects);
+        add_metric!(trigram_metric, oxey_bad_redirects, OxeyBadRedirects);
 
         self
     }
