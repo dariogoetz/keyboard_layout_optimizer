@@ -1,5 +1,25 @@
 metrics:
 
+  oxey_combined_trigram:
+    enabled: true
+    weight: 0.0
+    normalization:
+      type: weight_all
+      value: 1.0
+    params:
+      exclude_thumbs: false
+      same_hand_double_finger_repeat: 1.0
+      same_hand_single_finger_repeat: 1.0
+      same_hand_roll: 1.0
+      same_hand_redirect: 1.0
+      same_hand_bad_redirect: 1.0
+      roll_same_finger: 1.0
+      roll_inwards: 1.0
+      roll_outwards: 1.0
+      roll_other: 1.0
+      alternate_other_finger: 1.0
+      alternate_same_finger: 1.0
+
   oxey_sfbs:
     enabled: true
     weight: 100.0

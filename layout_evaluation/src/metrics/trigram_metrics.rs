@@ -10,6 +10,7 @@ pub mod no_handswitch_in_trigram;
 pub mod oxey_alternates;
 pub mod oxey_alternates_sfs;
 pub mod oxey_bad_redirects;
+pub mod oxey_combined_trigram;
 pub mod oxey_dsfbs;
 pub mod oxey_inward_rolls;
 pub mod oxey_onehands;

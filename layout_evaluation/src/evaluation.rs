@@ -67,6 +67,8 @@ pub struct MetricParameters {
     pub kla_same_finger: Option<WeightedParams<kla_same_finger::Parameters>>,
     pub kla_same_hand: Option<WeightedParams<kla_same_hand::Parameters>>,
 
+    pub oxey_combined_trigram: Option<WeightedParams<oxey_combined_trigram::Parameters>>,
+
     pub oxey_sfbs: Option<WeightedParams<oxey_sfbs::Parameters>>,
     pub oxey_lsbs: Option<WeightedParams<oxey_lsbs::Parameters>>,
     pub oxey_dsfbs: Option<WeightedParams<oxey_dsfbs::Parameters>>,
@@ -182,6 +184,8 @@ impl Evaluator {
         add_metric!(bigram_metric, kla_finger_usage, KLAFingerUsage);
         add_metric!(bigram_metric, kla_same_finger, KLASameFinger);
         add_metric!(bigram_metric, kla_same_hand, KLASameHand);
+
+        add_metric!(trigram_metric, oxey_combined_trigram, OxeyCombinedTrigram);
 
         add_metric!(bigram_metric, oxey_sfbs, OxeySfbs);
         add_metric!(bigram_metric, oxey_lsbs, OxeyLsbs);
