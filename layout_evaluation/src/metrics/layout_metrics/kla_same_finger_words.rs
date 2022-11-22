@@ -95,7 +95,7 @@ impl LayoutMetric for KLASameFingerWords {
             .sum();
 
         let message = format!(
-            "{} out of {} (unique lowercase) words",
+            "{} out of {} (distinct lowercase) words",
             found_words, total_words
         );
 
