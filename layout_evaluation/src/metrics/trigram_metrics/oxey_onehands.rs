@@ -67,7 +67,7 @@ impl TrigramMetric for OxeyOnehands {
             return Some(0.0);
         }
 
-        // same-finger is not a roll
+        // same-finger is not a (onehand) roll
         if f1 == f2 || f2 == f3 || f1 == f3 {
             return Some(0.0);
         }
