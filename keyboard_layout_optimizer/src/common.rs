@@ -116,10 +116,10 @@ pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
 
 pub fn init_evaluator(options: &Options) -> Evaluator {
     let eval_params =
-        EvaluationParameters::from_yaml(&options.eval_parameters).unwrap_or_else(|_| {
+        EvaluationParameters::from_yaml(&options.eval_parameters).unwrap_or_else(|e| {
             panic!(
-                "Could not read evaluation yaml file {}",
-                options.eval_parameters
+                "Could not read evaluation yaml file {}: {:?}",
+                options.eval_parameters, e
             )
         });
 
