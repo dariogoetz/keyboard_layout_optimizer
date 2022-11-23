@@ -1,114 +1,115 @@
 metrics:
 
-  oxey_combined_trigram:
-    enabled: true
-    weight: 0.0
-    normalization:
-      type: weight_all
-      value: 1.0
-    params:
-      exclude_thumbs: false
-      same_hand_double_finger_repeat: 1.0
-      same_hand_single_finger_repeat: 1.0
-      same_hand_roll: 1.0
-      same_hand_redirect: 1.0
-      same_hand_bad_redirect: 1.0
-      roll_same_finger: 1.0
-      roll_inwards: 1.0
-      roll_outwards: 1.0
-      roll_other: 1.0
-      alternate_other_finger: 1.0
-      alternate_same_finger: 1.0
-
   oxey_sfbs:
     enabled: true
-    weight: 100.0
+    weight: 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01  # bring to percent
     params:
       exclude_thumbs: false
 
   oxey_lsbs:
     enabled: true
-    weight: 100.0
+    weight: 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       null: null
 
   oxey_dsfbs:
     enabled: true
-    weight: 100.0
+    weight: 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_inward_rolls:
     enabled: true
-    weight: 100.0
+    weight: &roll_inwards 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_outward_rolls:
     enabled: true
-    weight: 100.0
+    weight: &roll_outwards 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_onehands:
     enabled: true
-    weight: 100.0
+    weight: &same_hand_roll 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_alternates:
     enabled: true
-    weight: 100.0
+    weight: &alternate_other_finger 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_alternates_sfs:
     enabled: true
-    weight: 100.0
+    weight: &alternate_same_finger 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_redirects:
     enabled: true
-    weight: 100.0
+    weight: &same_hand_redirect 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
 
   oxey_bad_redirects:
     enabled: true
-    weight: 100.0
+    weight: &same_hand_bad_redirect 1.0
     normalization:
       type: weight_all
-      value: 1.0
+      value: 0.01
     params:
       exclude_thumbs: false
+
+  oxey_combined_trigram:
+    enabled: true
+    weight: 0.0
+    normalization:
+      type: weight_all
+      value: 0.01
+    params:
+      exclude_thumbs: false
+      same_hand_double_finger_repeat: 0.0
+      same_hand_single_finger_repeat: 0.0
+      same_hand_roll: *same_hand_roll
+      same_hand_redirect: *same_hand_redirect
+      same_hand_bad_redirect: *same_hand_bad_redirect
+      roll_same_finger: 0.0
+      roll_inwards: *roll_inwards
+      roll_outwards: *roll_outwards
+      roll_other: 0.0
+      alternate_other_finger: *alternate_other_finger
+      alternate_same_key: -1.0
+      alternate_finger_repeat: *alternate_same_finger
 
 ngrams:
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed

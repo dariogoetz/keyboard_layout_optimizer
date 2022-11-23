@@ -20,7 +20,8 @@ pub struct Parameters {
     pub roll_outwards: f64,
     pub roll_other: f64,
     pub alternate_other_finger: f64,
-    pub alternate_same_finger: f64,
+    pub alternate_same_key: f64,
+    pub alternate_finger_repeat: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -36,7 +37,8 @@ pub struct OxeyCombinedTrigram {
     roll_outwards: f64,
     roll_other: f64,
     alternate_other_finger: f64,
-    alternate_same_finger: f64,
+    alternate_same_key: f64,
+    alternate_finger_repeat: f64,
 }
 
 #[derive(Debug, Default)]
@@ -51,7 +53,8 @@ struct TrigramTypeCounts {
     roll_outwards: f64,
     roll_other: f64,
     alternate_other_finger: f64,
-    alternate_same_finger: f64,
+    alternate_same_key: f64,
+    alternate_finger_repeat: f64,
 }
 
 #[inline(always)]
@@ -77,7 +80,8 @@ impl OxeyCombinedTrigram {
             roll_outwards: params.roll_outwards,
             roll_other: params.roll_other,
             alternate_other_finger: params.alternate_other_finger,
-            alternate_same_finger: params.alternate_same_finger,
+            alternate_same_key: params.alternate_same_key,
+            alternate_finger_repeat: params.alternate_finger_repeat,
         }
     }
 
@@ -154,7 +158,9 @@ impl OxeyCombinedTrigram {
         counts: &mut TrigramTypeCounts,
     ) {
         if k1.key.finger == k3.key.finger {
-            counts.alternate_same_finger += weight;
+            counts.alternate_finger_repeat += weight;
+        } else if k1.key == k3.key {
+            counts.alternate_same_key += weight;
         } else {
             counts.alternate_other_finger += weight;
         }
@@ -198,7 +204,7 @@ impl TrigramMetric for OxeyCombinedTrigram {
         });
 
         let message = format!(
-            "[SameHand: Onehand: {:.1} 2-Rep: {:.1} 1-Rep: {:.1} Redirect: {:.1} BadRedirect: {:.1}] [Roll: Inward: {:.1} Outward: {:.1} SameFinger: {:.1} Other: {:.1}] [Alternate: Normal: {:.1} Sfs: {:.1}]",
+            "[SameHand: Onehand: {:.1} 2-Rep: {:.1} 1-Rep: {:.1} Redirect: {:.1} BadRedirect: {:.1}] [Roll: Inward: {:.1} Outward: {:.1} SameFinger: {:.1} Other: {:.1}] [Alternate: Normal: {:.1} SameKey: {:.1} SameFinger: {:.1}]",
             100.0 * counts.same_hand_roll,
             100.0 * counts.same_hand_double_finger_repeat,
             100.0 * counts.same_hand_single_finger_repeat,
@@ -209,7 +215,8 @@ impl TrigramMetric for OxeyCombinedTrigram {
             100.0 * counts.roll_same_finger,
             100.0 * counts.roll_other,
             100.0 * counts.alternate_other_finger,
-            100.0 * counts.alternate_same_finger,
+            100.0 * counts.alternate_same_key,
+            100.0 * counts.alternate_finger_repeat,
         );
 
         let cost_same_hand = counts.same_hand_double_finger_repeat
@@ -222,7 +229,8 @@ impl TrigramMetric for OxeyCombinedTrigram {
             + counts.roll_inwards * self.roll_inwards
             + counts.roll_outwards * self.roll_outwards
             + counts.roll_other * self.roll_other;
-        let cost_alternate = counts.alternate_same_finger * self.alternate_same_finger
+        let cost_alternate = counts.alternate_finger_repeat * self.alternate_finger_repeat
+            + counts.alternate_same_key * self.alternate_same_key
             + counts.alternate_other_finger * self.alternate_other_finger;
 
         (cost_same_hand + cost_roll + cost_alternate, Some(message))
