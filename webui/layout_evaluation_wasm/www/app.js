@@ -21,7 +21,7 @@ const OPTIMIZATION_ALGORITHM_PARAMS = {
   "simulated_annealing": sa_opt_params,
 }
 
-const PUBLISH_URL = "https://keyboard-layout-optimizer.herokuapp.com/api"
+const PUBLISH_URL = "https://keyboard-layout-optimizer.fly.dev/api"
 
 const NGRAMS = [
   { key: 'deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4', label: 'Blend (deu/eng 60/40)', description: 'Ngram frequencies from various German and English corpora in relation 60 to 40. Sourced from <a href="https://wortschatz.uni-leipzig.de/en/download">Wortschatz of Uni Leipzig</a>.' },
@@ -54,7 +54,7 @@ Vue.component('evaluator-app', {
 <b-container fluid>
 
   <h1>Keyboard Layout Evaluator</h1>
-  Explore optimized layouts at <a href="https://keyboard-layout-optimizer.herokuapp.com">https://keyboard-layout-optimizer.herokuapp.com</a>
+  Explore optimized layouts at <a href="https://keyboard-layout-optimizer.fly.dev">https://keyboard-layout-optimizer.fly.dev</a>
   <hr>
 
   <b-row>

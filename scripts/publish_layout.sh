@@ -21,7 +21,7 @@ fi
 
 if [ -z "$4" ]
   then
-    URL="https://keyboard-layout-optimizer.herokuapp.com/api"
+    URL="https://keyboard-layout-optimizer.fly.dev/api"
 else
     URL="$4"
 fi

@@ -12,9 +12,9 @@ There is a webapp providing (a significant subset of) the evaluation and optimiz
 
 The corresponding webapp implementation is located in the `webui/layout_evaluation_wasm` crate.
 
-## Webapp - Result Exploration (soon offline due to Heroku shutting down the free service)
+## Webapp - Result Exploration
 
-Published results can be explored and compared at https://keyboard-layout-optimizer.herokuapp.com.
+Published results can be explored and compared at https://keyboard-layout-optimizer.fly.dev (previously https://keyboard-layout-optimizer.herokuapp.com).
 
 The corresponding webserver's implementation is located in the `webui/layouts_webservice` crate.
 
@@ -121,7 +121,7 @@ The available optimize-binaries include `optimize_genetic.rs`, `optimize_sa.rs`,
 If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
 Optional commandline parameters can be explored with the `-h` option.
 
-Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.herokuapp.com - soon offline):
+Example for a never ending search (appends solutions to a file `found_solutions.txt` and publishes them to https://keyboard-layout-optimizer.fly.dev):
 
 ``` sh
 RUST_LOG=INFO ./target/release/optimize_genetic --run-forever --append-solutions-to "found_solutions.txt" --publish-as "<your name>"

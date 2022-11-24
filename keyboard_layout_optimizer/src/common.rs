@@ -77,7 +77,7 @@ pub struct PublishingOptions {
     /// Publish found layout to webservice at this url
     #[clap(
         long,
-        default_value = "https://keyboard-layout-optimizer.herokuapp.com/api"
+        default_value = "https://keyboard-layout-optimizer.fly.dev/api"
     )]
     pub publish_to: String,
 }
