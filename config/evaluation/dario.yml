@@ -3,8 +3,8 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: false
-    weight: 0.35
+    enabled: true
+    weight: 10
     normalization:
       type: fixed
       value: 1.0
@@ -13,6 +13,25 @@ metrics:
       shortcut_chars: cvx
       cost: 1.0
       within_n_leftmost_cols: 5
+
+  # Symbols of specified groups shall have the same relative location to each others.
+  # Used to be called `asymmetric_keys`.
+  similar_letter_groups:
+    enabled: true
+    weight: 10.0
+    normalization:
+      type: fixed
+      value: 1.0
+    params:
+      # List of pairs of symbol groups for which the keys shall have the same relative position
+      # e.g. ["auo", "äüö"] means that the relative location of a -> ä shall be identical to u -> ü
+      # and o -> ö. Otherwise, a cost is counted.
+      letter_group_pairs:
+        - ["auo", "äüö"]
+        # - ["auo", "äüö"]
+        # - ["gbd", "kpt"]
+        # - ["gbdw", "kptf"]
+        # - ["sfdn", "tpbm"]
 
   # unigram metrics
 
@@ -194,19 +213,19 @@ metrics:
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
     enabled: true
-    weight: 300.0
+    weight: 200.0
     normalization:
       type: weight_found
       value: 1.0
     params:
       # Count this factor if there is a direction change in the trigram
-      factor_with_direction_change: 1.0
+      factor_with_direction_change: 2.0
       # Count this factor if there is no direction change in the trigram
-      factor_without_direction_change: 0.0
+      factor_without_direction_change: 1.0
       # Count this factor if all characters of the trigram lie on the same key
       factor_same_key: 0.0
-      # Count this factor if the trigram contains at least finger repeats
-      factor_contains_finger_repeat: 1.0
+      # Count this factor if the trigram contains at least one finger repeat
+      factor_contains_finger_repeat: 2.0
       # Count this factor if the starting and end key are the same (but no finger repeat)
       factor_same_key_start_end: 0.5
 
@@ -232,6 +251,24 @@ metrics:
       # Mental pauses start with one of the defined `initial_pause_indicators` and then contain
       # some kind of whitespace.
       initial_pause_indicators: [",", "."]
+
+  oxey_inward_rolls:
+    enabled: true
+    weight: -2.0
+    normalization:
+      type: weight_all
+      value: 0.01
+    params:
+      exclude_thumbs: true
+
+  oxey_outward_rolls:
+    enabled: true
+    weight: -1.0
+    normalization:
+      type: weight_all
+      value: 0.01
+    params:
+      exclude_thumbs: true
 
 ngrams:
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
