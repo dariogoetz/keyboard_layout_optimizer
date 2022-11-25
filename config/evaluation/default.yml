@@ -69,7 +69,7 @@ metrics:
   # Each finger's load shall be relative to the specified weights
   finger_balance:
     enabled: true
-    weight: 69.0
+    weight: 50.0
     normalization:
       type: fixed
       value: 1.0
@@ -209,30 +209,30 @@ metrics:
       # to: Finger for second symbol of the bigram
       # cost: Cost to count for such a movement
       finger_switch_factor:
-        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 8 }
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 6 }
         - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
 
-        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 12 }
-        - { from: [Left, Ring],    to: [Left, Middle],  cost: 6 }
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 8 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 3 }
         - { from: [Left, Ring],    to: [Left, Index], cost: 0.1 }
 
         - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
-        - { from: [Left, Middle],  to: [Left, Ring],    cost: 9 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 5 }
         - { from: [Left, Middle],  to: [Left, Index], cost: 0.6 }
 
         - { from: [Left, Index], to: [Left, Pinky],   cost: 0.1 }
         - { from: [Left, Index], to: [Left, Ring],    cost: 0.3 }
         - { from: [Left, Index], to: [Left, Middle],  cost: 0.9 }
 
-        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 8 }
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 6 }
         - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
 
-        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 12 }
-        - { from: [Right, Ring],    to: [Right, Middle],  cost: 6 }
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 8 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 3 }
         - { from: [Right, Ring],    to: [Right, Index], cost: 0.1 }
 
         - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
-        - { from: [Right, Middle],  to: [Right, Ring],    cost: 9 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 5 }
         - { from: [Right, Middle],  to: [Right, Index], cost: 0.6 }
 
         - { from: [Right, Index], to: [Right, Pinky],   cost: 0.1 }
@@ -298,13 +298,13 @@ metrics:
       value: 1.0
     params:
       # Count this factor if there is a direction change in the trigram
-      factor_with_direction_change: 1.0
+      factor_with_direction_change: 2.0
       # Count this factor if there is no direction change in the trigram
-      factor_without_direction_change: 0.0
+      factor_without_direction_change: 1.0
       # Count this factor if all characters of the trigram lie on the same key
       factor_same_key: 0.0
       # Count this factor if the trigram contains at least finger repeats
-      factor_contains_finger_repeat: 1.0
+      factor_contains_finger_repeat: 2.0
       # Count this factor if the starting and end key are the same (but no finger repeat)
       factor_same_key_start_end: 0.5
 
@@ -354,6 +354,24 @@ metrics:
       factor_inward: 1.0
       factor_outward: 0.2
       exclude_rows: [3]
+
+  oxey_inward_rolls:
+    enabled: true
+    weight: -2.0
+    normalization:
+      type: weight_all
+      value: 0.01
+    params:
+      exclude_thumbs: true
+
+  oxey_outward_rolls:
+    enabled: true
+    weight: -1.0
+    normalization:
+      type: weight_all
+      value: 0.01
+    params:
+      exclude_thumbs: true
 
 ngrams:
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
