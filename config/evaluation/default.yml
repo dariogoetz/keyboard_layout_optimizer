@@ -3,7 +3,7 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: true
+    enabled: false
     weight: 0.35
     normalization:
       type: fixed
@@ -16,7 +16,7 @@ metrics:
 
   # Pairs of keys that shall be placed in related positions to each other
   similar_letters:
-    enabled: true
+    enabled: false
     weight: 3.0
     normalization:
       type: fixed
@@ -48,7 +48,7 @@ metrics:
   # Symbols of specified groups shall have the same relative location to each others.
   # Used to be called `asymmetric_keys`.
   similar_letter_groups:
-    enabled: true
+    enabled: false
     weight: 10.0
     normalization:
       type: fixed
