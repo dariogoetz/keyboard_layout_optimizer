@@ -10,6 +10,7 @@ version = "0.1.0"
 
 [dependencies]
 ahash = "0.7.6"
+smallmap = "*"
 anyhow = "1.0.65"
 colored = "2.0.0"
 handlebars = "4.3.5"

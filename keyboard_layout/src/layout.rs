@@ -10,6 +10,7 @@ use anyhow::Result;
 use colored::Colorize;
 use core::slice;
 use serde::Deserialize;
+use smallmap::Map;
 use std::{fmt, sync::Arc};
 
 /// The index of a [`LayerKey`] in the `layerkeys` vec of a [`Layout`]
@@ -148,7 +149,7 @@ pub struct Layout {
     /// generaten with that [`Key`]
     key_layers: Vec<Vec<LayerKeyIndex>>,
     /// Map for retrieving the [`LayerKey`] for the symbol it generates
-    key_map: AHashMap<char, LayerKeyIndex>,
+    key_map: Map<char, LayerKeyIndex>,
 }
 
 impl fmt::Display for Layout {
@@ -311,8 +312,8 @@ impl Layout {
         })
     }
 
-    fn gen_key_map(layerkeys: &[LayerKey]) -> AHashMap<char, LayerKeyIndex> {
-        let mut m = AHashMap::default();
+    fn gen_key_map(layerkeys: &[LayerKey]) -> Map<char, LayerKeyIndex> {
+        let mut m = Map::default();
         layerkeys
             .iter()
             .enumerate()
