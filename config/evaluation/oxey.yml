@@ -88,7 +88,7 @@ metrics:
       type: weight_all
       value: 0.01
     params:
-      exclude_thumbs: false
+      exclude_thumbs: true  # consider thumb an index finger
 
   oxey_combined_trigram:
     enabled: true
