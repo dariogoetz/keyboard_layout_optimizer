@@ -49,6 +49,10 @@ pub struct Options {
     #[clap(long)]
     pub tops: Option<f64>,
 
+    /// Only consider ngrams that do not contain any of the given characters
+    #[clap(long)]
+    pub exclude_chars: Option<String>,
+
     /// Do not split modifiers
     #[clap(long)]
     pub no_split_modifiers: bool,
@@ -75,10 +79,7 @@ pub struct PublishingOptions {
     pub publish_layout_config: String,
 
     /// Publish found layout to webservice at this url
-    #[clap(
-        long,
-        default_value = "https://keyboard-layout-optimizer.fly.dev/api"
-    )]
+    #[clap(long, default_value = "https://keyboard-layout-optimizer.fly.dev/api")]
     pub publish_to: String,
 }
 
@@ -167,6 +168,14 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
             (unigrams, bigrams, trigrams)
         }
     };
+
+    if let Some(exclude_chars) = &options.exclude_chars {
+        for exclude_char in exclude_chars.chars() {
+            unigrams = unigrams.exclude_char(&exclude_char);
+            bigrams = bigrams.exclude_char(&exclude_char);
+            trigrams = trigrams.exclude_char(&exclude_char);
+        }
+    }
 
     if ngrams_config.increase_common_ngrams.enabled {
         unigrams = unigrams.increase_common(&ngrams_config.increase_common_ngrams);

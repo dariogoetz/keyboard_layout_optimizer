@@ -149,6 +149,22 @@ impl Unigrams {
         Self { grams }
     }
 
+    // Return a reduced set of unigrams filtering out those containing a given character
+    pub fn exclude_char(&self, exclude: &char) -> Self {
+        let grams: AHashMap<char, f64> = self
+            .grams
+            .iter()
+            .filter_map(|(c, w)| {
+                if *c == *exclude {
+                    None
+                } else {
+                    Some((c.clone(), w.clone()))
+                }
+            })
+            .collect();
+        Self { grams }
+    }
+
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
@@ -255,6 +271,22 @@ impl Bigrams {
             self.grams.len(),
             grams.len()
         );
+        Self { grams }
+    }
+
+    // Return a reduced set of bigrams filtering out those containing a given character
+    pub fn exclude_char(&self, exclude: &char) -> Self {
+        let grams: AHashMap<(char, char), f64> = self
+            .grams
+            .iter()
+            .filter_map(|((c1, c2), w)| {
+                if *c1 == *exclude || *c2 == *exclude {
+                    None
+                } else {
+                    Some(((c1.clone(), c2.clone()), w.clone()))
+                }
+            })
+            .collect();
         Self { grams }
     }
 
@@ -370,6 +402,22 @@ impl Trigrams {
             self.grams.len(),
             grams.len()
         );
+        Self { grams }
+    }
+
+    // Return a reduced set of trigrams filtering out those containing a given character
+    pub fn exclude_char(&self, exclude: &char) -> Self {
+        let grams: AHashMap<(char, char, char), f64> = self
+            .grams
+            .iter()
+            .filter_map(|((c1, c2, c3), w)| {
+                if *c1 == *exclude || *c2 == *exclude || *c3 == *exclude {
+                    None
+                } else {
+                    Some(((c1.clone(), c2.clone(), c3.clone()), w.clone()))
+                }
+            })
+            .collect();
         Self { grams }
     }
 
