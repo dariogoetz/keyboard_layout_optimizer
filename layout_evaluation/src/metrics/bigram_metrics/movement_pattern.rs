@@ -26,7 +26,6 @@ pub struct Parameters {
     finger_lengths: AHashMap<Hand, AHashMap<Finger, f64>>,
     short_down_to_long_or_long_up_to_short_factor: f64,
     same_row_offset: f64,
-    num_rows_factor: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -35,7 +34,6 @@ pub struct MovementPattern {
     finger_lengths: HandFingerMap<f64>,
     short_down_to_long_or_long_up_to_short_factor: f64,
     same_row_offset: f64,
-    num_rows_factor: f64,
 }
 
 impl MovementPattern {
@@ -54,7 +52,6 @@ impl MovementPattern {
             short_down_to_long_or_long_up_to_short_factor: params
                 .short_down_to_long_or_long_up_to_short_factor,
             same_row_offset: params.same_row_offset,
-            num_rows_factor: params.num_rows_factor,
         }
     }
 }
@@ -102,9 +99,8 @@ impl BigramMetric for MovementPattern {
             1.0
         };
 
-        let cost = (self.same_row_offset + self.num_rows_factor * num_rows)
-            * finger_switch_factor
-            * direction_factor;
+        let cost =
+            (self.same_row_offset + num_rows * num_rows) * finger_switch_factor * direction_factor;
 
         Some(weight * cost)
     }
