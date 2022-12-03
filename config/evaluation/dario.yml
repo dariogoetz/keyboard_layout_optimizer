@@ -130,30 +130,30 @@ metrics:
       # to: Finger for second symbol of the bigram
       # cost: Cost to count for such a movement
       finger_switch_factor:
-        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 6 }
+        - { from: [Left, Pinky],   to: [Left, Ring],    cost: 4 }
         - { from: [Left, Pinky],   to: [Left, Middle],  cost: 2 }
 
-        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 8 }
-        - { from: [Left, Ring],    to: [Left, Middle],  cost: 3 }
+        - { from: [Left, Ring],    to: [Left, Pinky],   cost: 6 }
+        - { from: [Left, Ring],    to: [Left, Middle],  cost: 2 }
         - { from: [Left, Ring],    to: [Left, Index], cost: 0.1 }
 
         - { from: [Left, Middle],  to: [Left, Pinky],   cost: 3 }
-        - { from: [Left, Middle],  to: [Left, Ring],    cost: 4 }
+        - { from: [Left, Middle],  to: [Left, Ring],    cost: 5 }
         - { from: [Left, Middle],  to: [Left, Index], cost: 0.6 }
 
         - { from: [Left, Index], to: [Left, Pinky],   cost: 0.1 }
         - { from: [Left, Index], to: [Left, Ring],    cost: 0.3 }
         - { from: [Left, Index], to: [Left, Middle],  cost: 0.9 }
 
-        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 6 }
+        - { from: [Right, Pinky],   to: [Right, Ring],    cost: 4 }
         - { from: [Right, Pinky],   to: [Right, Middle],  cost: 2 }
 
-        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 8 }
-        - { from: [Right, Ring],    to: [Right, Middle],  cost: 3 }
+        - { from: [Right, Ring],    to: [Right, Pinky],   cost: 6 }
+        - { from: [Right, Ring],    to: [Right, Middle],  cost: 2 }
         - { from: [Right, Ring],    to: [Right, Index], cost: 0.1 }
 
         - { from: [Right, Middle],  to: [Right, Pinky],   cost: 3 }
-        - { from: [Right, Middle],  to: [Right, Ring],    cost: 4 }
+        - { from: [Right, Middle],  to: [Right, Ring],    cost: 5 }
         - { from: [Right, Middle],  to: [Right, Index], cost: 0.6 }
 
         - { from: [Right, Index], to: [Right, Pinky],   cost: 0.1 }
