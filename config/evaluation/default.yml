@@ -200,7 +200,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 50.0
+    weight: 100.0
     normalization:
       type: weight_found
       value: 1.0
