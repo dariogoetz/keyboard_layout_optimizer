@@ -1,0 +1,54 @@
+# fly.toml file generated for keyboard-layout-optimizer on 2022-11-24T10:10:18+01:00
+
+app = "keyboard-layout-optimizer"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[build]
+  dockerfile = "webui/layouts_webservice/Dockerfile"
+
+[env]
+  ROCKET_ADDRESS = "0.0.0.0"
+  ROCKET_ALLOWED_CORS_ORIGINS = "https://dariogoetz.github.io"
+  ROCKET_DATABASES = "{\"sqlx\"={\"url\"=\"$DATABASE_URL\"}}"
+  ROCKET_DEFAULT_LAYOUT_CONFIG = "standard"
+  ROCKET_EVAL_PARAMETERS = "../../config/evaluation/default.yml"
+  ROCKET_KEEP_ALIVE = "0"
+  ROCKET_LAYOUT_CONFIGS = "[[\"standard\", \"../../config/keyboard/standard.yml\"], [\"ortho\", \"../../config/keyboard/ortho.yml\"], [\"moonlander\", \"../../config/keyboard/moonlander.yml\"], [\"crkbd\", \"../../config/keyboard/crkbd.yml\"]]"
+  ROCKET_LOG_LEVEL = "normal"
+  ROCKET_NGRAMS = "../../ngrams/deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4"
+  ROCKET_PORT = "8080"
+  ROCKET_SECRET = "super_duper_secret"
+  ROCKET_STATIC_DIR = "../../webui/layouts_webservice/static"
+
+[experimental]
+  allowed_public_ports = []
+  auto_rollback = true
+  cmd = "/app/webui/layouts_webservice/layouts_webservice"
+
+[[services]]
+  http_checks = []
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+  script_checks = []
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
