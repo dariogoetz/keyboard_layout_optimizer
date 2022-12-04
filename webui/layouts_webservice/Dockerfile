@@ -8,7 +8,7 @@ WORKDIR /usr/src/app/webui/layouts_webservice
 COPY keyboard_layout ../../keyboard_layout
 COPY layout_evaluation ../../layout_evaluation
 COPY webui/layouts_webservice/Cargo.toml Cargo.toml
-COPY webui/layouts_webservice/Cargo.lock Cargo.lock
+# COPY webui/layouts_webservice/Cargo.lock Cargo.lock
 
 # # Needs at least a main.rs file with a main function
 RUN mkdir src && echo "fn main(){}" > src/main.rs
