@@ -151,13 +151,67 @@ impl CrossoverOp<Vec<usize>> for NoOpCrossover {
     }
 }
 
+// Crossover method as used in https://github.com/Coletronix/Genetic-Keyboard-Generator
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
+pub struct MyCrossover {}
+impl MyCrossover {
+    pub fn new() -> Self {
+        MyCrossover {}
+    }
+}
+impl GeneticOperator for MyCrossover {
+    fn name() -> String {
+        "My-Crossover".to_string()
+    }
+}
+impl CrossoverOp<Vec<usize>> for MyCrossover {
+    fn crossover<R>(&self, parents: Parents<Vec<usize>>, rng: &mut R) -> Children<Vec<usize>>
+    where
+        R: Rng + Sized,
+    {
+        parents
+            .iter()
+            .zip(parents.iter().skip(1).cycle())
+            .map(|(p1, p2)| {
+                let len = p1.len();
+                let mut offspring: Vec<Option<usize>> = vec![None; len];
+
+                // determine cycle and take from parent 1
+                let start_idx = rng.gen_range(0..len);
+                offspring[start_idx] = Some(p1[start_idx]);
+
+                // find index in p1 of value that sits in p2 at start_idx
+                let mut idx = p1.iter().position(|v| *v == p2[start_idx]).unwrap().clone();
+                while idx != start_idx {
+                    offspring[idx] = Some(p1[idx]);
+
+                    // find index in p1 of value that sits in p2 at idx
+                    idx = p1.iter().position(|v| *v == p2[idx]).unwrap().clone();
+                }
+
+                // rest is copied from parent 2
+                p2.iter()
+                    .zip(offspring.iter_mut())
+                    .for_each(|(p_val, o_val)| {
+                        if o_val.is_none() {
+                            *o_val = Some(p_val.clone());
+                        }
+                    });
+
+                offspring.iter().map(|val| val.unwrap()).collect()
+            })
+            .collect()
+    }
+}
+
 pub type MySimulator = Simulator<
     GeneticAlgorithm<
         Vec<usize>,
         usize,
         FitnessCalc,
         MaximizeSelector,
-        //PartiallyMappedCrossover,
+        // PartiallyMappedCrossover,
+        // MyCrossover,
         NoOpCrossover,
         SwapOrderMutator,
         UniformReinserter, // we do not use an elitist reinserter due to performance reasons (non-parallelized evaluation)
@@ -204,7 +258,8 @@ pub fn init_optimization(
                 params.selection_ratio,
                 params.num_individuals_per_parents,
             ))
-            //.with_crossover(PartiallyMappedCrossover::new())
+            // .with_crossover(PartiallyMappedCrossover::new())
+            // .with_crossover(MyCrossover::new())
             .with_crossover(NoOpCrossover::new())
             .with_mutation(SwapOrderMutator::new(params.mutation_rate))
             .with_reinsertion(UniformReinserter::new(params.reinsertion_ratio))
