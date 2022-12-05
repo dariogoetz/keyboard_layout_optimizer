@@ -35,11 +35,11 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
         total_weight: Option<f64>,
         layout: &Layout,
     ) -> (f64, Option<String>) {
-        let show_worst: bool = env::var("show_worst")
+        let show_worst: bool = env::var("SHOW_WORST")
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or(true);
-        let n_worst: usize = env::var("n_worst")
+        let n_worst: usize = env::var("N_WORST")
             .ok()
             .and_then(|s| s.parse().ok())
             .unwrap_or(3);
