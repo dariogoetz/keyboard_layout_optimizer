@@ -260,6 +260,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: true
+      exclude_modifiers: true
+      exclude_chars: ["\n"]
 
   oxey_outward_rolls:
     enabled: true
@@ -269,6 +271,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: true
+      exclude_modifiers: true
+      exclude_chars: ["\n"]
 
 ngrams:
   # Increase the weight of bigrams that have both an absolute weight and relative weight exceed
