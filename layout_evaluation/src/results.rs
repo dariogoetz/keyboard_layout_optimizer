@@ -116,7 +116,7 @@ impl MetricResults {
             NormalizationType::Fixed(t) => val / t,
             NormalizationType::WeightFound(t) => val / (t * self.found_weight),
             NormalizationType::WeightAll(t) => {
-                val / (t * self.found_weight + self.not_found_weight)
+                val / (t * (self.found_weight + self.not_found_weight))
             }
         };
 
