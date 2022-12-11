@@ -48,10 +48,10 @@ metrics:
         [Left, Pinky]: 1.0
         [Left, Ring]: 1.6
         [Left, Middle]: 2.0
-        [Left, Index]: 2.5
+        [Left, Index]: 2.0
         [Left, Thumb]: 2.0
         [Right, Thumb]: 2.0
-        [Right, Index]: 2.5
+        [Right, Index]: 2.0
         [Right, Middle]: 2.0
         [Right, Ring]: 1.6
         [Right, Pinky]: 1.0
