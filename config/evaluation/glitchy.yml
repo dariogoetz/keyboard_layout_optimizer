@@ -303,7 +303,7 @@ metrics:
   # movement") or if there is a directional change.
   no_handswitch_in_trigram:
     enabled: true
-    weight: 200.0
+    weight: 400.0
     normalization:
       type: weight_found
       value: 1.0
@@ -318,6 +318,8 @@ metrics:
       factor_contains_finger_repeat: 1.0
       # Count this factor if the starting and end key are the same (but no finger repeat)
       factor_same_key_start_end: 0.5
+      # The trigram contains the index finger at least once
+      factor_contains_index: 0.5
 
   # The `secondary_bigrams` metric evaluates all bigram metrics that can be computed on individual
   # bigrams (in particular not the finger- and hand-balance metrics) for the bigram resulting from

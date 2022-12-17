@@ -18,17 +18,19 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub factor_with_direction_change: f64,
-    pub factor_without_direction_change: f64,
-    pub factor_same_key: f64,
-    pub factor_contains_finger_repeat: f64,
-    pub factor_same_key_start_end: f64,
+    factor_with_direction_change: f64,
+    factor_without_direction_change: f64,
+    factor_contains_index: f64,
+    factor_same_key: f64,
+    factor_contains_finger_repeat: f64,
+    factor_same_key_start_end: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct NoHandswitchInTrigram {
     factor_with_direction_change: f64,
     factor_without_direction_change: f64,
+    factor_contains_index: f64,
     factor_same_key: f64,
     factor_contains_finger_repeat: f64,
     factor_same_key_start_end: f64,
@@ -39,6 +41,7 @@ impl NoHandswitchInTrigram {
         Self {
             factor_with_direction_change: params.factor_with_direction_change,
             factor_without_direction_change: params.factor_without_direction_change,
+            factor_contains_index: params.factor_contains_index,
             factor_same_key: params.factor_same_key,
             factor_contains_finger_repeat: params.factor_contains_finger_repeat,
             factor_same_key_start_end: params.factor_same_key_start_end,
@@ -91,6 +94,14 @@ impl TrigramMetric for NoHandswitchInTrigram {
         let contains_repeat = (k1.key.finger == k2.key.finger && k1.key.hand == k2.key.hand)
             || (k2.key.finger == k3.key.finger && k2.key.hand == k3.key.hand);
         let same_key = pos1 == pos2 && pos2 == pos3;
+        let contains_index = if k1.key.finger == Finger::Index
+            || k2.key.finger == Finger::Index
+            || k3.key.finger == Finger::Index
+        {
+            self.factor_contains_index
+        } else {
+            1.0
+        };
 
         let factor = if same_key {
             self.factor_same_key
@@ -104,6 +115,6 @@ impl TrigramMetric for NoHandswitchInTrigram {
             self.factor_without_direction_change
         };
 
-        Some(weight * factor)
+        Some(weight * factor * contains_index)
     }
 }
