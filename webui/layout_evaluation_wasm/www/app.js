@@ -61,7 +61,7 @@ Vue.component('evaluator-app', {
 
     <b-col xl="4" lg="6" style="height: 450px">
       <h2>Layout</h2>
-
+      <b-button class="mb-2" size="sm" @click="setInput('zyuaqpbmlfjßcsieodtnrhvxüäöwg,.k')">noted</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('zguaqwbdlyjßcsieomntrhvxüäöpf,.k')">miners</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('zluaqwbdgyjßcrieomntshvxüäöpf,.k')">mine</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('jduaxphlmwqßctieobnrsgfvüäöyz,.k')">bone</b-button>
