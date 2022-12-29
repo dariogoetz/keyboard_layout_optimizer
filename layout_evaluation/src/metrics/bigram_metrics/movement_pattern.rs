@@ -26,6 +26,7 @@ pub struct Parameters {
     finger_lengths: AHashMap<Hand, AHashMap<Finger, f64>>,
     short_down_to_long_or_long_up_to_short_factor: f64,
     same_row_offset: f64,
+    unbalancing_factor: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -34,6 +35,7 @@ pub struct MovementPattern {
     finger_lengths: HandFingerMap<f64>,
     short_down_to_long_or_long_up_to_short_factor: f64,
     same_row_offset: f64,
+    unbalancing_factor: f64,
 }
 
 impl MovementPattern {
@@ -52,6 +54,7 @@ impl MovementPattern {
             short_down_to_long_or_long_up_to_short_factor: params
                 .short_down_to_long_or_long_up_to_short_factor,
             same_row_offset: params.same_row_offset,
+            unbalancing_factor: params.unbalancing_factor,
         }
     }
 }
@@ -99,8 +102,15 @@ impl BigramMetric for MovementPattern {
             1.0
         };
 
-        let cost =
-            (self.same_row_offset + num_rows * num_rows) * finger_switch_factor * direction_factor;
+        let unbalancing_factor = 1.0
+            + (self.unbalancing_factor
+                * ((k1.key.unbalancing.0 - k2.key.unbalancing.0).abs()
+                    + (k1.key.unbalancing.1 - k2.key.unbalancing.1).abs()));
+
+        let cost = (self.same_row_offset + num_rows * num_rows)
+            * finger_switch_factor
+            * direction_factor
+            * unbalancing_factor;
 
         Some(weight * cost)
     }

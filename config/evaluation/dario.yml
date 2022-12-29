@@ -182,6 +182,9 @@ metrics:
       # If same_row_offset is zero, movement patterns on the same row have zero cost.
       same_row_offset: 0.1
 
+      # If the movement involves unbalancing keys (horizontally or vertically), the corresponding
+      # unbalancing values are weighted with this factor and multiplied to the result.
+      unbalancing_factor: 0.5
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.
   no_handswitch_after_unbalancing_key:
