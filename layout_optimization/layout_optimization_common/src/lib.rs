@@ -1,17 +1,15 @@
-use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
 use rand::{seq::SliceRandom, thread_rng};
 
 #[derive(Clone, Debug)]
-pub struct PermutationLayoutGenerator {
+pub struct LayoutPermutator {
     perm_keys: Vec<char>,
     perm_indices: Vec<usize>,
     fixed_keys: Vec<char>,
     fixed_indices: Vec<usize>,
-    pub layout_generator: NeoLayoutGenerator,
 }
 
-impl PermutationLayoutGenerator {
-    pub fn new(layout: &str, fixed: &str, layout_generator: &NeoLayoutGenerator) -> Self {
+impl LayoutPermutator {
+    pub fn new(layout: &str, fixed: &str) -> Self {
         let mut perm_keys = Vec::new();
         let mut perm_indices = Vec::new();
         let mut fixed_keys = Vec::new();
@@ -31,7 +29,6 @@ impl PermutationLayoutGenerator {
             perm_indices,
             fixed_keys,
             fixed_indices,
-            layout_generator: layout_generator.clone(),
         }
     }
 
@@ -91,12 +88,6 @@ impl PermutationLayoutGenerator {
         }
 
         indices
-    }
-
-    pub fn generate_layout(&self, permutation: &[usize]) -> (String, Layout) {
-        let s = self.generate_string(permutation);
-        let layout = self.layout_generator.generate(&s).unwrap();
-        (s, layout)
     }
 
     pub fn get_permutable_indices(&self) -> Vec<usize> {

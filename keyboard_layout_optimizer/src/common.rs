@@ -1,5 +1,6 @@
 use keyboard_layout::{
-    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::NeoLayoutGenerator,
+    config::LayoutConfig, keyboard::Keyboard, layout::Layout,
+    neo_layout_generator::NeoLayoutGenerator,
 };
 use layout_evaluation::{
     config::EvaluationParameters,

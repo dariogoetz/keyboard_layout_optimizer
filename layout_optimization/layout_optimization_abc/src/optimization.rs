@@ -1,7 +1,7 @@
-use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
+use keyboard_layout::{layout::Layout, layout_generator::LayoutGenerator};
 use layout_evaluation::{cache::Cache, evaluation::Evaluator};
 
-use layout_optimization_common::PermutationLayoutGenerator;
+use layout_optimization_common::LayoutPermutator;
 
 use anyhow::Result;
 use serde::Deserialize;
@@ -40,7 +40,8 @@ impl Parameters {
 #[derive(Clone, Debug)]
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
+    layout_generator: Box<dyn LayoutGenerator>,
     result_cache: Option<Cache<usize>>,
     n_switches: usize,
 }
@@ -49,8 +50,10 @@ impl Context for FitnessCalc {
     type Solution = Layout;
 
     fn make(&self) -> Self::Solution {
-        let indices = self.layout_generator.generate_random();
-        self.layout_generator.generate_layout(&indices).1
+        let indices = self.permutator.generate_random();
+        self.layout_generator
+            .generate(&self.permutator.generate_string(&indices))
+            .unwrap()
     }
 
     fn evaluate_fitness(&self, solution: &Self::Solution) -> f64 {
@@ -75,10 +78,8 @@ impl Context for FitnessCalc {
         let mut chars: Vec<char> = layout_str.chars().collect();
 
         // only permutate indices of chars that are not fixed
-        let indices = self.layout_generator.get_permutable_indices();
-        let permutated_indices = self
-            .layout_generator
-            .perform_n_swaps(&indices, self.n_switches);
+        let indices = self.permutator.get_permutable_indices();
+        let permutated_indices = self.permutator.perform_n_swaps(&indices, self.n_switches);
 
         indices
             .iter()
@@ -90,7 +91,6 @@ impl Context for FitnessCalc {
 
         let permutated_layout_str: String = chars.iter().collect();
         self.layout_generator
-            .layout_generator
             .generate(&permutated_layout_str)
             .unwrap()
     }
@@ -100,11 +100,11 @@ pub fn optimize(
     params: &Parameters,
     evaluator: &Evaluator,
     layout_str: &str,
-    layout_generator: &NeoLayoutGenerator,
+    layout_generator: &Box<dyn LayoutGenerator>,
     fixed_characters: &str,
     cache_results: bool,
 ) -> Receiver<Candidate<Layout>> {
-    let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
+    let pm = LayoutPermutator::new(layout_str, fixed_characters);
 
     let result_cache = if cache_results {
         Some(Cache::new())
@@ -114,7 +114,8 @@ pub fn optimize(
 
     let core = FitnessCalc {
         evaluator: Arc::new(evaluator.clone()),
-        layout_generator: pm,
+        permutator: pm,
+        layout_generator: layout_generator.clone(),
         result_cache,
         n_switches: params.n_switches,
     };

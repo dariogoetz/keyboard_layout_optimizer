@@ -1,6 +1,6 @@
 use super::Options;
 
-use keyboard_layout::layout_generator::NeoLayoutGenerator;
+use keyboard_layout::neo_layout_generator::NeoLayoutGenerator;
 use layout_evaluation::{evaluation::Evaluator, results::EvaluationResult};
 
 use ahash::AHashMap;

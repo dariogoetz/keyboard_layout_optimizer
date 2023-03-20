@@ -11,6 +11,7 @@ pub mod key;
 pub mod keyboard;
 pub mod layout;
 pub mod layout_generator;
+pub mod neo_layout_generator;
 
 #[cfg(test)]
 mod tests {

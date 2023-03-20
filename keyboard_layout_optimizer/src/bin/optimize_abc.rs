@@ -1,3 +1,4 @@
+use keyboard_layout::layout_generator::LayoutGenerator;
 use keyboard_layout_optimizer::common;
 use layout_optimization_abc::optimization;
 
@@ -49,6 +50,7 @@ fn main() {
     let options = Options::parse();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
+    let layout_generator: Box<dyn LayoutGenerator> = Box::new(layout_generator);
 
     let optimization_params = optimization::Parameters::from_yaml(&options.optimization_parameters)
         .unwrap_or_else(|_| {

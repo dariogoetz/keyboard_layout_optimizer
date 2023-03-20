@@ -8,7 +8,8 @@ use std::{str::FromStr, sync::Arc};
 use wasm_bindgen::prelude::*;
 
 use keyboard_layout::{
-    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::NeoLayoutGenerator,
+    config::LayoutConfig, keyboard::Keyboard, layout::Layout, layout_generator::LayoutGenerator,
+    neo_layout_generator::NeoLayoutGenerator,
 };
 
 use layout_evaluation::{
@@ -20,7 +21,7 @@ use layout_evaluation::{
     results::EvaluationResult,
 };
 
-use layout_optimization_common::PermutationLayoutGenerator;
+use layout_optimization_common::LayoutPermutator;
 use layout_optimization_genetic::optimization as genevo_optimization;
 use layout_optimization_sa::optimization::{
     self as sa_optimization, CustomObserver as SaCustomObserver, SaIterState,
@@ -219,7 +220,8 @@ impl LayoutEvaluator {
 pub struct LayoutOptimizer {
     evaluator: Evaluator,
     simulator: genevo_optimization::MySimulator,
-    permutation_layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
+    layout_generator: Box<dyn LayoutGenerator>,
     all_time_best: Option<(usize, Vec<usize>)>,
     parameters: genevo_optimization::Parameters,
 }
@@ -239,11 +241,14 @@ impl LayoutOptimizer {
             serde_yaml::from_str(optimization_params_str)
                 .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
 
-        let (simulator, permutation_layout_generator) = genevo_optimization::init_optimization(
+        let layout_generator: Box<dyn LayoutGenerator> =
+            Box::new(layout_evaluator.layout_generator.clone());
+
+        let (simulator, permutator) = genevo_optimization::init_optimization(
             &parameters,
             &layout_evaluator.evaluator,
             layout_str,
-            &layout_evaluator.layout_generator,
+            &layout_generator,
             fixed_characters,
             start_with_layout,
             true,
@@ -252,7 +257,8 @@ impl LayoutOptimizer {
         Ok(LayoutOptimizer {
             evaluator: layout_evaluator.evaluator.clone(),
             simulator,
-            permutation_layout_generator,
+            permutator,
+            layout_generator,
             all_time_best: None,
             parameters,
         })
@@ -281,9 +287,10 @@ impl LayoutOptimizer {
                     ));
                 }
 
-                let (layout_str, layout) = self
-                    .permutation_layout_generator
-                    .generate_layout(&self.all_time_best.as_ref().unwrap().1);
+                let layout_str = self
+                    .permutator
+                    .generate_string(&self.all_time_best.as_ref().unwrap().1);
+                let layout = self.layout_generator.generate(&layout_str).unwrap();
                 let res = self.evaluator.evaluate_layout(&layout);
                 let printed = Some(format!("{}", res));
                 let plot = Some(layout.plot());
@@ -309,7 +316,7 @@ impl LayoutOptimizer {
 
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct SaObserver {
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
     last_update_call: Instant,
     update_callback: js_sys::Function,
     new_best_callback: js_sys::Function,
@@ -335,7 +342,7 @@ impl Observe<SaIterState> for SaObserver {
         if state.is_best() && (state.param != state.prev_best_param) {
             let this = JsValue::null();
             let layout_js = JsValue::from(
-                self.layout_generator
+                self.permutator
                     .generate_string(state.param.as_ref().unwrap()),
             );
             let cost_js = JsValue::from(state.cost);
@@ -374,22 +381,20 @@ pub fn sa_optimize(
     let _ = update_callback.call2(&this, &zero, &init_temp);
 
     let observer = SaObserver {
-        layout_generator: PermutationLayoutGenerator::new(
-            layout_str,
-            fixed_characters,
-            &layout_evaluator.layout_generator,
-        ),
+        permutator: LayoutPermutator::new(layout_str, fixed_characters),
         last_update_call: Instant::now(),
         update_callback: update_callback.clone(),
         new_best_callback,
     };
+    let layout_generator: Box<dyn LayoutGenerator> =
+        Box::new(layout_evaluator.layout_generator.clone());
 
     let _: Layout = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         &parameters,
         layout_str,
         fixed_characters,
-        &layout_evaluator.layout_generator,
+        &layout_generator,
         start_with_layout,
         &layout_evaluator.evaluator,
         /* log_everything: */ false,
