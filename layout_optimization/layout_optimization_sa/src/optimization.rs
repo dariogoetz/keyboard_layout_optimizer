@@ -270,7 +270,7 @@ pub fn optimize(
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
     custom_observer: Option<CustomObserver>,
-) -> Layout {
+) -> (String, Layout) {
     let pm = LayoutPermutator::new(layout_str, fixed_characters);
     // Get initial Layout.
     let initial_indices = match start_with_layout {
@@ -379,7 +379,8 @@ pub fn optimize(
     let res = executor.run().unwrap();
 
     let best_layout_param = res.state().get_best_param().unwrap();
-    layout_generator
-        .generate(&pm.generate_string(best_layout_param))
-        .unwrap()
+    let best_layout_str = pm.generate_string(best_layout_param);
+    let best_layout = layout_generator.generate(&best_layout_str).unwrap();
+
+    (best_layout_str, best_layout)
 }

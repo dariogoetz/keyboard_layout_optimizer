@@ -283,7 +283,7 @@ pub fn optimize(
     fixed_characters: &str,
     start_with_layout: bool,
     cache_results: bool,
-) -> Layout {
+) -> (String, Layout) {
     let (mut sim, pm) = init_optimization(
         params,
         evaluator,
@@ -364,7 +364,8 @@ pub fn optimize(
         }
     }
 
-    layout_generator
-        .generate(&pm.generate_string(&all_time_best.as_ref().unwrap().1))
-        .unwrap()
+    let best_layout_str = pm.generate_string(&all_time_best.as_ref().unwrap().1);
+    let best_layout = layout_generator.generate(&best_layout_str).unwrap();
+
+    (best_layout_str, best_layout)
 }

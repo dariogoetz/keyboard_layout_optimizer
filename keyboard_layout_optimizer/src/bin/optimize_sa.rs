@@ -1,4 +1,3 @@
-use keyboard_layout::layout_generator::LayoutGenerator;
 use keyboard_layout_optimizer::common;
 use layout_evaluation::cache::Cache;
 use layout_optimization_sa::optimization;
@@ -127,7 +126,6 @@ fn main() {
     let options = Options::parse();
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
-    let layout_generator: Box<dyn LayoutGenerator> = Box::new(layout_generator);
 
     let mut optimization_params = optimization::Parameters::from_yaml(
         &options.optimization_parameters,
@@ -176,7 +174,7 @@ fn main() {
             }
 
             // Perform the optimization.
-            let layout = optimization::optimize(
+            let (layout_str, layout) = optimization::optimize(
                 &process_id,
                 &optimization_params,
                 &fix_from,
@@ -190,7 +188,7 @@ fn main() {
             );
             let evaluation_result = evaluator.evaluate_layout(&layout);
             let cost = evaluation_result.total_cost();
-            let _ = final_results.get_or_insert_with(&layout.as_text(), || cost);
+            let _ = final_results.get_or_insert_with(&layout_str, || cost);
 
             // Plot some information regarding the layout.
             println!(
@@ -201,7 +199,7 @@ fn main() {
                 layout.plot_compact(),
                 layout.plot(),
                 evaluation_result,
-                final_results.highlighted_fmt(Some(&layout.as_text()), 10),
+                final_results.highlighted_fmt(Some(&layout_str), 10),
             );
 
             // Log solution to file.

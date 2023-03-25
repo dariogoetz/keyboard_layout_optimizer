@@ -70,6 +70,22 @@ Whitespace is allowed and will be ignored.
 
 Only those keys shall be specified that are not marked as "fixed" in the layout configuration file "config/keyboard/standard.yml" (usually 32 keys).
 
+There are two options how the layout string provided on the commandline is interpreted:
+#### Default Behavior
+Only the keys of the "base layer" are specified in the provided layout string (corresponding to the first symbols of the lists defined in the config under `base_layout`).
+The the base layer symbols together with all upper layer symbols defined in the `base_layout` move to the specified location (except those layers defined in `fixed_layers`).
+
+Using this option, optimizations always keep the symbols defined in the `base_layout` together (apart from the `fixed_layers` that do not permute at all).
+
+#### Grouped Layers (used if the commandline-argument `--grouped-layout-generator` is active)
+The number of symbols provided in the given layout string can be a multiple of the non-fixed keys, say `N`. In that case, the first `N` symbols represent the first layer of the layout.
+The config parameter `grouped_layers` determines the number of symbols in the `base_layout` that move together with the symbol in the given layout string.
+For instance, `grouped_layers: 1` means that only the given symbol moves to the specified location. `grouped_layers: 2` would move the given symbol together with the next symbol in the same list (maybe its uppercase variant).
+
+The second `N` symbols are then placed in the next layer of the layout (layer `grouped_layers + 1`).
+
+This option allows optimizing the location of symbols across multiple layers independently.
+
 ### Layout Plot Binary
 The `plot` binary expects a layout representation as commandline argument.
 

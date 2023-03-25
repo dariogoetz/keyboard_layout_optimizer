@@ -1,6 +1,6 @@
 use keyboard_layout::{
-    config::LayoutConfig, keyboard::Keyboard, layout::Layout,
-    neo_layout_generator::NeoLayoutGenerator,
+    config::LayoutConfig, grouped_layout_generator::GroupedLayoutGenerator, keyboard::Keyboard,
+    layout::Layout, layout_generator::LayoutGenerator, neo_layout_generator::NeoLayoutGenerator,
 };
 use layout_evaluation::{
     config::EvaluationParameters,
@@ -61,6 +61,10 @@ pub struct Options {
     /// Do not increase weight of common ngrams
     #[clap(long)]
     pub no_increase_common_ngrams: bool,
+
+    /// Interpred given layout string using the "grouped" logic
+    #[clap(long)]
+    pub grouped_layout_generator: bool,
 }
 
 #[derive(Parser, Debug)]
@@ -84,14 +88,17 @@ pub struct PublishingOptions {
     pub publish_to: String,
 }
 
-pub fn init(options: &Options) -> (NeoLayoutGenerator, Evaluator) {
+pub fn init(options: &Options) -> (Box<dyn LayoutGenerator>, Evaluator) {
     (
-        init_layout_generator(&options.layout_config),
+        init_layout_generator(&options.layout_config, options.grouped_layout_generator),
         init_evaluator(options),
     )
 }
 
-pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
+pub fn init_layout_generator(
+    layout_config: &str,
+    grouped_layout_generator: bool,
+) -> Box<dyn LayoutGenerator> {
     let layout_config = LayoutConfig::from_yaml(layout_config)
         .unwrap_or_else(|e| panic!("Could not load config file {}: {}", layout_config, e));
 
@@ -113,7 +120,17 @@ pub fn init_layout_generator(layout_config: &str) -> NeoLayoutGenerator {
     let message = messages.join(" ");
     log::info!("Row loads: {}", message);
 
-    NeoLayoutGenerator::from_object(layout_config.base_layout, keyboard)
+    if grouped_layout_generator {
+        Box::new(GroupedLayoutGenerator::from_object(
+            layout_config.base_layout,
+            keyboard,
+        ))
+    } else {
+        Box::new(NeoLayoutGenerator::from_object(
+            layout_config.base_layout,
+            keyboard,
+        ))
+    }
 }
 
 pub fn init_evaluator(options: &Options) -> Evaluator {

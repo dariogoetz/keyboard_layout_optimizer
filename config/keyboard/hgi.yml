@@ -1,0 +1,124 @@
+keyboard:
+  matrix_positions:
+    - [       [3,2], [4,2], [5,2],                                 [14,2], [15,2], [16,2]        ]
+    - [[2,3], [3,3], [4,3], [5,3],                                 [14,3], [15,3], [16,3], [17,3]]
+    - [                            [6,4], [7,4],   [12,4], [13,4]                                ]
+
+  positions:
+    - [              [100.5,105.5], [150.5,100.5], [200.5,105.5],                              [500.5,105.5], [550.5,100.5], [600.5,105.5]               ]
+    - [[50.5,165.5], [100.5,155.5], [150.5,150.5], [200.5,155.5],                              [500.5,155.5], [550.5,150.5], [600.5,155.5], [650.5,165.5]]
+    - [                                                        [230.5,210.5],  [290.5,210.5],   [410.5,210.5],   [470.5,210.5]                           ]
+
+  hands:
+    - [      Left, Left, Left,                              Right, Right, Right       ]
+    - [Left, Left, Left, Left,                              Right, Right, Right, Right]
+    - [                        Left, Left,    Right, Right                            ]
+
+  fingers:
+    - [       Ring,  Middle, Index,                                 Index, Middle, Ring        ]
+    - [Pinky, Ring,  Middle, Index,                                 Index, Middle, Ring,  Pinky]
+    - [                             Thumb,   Thumb,   Thumb, Thumb                    ]
+
+  key_costs:
+    - [     8,  5, 11,                    11,  5,  8    ]
+    - [ 7,  3,  2,  2,                     2,  2,  3,  7]
+    - [                  3,  6,    6,  3                ]
+
+  unbalancing_positions:
+    - [          [0,   0], [0,  0], [0,   0],                  [0,   0], [0, 0], [0,   0]          ]
+    - [[0,   0], [0,   0], [0,  0], [0,   0],                  [0,   0], [0, 0], [0,   0], [0,   0]]
+    - [                                 [0, 0],   [0, 0], [0, 0], [0,   0]                                       ]
+
+  symmetries:
+    - [    17, 18, 19,           19, 18, 17    ]
+    - [22, 23, 24, 25,           25, 24, 23, 22]
+    - [                28, 29,   29, 28                ]
+
+  home_row_positions:
+    Left:
+      Pinky: [50.5,165.5]
+      Ring: [100.5,155.5]
+      Middle: [150.5,150.5]
+      Index: [200.5,155.5]
+      Thumb: [230.5, 210.5]
+    Right:
+      Pinky: [650.5,165.5]
+      Ring: [600.5,155.5]
+      Middle: [550.5,150.5]
+      Index: [500.5,155.5]
+      Thumb: [470.5, 210.5]
+
+
+  plot_template: |2
+            ┌───┐                         ┌───┐
+        ┌───┤ {{1}} ├───┐                 ┌───┤ {{4}} ├───┐
+        │ {{0}} ├───┤ {{2}} │                 │ {{3}} ├───┤ {{5}} │
+        ├───┤ {{8}} ├───┤                 ├─━─┤ {{11}} ├───┤
+    ┌───┤ {{7}} ├───┤ {{9}} │                 │ {{10}} ├───┤ {{12}} ├───┐
+    │ {{6}} ├───┘   └───┘                 └───┘   └───┤ {{13}} │
+    └───┘           ┌───┬───┐ ┌───┬───┐           └───┘
+                    │ {{14}} │ {{15}} │ │ {{16}} │ {{17}} │
+                    └───┴───┘ └───┴───┘
+
+  plot_template_short: |2
+     {{0}}{{1}}{{2}} {{3}}{{4}}{{5}}
+    {{6}}{{7}}{{8}}{{9}} {{10}}{{11}}{{12}}{{13}}
+    {{14}}{{15}} {{16}}{{17}}
+
+base_layout:
+  keys:
+    # Row 2
+    - - ["l", "L", "v", "V"]
+      - ["d", "D", "m", "M"]
+      - ["g", "G", "w", "W"]
+      - ["h", "H", "f", "F"]
+      - ["u", "U", ",", "/"]
+      - ["o", "O", "z", "Z"]
+    # Row 3 (home row)
+    - - ["i", "I", "q", "Q"]
+      - ["s", "S", "j", "J"]
+      - ["t", "T", "k", "K"]
+      - ["r", "R", "p", "P"]
+      - ["n", "N", "b", "B"]
+      - ["e", "E", ".", "/"]
+      - ["a", "A", "x", "X"]
+      - ["c", "C", "y", "Y"]
+    # Row 4, containing the spacebar
+    - - [" "]
+      - ["⇧"]
+      - ["\n"]
+      - ["⇙"]
+
+  fixed_keys:
+    - [         false, false, false,                  false, false, false       ]
+    - [  false, false, false, false,                  false, false, false, false]
+    - [                        true,  true,    true,  true                      ]
+
+  # for NeoLayoutGenerator:
+  # layers that shall not be permutated (starting from 0)
+  fixed_layers: [1]
+
+  # for GroupedLayoutGenerator:
+  # number of consecutive symbols from base layout to group together generating a layout
+  grouped_layers: 2
+
+  modifiers:
+    - Left:
+        type: hold
+        value: [[7,4]]
+      Right:
+        type: hold
+        value: [[7,4]]
+    - Left:
+        type: hold
+        value: [[13,4]]
+      Right:
+        type: hold
+        value: [[13,4]]
+    - Left:
+        type: hold
+        value: [[7,4], [13,4]]
+      Right:
+        type: hold
+        value: [[7,4], [13,4]]
+

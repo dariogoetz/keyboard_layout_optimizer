@@ -11,6 +11,10 @@ struct Options {
     /// Filename of layout configuration file to use
     #[clap(short, long, default_value = "config/keyboard/standard.yml")]
     layout_config: String,
+
+    /// Interpred given layout string using the "grouped" logic
+    #[clap(long)]
+    pub grouped_layout_generator: bool,
 }
 
 fn main() {
@@ -18,7 +22,8 @@ fn main() {
     env_logger::init();
     let options = Options::parse();
 
-    let layout_generator = common::init_layout_generator(&options.layout_config);
+    let layout_generator =
+        common::init_layout_generator(&options.layout_config, options.grouped_layout_generator);
 
     let layout = match layout_generator.generate(&options.layout_str) {
         Ok(layout) => layout,
