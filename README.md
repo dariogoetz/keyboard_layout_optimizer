@@ -133,7 +133,7 @@ base layouts instead of neo (`standard_qwerty_uk.yml` and `standard_qwerty_us.ym
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
 ### Layout Optimization Binary
-The available optimize-binaries include `optimize_genetic.rs`, `optimize_sa.rs`, and `optimize_abc.rs`.
+The available optimize-binaries include `optimize_genetic.rs` and `optimize_sa.rs`.rs`.
 If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
 Optional commandline parameters can be explored with the `-h` option.
 
@@ -166,19 +166,10 @@ In contrast to other binaries, using this algorithm you can optimize multiple st
 RUST_LOG=INFO ./target/release/optimize_sa -s "jduaxphlmwqßctieobnrsgfvüäöyz,.k" -s "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j" -s "k.o,yvgclfzßhaeiudtrnsxqäüöbpwmj"
 ```
 
-##### Artificial Bee Colony (`optimize_abc.rs`)
-This implementation is not regarded "production-ready" and only a few of the options available in the other binaries are implemented.
-
-Example of an optimization (starting from a random layout, fixing "," and "."):
-``` sh
-RUST_LOG=INFO ./target/release/optimize_abc -f ",."
-```
-
 #### Configuration
 The parameters of the corresponding optimization process can be configured in the files:
 * `genetic.yml`
 * `sa.yml`
-* `abc.yml`
 
 They can be found inside the config-directory (`config/optimization/`).
 
@@ -201,7 +192,6 @@ The project includes several binaries within the `keyboard_layout_optimizer` cra
 1. `evaluate` - Evaluates a specified layout and prints a summary of the various metrics to stdout
 1. `optimize_genetic` - Starts an optimization heuristic to find a good layout (genetic algorithm)
 1. `optimize_sa` - Starts an optimization heuristic to find a good layout (simulated annealing algorithm)
-1. `optimize_abc` - Starts an optimization heuristic to find a good layout (artificial bee colony algorithm)
 1. `random_evaluate` - Evaluates a series of randomly generated layouts (mostly used for benchmarking)
 1. `ngrams` - Generates ngram-frequency files (used as standard input to the evaluation) from a
    given text file
