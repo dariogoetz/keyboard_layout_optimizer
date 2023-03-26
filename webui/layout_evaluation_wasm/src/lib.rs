@@ -389,7 +389,7 @@ pub fn sa_optimize(
     let layout_generator: Box<dyn LayoutGenerator> =
         Box::new(layout_evaluator.layout_generator.clone());
 
-    let _: Layout = sa_optimization::optimize(
+    let _: (String, Layout) = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         &parameters,
         layout_str,
