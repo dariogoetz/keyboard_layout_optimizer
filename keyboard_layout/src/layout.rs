@@ -415,17 +415,22 @@ impl Layout {
             .key_layers
             .iter()
             .map(|layers| {
-                if !layers.is_empty() {
-                    // if layer is larger than number of layers on this key, show last layer's value
-                    let l = layer.min(layers.len() - 1);
-                    let k = self.get_layerkey(&layers[l]);
+                if layers.is_empty() {
+                    return " ".to_string();
+                }
+                // layers may have less items than given "layer"
+                let k = self.get_layerkey(&layers[layer.min(layers.len() - 1)]);
+
+                if layer >= layers.len() && !k.is_fixed {
+                    // for non-fixed, show empty field if no symbol is in layers
+                    " ".to_string()
+                } else {
+                    // if no symbol is in layers, show last layers value if it is fixed
                     let mut s = fmt_char(k.symbol).to_string();
                     if !k.is_fixed {
                         s = s.yellow().bold().to_string();
                     }
                     s
-                } else {
-                    " ".to_string()
                 }
             })
             .collect();
