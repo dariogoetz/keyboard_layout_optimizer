@@ -132,7 +132,7 @@ impl BigramMetric for KLADistance {
                         // move finger from previous keypress to key and press it (same finger activation)
                         (KeyUsage::Used(prev_key), KeyUsage::Used(curr_key)) => {
                             // if both keys are identical and are mods it is a hold -> no cost
-                            if !(prev_key == curr_key && curr_key.is_modifier) {
+                            if !(prev_key == curr_key && curr_key.is_modifier.is_some()) {
                                 let dist = curr_key.key.position.distance(&prev_key.key.position)
                                     + self.keydown_distance
                                     + self.keyup_distance;

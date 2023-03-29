@@ -83,7 +83,8 @@ impl BigramMetric for KLASameFinger {
                     ) = (prev_used, curr_used)
                     {
                         // if both keys are identical and are mods it is a hold -> no cost
-                        if !(prev_used_key == curr_used_key && curr_used_key.is_modifier) {
+                        if !(prev_used_key == curr_used_key && curr_used_key.is_modifier.is_some())
+                        {
                             *finger_values
                                 .get_mut(&curr_used_key.key.hand, &curr_used_key.key.finger) +=
                                 *weight;

@@ -55,7 +55,9 @@ impl TrigramMetric for OxeyInwardRolls {
             return Some(0.0);
         }
 
-        if self.exclude_modifiers && (k1.is_modifier || k2.is_modifier || k3.is_modifier) {
+        if self.exclude_modifiers
+            && (k1.is_modifier.is_some() || k2.is_modifier.is_some() || k3.is_modifier.is_some())
+        {
             return Some(0.0);
         }
 
