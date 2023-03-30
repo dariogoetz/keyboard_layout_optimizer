@@ -97,7 +97,7 @@ impl BigramMetric for MovementPattern {
 
         let finger_switch_factor = self.finger_switch_factor.get(&h1, &f1).get(&h2, &f2);
         let direction_factor = if (downwards && first_is_shorter) || (upwards && first_is_longer) {
-            finger_length_diff.abs() * self.short_down_to_long_or_long_up_to_short_factor
+            1.0 + finger_length_diff.abs() * self.short_down_to_long_or_long_up_to_short_factor
         } else {
             1.0
         };
