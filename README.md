@@ -117,7 +117,7 @@ base layouts instead of neo (`standard_qwerty_uk.yml` and `standard_qwerty_us.ym
 This file contains configuration parameters for all available evaluation metrics, filenames of prepared ngram data to use, and parameters specifying the behavior of post-processing the ngram data for a given layout.
 
 ### Layout Optimization Binary
-The available optimize-binaries include `optimize_genetic.rs`, `optimize_sa.rs`, and `optimize_abc.rs`.
+The available optimize-binaries include `optimize_genetic.rs` and `optimize_sa.rs`.
 If run without any commandline parameters, they start with a random layout or a collection of random layouts and optimize from there. With commandline options, a "starting layout" can be specified or a list of keys that shall not be permutated (if no starting layout is given, fixed keys relate to the [Neo2](https://neo-layout.org/) layout).
 Optional commandline parameters can be explored with the `-h` option.
 
