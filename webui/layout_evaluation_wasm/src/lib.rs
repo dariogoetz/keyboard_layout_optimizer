@@ -82,9 +82,10 @@ impl LayoutPlotter {
     }
 
     pub fn plot(&self, layout_str: &str, layer: usize) -> Result<String, JsValue> {
+        let layout_str: String = layout_str.chars().filter(|c| !c.is_whitespace()).collect();
         let layout = self
             .layout_generator
-            .generate_unchecked(layout_str)
+            .generate_unchecked(&layout_str)
             .map_err(|e| format!("Could not plot the layout: {:?}", e))?;
         Ok(layout.plot_layer(layer))
     }
@@ -186,9 +187,10 @@ impl LayoutEvaluator {
     }
 
     pub fn evaluate(&self, layout_str: &str) -> Result<JsValue, JsValue> {
+        let layout_str: String = layout_str.chars().filter(|c| !c.is_whitespace()).collect();
         let layout = self
             .layout_generator
-            .generate(layout_str)
+            .generate(&layout_str)
             .map_err(|e| format!("Could not generate layout: {:?}", e))?;
         let res = self.evaluator.evaluate_layout(&layout);
         let printed = Some(format!("{}", res));
@@ -203,9 +205,10 @@ impl LayoutEvaluator {
     }
 
     pub fn plot(&self, layout_str: &str, layer: usize) -> Result<String, JsValue> {
+        let layout_str: String = layout_str.chars().filter(|c| !c.is_whitespace()).collect();
         let layout = self
             .layout_generator
-            .generate(layout_str)
+            .generate(&layout_str)
             .map_err(|e| format!("Could not plot the layout: {:?}", e))?;
         Ok(layout.plot_layer(layer))
     }
@@ -237,6 +240,8 @@ impl LayoutOptimizer {
     ) -> Result<LayoutOptimizer, JsValue> {
         utils::set_panic_hook();
 
+        let layout_str: String = layout_str.chars().filter(|c| !c.is_whitespace()).collect();
+
         let parameters: genevo_optimization::Parameters =
             serde_yaml::from_str(optimization_params_str)
                 .map_err(|e| format!("Could not read optimization params: {:?}", e))?;
@@ -247,7 +252,7 @@ impl LayoutOptimizer {
         let (simulator, permutator) = genevo_optimization::init_optimization(
             &parameters,
             &layout_evaluator.evaluator,
-            layout_str,
+            &layout_str,
             &layout_generator,
             fixed_characters,
             start_with_layout,
@@ -389,10 +394,12 @@ pub fn sa_optimize(
     let layout_generator: Box<dyn LayoutGenerator> =
         Box::new(layout_evaluator.layout_generator.clone());
 
+    let layout_str: String = layout_str.chars().filter(|c| !c.is_whitespace()).collect();
+
     let _: (String, Layout) = sa_optimization::optimize(
         /* Thread_name: */ "Web optimization",
         &parameters,
-        layout_str,
+        &layout_str,
         fixed_characters,
         &layout_generator,
         start_with_layout,

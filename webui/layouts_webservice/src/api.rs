@@ -1,5 +1,6 @@
 use super::Options;
 
+use keyboard_layout::layout_generator::LayoutGenerator;
 use keyboard_layout::neo_layout_generator::NeoLayoutGenerator;
 use layout_evaluation::{evaluation::Evaluator, results::EvaluationResult};
 
@@ -96,10 +97,15 @@ async fn post(
     let layout_generator = layout_generators
         .get(&layout_config)
         .ok_or(Status::BadRequest)?;
+
+    let layout_str: String = layout
+        .layout
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect();
     let l = layout_generator
-        .generate(&layout.layout)
+        .generate(&layout_str)
         .map_err(|_| Status::BadRequest)?;
-    let layout_str = l.as_text();
 
     // check if layout is in database already
     let result = sqlx::query_as::<_, LayoutEvaluationDB>(

@@ -28,6 +28,10 @@ struct Options {
     #[clap(short, long)]
     start_layout: Option<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Do not cache intermediate results
     #[clap(long)]
     no_cache_results: bool,
@@ -72,6 +76,18 @@ fn main() {
 
     let options = Options::parse();
 
+    let fix_from: String = options
+        .fix_from
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
+
+    let start_layout = options.start_layout.as_ref().map(|s| {
+        s.chars()
+            .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+            .collect::<String>()
+    });
+
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let mut optimization_params = optimization::Parameters::from_yaml(
@@ -88,11 +104,7 @@ fn main() {
         optimization_params.generation_limit = generation_limit
     }
 
-    let fix_from = options
-        .start_layout
-        .as_ref()
-        .unwrap_or(&options.fix_from)
-        .to_string();
+    let fix_from = start_layout.as_ref().unwrap_or(&fix_from).to_string();
 
     loop {
         let (layout_str, layout) = optimization::optimize(
@@ -101,7 +113,7 @@ fn main() {
             &fix_from,
             &layout_generator,
             &options.fix.clone().unwrap_or_else(|| "".to_string()),
-            options.start_layout.is_some(),
+            start_layout.is_some(),
             !options.no_cache_results,
         );
         let evaluation_result = evaluator.evaluate_layout(&layout);

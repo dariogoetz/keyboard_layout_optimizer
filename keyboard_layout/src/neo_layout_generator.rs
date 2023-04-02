@@ -113,7 +113,7 @@ impl NeoLayoutGenerator {
     /// Does not check whether the given string is valid (sufficient, correct and unique charactors).
     /// This is useful for plotting unfinished or invalid layouts.
     pub fn generate_unchecked(&self, layout_keys: &str) -> Result<Layout> {
-        let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
+        let chars: Vec<char> = layout_keys.chars().collect();
 
         // assemble a Vec<Vec<char>> representation of the layer for the given layout string
         let mut given_chars = chars.iter();
@@ -168,7 +168,7 @@ impl NeoLayoutGenerator {
 impl LayoutGenerator for NeoLayoutGenerator {
     /// Generate a Neo variant [`Layout`] from a given string representation of its base layer (only non-fixed keys)
     fn generate(&self, layout_keys: &str) -> Result<Layout> {
-        let chars: Vec<char> = layout_keys.chars().filter(|c| !c.is_whitespace()).collect();
+        let chars: Vec<char> = layout_keys.chars().collect();
 
         let char_set: AHashSet<char> = AHashSet::from_iter(chars.clone());
         let layout_set: AHashSet<char> =

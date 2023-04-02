@@ -32,6 +32,10 @@ struct Options {
     /// List of Layout keys from left to right, top to bottom
     layout_str: Vec<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Read layouts from file and append to command line layouts
     #[clap(long)]
     from_file: Option<String>,
@@ -83,7 +87,11 @@ fn main() {
     let mut results: Vec<(Layout, EvaluationResult)> = layout_strings
         .par_iter()
         .map(|layout_str| {
-            let layout = match layout_generator.generate(layout_str) {
+            let layout_str: String = layout_str
+                .chars()
+                .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+                .collect();
+            let layout = match layout_generator.generate(&layout_str) {
                 Ok(layout) => layout,
                 Err(e) => {
                     log::error!("Error in generating layout: {:?}", e);

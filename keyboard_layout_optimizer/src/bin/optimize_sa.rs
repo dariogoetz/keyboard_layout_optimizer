@@ -30,6 +30,10 @@ struct Options {
     #[clap(short, long)]
     start_layouts: Vec<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Do not cache intermediate results
     #[clap(long)]
     no_cache_results: bool,
@@ -125,6 +129,22 @@ fn main() {
 
     let options = Options::parse();
 
+    let fix_from: String = options
+        .fix_from
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
+
+    let start_layouts: Vec<String> = options
+        .start_layouts
+        .iter()
+        .map(|s| {
+            s.chars()
+                .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+                .collect::<String>()
+        })
+        .collect();
+
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let mut optimization_params = optimization::Parameters::from_yaml(
@@ -143,12 +163,12 @@ fn main() {
     }
     optimization_params.correct_init_temp();
 
-    let mut layouts: Vec<String> = options.start_layouts.to_vec();
+    let mut layouts: Vec<String> = start_layouts.to_vec();
     if layouts.is_empty() {
-        layouts = vec![options.fix_from.clone()];
+        layouts = vec![fix_from.clone()];
     }
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
-    let start_from_layout = !options.start_layouts.is_empty();
+    let start_from_layout = !start_layouts.is_empty();
 
     let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
