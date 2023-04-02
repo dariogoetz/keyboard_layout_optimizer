@@ -117,6 +117,16 @@ metrics:
     params:
       null: null
 
+  modifier_usage:
+    enabled: true
+    weight: 100.0
+    normalization:
+      type: weight_found
+      value: 1.0
+    params:
+      hold_cost: 1.0
+      one_shot_cost: 0.0
+
   # bigram metrics
 
   # If the keys corresponding to a bigram are not symmetrical on left and right hand, a cost is

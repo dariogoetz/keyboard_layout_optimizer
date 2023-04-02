@@ -5,7 +5,6 @@ members = [
   "layout_optimization/layout_optimization_common",
   "layout_optimization/layout_optimization_genetic",
   "layout_optimization/layout_optimization_sa",
-  "layout_optimization/layout_optimization_abc",
   "keyboard_layout_optimizer",
 ]
 

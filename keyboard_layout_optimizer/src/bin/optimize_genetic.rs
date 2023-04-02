@@ -28,6 +28,10 @@ struct Options {
     #[clap(short, long)]
     start_layout: Option<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Do not cache intermediate results
     #[clap(long)]
     no_cache_results: bool,
@@ -72,6 +76,18 @@ fn main() {
 
     let options = Options::parse();
 
+    let fix_from: String = options
+        .fix_from
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
+
+    let start_layout = options.start_layout.as_ref().map(|s| {
+        s.chars()
+            .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+            .collect::<String>()
+    });
+
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let mut optimization_params = optimization::Parameters::from_yaml(
@@ -88,42 +104,38 @@ fn main() {
         optimization_params.generation_limit = generation_limit
     }
 
-    let fix_from = options
-        .start_layout
-        .as_ref()
-        .unwrap_or(&options.fix_from)
-        .to_string();
+    let fix_from = start_layout.as_ref().unwrap_or(&fix_from).to_string();
 
     loop {
-        let layout = optimization::optimize(
+        let (layout_str, layout) = optimization::optimize(
             &optimization_params,
             &evaluator,
             &fix_from,
             &layout_generator,
             &options.fix.clone().unwrap_or_else(|| "".to_string()),
-            options.start_layout.is_some(),
+            start_layout.is_some(),
             !options.no_cache_results,
         );
         let evaluation_result = evaluator.evaluate_layout(&layout);
         let cost = evaluation_result.total_cost();
-        let _ = final_results.get_or_insert_with(&layout.as_text(), || cost);
+        let _ = final_results.get_or_insert_with(&layout_str, || cost);
 
         println!(
             "{}\n\n{}\n",
             evaluation_result,
-            final_results.highlighted_fmt(Some(&layout.as_text()), 10)
+            final_results.highlighted_fmt(Some(&layout_str), 10)
         );
 
         // Log solution to file.
         if let Some(filename) = &options.append_solutions_to {
-            common::append_to_file(&layout, filename);
+            common::append_to_file(&layout_str, filename);
         }
 
         // Publish to webservice.
         let o = &options.publishing_options;
         if o.publish_as.is_some() && cost < o.publish_if_cost_below.unwrap_or(f64::INFINITY) {
             common::publish_to_webservice(
-                &layout,
+                &layout_str,
                 o.publish_as.as_ref().unwrap(),
                 &o.publish_to,
                 &o.publish_layout_config,

@@ -30,6 +30,10 @@ struct Options {
     #[clap(short, long)]
     start_layouts: Vec<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Do not cache intermediate results
     #[clap(long)]
     no_cache_results: bool,
@@ -125,6 +129,22 @@ fn main() {
 
     let options = Options::parse();
 
+    let fix_from: String = options
+        .fix_from
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
+
+    let start_layouts: Vec<String> = options
+        .start_layouts
+        .iter()
+        .map(|s| {
+            s.chars()
+                .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+                .collect::<String>()
+        })
+        .collect();
+
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
     let mut optimization_params = optimization::Parameters::from_yaml(
@@ -143,12 +163,12 @@ fn main() {
     }
     optimization_params.correct_init_temp();
 
-    let mut layouts: Vec<String> = options.start_layouts.to_vec();
+    let mut layouts: Vec<String> = start_layouts.to_vec();
     if layouts.is_empty() {
-        layouts = vec![options.fix_from.clone()];
+        layouts = vec![fix_from.clone()];
     }
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
-    let start_from_layout = !options.start_layouts.is_empty();
+    let start_from_layout = !start_layouts.is_empty();
 
     let cache: Option<Cache<f64>> = match !options.no_cache_results {
         true => Some(Cache::new()),
@@ -174,7 +194,7 @@ fn main() {
             }
 
             // Perform the optimization.
-            let layout = optimization::optimize(
+            let (layout_str, layout) = optimization::optimize(
                 &process_id,
                 &optimization_params,
                 &fix_from,
@@ -188,7 +208,7 @@ fn main() {
             );
             let evaluation_result = evaluator.evaluate_layout(&layout);
             let cost = evaluation_result.total_cost();
-            let _ = final_results.get_or_insert_with(&layout.as_text(), || cost);
+            let _ = final_results.get_or_insert_with(&layout_str, || cost);
 
             // Plot some information regarding the layout.
             println!(
@@ -199,19 +219,19 @@ fn main() {
                 layout.plot_compact(),
                 layout.plot(),
                 evaluation_result,
-                final_results.highlighted_fmt(Some(&layout.as_text()), 10),
+                final_results.highlighted_fmt(Some(&layout_str), 10),
             );
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {
-                common::append_to_file(&layout, filename);
+                common::append_to_file(&layout_str, filename);
             }
 
             // Publish to webservice.
             let o = &options.publishing_options;
             if o.publish_as.is_some() && cost < o.publish_if_cost_below.unwrap_or(f64::INFINITY) {
                 common::publish_to_webservice(
-                    &layout,
+                    &layout_str,
                     o.publish_as.as_ref().unwrap(),
                     &o.publish_to,
                     &o.publish_layout_config,

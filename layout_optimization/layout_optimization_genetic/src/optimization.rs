@@ -1,7 +1,7 @@
-use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
+use keyboard_layout::{layout::Layout, layout_generator::LayoutGenerator};
 use layout_evaluation::{cache::Cache, evaluation::Evaluator};
 
-use layout_optimization_common::PermutationLayoutGenerator;
+use layout_optimization_common::LayoutPermutator;
 
 use anyhow::Result;
 use colored::Colorize;
@@ -55,13 +55,15 @@ type Genotype = Vec<usize>;
 #[derive(Clone, Debug)]
 pub struct FitnessCalc {
     evaluator: Arc<Evaluator>,
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
+    layout_generator: Box<dyn LayoutGenerator>,
     result_cache: Option<Cache<usize>>,
 }
 
 impl FitnessFunction<Genotype, usize> for FitnessCalc {
     fn fitness_of(&self, genome: &Genotype) -> usize {
-        let (layout_str, l) = self.layout_generator.generate_layout(genome);
+        let layout_str = self.permutator.generate_string(genome);
+        let l = self.layout_generator.generate(&layout_str).unwrap();
 
         // Get & return the evaluation-result
         match &self.result_cache {
@@ -90,7 +92,7 @@ struct LayoutBuilder {
 }
 
 impl LayoutBuilder {
-    fn with_permutable_layout(layout_prototype: &PermutationLayoutGenerator) -> Self {
+    fn with_permutable_layout(layout_prototype: &LayoutPermutator) -> Self {
         Self {
             indices: layout_prototype.get_permutable_indices(),
         }
@@ -113,7 +115,7 @@ struct FromGivenLayoutBuilder {
 }
 
 impl FromGivenLayoutBuilder {
-    fn with_permutable_layout(layout_prototype: &PermutationLayoutGenerator) -> Self {
+    fn with_permutable_layout(layout_prototype: &LayoutPermutator) -> Self {
         Self {
             indices: layout_prototype.get_permutable_indices(),
         }
@@ -223,12 +225,12 @@ pub fn init_optimization(
     params: &Parameters,
     evaluator: &Evaluator,
     layout_str: &str,
-    layout_generator: &NeoLayoutGenerator,
+    layout_generator: &Box<dyn LayoutGenerator>,
     fixed_characters: &str,
     start_with_layout: bool,
     cache_results: bool,
-) -> (MySimulator, PermutationLayoutGenerator) {
-    let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
+) -> (MySimulator, LayoutPermutator) {
+    let pm = LayoutPermutator::new(layout_str, fixed_characters);
     let initial_population: Population<Genotype> = if start_with_layout {
         build_population()
             .with_genome_builder(FromGivenLayoutBuilder::with_permutable_layout(&pm))
@@ -251,7 +253,8 @@ pub fn init_optimization(
         genetic_algorithm()
             .with_evaluation(FitnessCalc {
                 evaluator: Arc::new(evaluator.clone()),
-                layout_generator: pm.clone(),
+                permutator: pm.clone(),
+                layout_generator: layout_generator.clone(),
                 result_cache,
             })
             .with_selection(MaximizeSelector::new(
@@ -276,11 +279,11 @@ pub fn optimize(
     params: &Parameters,
     evaluator: &Evaluator,
     layout_str: &str,
-    layout_generator: &NeoLayoutGenerator,
+    layout_generator: &Box<dyn LayoutGenerator>,
     fixed_characters: &str,
     start_with_layout: bool,
     cache_results: bool,
-) -> Layout {
+) -> (String, Layout) {
     let (mut sim, pm) = init_optimization(
         params,
         evaluator,
@@ -302,8 +305,9 @@ pub fn optimize(
                 let best_solution = step.result.best_solution;
                 if let Some(king) = &all_time_best {
                     if best_solution.solution.fitness > king.0 {
-                        let (layout_str, layout) =
-                            pm.generate_layout(&best_solution.solution.genome);
+                        let layout_str = pm.generate_string(&best_solution.solution.genome);
+                        let layout = layout_generator.generate(&layout_str).unwrap();
+
                         let evaluation_result = evaluator.evaluate_layout(&layout);
                         println!(
                             "{}: {} (score: {})\n{}",
@@ -335,11 +339,12 @@ pub fn optimize(
                     all_time_best.as_ref().unwrap().0,
                     step.duration.fmt(),
                     step.processing_time.fmt(),
-                    pm.generate_layout(&best_solution.solution.genome).0
+                    pm.generate_string(&best_solution.solution.genome)
                 );
             }
             Ok(SimResult::Final(step, processing_time, duration, _stop_reason)) => {
-                let (layout_str, layout) = pm.generate_layout(&all_time_best.as_ref().unwrap().1);
+                let layout_str = pm.generate_string(&all_time_best.as_ref().unwrap().1);
+                let layout = layout_generator.generate(&layout_str).unwrap();
                 println!(
                     "{} after generation {}, duration {}, processing time {}\n\n{}\n\n{}\n{}",
                     "Final result".green().bold(),
@@ -359,5 +364,8 @@ pub fn optimize(
         }
     }
 
-    pm.generate_layout(&all_time_best.as_ref().unwrap().1).1
+    let best_layout_str = pm.generate_string(&all_time_best.as_ref().unwrap().1);
+    let best_layout = layout_generator.generate(&best_layout_str).unwrap();
+
+    (best_layout_str, best_layout)
 }

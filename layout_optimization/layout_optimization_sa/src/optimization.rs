@@ -1,7 +1,7 @@
-use keyboard_layout::{layout::Layout, layout_generator::NeoLayoutGenerator};
+use keyboard_layout::{layout::Layout, layout_generator::LayoutGenerator};
 use layout_evaluation::{cache::Cache, evaluation::Evaluator};
 
-use layout_optimization_common::PermutationLayoutGenerator;
+use layout_optimization_common::LayoutPermutator;
 
 use anyhow::Result;
 use colored::Colorize;
@@ -68,7 +68,8 @@ impl Parameters {
 
 pub struct AnnealingStruct {
     evaluator: Arc<Evaluator>,
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
+    layout_generator: Box<dyn LayoutGenerator>,
     key_switches: usize,
     result_cache: Option<Cache<f64>>,
 }
@@ -80,15 +81,11 @@ impl CostFunction for AnnealingStruct {
     /// Evaluate param (= the layout-vector).
     fn cost(&self, param: &Self::Param) -> Result<Self::Output, Error> {
         let evaluate_layout_str = |layout_str: &str| -> f64 {
-            let l = self
-                .layout_generator
-                .layout_generator
-                .generate(layout_str)
-                .unwrap();
+            let l = self.layout_generator.generate(layout_str).unwrap();
             self.evaluator.evaluate_layout(&l).total_cost()
         };
 
-        let layout_string = self.layout_generator.generate_string(param);
+        let layout_string = self.permutator.generate_string(param);
         let evaluation_result = match &self.result_cache {
             Some(result_cache) => result_cache
                 .get_or_insert_with(&layout_string, || evaluate_layout_str(&layout_string)),
@@ -106,9 +103,7 @@ impl Anneal for AnnealingStruct {
 
     /// Anneal a parameter vector, slightly changing it.
     fn anneal(&self, param: &Self::Param, _temp: f64) -> Result<Self::Output, Error> {
-        Ok(self
-            .layout_generator
-            .perform_n_swaps(param, self.key_switches))
+        Ok(self.permutator.perform_n_swaps(param, self.key_switches))
     }
 }
 
@@ -117,7 +112,7 @@ pub type SaIterState = IterState<Vec<usize>, (), (), (), f64>;
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct BestObserver {
     id: String,
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
 }
 
 impl Observe<SaIterState> for BestObserver {
@@ -127,7 +122,7 @@ impl Observe<SaIterState> for BestObserver {
             _ => "New best:".green(),
         };
         let best_layout = self
-            .layout_generator
+            .permutator
             .generate_string(state.best_param.as_ref().unwrap());
         log::info!(
             "{} {} {} ({:>6.1})",
@@ -152,7 +147,7 @@ impl Observe<SaIterState> for CustomObserver {
 /// An observer that outputs important information in a more human-readable format than `Argmin`'s original implementation.
 struct IterationObserver {
     id: String,
-    layout_generator: PermutationLayoutGenerator,
+    permutator: LayoutPermutator,
     log_everything: bool,
 }
 
@@ -160,10 +155,10 @@ impl Observe<SaIterState> for IterationObserver {
     fn observe_iter(&mut self, state: &SaIterState, kv: &KV) -> Result<(), Error> {
         if state.iter > 0 {
             let layout = self
-                .layout_generator
+                .permutator
                 .generate_string(state.param.as_ref().unwrap());
             let best_layout = self
-                .layout_generator
+                .permutator
                 .generate_string(state.best_param.as_ref().unwrap());
             /* Structure of ArgminKV.kv: Vec<(&'static str, String)>
             t: 111.38906945299198
@@ -232,7 +227,8 @@ fn mean(list: &[f64]) -> f64 {
 fn get_cost_sd(
     initial_indices: &[usize],
     evaluator: Arc<Evaluator>,
-    layout_generator: &PermutationLayoutGenerator,
+    permutator: &LayoutPermutator,
+    layout_generator: &Box<dyn LayoutGenerator>,
     key_pair_switches: usize,
 ) -> f64 {
     const USED_NEIGHBORS: u16 = 100;
@@ -243,10 +239,12 @@ fn get_cost_sd(
     let mut current_indices = initial_indices.to_owned();
 
     for _ in 0..USED_NEIGHBORS {
-        let (_, layout) = layout_generator.generate_layout(&current_indices);
+        let layout = layout_generator
+            .generate(&permutator.generate_string(&current_indices))
+            .unwrap();
         let evaluation_result = evaluator.evaluate_layout(&layout);
         costs.push(evaluation_result.total_cost());
-        current_indices = layout_generator.perform_n_swaps(&current_indices, key_pair_switches);
+        current_indices = permutator.perform_n_swaps(&current_indices, key_pair_switches);
     }
     let average: f64 = mean(&costs);
 
@@ -266,14 +264,14 @@ pub fn optimize(
     params: &Parameters,
     layout_str: &str,
     fixed_characters: &str,
-    layout_generator: &NeoLayoutGenerator,
+    layout_generator: &Box<dyn LayoutGenerator>,
     start_with_layout: bool,
     evaluator: &Evaluator,
     log_everything: bool,
     result_cache: Option<Cache<f64>>,
     custom_observer: Option<CustomObserver>,
-) -> Layout {
-    let pm = PermutationLayoutGenerator::new(layout_str, fixed_characters, layout_generator);
+) -> (String, Layout) {
+    let pm = LayoutPermutator::new(layout_str, fixed_characters);
     // Get initial Layout.
     let initial_indices = match start_with_layout {
         true => pm.get_permutable_indices(),
@@ -302,6 +300,7 @@ pub fn optimize(
                 &initial_indices,
                 Arc::new(evaluator.clone()),
                 &pm,
+                layout_generator,
                 params.key_switches,
             );
             log::info!(
@@ -314,7 +313,8 @@ pub fn optimize(
     };
     let problem = AnnealingStruct {
         evaluator: Arc::new(evaluator.clone()),
-        layout_generator: pm.clone(),
+        permutator: pm.clone(),
+        layout_generator: layout_generator.clone(),
         key_switches: params.key_switches,
         result_cache,
     };
@@ -351,11 +351,11 @@ pub fn optimize(
         None => {
             let best_observer = BestObserver {
                 id: process_name.to_string(),
-                layout_generator: pm.clone(),
+                permutator: pm.clone(),
             };
             let iter_observer = IterationObserver {
                 id: process_name.to_string(),
-                layout_generator: pm.clone(),
+                permutator: pm.clone(),
                 log_everything,
             };
             let iter_observer_mode = if log_everything {
@@ -379,5 +379,8 @@ pub fn optimize(
     let res = executor.run().unwrap();
 
     let best_layout_param = res.state().get_best_param().unwrap();
-    pm.generate_layout(best_layout_param).1
+    let best_layout_str = pm.generate_string(best_layout_param);
+    let best_layout = layout_generator.generate(&best_layout_str).unwrap();
+
+    (best_layout_str, best_layout)
 }

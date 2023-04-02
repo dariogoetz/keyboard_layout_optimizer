@@ -1,5 +1,5 @@
 use crate::keyboard::KeyboardYAML;
-use crate::layout_generator::BaseLayoutYAML;
+use crate::neo_layout_generator::BaseLayoutYAML;
 
 use anyhow::Result;
 use serde::Deserialize;

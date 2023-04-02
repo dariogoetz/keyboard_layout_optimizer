@@ -58,7 +58,7 @@ impl TrigramMetric for SecondaryBigrams {
         total_weight: f64,
         layout: &Layout,
     ) -> Option<f64> {
-        if k1 == k3 && k1.is_modifier {
+        if k1 == k3 && k1.is_modifier.is_some() {
             return Some(0.0);
         }
 

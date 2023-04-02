@@ -72,7 +72,7 @@ impl TrigramMetric for NoHandswitchInTrigram {
         // Here, we use "non-fixed" keys, which should (but need not, depending on configuration), amount to the same
 
         // exclude modifiers (see ArneBab's explanation in comments for layout_cost.py:_trigram_key_tables)
-        if k1.is_modifier || k2.is_modifier || k3.is_modifier {
+        if k1.is_modifier.is_some() || k2.is_modifier.is_some() || k3.is_modifier.is_some() {
             return Some(0.0);
         }
 

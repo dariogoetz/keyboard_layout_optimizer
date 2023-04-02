@@ -7,10 +7,12 @@
 //! and other associated properties.
 
 pub mod config;
+pub mod grouped_layout_generator;
 pub mod key;
 pub mod keyboard;
 pub mod layout;
 pub mod layout_generator;
+pub mod neo_layout_generator;
 
 #[cfg(test)]
 mod tests {

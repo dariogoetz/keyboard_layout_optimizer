@@ -58,7 +58,7 @@ impl BigramMetric for FingerRepeats {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
-        if (k1 == k2 && k1.is_modifier)
+        if (k1 == k2 && k1.is_modifier.is_some())
             || k1.key.hand != k2.key.hand
             || k1.key.finger != k2.key.finger
         {

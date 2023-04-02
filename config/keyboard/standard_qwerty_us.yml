@@ -159,8 +159,13 @@ base_layout:
     - [ true,  false, false, false, false, false, false, false, false, false,  true,  true]
     - [ true,  true,  true,                       true,                       true,  true,  true,  true]
 
-  # starting from 0
+  # for NeoLayoutGenerator:
+  # layers that shall not be permutated (starting from 0)
   fixed_layers: []
+
+  # for GroupedLayoutGenerator:
+  # number of consecutive symbols from base layout to group together generating a layout
+  grouped_layers: 2
 
   modifiers:
     - Left:

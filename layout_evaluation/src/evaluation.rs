@@ -46,6 +46,7 @@ pub struct MetricParameters {
     pub hand_disbalance: Option<WeightedParams<hand_disbalance::Parameters>>,
     pub row_loads: Option<WeightedParams<row_loads::Parameters>>,
     pub key_costs: Option<WeightedParams<key_costs::Parameters>>,
+    pub modifier_usage: Option<WeightedParams<modifier_usage::Parameters>>,
 
     pub symmetric_handswitches: Option<WeightedParams<symmetric_handswitches::Parameters>>,
     pub finger_repeats: Option<WeightedParams<finger_repeats::Parameters>>,
@@ -143,6 +144,7 @@ impl Evaluator {
         add_metric!(unigram_metric, finger_balance, FingerBalance);
         add_metric!(unigram_metric, hand_disbalance, HandDisbalance);
         add_metric!(unigram_metric, row_loads, RowLoads);
+        add_metric!(unigram_metric, modifier_usage, ModifierUsage);
         add_metric!(unigram_metric, key_costs, KeyCost);
 
         // bigram metrics

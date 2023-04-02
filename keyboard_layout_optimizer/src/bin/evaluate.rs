@@ -32,6 +32,10 @@ struct Options {
     /// List of Layout keys from left to right, top to bottom
     layout_str: Vec<String>,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Read layouts from file and append to command line layouts
     #[clap(long)]
     from_file: Option<String>,
@@ -80,10 +84,14 @@ fn main() {
     let result_cache: Cache<EvaluationResult> = Cache::new();
 
     // evaluate layouts
-    let mut results: Vec<(Layout, EvaluationResult)> = layout_strings
+    let mut results: Vec<(String, Layout, EvaluationResult)> = layout_strings
         .par_iter()
         .map(|layout_str| {
-            let layout = match layout_generator.generate(layout_str) {
+            let layout_str: String = layout_str
+                .chars()
+                .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+                .collect();
+            let layout = match layout_generator.generate(&layout_str) {
                 Ok(layout) => layout,
                 Err(e) => {
                     log::error!("Error in generating layout: {:?}", e);
@@ -91,33 +99,31 @@ fn main() {
                 }
             };
             let evaluation_result =
-                result_cache.get_or_insert_with(layout_str, || evaluator.evaluate_layout(&layout));
-            (layout, evaluation_result)
+                result_cache.get_or_insert_with(&layout_str, || evaluator.evaluate_layout(&layout));
+            (layout_str, layout, evaluation_result)
         })
         .collect();
 
     // sort if required
     if options.sort {
-        results.sort_by(|(_, c1), (_, c2)| c1.total_cost().partial_cmp(&c2.total_cost()).unwrap());
+        results.sort_by(|(_, _, c1), (_, _, c2)| {
+            c1.total_cost().partial_cmp(&c2.total_cost()).unwrap()
+        });
     }
 
     // print results
     if options.json {
         let results: Vec<LayoutEvaluation> =
-            results.into_iter().map(|(_, res)| res.into()).collect();
+            results.into_iter().map(|(_, _, res)| res.into()).collect();
         println!("{}", serde_json::to_string(&results).unwrap());
     } else {
-        for (layout, evaluation_result) in results {
+        for (layout_str, layout, evaluation_result) in results {
             if !options.only_total_costs {
                 println!("Layout (layer 1):\n{}", layout.plot_layer(0));
                 println!("Layout string (layer 1):\n{}\n", layout);
                 println!("{}", evaluation_result);
             } else {
-                println!(
-                    "{} {:4.2}",
-                    layout.as_text(),
-                    evaluation_result.total_cost()
-                );
+                println!("{} {:4.2}", layout_str, evaluation_result.total_cost());
             }
         }
     }

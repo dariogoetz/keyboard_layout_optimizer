@@ -35,6 +35,32 @@ pub enum ModifierLocation {
     Symbol(char),
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum LayerModifierType {
+    None,
+    Hold,
+    OneShot,
+}
+
+impl Default for LayerModifierType {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+impl LayerModifierType {
+    pub fn is_some(&self) -> bool {
+        match self {
+            Self::None => false,
+            _ => true,
+        }
+    }
+
+    pub fn is_none(&self) -> bool {
+        !self.is_some()
+    }
+}
+
 /// Enum for configuring the way how the modifiers shall be used to access a layer.
 /// (e.g. whether the modifiers has to be held or tapped for activating a layer)
 #[derive(Deserialize, Clone, PartialEq, Eq, Debug)]
@@ -50,6 +76,12 @@ impl LayerModifierLocations {
         match self {
             Self::Hold(v) => v.iter(),
             Self::OneShot(v) => v.iter(),
+        }
+    }
+    pub fn layer_modifier_type(&self) -> LayerModifierType {
+        match self {
+            Self::Hold(_) => LayerModifierType::Hold,
+            Self::OneShot(_) => LayerModifierType::OneShot,
         }
     }
 }
@@ -95,12 +127,12 @@ pub struct LayerKey {
     /// If the key shall not be permutated for optimization
     pub is_fixed: bool,
     /// If the symbol itself is a modifier
-    pub is_modifier: bool,
+    pub is_modifier: LayerModifierType,
 }
 
 impl fmt::Display for LayerKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.is_modifier {
+        if self.is_modifier.is_some() {
             write!(f, "[{}]", self.symbol.escape_debug())
         } else {
             write!(f, "{}", self.symbol.escape_debug())
@@ -115,7 +147,7 @@ impl LayerKey {
         symbol: char,
         modifiers: LayerModifiers,
         is_fixed: bool,
-        is_modifier: bool,
+        is_modifier: LayerModifierType,
     ) -> Self {
         Self {
             layer,
@@ -188,7 +220,7 @@ impl Layout {
                             *c,
                             LayerModifiers::default(),
                             *fixed,
-                            false,
+                            LayerModifierType::None,
                         ));
                         layerkey_to_key_index.push(key_index as KeyIndex);
 
@@ -216,36 +248,40 @@ impl Layout {
         let mut mod_map: Vec<AHashMap<Hand, LayerModifiers>> = Vec::with_capacity(modifiers.len());
 
         // add modifier keys as layerkeys
-        let mut pos2mod_index: AHashMap<MatrixPosition, LayerKeyIndex> = AHashMap::default();
-        let mut char2mod_index: AHashMap<char, LayerKeyIndex> = AHashMap::default();
+        let mut pos2mod_index: AHashMap<(LayerModifierType, MatrixPosition), LayerKeyIndex> =
+            AHashMap::default();
+        let mut char2mod_index: AHashMap<(LayerModifierType, char), LayerKeyIndex> =
+            AHashMap::default();
         for mods_per_hand in modifiers.iter() {
             let mut resolved_mods_per_hand = AHashMap::default();
             for (hand, mods) in mods_per_hand.iter() {
                 let mut resolved_mods_vec = Vec::new();
                 for mp in mods.iter() {
+                    let layer_modifier_type = mods.layer_modifier_type();
                     match mp {
                         ModifierLocation::Position(mp) => {
                             let base_key_idx = *pos2layerkey_index
                                 .get(mp)
                                 .ok_or(format!("Modifier position '{:?}' not a found", mp))
                                 .map_err(anyhow::Error::msg)?;
-                            let mod_idx = *pos2mod_index.entry(*mp).or_insert_with(|| {
-                                let base_layerkey = &layerkeys[base_key_idx as usize];
-                                layerkeys.push(LayerKey::new(
-                                    0,
-                                    base_layerkey.key.clone(),
-                                    base_layerkey.symbol,
-                                    LayerModifiers::default(),
-                                    base_layerkey.is_fixed,
-                                    true,
-                                ));
-                                layerkey_to_key_index
-                                    .push(layerkey_to_key_index[base_key_idx as usize]);
+                            let mod_idx = *pos2mod_index
+                                .entry((layer_modifier_type, *mp))
+                                .or_insert_with(|| {
+                                    let base_layerkey = &layerkeys[base_key_idx as usize];
+                                    layerkeys.push(LayerKey::new(
+                                        0,
+                                        base_layerkey.key.clone(),
+                                        base_layerkey.symbol,
+                                        LayerModifiers::default(),
+                                        base_layerkey.is_fixed,
+                                        layer_modifier_type,
+                                    ));
+                                    layerkey_to_key_index
+                                        .push(layerkey_to_key_index[base_key_idx as usize]);
 
-                                layerkey_index += 1;
-                                layerkey_index - 1
-                            });
-
+                                    layerkey_index += 1;
+                                    layerkey_index - 1
+                                });
                             resolved_mods_vec.push(mod_idx);
                         }
                         ModifierLocation::Symbol(c) => {
@@ -253,22 +289,24 @@ impl Layout {
                                 .get(c)
                                 .ok_or(format!("Modifier char '{:?}' not a found", c))
                                 .map_err(anyhow::Error::msg)?;
-                            let mod_idx = *char2mod_index.entry(*c).or_insert_with(|| {
-                                let base_layerkey = &layerkeys[base_key_idx as usize];
-                                layerkeys.push(LayerKey::new(
-                                    base_layerkey.layer,
-                                    base_layerkey.key.clone(),
-                                    base_layerkey.symbol,
-                                    base_layerkey.modifiers.clone(),
-                                    base_layerkey.is_fixed,
-                                    true,
-                                ));
-                                layerkey_to_key_index
-                                    .push(layerkey_to_key_index[base_key_idx as usize]);
+                            let mod_idx = *char2mod_index
+                                .entry((layer_modifier_type, *c))
+                                .or_insert_with(|| {
+                                    let base_layerkey = &layerkeys[base_key_idx as usize];
+                                    layerkeys.push(LayerKey::new(
+                                        base_layerkey.layer,
+                                        base_layerkey.key.clone(),
+                                        base_layerkey.symbol,
+                                        base_layerkey.modifiers.clone(),
+                                        base_layerkey.is_fixed,
+                                        layer_modifier_type,
+                                    ));
+                                    layerkey_to_key_index
+                                        .push(layerkey_to_key_index[base_key_idx as usize]);
 
-                                layerkey_index += 1;
-                                layerkey_index - 1
-                            });
+                                    layerkey_index += 1;
+                                    layerkey_index - 1
+                                });
 
                             resolved_mods_vec.push(mod_idx);
                         }
@@ -319,7 +357,7 @@ impl Layout {
             .enumerate()
             .for_each(|(layerkey_index, layerkey)| {
                 // modifiers do not generate symbols themselves -> return
-                if layerkey.is_modifier {
+                if layerkey.is_modifier.is_some() {
                     return;
                 };
 
@@ -415,17 +453,22 @@ impl Layout {
             .key_layers
             .iter()
             .map(|layers| {
-                if !layers.is_empty() {
-                    // if layer is larger than number of layers on this key, show last layer's value
-                    let l = layer.min(layers.len() - 1);
-                    let k = self.get_layerkey(&layers[l]);
+                if layers.is_empty() {
+                    return " ".to_string();
+                }
+                // layers may have less items than given "layer"
+                let k = self.get_layerkey(&layers[layer.min(layers.len() - 1)]);
+
+                if layer >= layers.len() && !k.is_fixed {
+                    // for non-fixed, show empty field if no symbol is in layers
+                    " ".to_string()
+                } else {
+                    // if no symbol is in layers, show last layers value if it is fixed
                     let mut s = fmt_char(k.symbol).to_string();
                     if !k.is_fixed {
                         s = s.yellow().bold().to_string();
                     }
                     s
-                } else {
-                    " ".to_string()
                 }
             })
             .collect();

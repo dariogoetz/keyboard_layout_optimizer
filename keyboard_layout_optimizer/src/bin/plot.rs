@@ -8,9 +8,17 @@ struct Options {
     /// Layout keys from left to right, top to bottom
     layout_str: String,
 
+    /// Do not remove whitespace from layout strings
+    #[clap(long)]
+    do_not_remove_whitespace: bool,
+
     /// Filename of layout configuration file to use
     #[clap(short, long, default_value = "config/keyboard/standard.yml")]
     layout_config: String,
+
+    /// Interpred given layout string using the "grouped" logic
+    #[clap(long)]
+    pub grouped_layout_generator: bool,
 }
 
 fn main() {
@@ -18,9 +26,15 @@ fn main() {
     env_logger::init();
     let options = Options::parse();
 
-    let layout_generator = common::init_layout_generator(&options.layout_config);
+    let layout_str: String = options
+        .layout_str
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
+    let layout_generator =
+        common::init_layout_generator(&options.layout_config, options.grouped_layout_generator);
 
-    let layout = match layout_generator.generate(&options.layout_str) {
+    let layout = match layout_generator.generate(&layout_str) {
         Ok(layout) => layout,
         Err(e) => {
             log::error!("{:?}", e);
@@ -31,7 +45,7 @@ fn main() {
     for layer in 0..max_layer + 1 {
         println!(
             "Layout '{}' (layer {}):\n{}",
-            options.layout_str,
+            layout_str,
             layer + 1,
             layout.plot_layer(layer as usize)
         );
