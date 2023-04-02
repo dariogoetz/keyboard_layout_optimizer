@@ -123,9 +123,13 @@ impl GroupedLayoutGenerator {
                     let given_key_layers = &self.base_layout_symbols[*base_key_idx as usize];
 
                     // take a group of <self.grouped_layer> chars from the base layout
-                    let new_key_layers = given_key_layers
+                    let new_key_layers: Vec<char> = given_key_layers
                         .iter()
                         .skip(*base_key_layer as usize)
+                        .take(self.grouped_layers as usize)
+                        // make sure that the result has "self.grouped_layers" items
+                        // if insufficient symbols are in base_layout by cycling
+                        .cycle()
                         .take(self.grouped_layers as usize)
                         .cloned()
                         .collect();
