@@ -195,7 +195,7 @@ impl LayoutEvaluator {
         let res = self.evaluator.evaluate_layout(&layout);
         let printed = Some(format!("{}", res));
         let plot = Some(layout.plot());
-        let layout_str = Some(layout.as_text());
+        let layout_str = Some(layout_str);
 
         let mut res: LayoutEvaluation = res.into();
         res.printed = printed;

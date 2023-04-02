@@ -224,14 +224,14 @@ fn main() {
 
             // Log solution to file.
             if let Some(filename) = &options.append_solutions_to {
-                common::append_to_file(&layout, filename);
+                common::append_to_file(&layout_str, filename);
             }
 
             // Publish to webservice.
             let o = &options.publishing_options;
             if o.publish_as.is_some() && cost < o.publish_if_cost_below.unwrap_or(f64::INFINITY) {
                 common::publish_to_webservice(
-                    &layout,
+                    &layout_str,
                     o.publish_as.as_ref().unwrap(),
                     &o.publish_to,
                     &o.publish_layout_config,

@@ -214,22 +214,22 @@ pub fn init_evaluator(options: &Options) -> Evaluator {
 }
 
 /// Appends a layout-string to a file.
-pub fn append_to_file(layout: &Layout, filename: &str) {
+pub fn append_to_file(layout_str: &str, filename: &str) {
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(filename)
         .unwrap();
-    if let Err(e) = writeln!(file, "{}", layout.as_text()) {
+    if let Err(e) = writeln!(file, "{}", layout_str) {
         log::error!("Couldn't write to file: {}", e);
     } else {
-        log::info!("Appended layout '{}' to '{}'", layout.as_text(), filename);
+        log::info!("Appended layout '{}' to '{}'", layout_str, filename);
     }
 }
 
 /// Publishes the layout to a webservice.
 pub fn publish_to_webservice(
-    layout: &Layout,
+    layout_str: &str,
     publish_name: &str,
     publish_to: &str,
     publish_layout_config: &str,
@@ -237,13 +237,13 @@ pub fn publish_to_webservice(
     let client = reqwest::blocking::Client::new();
     let mut body = AHashMap::default();
     body.insert("published_by", publish_name.to_string());
-    body.insert("layout", layout.as_text());
+    body.insert("layout", layout_str.to_string());
     body.insert("layout_config", publish_layout_config.to_string());
 
     let resp = client.post(publish_to).json(&body).send().ok();
     if let Some(resp) = resp {
         if resp.status().is_success() {
-            log::info!("Published layout '{}' to {}", layout.as_text(), publish_to);
+            log::info!("Published layout '{}' to {}", layout_str, publish_to);
         } else {
             log::error!("Could not publish result to webservice: {:?}", &resp.text());
         }
