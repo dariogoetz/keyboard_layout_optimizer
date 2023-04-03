@@ -59,6 +59,20 @@ impl LayerModifierType {
     pub fn is_none(&self) -> bool {
         !self.is_some()
     }
+
+    pub fn is_hold(&self) -> bool {
+        match self {
+            Self::Hold => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_one_shot(&self) -> bool {
+        match self {
+            Self::OneShot => true,
+            _ => false,
+        }
+    }
 }
 
 /// Enum for configuring the way how the modifiers shall be used to access a layer.

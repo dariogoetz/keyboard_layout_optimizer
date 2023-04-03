@@ -115,7 +115,7 @@ impl OnDemandBigramMapper {
 
             // If the same modifier appears consecutively, it is usually "hold" instead of repeatedly pressed
             // --> remove
-            match k1.is_modifier.is_some() && idx1 == idx2 {
+            match k1.is_modifier.is_hold() && idx1 == idx2 {
                 false => Some((
                     (
                         k1,                        // LayerKey 1
