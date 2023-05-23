@@ -1,7 +1,7 @@
 # Keyboard Layout Optimizer
 
 Keyboard layout optimizer written in rust. The optimizer is based on the "evolve-keyboard-layout" [scripts by ArneBab](https://hg.sr.ht/~arnebab/evolve-keyboard-layout).
-It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (that are activated by holding corresponding modifiers).
+It was historically developed with layouts of the ["Neo"-family](https://neo-layout.org/) in mind, but can be applied to arbitrary layouts. It supports the use of multiple layers per key (which are activated by holding corresponding modifiers).
 
 At the heart of the optimization lies a layout evaluation that involves multiple criteria/metrics on the frequencies of unigrams, bigrams, and trigrams. And with a little bit of Rust-knowledge, new metrics [can easily be added](#adding-new-metrics).
 
@@ -73,7 +73,7 @@ Only those keys shall be specified that are not marked as "fixed" in the layout 
 There are two options how the layout string provided on the commandline is interpreted:
 #### Default Behavior
 Only the keys of the "base layer" are specified in the provided layout string (corresponding to the first symbols of the lists defined in the config under `base_layout`).
-The the base layer symbols together with all upper layer symbols defined in the `base_layout` move to the specified location (except those layers defined in `fixed_layers`).
+The base layer symbols together with all upper layer symbols defined in the `base_layout` move to the specified location (except those layers defined in `fixed_layers`).
 
 Using this option, optimizations always keep the symbols defined in the `base_layout` together (apart from the `fixed_layers` that do not permute at all).
 
