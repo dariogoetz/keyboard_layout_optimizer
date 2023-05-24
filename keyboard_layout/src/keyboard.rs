@@ -26,7 +26,7 @@ pub type KeyIndex = u8;
 pub struct Keyboard {
     /// The keys of the keyboard
     pub keys: Vec<Key>,
-    pub home_row_positions: HandFingerMap<Position>,
+    pub finger_resting_positions: HandFingerMap<Position>,
     plot_template: String,
     plot_template_short: String,
 }
@@ -43,7 +43,7 @@ pub struct KeyboardYAML {
     key_costs: Vec<Vec<f64>>,
     symmetries: Vec<Vec<u8>>,
     unbalancing_positions: Vec<Vec<Position>>,
-    home_row_positions: AHashMap<Hand, AHashMap<Finger, Position>>,
+    finger_resting_positions: AHashMap<Hand, AHashMap<Finger, Position>>,
     plot_template: String,
     plot_template_short: String,
 }
@@ -126,8 +126,8 @@ impl Keyboard {
 
         Keyboard {
             keys,
-            home_row_positions: HandFingerMap::with_hashmap(
-                &k.home_row_positions,
+            finger_resting_positions: HandFingerMap::with_hashmap(
+                &k.finger_resting_positions,
                 Position::default(),
             ),
             plot_template: k.plot_template,
