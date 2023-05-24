@@ -41,7 +41,7 @@ keyboard:
     - [22, 23, 24, 25, 26,           26, 25, 24, 23, 22]
     - [            27, 28, 29,   29, 28, 27            ]
 
-  home_row_positions:
+  finger_resting_positions:
     Left:
       Pinky: [50.5, 115.5]
       Ring: [100.5, 115.5]
