@@ -40,6 +40,7 @@ pub enum LayerModifierType {
     None,
     Hold,
     OneShot,
+    Lock,
 }
 
 impl Default for LayerModifierType {
@@ -73,6 +74,13 @@ impl LayerModifierType {
             _ => false,
         }
     }
+
+    pub fn is_lock(&self) -> bool {
+        match self {
+            Self::Lock => true,
+            _ => false,
+        }
+    }
 }
 
 /// Enum for configuring the way how the modifiers shall be used to access a layer.
@@ -83,6 +91,7 @@ impl LayerModifierType {
 pub enum LayerModifierLocations {
     Hold(Vec<ModifierLocation>),
     OneShot(Vec<ModifierLocation>),
+    Lock(Vec<ModifierLocation>),
 }
 
 impl LayerModifierLocations {
@@ -90,12 +99,14 @@ impl LayerModifierLocations {
         match self {
             Self::Hold(v) => v.iter(),
             Self::OneShot(v) => v.iter(),
+            Self::Lock(v) => v.iter(),
         }
     }
     pub fn layer_modifier_type(&self) -> LayerModifierType {
         match self {
             Self::Hold(_) => LayerModifierType::Hold,
             Self::OneShot(_) => LayerModifierType::OneShot,
+            Self::Lock(_) => LayerModifierType::Lock,
         }
     }
 }
@@ -106,6 +117,7 @@ impl LayerModifierLocations {
 pub enum LayerModifiers {
     Hold(Vec<LayerKeyIndex>),
     OneShot(Vec<LayerKeyIndex>),
+    Lock(Vec<LayerKeyIndex>),
 }
 
 impl LayerModifiers {
@@ -113,6 +125,7 @@ impl LayerModifiers {
         match self {
             Self::Hold(v) => v,
             Self::OneShot(v) => v,
+            Self::Lock(v) => v,
         }
     }
 }
@@ -331,6 +344,7 @@ impl Layout {
                     LayerModifierLocations::OneShot(_) => {
                         LayerModifiers::OneShot(resolved_mods_vec)
                     }
+                    LayerModifierLocations::Lock(_) => LayerModifiers::Lock(resolved_mods_vec),
                 };
                 resolved_mods_per_hand.insert(*hand, resolved_mods);
             }
@@ -447,9 +461,10 @@ impl Layout {
 
     /// If the layout has at least one layer configured as one-shot layer
     pub fn has_one_shot_layers(&self) -> bool {
-        self.layerkeys
-            .iter()
-            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)))
+        self.layerkeys.iter().any(|lk| {
+            matches!(lk.modifiers, LayerModifiers::OneShot(_))
+                || matches!(lk.modifiers, LayerModifiers::Hold(_))
+        })
     }
 
     /// Plot a graphical representation of a layer

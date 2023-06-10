@@ -1,8 +1,53 @@
 /// The `common` module provides utility functions for resolving modifiers in ngrams.
-use keyboard_layout::layout::LayerKeyIndex;
+use keyboard_layout::layout::{LayerKey, LayerKeyIndex, LayerModifiers};
 
 use ahash::AHashMap;
 use std::{cmp::Eq, hash::Hash, slice};
+
+pub fn expand_one_shot_symbol(
+    k: &LayerKeyIndex,
+    base: &LayerKeyIndex,
+    mods: &LayerModifiers,
+    target: &mut Vec<LayerKeyIndex>,
+) {
+    match &mods {
+        LayerModifiers::OneShot(mods) => {
+            target.extend(mods);
+            target.push(*base);
+        }
+        LayerModifiers::Lock(_) => {
+            target.push(*base);
+        }
+        _ => target.push(*k),
+    }
+}
+
+pub fn unlock_and_lock_layer(
+    k1: &LayerKey,
+    k2: &LayerKey,
+    mods1: &LayerModifiers,
+    mods2: &LayerModifiers,
+    target: &mut Vec<LayerKeyIndex>,
+) {
+    // unlock first layer if locked?
+    if let LayerModifiers::Lock(mods1) = mods1 {
+        // whitespace shall not break locked layer
+        if k2.symbol.is_whitespace() {
+            return;
+        }
+        // staying on the same layer shall not break locked layer
+        if matches!(mods2, LayerModifiers::Lock(_)) && k1.layer == k2.layer {
+            return;
+        }
+
+        target.extend(mods1);
+    }
+
+    // lock second layer if it is a locked layer
+    if let LayerModifiers::Lock(mods2) = mods2 {
+        target.extend(mods2);
+    }
+}
 
 /// Iterator over unigrams of the base-layer key and each modifier.
 #[derive(Clone, Debug)]

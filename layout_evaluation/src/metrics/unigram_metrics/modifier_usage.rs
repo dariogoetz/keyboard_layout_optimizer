@@ -51,6 +51,7 @@ impl UnigramMetric for ModifierUsage {
         let modifier_costs = match &key.modifiers {
             LayerModifiers::Hold(v) => self.hold_cost * v.len() as f64,
             LayerModifiers::OneShot(v) => self.one_shot_cost * v.len() as f64,
+            LayerModifiers::Lock(v) => self.one_shot_cost * v.len() as f64,
         };
 
         Some(weight * (key_cost + modifier_costs))

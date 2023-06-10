@@ -298,28 +298,17 @@ impl OnDemandTrigramMapper {
             let (base2, mods2) = layout.resolve_modifiers(&k2);
             let (base3, mods3) = layout.resolve_modifiers(&k3);
 
+            let lk1 = layout.get_layerkey(&k1);
+            let lk2 = layout.get_layerkey(&k2);
+            let lk3 = layout.get_layerkey(&k3);
+
             let mut keys = Vec::new();
 
-            if let LayerModifiers::OneShot(mods) = mods1 {
-                keys.extend(mods);
-                keys.push(base1);
-            } else {
-                keys.push(k1);
-            };
-
-            if let LayerModifiers::OneShot(mods) = mods2 {
-                keys.extend(mods);
-                keys.push(base2);
-            } else {
-                keys.push(k2);
-            };
-
-            if let LayerModifiers::OneShot(mods) = mods3 {
-                keys.extend(mods);
-                keys.push(base3);
-            } else {
-                keys.push(k3);
-            };
+            expand_one_shot_symbol(&k1, &base1, &mods1, &mut keys);
+            unlock_and_lock_layer(lk1, lk2, &mods1, &mods2, &mut keys);
+            expand_one_shot_symbol(&k2, &base2, &mods2, &mut keys);
+            unlock_and_lock_layer(lk2, lk3, &mods2, &mods3, &mut keys);
+            expand_one_shot_symbol(&k3, &base3, &mods3, &mut keys);
 
             keys.iter()
                 .zip(keys.iter().skip(1))
