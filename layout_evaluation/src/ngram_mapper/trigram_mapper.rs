@@ -304,11 +304,11 @@ impl OnDemandTrigramMapper {
 
             let mut keys = Vec::new();
 
-            expand_one_shot_symbol(&k1, &base1, &mods1, &mut keys);
+            expand_one_shot_or_hold_symbol(&k1, &base1, &mods1, &mut keys);
             unlock_and_lock_layer(lk1, lk2, &mods1, &mods2, &mut keys);
-            expand_one_shot_symbol(&k2, &base2, &mods2, &mut keys);
+            expand_one_shot_or_hold_symbol(&k2, &base2, &mods2, &mut keys);
             unlock_and_lock_layer(lk2, lk3, &mods2, &mods3, &mut keys);
-            expand_one_shot_symbol(&k3, &base3, &mods3, &mut keys);
+            expand_one_shot_or_hold_symbol(&k3, &base3, &mods3, &mut keys);
 
             keys.iter()
                 .zip(keys.iter().skip(1))
