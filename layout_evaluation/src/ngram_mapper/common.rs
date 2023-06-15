@@ -16,6 +16,7 @@ pub fn expand_one_shot_symbol(
             target.push(*base);
         }
         LayerModifiers::Lock(_) => {
+            // locking/unlocking layer will be performed in `unlock_and_lock_layer`
             target.push(*base);
         }
         _ => target.push(*k),
@@ -45,6 +46,10 @@ pub fn unlock_and_lock_layer(
 
     // lock second layer if it is a locked layer
     if let LayerModifiers::Lock(mods2) = mods2 {
+        // if first symbol is whitespace, we assume that the layer was already locked
+        if k1.symbol.is_whitespace() {
+            return;
+        }
         target.extend(mods2);
     }
 }
