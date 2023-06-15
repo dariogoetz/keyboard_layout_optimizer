@@ -4,7 +4,7 @@ use keyboard_layout::layout::{LayerKey, LayerKeyIndex, LayerModifiers};
 use ahash::AHashMap;
 use std::{cmp::Eq, hash::Hash, slice};
 
-pub fn expand_one_shot_symbol(
+pub fn expand_one_shot_or_hold_symbol(
     k: &LayerKeyIndex,
     base: &LayerKeyIndex,
     mods: &LayerModifiers,

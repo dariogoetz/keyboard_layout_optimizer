@@ -244,9 +244,9 @@ impl OnDemandBigramMapper {
 
             let mut keys = Vec::new();
 
-            expand_one_shot_symbol(&k1, &base1, &mods1, &mut keys);
+            expand_one_shot_or_hold_symbol(&k1, &base1, &mods1, &mut keys);
             unlock_and_lock_layer(lk1, lk2, &mods1, &mods2, &mut keys);
-            expand_one_shot_symbol(&k2, &base2, &mods2, &mut keys);
+            expand_one_shot_or_hold_symbol(&k2, &base2, &mods2, &mut keys);
 
             keys.iter().zip(keys.iter().skip(1)).for_each(|(lk1, lk2)| {
                 processed_bigrams.push(((*lk1, *lk2), w));
