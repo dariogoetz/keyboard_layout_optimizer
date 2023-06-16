@@ -49,10 +49,18 @@ impl BigramMetric for KLAFingerUsage {
             *finger_values.get_mut(&curr_key.key.hand, &curr_key.key.finger) += *weight;
 
             if !self.ignore_modifiers {
-                let prev_mods: AHashSet<LayerKeyIndex> =
-                    prev_key.modifiers.layerkeys().iter().cloned().collect();
-                let curr_mods: AHashSet<LayerKeyIndex> =
-                    curr_key.modifiers.layerkeys().iter().cloned().collect();
+                let prev_mods: AHashSet<LayerKeyIndex> = prev_key
+                    .modifiers
+                    .layerkey_indices()
+                    .iter()
+                    .cloned()
+                    .collect();
+                let curr_mods: AHashSet<LayerKeyIndex> = curr_key
+                    .modifiers
+                    .layerkey_indices()
+                    .iter()
+                    .cloned()
+                    .collect();
 
                 let pressed_mods = curr_mods
                     .difference(&prev_mods)
