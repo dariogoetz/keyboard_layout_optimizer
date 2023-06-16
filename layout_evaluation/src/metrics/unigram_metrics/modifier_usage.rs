@@ -9,12 +9,14 @@ use serde::Deserialize;
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
     pub hold_cost: f64,
+    pub lock_cost: f64,
     pub one_shot_cost: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct ModifierUsage {
     pub hold_cost: f64,
+    pub lock_cost: f64,
     pub one_shot_cost: f64,
 }
 
@@ -22,6 +24,7 @@ impl ModifierUsage {
     pub fn new(params: &Parameters) -> Self {
         Self {
             hold_cost: params.hold_cost,
+            lock_cost: params.lock_cost,
             one_shot_cost: params.one_shot_cost,
         }
     }
@@ -43,6 +46,7 @@ impl UnigramMetric for ModifierUsage {
         // costs if this key is a modifier
         let key_cost = match key.is_modifier {
             LayerModifierType::Hold => self.hold_cost,
+            LayerModifierType::Lock => self.lock_cost,
             LayerModifierType::OneShot => self.one_shot_cost,
             _ => 0.0,
         };
@@ -50,6 +54,7 @@ impl UnigramMetric for ModifierUsage {
         // costs if this key relies on modifiers (that were not split in ngram splitting)
         let modifier_costs = match &key.modifiers {
             LayerModifiers::Hold(v) => self.hold_cost * v.len() as f64,
+            LayerModifiers::Lock(v) => self.lock_cost * v.len() as f64,
             LayerModifiers::OneShot(v) => self.one_shot_cost * v.len() as f64,
         };
 

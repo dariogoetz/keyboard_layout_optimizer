@@ -60,10 +60,17 @@ impl OnDemandUnigramMapper {
             unigram_keys_vec = self.process_one_shot_layers(unigram_keys_vec, layout);
         }
 
-        let unigram_keys = if self.split_modifiers.enabled {
-            Self::split_unigram_modifiers(unigram_keys_vec, layout)
+        let mut unigram_keys = if layout.has_hold_layers() && self.split_modifiers.enabled {
+            Self::process_hold_modifiers(unigram_keys_vec, layout)
         } else {
             unigram_keys_vec.into_iter().collect()
+        };
+
+        unigram_keys = if layout.has_lock_layers() {
+            // The `lock` modifier type needs to get processed first since it might host other modifiers.
+            self.process_lock_layers(unigram_keys, layout)
+        } else {
+            unigram_keys
         };
 
         (unigram_keys, not_found_weight)
@@ -85,7 +92,7 @@ impl OnDemandUnigramMapper {
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
-    fn split_unigram_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
+    fn process_hold_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
         let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
@@ -117,11 +124,32 @@ impl OnDemandUnigramMapper {
         idx_w_map
     }
 
+    /// Process layers accessible via `lock` modifiers.
+    /// Since we assume users typically stay on these layers for many words/sentences, and since unigrams
+    /// contain no information about certain `lock`-layer-switches, this function transforms
+    /// the `lock`-layer-keys to base-layer-keys.
+    fn process_lock_layers(&self, unigrams: UnigramIndices, layout: &Layout) -> UnigramIndices {
+        unigrams
+            .into_iter()
+            .map(|(k, w)| {
+                let lk = layout.get_layerkey(&k);
+
+                if lk.modifiers.layer_modifier_type().is_lock() {
+                    let base = layout.get_base_layerkey_index(&k);
+                    (base, w)
+                } else {
+                    (k, w)
+                }
+            })
+            .collect()
+    }
+
     fn process_one_shot_layers(
         &self,
         unigrams: UnigramIndicesVec,
         layout: &Layout,
     ) -> UnigramIndicesVec {
+        println!("\n{}", unigrams.len());
         let mut processed_unigrams = Vec::with_capacity(unigrams.len());
 
         unigrams.into_iter().for_each(|(k, w)| {
@@ -133,7 +161,7 @@ impl OnDemandUnigramMapper {
                 processed_unigrams.push((k, w));
             }
         });
-
+        println!("{}", processed_unigrams.len());
         processed_unigrams
     }
 }

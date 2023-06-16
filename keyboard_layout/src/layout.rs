@@ -39,6 +39,7 @@ pub enum ModifierLocation {
 pub enum LayerModifierType {
     None,
     Hold,
+    Lock,
     OneShot,
 }
 
@@ -67,6 +68,13 @@ impl LayerModifierType {
         }
     }
 
+    pub fn is_lock(&self) -> bool {
+        match self {
+            Self::Lock => true,
+            _ => false,
+        }
+    }
+
     pub fn is_one_shot(&self) -> bool {
         match self {
             Self::OneShot => true,
@@ -82,6 +90,7 @@ impl LayerModifierType {
 #[serde(rename_all = "snake_case")]
 pub enum LayerModifierLocations {
     Hold(Vec<ModifierLocation>),
+    Lock(Vec<ModifierLocation>),
     OneShot(Vec<ModifierLocation>),
 }
 
@@ -89,12 +98,14 @@ impl LayerModifierLocations {
     pub fn iter(&self) -> slice::Iter<'_, ModifierLocation> {
         match self {
             Self::Hold(v) => v.iter(),
+            Self::Lock(v) => v.iter(),
             Self::OneShot(v) => v.iter(),
         }
     }
     pub fn layer_modifier_type(&self) -> LayerModifierType {
         match self {
             Self::Hold(_) => LayerModifierType::Hold,
+            Self::Lock(_) => LayerModifierType::Lock,
             Self::OneShot(_) => LayerModifierType::OneShot,
         }
     }
@@ -105,6 +116,7 @@ impl LayerModifierLocations {
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum LayerModifiers {
     Hold(Vec<LayerKeyIndex>),
+    Lock(Vec<LayerKeyIndex>),
     OneShot(Vec<LayerKeyIndex>),
 }
 
@@ -112,7 +124,15 @@ impl LayerModifiers {
     pub fn layerkeys(&self) -> &[LayerKeyIndex] {
         match self {
             Self::Hold(v) => v,
+            Self::Lock(v) => v,
             Self::OneShot(v) => v,
+        }
+    }
+    pub fn layer_modifier_type(&self) -> LayerModifierType {
+        match self {
+            Self::Hold(_) => LayerModifierType::Hold,
+            Self::Lock(_) => LayerModifierType::Lock,
+            Self::OneShot(_) => LayerModifierType::OneShot,
         }
     }
 }
@@ -328,6 +348,7 @@ impl Layout {
                 }
                 let resolved_mods = match mods {
                     LayerModifierLocations::Hold(_) => LayerModifiers::Hold(resolved_mods_vec),
+                    LayerModifierLocations::Lock(_) => LayerModifiers::Lock(resolved_mods_vec),
                     LayerModifierLocations::OneShot(_) => {
                         LayerModifiers::OneShot(resolved_mods_vec)
                     }
@@ -445,11 +466,32 @@ impl Layout {
         (base, mods)
     }
 
-    /// If the layout has at least one layer configured as one-shot layer
-    pub fn has_one_shot_layers(&self) -> bool {
-        self.layerkeys
+    /// If the layout has at least one layer configured as `hold` layer
+    pub fn has_hold_layers(&self) -> bool {
+        let x = self
+            .layerkeys
             .iter()
-            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)))
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Hold(_)));
+        println!("has_hold_layers: {}", x);
+        x
+    }
+    /// If the layout has at least one layer configured as `lock` layer
+    pub fn has_lock_layers(&self) -> bool {
+        let x = self
+            .layerkeys
+            .iter()
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Lock(_)));
+        println!("has_lock_layers: {}", x);
+        x
+    }
+    /// If the layout has at least one layer configured as `one_shot` layer
+    pub fn has_one_shot_layers(&self) -> bool {
+        let x = self
+            .layerkeys
+            .iter()
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)));
+        println!("has_one_shot_layers: {}", x);
+        x
     }
 
     /// Plot a graphical representation of a layer

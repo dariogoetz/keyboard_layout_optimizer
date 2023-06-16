@@ -125,6 +125,7 @@ metrics:
       value: 1.0
     params:
       hold_cost: 1.0
+      lock_cost: 1.0
       one_shot_cost: 0.0
 
   # bigram metrics

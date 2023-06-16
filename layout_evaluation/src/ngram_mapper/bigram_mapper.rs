@@ -86,10 +86,17 @@ impl OnDemandBigramMapper {
             bigram_keys_vec = self.process_one_shot_layers(bigram_keys_vec, layout);
         }
 
-        let bigram_keys = if self.split_modifiers.enabled {
-            self.split_bigram_modifiers(bigram_keys_vec, layout)
+        let mut bigram_keys = if layout.has_hold_layers() && self.split_modifiers.enabled {
+            self.process_hold_layers(bigram_keys_vec, layout)
         } else {
-            bigram_keys_vec.into_iter().collect()
+            bigram_keys_vec.clone().into_iter().collect()
+        };
+
+        bigram_keys = if layout.has_lock_layers() {
+            // The `lock` modifier type needs to get processed last since it might host other modifiers.
+            self.process_lock_layers(bigram_keys, layout)
+        } else {
+            bigram_keys
         };
 
         // bigram_keys
@@ -135,7 +142,7 @@ impl OnDemandBigramMapper {
     ///
     /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
     /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
-    fn split_bigram_modifiers(&self, bigrams: BigramIndicesVec, layout: &Layout) -> BigramIndices {
+    fn process_hold_layers(&self, bigrams: BigramIndicesVec, layout: &Layout) -> BigramIndices {
         let mut bigram_w_map = AHashMap::with_capacity(bigrams.len() / 3);
 
         bigrams.into_iter().for_each(|((k1, k2), w)| {
@@ -187,6 +194,95 @@ impl OnDemandBigramMapper {
                     bigram_w_map.insert_or_add_weight(e, w);
                     // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
                 });
+        });
+
+        bigram_w_map
+    }
+
+    fn process_lock_layers(&self, bigrams: BigramIndices, layout: &Layout) -> BigramIndices {
+        let mut bigram_w_map = AHashMap::with_capacity(bigrams.len() / 3);
+
+        bigrams.into_iter().for_each(|((k1, k2), w)| {
+            let lk1 = layout.get_layerkey(&k1);
+            let lk2 = layout.get_layerkey(&k2);
+
+            if !lk1.modifiers.layer_modifier_type().is_lock()
+                && !lk2.modifiers.layer_modifier_type().is_lock()
+            {
+                bigram_w_map.insert_or_add_weight((k1, k2), w);
+            } else {
+                let base1 = layout.get_base_layerkey_index(&k1);
+                let base2 = layout.get_base_layerkey_index(&k2);
+
+                // If both lock-keys are on the same layer, the resulting bigram is very simple.
+                if lk1.modifiers.layer_modifier_type().is_lock() && lk1.layer == lk2.layer {
+                    bigram_w_map.insert_or_add_weight((base1, base2), w);
+                    return;
+                }
+
+                let found_whitespace = lk1.symbol.is_whitespace() || lk2.symbol.is_whitespace();
+
+                let (key1, mods1) = match &lk1.modifiers {
+                    LayerModifiers::Hold(mods) => {
+                        // If there is whitespace, there is no certain switch -> don't add modifiers.
+                        let m = if found_whitespace {
+                            Vec::new()
+                        } else {
+                            mods.clone()
+                        };
+                        (base1, m)
+                    }
+                    _ => (k1, Vec::new()),
+                };
+                let (mods2, key2) = match &lk2.modifiers {
+                    LayerModifiers::Hold(mods) => {
+                        let m = if found_whitespace {
+                            Vec::new()
+                        } else {
+                            mods.clone()
+                        };
+                        (m, base2)
+                    }
+                    _ => (Vec::new(), k2),
+                };
+
+                bigram_w_map.insert_or_add_weight((key1, key2), w);
+                // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&chosen_key1).symbol, layout.get_layerkey(&chosen_key2).symbol);
+
+                mods1.iter().for_each(|mod1| {
+                    // mix mods of k1 with base of k2
+                    bigram_w_map.insert_or_add_weight((*mod1, key2), w);
+                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&chosen_key2).symbol);
+
+                    // mix mods of k1 and k2
+                    mods2.iter().for_each(|mod2| {
+                        if mod1 != mod2 {
+                            bigram_w_map.insert_or_add_weight((*mod1, *mod2), w);
+                            // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&mod2).symbol);
+                        }
+                    });
+                });
+
+                mods2.iter().for_each(|mod2| {
+                    // mix mods of k2 with base of k1
+                    bigram_w_map.insert_or_add_weight((key1, *mod2), w);
+                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&chosen_key1).symbol, layout.get_layerkey(&mod2).symbol);
+                });
+
+                // same key mods
+                TakeTwoLayerKey::new(key1, &mods1, w, self.split_modifiers.same_key_mod_factor)
+                    .for_each(|((e1, e2), w)| {
+                        // The elements e1 and e2 were purposefully reversed. This is due to the modifier coming AFTER the key.
+                        bigram_w_map.insert_or_add_weight((e2, e1), w);
+                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
+                    });
+
+                TakeTwoLayerKey::new(key2, &mods2, w, self.split_modifiers.same_key_mod_factor)
+                    .for_each(|(e, w)| {
+                        bigram_w_map.insert_or_add_weight(e, w);
+                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
+                    });
+            }
         });
 
         bigram_w_map
