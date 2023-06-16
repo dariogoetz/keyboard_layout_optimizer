@@ -53,7 +53,7 @@ impl BigramMetric for KLASameHand {
             if !self.ignore_modifiers {
                 prev_key
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| prev_hands_used.set(&k.key.hand, true));
@@ -66,7 +66,7 @@ impl BigramMetric for KLASameHand {
             if !self.ignore_modifiers {
                 curr_key
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| curr_hands_used.set(&k.key.hand, true));

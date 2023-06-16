@@ -53,7 +53,7 @@ impl BigramMetric for KLASameFinger {
             if !self.ignore_modifiers {
                 prev_key
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| prev_keys_per_finger.set(&k.key.hand, &k.key.finger, Some(k)));
@@ -66,7 +66,7 @@ impl BigramMetric for KLASameFinger {
             if !self.ignore_modifiers {
                 curr_key
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|k| layout.get_layerkey(k))
                     .for_each(|k| curr_keys_per_finger.set(&k.key.hand, &k.key.finger, Some(k)));

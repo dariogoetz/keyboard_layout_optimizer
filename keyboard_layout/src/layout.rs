@@ -121,7 +121,7 @@ pub enum LayerModifiers {
 }
 
 impl LayerModifiers {
-    pub fn layerkeys(&self) -> &[LayerKeyIndex] {
+    pub fn layerkey_indices(&self) -> &[LayerKeyIndex] {
         match self {
             Self::Hold(v) => v,
             Self::Lock(v) => v,
@@ -403,14 +403,14 @@ impl Layout {
 
                 let entry_modifier_cost: f64 = entry_layerkey
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|i| layerkeys[*i as usize].key.cost)
                     .sum();
 
                 let new_modifier_cost: f64 = layerkey
                     .modifiers
-                    .layerkeys()
+                    .layerkey_indices()
                     .iter()
                     .map(|i| layerkeys[*i as usize].key.cost)
                     .sum();
