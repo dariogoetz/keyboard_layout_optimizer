@@ -429,12 +429,12 @@ impl<'a> TakeThreeLayerKey<'a> {
 pub trait NgramMap<Ngram: Eq + Hash> {
     /// Adds the ngram to the HashMap if it does not already exist.
     /// If it does exist, simply add its weight to the preexisting weight.
-    fn insert_or_add_weight(&mut self, k: Ngram, v: f64);
+    fn insert_or_add_weight(&mut self, k: Ngram, w: f64);
 }
 
 impl<Ngram: Eq + Hash> NgramMap<Ngram> for AHashMap<Ngram, f64> {
     #[inline(always)]
-    fn insert_or_add_weight(&mut self, k: Ngram, v: f64) {
-        *self.entry(k).or_insert(0.0) += v;
+    fn insert_or_add_weight(&mut self, k: Ngram, w: f64) {
+        *self.entry(k).or_insert(0.0) += w;
     }
 }
