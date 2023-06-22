@@ -138,6 +138,10 @@ base_layout:
   # number of consecutive symbols from base layout to group together generating a layout
   grouped_layers: 2
 
+  # modifier types can be "hold", "one_shot", and "long_press"
+  #
+  # "hold" and "one_shot" modifiers require a field "value" holding a list of
+  # either matrix positions or symbols acting as modifiers
   modifiers:
     - Left:
         type: hold

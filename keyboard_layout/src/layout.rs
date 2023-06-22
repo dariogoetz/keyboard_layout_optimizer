@@ -40,6 +40,7 @@ pub enum LayerModifierType {
     None,
     Hold,
     OneShot,
+    LongPress,
 }
 
 impl Default for LayerModifierType {
@@ -50,10 +51,7 @@ impl Default for LayerModifierType {
 
 impl LayerModifierType {
     pub fn is_some(&self) -> bool {
-        match self {
-            Self::None => false,
-            _ => true,
-        }
+        !matches!(self, Self::None)
     }
 
     pub fn is_none(&self) -> bool {
@@ -61,17 +59,15 @@ impl LayerModifierType {
     }
 
     pub fn is_hold(&self) -> bool {
-        match self {
-            Self::Hold => true,
-            _ => false,
-        }
+        matches!(self, Self::Hold)
     }
 
     pub fn is_one_shot(&self) -> bool {
-        match self {
-            Self::OneShot => true,
-            _ => false,
-        }
+        matches!(self, Self::OneShot)
+    }
+
+    pub fn is_long_press(&self) -> bool {
+        matches!(self, Self::LongPress)
     }
 }
 
@@ -83,6 +79,7 @@ impl LayerModifierType {
 pub enum LayerModifierLocations {
     Hold(Vec<ModifierLocation>),
     OneShot(Vec<ModifierLocation>),
+    LongPress,
 }
 
 impl LayerModifierLocations {
@@ -90,12 +87,14 @@ impl LayerModifierLocations {
         match self {
             Self::Hold(v) => v.iter(),
             Self::OneShot(v) => v.iter(),
+            Self::LongPress => [].iter(),
         }
     }
     pub fn layer_modifier_type(&self) -> LayerModifierType {
         match self {
             Self::Hold(_) => LayerModifierType::Hold,
             Self::OneShot(_) => LayerModifierType::OneShot,
+            Self::LongPress => LayerModifierType::LongPress,
         }
     }
 }
@@ -106,6 +105,7 @@ impl LayerModifierLocations {
 pub enum LayerModifiers {
     Hold(Vec<LayerKeyIndex>),
     OneShot(Vec<LayerKeyIndex>),
+    LongPress,
 }
 
 impl LayerModifiers {
@@ -113,6 +113,7 @@ impl LayerModifiers {
         match self {
             Self::Hold(v) => v,
             Self::OneShot(v) => v,
+            Self::LongPress => &[],
         }
     }
 }
@@ -331,6 +332,7 @@ impl Layout {
                     LayerModifierLocations::OneShot(_) => {
                         LayerModifiers::OneShot(resolved_mods_vec)
                     }
+                    LayerModifierLocations::LongPress => LayerModifiers::LongPress,
                 };
                 resolved_mods_per_hand.insert(*hand, resolved_mods);
             }
@@ -440,6 +442,12 @@ impl Layout {
     #[inline(always)]
     pub fn resolve_modifiers(&self, k: &LayerKeyIndex) -> (LayerKeyIndex, LayerModifiers) {
         let lk = self.get_layerkey(k);
+
+        if matches!(lk.modifiers, LayerModifiers::LongPress) {
+            // long press does not resolve to underlying base LayerKey
+            return (*k, LayerModifiers::LongPress);
+        }
+
         let base = self.get_base_layerkey_index(k);
         let mods = lk.modifiers.clone();
         (base, mods)

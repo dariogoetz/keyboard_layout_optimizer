@@ -126,6 +126,7 @@ metrics:
     params:
       hold_cost: 1.0
       one_shot_cost: 0.0
+      long_press_cost: 1.0
 
   # bigram metrics
 

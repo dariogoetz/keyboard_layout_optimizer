@@ -10,12 +10,14 @@ use serde::Deserialize;
 pub struct Parameters {
     pub hold_cost: f64,
     pub one_shot_cost: f64,
+    pub long_press_cost: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct ModifierUsage {
     pub hold_cost: f64,
     pub one_shot_cost: f64,
+    pub long_press_cost: f64,
 }
 
 impl ModifierUsage {
@@ -23,13 +25,14 @@ impl ModifierUsage {
         Self {
             hold_cost: params.hold_cost,
             one_shot_cost: params.one_shot_cost,
+            long_press_cost: params.long_press_cost,
         }
     }
 }
 
 impl UnigramMetric for ModifierUsage {
     fn name(&self) -> &str {
-        "Hold Modifier Usage"
+        "Modifier Usage"
     }
 
     #[inline(always)]
@@ -44,6 +47,7 @@ impl UnigramMetric for ModifierUsage {
         let key_cost = match key.is_modifier {
             LayerModifierType::Hold => self.hold_cost,
             LayerModifierType::OneShot => self.one_shot_cost,
+            LayerModifierType::LongPress => self.long_press_cost,
             _ => 0.0,
         };
 
@@ -51,6 +55,7 @@ impl UnigramMetric for ModifierUsage {
         let modifier_costs = match &key.modifiers {
             LayerModifiers::Hold(v) => self.hold_cost * v.len() as f64,
             LayerModifiers::OneShot(v) => self.one_shot_cost * v.len() as f64,
+            LayerModifiers::LongPress => self.long_press_cost,
         };
 
         Some(weight * (key_cost + modifier_costs))
