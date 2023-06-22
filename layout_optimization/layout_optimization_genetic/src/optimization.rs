@@ -183,12 +183,12 @@ impl CrossoverOp<Vec<usize>> for MyCrossover {
                 offspring[start_idx] = Some(p1[start_idx]);
 
                 // find index in p1 of value that sits in p2 at start_idx
-                let mut idx = p1.iter().position(|v| *v == p2[start_idx]).unwrap().clone();
+                let mut idx = p1.iter().position(|v| *v == p2[start_idx]).unwrap();
                 while idx != start_idx {
                     offspring[idx] = Some(p1[idx]);
 
                     // find index in p1 of value that sits in p2 at idx
-                    idx = p1.iter().position(|v| *v == p2[idx]).unwrap().clone();
+                    idx = p1.iter().position(|v| *v == p2[idx]).unwrap();
                 }
 
                 // rest is copied from parent 2
@@ -196,7 +196,7 @@ impl CrossoverOp<Vec<usize>> for MyCrossover {
                     .zip(offspring.iter_mut())
                     .for_each(|(p_val, o_val)| {
                         if o_val.is_none() {
-                            *o_val = Some(p_val.clone());
+                            *o_val = Some(*p_val);
                         }
                     });
 

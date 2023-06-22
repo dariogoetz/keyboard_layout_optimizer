@@ -112,7 +112,7 @@ fn main() {
             &evaluator,
             &fix_from,
             &layout_generator,
-            &options.fix.clone().unwrap_or_else(|| "".to_string()),
+            &options.fix.clone().unwrap_or_default(),
             start_layout.is_some(),
             !options.no_cache_results,
         );

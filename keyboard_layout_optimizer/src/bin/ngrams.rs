@@ -26,13 +26,13 @@ fn main() {
 
     let unigrams = Unigrams::from_text(&text).expect("Could not generate unigrams from text.");
     let p = d.join("1-grams.txt");
-    unigrams.save_frequencies(&p).unwrap();
+    unigrams.save_frequencies(p).unwrap();
 
     let bigrams = Bigrams::from_text(&text).expect("Could not generate bigrams from text.");
     let p = d.join("2-grams.txt");
-    bigrams.save_frequencies(&p).unwrap();
+    bigrams.save_frequencies(p).unwrap();
 
     let trigrams = Trigrams::from_text(&text).expect("Could not generate trigrams from text.");
     let p = d.join("3-grams.txt");
-    trigrams.save_frequencies(&p).unwrap();
+    trigrams.save_frequencies(p).unwrap();
 }

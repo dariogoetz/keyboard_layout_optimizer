@@ -30,10 +30,8 @@ struct WordRecord {
 
 impl KLAHomeKeyWords {
     pub fn new(params: &Parameters) -> Self {
-        let file = File::open(&params.words_filename).expect(&format!(
-            "Could not open words file {}",
-            params.words_filename
-        ));
+        let file = File::open(&params.words_filename)
+            .unwrap_or_else(|_| panic!("Could not open words file {}", params.words_filename));
         let mut reader = csv::ReaderBuilder::new()
             .has_headers(false)
             .delimiter(b'\t')
@@ -41,7 +39,7 @@ impl KLAHomeKeyWords {
 
         let mut words = AHashMap::default();
         reader.deserialize().for_each(|r| {
-            let r: WordRecord = r.expect(&format!("Could not read record!"));
+            let r: WordRecord = r.expect("Could not read record!");
 
             if r.word.len() >= params.min_word_length {
                 let word = r.word.to_lowercase();

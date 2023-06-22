@@ -154,13 +154,7 @@ impl Unigrams {
         let grams: AHashMap<char, f64> = self
             .grams
             .iter()
-            .filter_map(|(c, w)| {
-                if *c == *exclude {
-                    None
-                } else {
-                    Some((c.clone(), w.clone()))
-                }
-            })
+            .filter_map(|(c, w)| if *c == *exclude { None } else { Some((*c, *w)) })
             .collect();
         Self { grams }
     }
@@ -168,7 +162,7 @@ impl Unigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+        create_dir_all(p.parent().unwrap()).map_err(|e| {
             format!(
                 "Unable to create directory '{}': {}",
                 p.to_str().unwrap(),
@@ -283,7 +277,7 @@ impl Bigrams {
                 if *c1 == *exclude || *c2 == *exclude {
                     None
                 } else {
-                    Some(((c1.clone(), c2.clone()), w.clone()))
+                    Some(((*c1, *c2), *w))
                 }
             })
             .collect();
@@ -293,7 +287,7 @@ impl Bigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+        create_dir_all(p.parent().unwrap()).map_err(|e| {
             format!(
                 "Unable to create directory '{}': {}",
                 p.to_str().unwrap(),
@@ -414,7 +408,7 @@ impl Trigrams {
                 if *c1 == *exclude || *c2 == *exclude || *c3 == *exclude {
                     None
                 } else {
-                    Some(((c1.clone(), c2.clone(), c3.clone()), w.clone()))
+                    Some(((*c1, *c2, *c3), *w))
                 }
             })
             .collect();
@@ -424,7 +418,7 @@ impl Trigrams {
     /// Save frequencies to file
     pub fn save_frequencies<T: AsRef<Path>>(&self, filename: T) -> Result<(), String> {
         let p = filename.as_ref();
-        create_dir_all(&p.parent().unwrap()).map_err(|e| {
+        create_dir_all(p.parent().unwrap()).map_err(|e| {
             format!(
                 "Unable to create directory '{}': {}",
                 p.to_str().unwrap(),

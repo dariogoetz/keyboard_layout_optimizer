@@ -326,9 +326,9 @@ impl Evaluator {
     }
 
     /// Evaluate all trigram metrics for a layout.
-    fn evaluate_trigram_metrics<'s>(
+    fn evaluate_trigram_metrics(
         &self,
-        layout: &'s Layout,
+        layout: &Layout,
         keys: &[((&LayerKey, &LayerKey, &LayerKey), f64)],
     ) -> Vec<MetricResult> {
         if self.trigram_metrics.is_empty() {

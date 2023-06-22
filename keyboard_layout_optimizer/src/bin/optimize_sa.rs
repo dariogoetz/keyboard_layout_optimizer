@@ -165,7 +165,7 @@ fn main() {
 
     let mut layouts: Vec<String> = start_layouts.to_vec();
     if layouts.is_empty() {
-        layouts = vec![fix_from.clone()];
+        layouts = vec![fix_from];
     }
     let layout_iterator = LayoutIterator::new(&layouts, options.run_forever);
     let start_from_layout = !start_layouts.is_empty();
@@ -198,7 +198,7 @@ fn main() {
                 &process_id,
                 &optimization_params,
                 &fix_from,
-                &options.fix.clone().unwrap_or_else(|| "".to_string()),
+                &options.fix.clone().unwrap_or_default(),
                 &layout_generator,
                 start_from_layout,
                 &evaluator,

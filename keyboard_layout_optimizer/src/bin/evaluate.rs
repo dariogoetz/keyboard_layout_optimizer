@@ -70,7 +70,7 @@ fn main() {
     // collect layout strings to a vec
     let mut layout_strings = options.layout_str.to_vec();
     if let Some(filename) = &options.from_file {
-        match File::open(&filename) {
+        match File::open(filename) {
             Ok(file) => {
                 layout_strings.append(&mut BufReader::new(file).lines().flatten().collect());
             }

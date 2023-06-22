@@ -8,8 +8,8 @@ use std::{env, fmt};
 pub mod finger_balance;
 pub mod hand_disbalance;
 pub mod key_costs;
-pub mod row_loads;
 pub mod modifier_usage;
+pub mod row_loads;
 
 /// UnigramMetric is a trait for metrics that iterate over weighted unigrams.
 pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
@@ -50,7 +50,7 @@ pub trait UnigramMetric: Send + Sync + UnigramMetricClone + fmt::Debug {
             .iter()
             .enumerate()
             .filter_map(|(i, (unigram, weight))| {
-                let cost_option = self.individual_cost(*unigram, *weight, total_weight, layout);
+                let cost_option = self.individual_cost(unigram, *weight, total_weight, layout);
 
                 cost_option.map(|cost| (i, unigram, cost))
             });

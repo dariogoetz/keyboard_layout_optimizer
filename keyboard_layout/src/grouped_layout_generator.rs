@@ -164,7 +164,7 @@ impl LayoutGenerator for GroupedLayoutGenerator {
             return Err(LayoutError::WrongKeyNumber(chars.len(), n_fixed).into());
         }
 
-        let char_set: AHashSet<char> = AHashSet::from_iter(chars.clone());
+        let char_set: AHashSet<char> = AHashSet::from_iter(chars);
         let layout_set: AHashSet<char> =
             AHashSet::from_iter(self.permutable_key_map.keys().cloned());
 
