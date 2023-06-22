@@ -508,7 +508,7 @@ impl Layout {
         let key_chars: Vec<String> = self
             .key_layers
             .iter()
-            .filter_map(|layerkeys| layerkeys.get(0).map(|lk| self.get_layerkey(&lk)))
+            .filter_map(|layerkeys| layerkeys.first().map(|lk| self.get_layerkey(&lk)))
             .filter(|k| !k.is_fixed)
             .map(|k| k.symbol.to_string())
             .collect();
@@ -519,7 +519,7 @@ impl Layout {
     pub fn as_text(&self) -> String {
         self.key_layers
             .iter()
-            .filter_map(|layerkeys| layerkeys.get(0).map(|lk| self.get_layerkey(&lk)))
+            .filter_map(|layerkeys| layerkeys.first().map(|lk| self.get_layerkey(&lk)))
             .filter(|k| !k.is_fixed)
             .map(|k| k.symbol.to_string())
             .collect()
