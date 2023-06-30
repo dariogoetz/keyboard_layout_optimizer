@@ -167,6 +167,17 @@ base_layout:
   # number of consecutive symbols from base layout to group together generating a layout
   grouped_layers: 2
 
+  # Modifyer-types include `hold`, `lock` and `one-shot`.
+  #
+  # `hold` modifiers work the way the shift-key does. While holding down the modifier,
+  # you may press any number of keys to type their modified versions.
+  #
+  # `lock` works the way the caps-lock key does. After pressing and releasing the modifier,
+  # you may press any number of keys to type their modified versions. To return to the
+  # original layer, press (and release) the modifier a second time.
+  #
+  # `one_shot` works roughly the way the ^-key does. After pressing and releasing the modifier,
+  # the single next key that gets pressed will result in typing its modified version.
   modifiers:
     - Left:
         type: hold
