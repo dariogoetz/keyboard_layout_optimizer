@@ -90,13 +90,13 @@ impl OnDemandUnigramMapper {
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
 
-            let mods = match mods {
-                LayerModifiers::Hold(mods) => mods,
-                _ => Vec::new(),
+            let (key, mods) = match mods {
+                LayerModifiers::Hold(mods) => (base, mods),
+                _ => (k, Vec::new()),
             };
 
             // Make sure we don't have any duplicate unigrams by adding them up.
-            TakeOneLayerKey::new(base, &mods, w)
+            TakeOneLayerKey::new(key, &mods, w)
                 .for_each(|(idx, w)| idx_w_map.insert_or_add_weight(idx, w));
 
             // if base.symbol == ' ' {
