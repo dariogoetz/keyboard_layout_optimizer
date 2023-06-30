@@ -93,10 +93,17 @@ impl OnDemandTrigramMapper {
             trigram_keys_vec = self.process_one_shot_layers(trigram_keys_vec, layout);
         }
 
-        let trigram_keys = if self.split_modifiers.enabled {
-            self.split_trigram_modifiers(trigram_keys_vec, layout)
+        let mut trigram_keys = if layout.has_hold_layers() && self.split_modifiers.enabled {
+            self.process_hold_layers(trigram_keys_vec, layout)
         } else {
-            trigram_keys_vec.into_iter().collect()
+            trigram_keys_vec.clone().into_iter().collect()
+        };
+
+        trigram_keys = if layout.has_lock_layers() {
+            // The `lock` modifier type needs to get processed last since it might host other modifiers.
+            self.process_lock_layers(trigram_keys, layout)
+        } else {
+            trigram_keys
         };
 
         (trigram_keys, not_found_weight)
@@ -140,11 +147,7 @@ impl OnDemandTrigramMapper {
     /// trigram can be large (tens of trigrams) if multiple symbols of the trigram are accessed using multiple modifiers.
 
     // this is one of the most intensive functions of the layout evaluation
-    fn split_trigram_modifiers(
-        &self,
-        trigrams: TrigramIndicesVec,
-        layout: &Layout,
-    ) -> TrigramIndices {
+    fn process_hold_layers(&self, trigrams: TrigramIndicesVec, layout: &Layout) -> TrigramIndices {
         let mut trigram_w_map = AHashMap::with_capacity(trigrams.len() / 3);
         trigrams.into_iter().for_each(|((k1, k2, k3), w)| {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
@@ -281,6 +284,132 @@ impl OnDemandTrigramMapper {
                     // );
                     trigram_w_map.insert_or_add_weight(e, w);
                 });
+        });
+
+        trigram_w_map
+    }
+
+    fn process_lock_layers(&self, trigrams: TrigramIndices, layout: &Layout) -> TrigramIndices {
+        let mut trigram_w_map = AHashMap::with_capacity(trigrams.len());
+
+        trigrams.into_iter().for_each(|((k1, k2, k3), w)| {
+            let lk1 = layout.get_layerkey(&k1);
+            let lk2 = layout.get_layerkey(&k2);
+            let lk3 = layout.get_layerkey(&k3);
+
+            if !lk1.modifiers.layer_modifier_type().is_lock()
+                && !lk2.modifiers.layer_modifier_type().is_lock()
+                && !lk3.modifiers.layer_modifier_type().is_lock()
+            {
+                trigram_w_map.insert_or_add_weight((k1, k2, k3), w);
+            } else {
+                let base1 = layout.get_base_layerkey_index(&k1);
+                let base2 = layout.get_base_layerkey_index(&k2);
+                let base3 = layout.get_base_layerkey_index(&k3);
+
+                // If all lock-keys are on the same layer, the resulting bigram is very simple.
+                if lk1.modifiers.layer_modifier_type().is_lock()
+                    && lk1.layer == lk2.layer
+                    && lk2.layer == lk3.layer
+                {
+                    trigram_w_map.insert_or_add_weight((base1, base2, base3), w);
+                    return;
+                }
+
+                // Decide what modifiers to use
+                let (key1, mods_after_1) = match &lk1.modifiers {
+                    LayerModifiers::Hold(mods) => {
+                        // If there is whitespace, there is no certain switch -> don't add modifiers.
+                        let m = if lk1.symbol.is_whitespace()
+                            || lk1.layer == lk2.layer
+                            || (lk2.symbol.is_whitespace() && lk1.layer == lk3.layer)
+                            || (lk2.symbol.is_whitespace() && lk3.symbol.is_whitespace())
+                        {
+                            vec![None]
+                        } else {
+                            mods.iter().map(|m| Some(*m)).collect()
+                        };
+                        (vec![Some(base1)], m)
+                    }
+                    _ => (vec![Some(k1)], vec![None]),
+                };
+                let (mods_before_2, key2, mods_after_2) = match &lk2.modifiers {
+                    LayerModifiers::Hold(mods) => {
+                        let m_before = if lk1.symbol.is_whitespace()
+                            || lk2.symbol.is_whitespace()
+                            || lk1.layer == lk2.layer
+                        {
+                            vec![None]
+                        } else {
+                            mods.iter().map(|m| Some(*m)).collect()
+                        };
+                        let m_after = if lk2.symbol.is_whitespace()
+                            || lk3.symbol.is_whitespace()
+                            || lk2.layer == lk3.layer
+                        {
+                            vec![None]
+                        } else {
+                            mods.iter().map(|m| Some(*m)).collect()
+                        };
+                        (m_before, vec![Some(base2)], m_after)
+                    }
+                    _ => (vec![None], vec![Some(k2)], vec![None]),
+                };
+                let (mods_before_3, key3) = match &lk3.modifiers {
+                    LayerModifiers::Hold(mods) => {
+                        let m = if lk3.symbol.is_whitespace()
+                            || lk2.layer == lk3.layer
+                            || (lk2.symbol.is_whitespace() && lk1.layer == lk3.layer)
+                            || (lk1.symbol.is_whitespace() && lk2.symbol.is_whitespace())
+                        {
+                            vec![None]
+                        } else {
+                            mods.iter().map(|m| Some(*m)).collect()
+                        };
+                        (m, vec![Some(base3)])
+                    }
+                    _ => (vec![None], vec![Some(k3)]),
+                };
+
+                // If there's many ways to type a trigram, make sure to use a lower weight for each of those ways.
+                let mut w_per_path = w;
+                w_per_path = w_per_path / (mods_after_1.len() as f64);
+                w_per_path = w_per_path / (mods_before_2.len() as f64);
+                w_per_path = w_per_path / (mods_after_2.len() as f64);
+                w_per_path = w_per_path / (mods_before_3.len() as f64);
+
+                // Add each way to type the trigram to the results.
+                key1.iter().for_each(|one| {
+                    mods_after_1.iter().for_each(|two| {
+                        mods_before_2.iter().for_each(|three| {
+                            key2.iter().for_each(|four| {
+                                mods_after_2.iter().for_each(|five| {
+                                    mods_before_3.iter().for_each(|six| {
+                                        key3.iter().for_each(|seven| {
+                                            let full_path =
+                                                [one, two, three, four, five, six, seven];
+                                            // Remove all parts of the combination that are `None`
+                                            let filtered_path =
+                                                full_path.iter().filter_map(|key| **key);
+
+                                            filtered_path
+                                                .clone()
+                                                .zip(filtered_path.clone().skip(1))
+                                                .zip(filtered_path.clone().skip(2))
+                                                .for_each(|((lki1, lki2), lki3)| {
+                                                    trigram_w_map.insert_or_add_weight(
+                                                        (lki1, lki2, lki3),
+                                                        w_per_path,
+                                                    );
+                                                });
+                                        })
+                                    })
+                                })
+                            })
+                        })
+                    })
+                });
+            }
         });
 
         trigram_w_map
