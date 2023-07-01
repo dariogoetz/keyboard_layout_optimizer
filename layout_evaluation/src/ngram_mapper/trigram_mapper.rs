@@ -318,7 +318,7 @@ impl OnDemandTrigramMapper {
 
                 // Decide what modifiers to use
                 let (key1, mods_after_1) = match &lk1.modifiers {
-                    LayerModifiers::Hold(mods) => {
+                    LayerModifiers::Lock(mods) => {
                         // If there is whitespace, there is no certain switch -> don't add modifiers.
                         let m = if lk1.symbol.is_whitespace()
                             || lk1.layer == lk2.layer
@@ -334,7 +334,7 @@ impl OnDemandTrigramMapper {
                     _ => (vec![Some(k1)], vec![None]),
                 };
                 let (mods_before_2, key2, mods_after_2) = match &lk2.modifiers {
-                    LayerModifiers::Hold(mods) => {
+                    LayerModifiers::Lock(mods) => {
                         let m_before = if lk1.symbol.is_whitespace()
                             || lk2.symbol.is_whitespace()
                             || lk1.layer == lk2.layer
@@ -356,7 +356,7 @@ impl OnDemandTrigramMapper {
                     _ => (vec![None], vec![Some(k2)], vec![None]),
                 };
                 let (mods_before_3, key3) = match &lk3.modifiers {
-                    LayerModifiers::Hold(mods) => {
+                    LayerModifiers::Lock(mods) => {
                         let m = if lk3.symbol.is_whitespace()
                             || lk2.layer == lk3.layer
                             || (lk2.symbol.is_whitespace() && lk1.layer == lk3.layer)

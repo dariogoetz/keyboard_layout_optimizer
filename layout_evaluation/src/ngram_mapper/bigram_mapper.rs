@@ -224,7 +224,7 @@ impl OnDemandBigramMapper {
 
                 // Decide what modifiers to use
                 let (key1, mods1) = match &lk1.modifiers {
-                    LayerModifiers::Hold(mods) => {
+                    LayerModifiers::Lock(mods) => {
                         // If there is whitespace, there is no certain switch -> don't add modifiers.
                         let m = if found_whitespace {
                             Vec::new()
@@ -236,7 +236,7 @@ impl OnDemandBigramMapper {
                     _ => (k1, Vec::new()),
                 };
                 let (mods2, key2) = match &lk2.modifiers {
-                    LayerModifiers::Hold(mods) => {
+                    LayerModifiers::Lock(mods) => {
                         let m = if found_whitespace {
                             Vec::new()
                         } else {
