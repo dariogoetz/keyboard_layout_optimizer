@@ -180,15 +180,12 @@ impl OnDemandTrigramMapper {
             let k3_take_two =
                 TakeTwoLayerKey::new(key3, &mods3, w, self.split_modifiers.same_key_mod_factor);
 
-            // Without this line (and the `.skip(1)` in the following lines), bigrams with non-hold
-            //  modifiers that contain repeating letters would get removed.
-            // (For example, "ββx", if greek letters are accessed via an other type of modifier.)
-            trigram_w_map.insert_or_add_weight((key1, key2, key3), w);
-
-            k1_take_one.clone().skip(1).for_each(|(e1, _)| {
-                k2_take_one.clone().skip(1).for_each(|(e2, _)| {
-                    k3_take_one.clone().skip(1).for_each(|(e3, _)| {
-                        if (e1 != e2) && (e2 != e3) {
+            k1_take_one.clone().for_each(|(e1, _)| {
+                k2_take_one.clone().enumerate().for_each(|(idx2, (e2, _))| {
+                    k3_take_one.clone().for_each(|(e3, _)| {
+                        // `idx2 == 0` is necessary because bigrams without hold modifiers
+                        //  that contain repeating letters would otherwise get removed. (For example, "aab".)
+                        if idx2 == 0 || (e1 != e2 && e2 != e3) {
                             // log::trace!(
                             //     "one each:                    {}{}{}",
                             //     layout.get_layerkey(&e1).symbol,
