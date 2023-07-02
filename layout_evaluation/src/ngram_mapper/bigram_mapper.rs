@@ -252,9 +252,9 @@ impl OnDemandBigramMapper {
                                 })
                                 .collect()
                         };
-                        (vec![Some(base1)], m)
+                        (base1, m)
                     }
-                    _ => (vec![Some(k1)], vec![None]),
+                    _ => (k1, vec![None]),
                 };
                 let (mods2, key2) = match &lk2.modifiers {
                     LayerModifiers::Lock(mods) => {
@@ -284,9 +284,9 @@ impl OnDemandBigramMapper {
                                 })
                                 .collect()
                         };
-                        (m, vec![Some(base2)])
+                        (m, base2)
                     }
-                    _ => (vec![None], vec![Some(k2)]),
+                    _ => (vec![None], k2),
                 };
 
                 // If there's many ways to type a bigram, make sure to use a lower weight for each of those ways.
@@ -295,27 +295,29 @@ impl OnDemandBigramMapper {
                 w_per_path = w_per_path / (mods2.len() as f64);
 
                 // Add each way to type the bigram to the results.
-                key1.iter().for_each(|one| {
-                    mods1.iter().for_each(|two| {
-                        mods2.iter().for_each(|three| {
-                            key2.iter().for_each(|four| {
-                                let full_path = [one, two, three, four];
-                                // Remove all parts of the combination that are `None`
-                                let filtered_path = full_path.iter().filter_map(|key| **key);
+                mods1.iter().for_each(|mod1| {
+                    mods2.iter().for_each(|mod2| {
+                        let mut path = Vec::with_capacity(4);
 
-                                filtered_path
-                                    .clone()
-                                    .zip(filtered_path.clone().skip(1))
-                                    .for_each(|(lki1, lki2)| {
-                                        println!(
-                                            "{}{}",
-                                            layout.get_layerkey(&lki1).symbol,
-                                            layout.get_layerkey(&lki2).symbol,
-                                        );
-                                        bigram_w_map.insert_or_add_weight((lki1, lki2), w_per_path);
-                                    });
-                            })
-                        })
+                        path.push(key1);
+                        if let Some(m) = mod1 {
+                            path.push(*m); // Only add mods that ... actually exist.
+                        }
+                        if let Some(m) = mod2 {
+                            path.push(*m);
+                        }
+                        path.push(key2);
+
+                        path.iter()
+                            .zip(path.iter().skip(1))
+                            .for_each(|(lki1, lki2)| {
+                                println!(
+                                    "{}{}",
+                                    layout.get_layerkey(&lki1).symbol,
+                                    layout.get_layerkey(&lki2).symbol,
+                                );
+                                bigram_w_map.insert_or_add_weight((*lki1, *lki2), w_per_path);
+                            });
                     })
                 });
             }

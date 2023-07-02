@@ -331,9 +331,9 @@ impl OnDemandTrigramMapper {
                         } else {
                             mods.iter().map(|m| Some(*m)).collect()
                         };
-                        (vec![Some(base1)], m)
+                        (base1, m)
                     }
-                    _ => (vec![Some(k1)], vec![None]),
+                    _ => (k1, vec![None]),
                 };
                 let (mods_before_2, key2, mods_after_2) = match &lk2.modifiers {
                     LayerModifiers::Lock(mods) => {
@@ -353,9 +353,9 @@ impl OnDemandTrigramMapper {
                         } else {
                             mods.iter().map(|m| Some(*m)).collect()
                         };
-                        (m_before, vec![Some(base2)], m_after)
+                        (m_before, base2, m_after)
                     }
-                    _ => (vec![None], vec![Some(k2)], vec![None]),
+                    _ => (vec![None], k2, vec![None]),
                 };
                 let (mods_before_3, key3) = match &lk3.modifiers {
                     LayerModifiers::Lock(mods) => {
@@ -368,9 +368,9 @@ impl OnDemandTrigramMapper {
                         } else {
                             mods.iter().map(|m| Some(*m)).collect()
                         };
-                        (m, vec![Some(base3)])
+                        (m, base3)
                     }
-                    _ => (vec![None], vec![Some(k3)]),
+                    _ => (vec![None], k3),
                 };
 
                 // If there's many ways to type a trigram, make sure to use a lower weight for each of those ways.
@@ -381,36 +381,41 @@ impl OnDemandTrigramMapper {
                 w_per_path = w_per_path / (mods_before_3.len() as f64);
 
                 // Add each way to type the trigram to the results.
-                key1.iter().for_each(|one| {
-                    mods_after_1.iter().for_each(|two| {
-                        mods_before_2.iter().for_each(|three| {
-                            key2.iter().for_each(|four| {
-                                mods_after_2.iter().for_each(|five| {
-                                    mods_before_3.iter().for_each(|six| {
-                                        key3.iter().for_each(|seven| {
-                                            let full_path =
-                                                [one, two, three, four, five, six, seven];
-                                            // Remove all parts of the combination that are `None`
-                                            let filtered_path =
-                                                full_path.iter().filter_map(|key| **key);
+                mods_after_1.iter().for_each(|mod_after_1| {
+                    mods_before_2.iter().for_each(|mod_before_2| {
+                        mods_after_2.iter().for_each(|mod_after_2| {
+                            mods_before_3.iter().for_each(|mod_before_3| {
+                                let mut path = Vec::with_capacity(7);
 
-                                            filtered_path
-                                                .clone()
-                                                .zip(filtered_path.clone().skip(1))
-                                                .zip(filtered_path.clone().skip(2))
-                                                .for_each(|((lki1, lki2), lki3)| {
-                                                    trigram_w_map.insert_or_add_weight(
-                                                        (lki1, lki2, lki3),
-                                                        w_per_path,
-                                                    );
-                                                });
-                                        })
-                                    })
-                                })
+                                path.push(key1);
+                                if let Some(m) = mod_after_1 {
+                                    path.push(*m); // Only add mods that ... actually exist.
+                                }
+                                if let Some(m) = mod_before_2 {
+                                    path.push(*m);
+                                }
+                                path.push(key2);
+                                if let Some(m) = mod_after_2 {
+                                    path.push(*m);
+                                }
+                                if let Some(m) = mod_before_3 {
+                                    path.push(*m);
+                                }
+                                path.push(key3);
+
+                                path.iter()
+                                    .zip(path.iter().skip(1))
+                                    .zip(path.iter().skip(2))
+                                    .for_each(|((lki1, lki2), lki3)| {
+                                        trigram_w_map.insert_or_add_weight(
+                                            (*lki1, *lki2, *lki3),
+                                            w_per_path,
+                                        );
+                                    });
                             })
                         })
                     })
-                });
+                })
             }
         });
 
