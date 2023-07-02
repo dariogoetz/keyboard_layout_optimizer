@@ -227,62 +227,97 @@ impl OnDemandBigramMapper {
                     LayerModifiers::Lock(mods) => {
                         // If there is whitespace, there is no certain switch -> don't add modifiers.
                         let m = if found_whitespace {
-                            Vec::new()
+                            vec![None]
                         } else {
-                            mods.clone()
+                            mods.iter()
+                                .enumerate()
+                                .map(|(i, m)| {
+                                    // If there are multiple mods used to type a single key, immediately add their permutations.
+                                    mods.iter().skip(i + 1).for_each(|second_m| {
+                                        let w_per_mods_combination = w
+                                            / (factorial(mods.len()) / factorial(mods.len() - 2))
+                                                as f64;
+                                        bigram_w_map.insert_or_add_weight(
+                                            (*m, *second_m),
+                                            w_per_mods_combination,
+                                        );
+                                        bigram_w_map.insert_or_add_weight(
+                                            (*second_m, *m),
+                                            w_per_mods_combination,
+                                        );
+                                    });
+
+                                    // Return the actual content of the mods-vector
+                                    Some(*m)
+                                })
+                                .collect()
                         };
-                        (base1, m)
+                        (vec![Some(base1)], m)
                     }
-                    _ => (k1, Vec::new()),
+                    _ => (vec![Some(k1)], vec![None]),
                 };
                 let (mods2, key2) = match &lk2.modifiers {
                     LayerModifiers::Lock(mods) => {
                         let m = if found_whitespace {
-                            Vec::new()
+                            vec![None]
                         } else {
-                            mods.clone()
+                            mods.iter()
+                                .enumerate()
+                                .map(|(i, m)| {
+                                    // If there are multiple mods used to type a single key, immediately add their permutations.
+                                    mods.iter().skip(i + 1).for_each(|second_m| {
+                                        let w_per_mods_combination = w
+                                            / (factorial(mods.len()) / factorial(mods.len() - 2))
+                                                as f64;
+                                        bigram_w_map.insert_or_add_weight(
+                                            (*m, *second_m),
+                                            w_per_mods_combination,
+                                        );
+                                        bigram_w_map.insert_or_add_weight(
+                                            (*second_m, *m),
+                                            w_per_mods_combination,
+                                        );
+                                    });
+
+                                    // Return the actual content of the mods-vector
+                                    Some(*m)
+                                })
+                                .collect()
                         };
-                        (m, base2)
+                        (m, vec![Some(base2)])
                     }
-                    _ => (Vec::new(), k2),
+                    _ => (vec![None], vec![Some(k2)]),
                 };
 
-                bigram_w_map.insert_or_add_weight((key1, key2), w);
-                // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&chosen_key1).symbol, layout.get_layerkey(&chosen_key2).symbol);
+                // If there's many ways to type a bigram, make sure to use a lower weight for each of those ways.
+                let mut w_per_path = w;
+                w_per_path = w_per_path / (mods1.len() as f64);
+                w_per_path = w_per_path / (mods2.len() as f64);
 
-                mods1.iter().for_each(|mod1| {
-                    // mix mods of k1 with base of k2
-                    bigram_w_map.insert_or_add_weight((*mod1, key2), w);
-                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&chosen_key2).symbol);
+                // Add each way to type the bigram to the results.
+                key1.iter().for_each(|one| {
+                    mods1.iter().for_each(|two| {
+                        mods2.iter().for_each(|three| {
+                            key2.iter().for_each(|four| {
+                                let full_path = [one, two, three, four];
+                                // Remove all parts of the combination that are `None`
+                                let filtered_path = full_path.iter().filter_map(|key| **key);
 
-                    // mix mods of k1 and k2
-                    mods2.iter().for_each(|mod2| {
-                        if mod1 != mod2 {
-                            bigram_w_map.insert_or_add_weight((*mod1, *mod2), w);
-                            // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&mod2).symbol);
-                        }
-                    });
+                                filtered_path
+                                    .clone()
+                                    .zip(filtered_path.clone().skip(1))
+                                    .for_each(|(lki1, lki2)| {
+                                        println!(
+                                            "{}{}",
+                                            layout.get_layerkey(&lki1).symbol,
+                                            layout.get_layerkey(&lki2).symbol,
+                                        );
+                                        bigram_w_map.insert_or_add_weight((lki1, lki2), w_per_path);
+                                    });
+                            })
+                        })
+                    })
                 });
-
-                mods2.iter().for_each(|mod2| {
-                    // mix mods of k2 with base of k1
-                    bigram_w_map.insert_or_add_weight((key1, *mod2), w);
-                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&chosen_key1).symbol, layout.get_layerkey(&mod2).symbol);
-                });
-
-                // same key mods
-                TakeTwoLayerKey::new(key1, &mods1, w, self.split_modifiers.same_key_mod_factor)
-                    .for_each(|((e1, e2), w)| {
-                        // The elements e1 and e2 were purposefully reversed. This is due to the modifier coming AFTER the key.
-                        bigram_w_map.insert_or_add_weight((e2, e1), w);
-                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
-                    });
-
-                TakeTwoLayerKey::new(key2, &mods2, w, self.split_modifiers.same_key_mod_factor)
-                    .for_each(|(e, w)| {
-                        bigram_w_map.insert_or_add_weight(e, w);
-                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&e.0).symbol, layout.get_layerkey(&e.1).symbol);
-                    });
             }
         });
 
