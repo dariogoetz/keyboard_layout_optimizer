@@ -374,11 +374,11 @@ impl OnDemandTrigramMapper {
                 };
 
                 // If there's many ways to type a trigram, make sure to use a lower weight for each of those ways.
-                let mut w_per_path = w;
-                w_per_path = w_per_path / (mods_after_1.len() as f64);
-                w_per_path = w_per_path / (mods_before_2.len() as f64);
-                w_per_path = w_per_path / (mods_after_2.len() as f64);
-                w_per_path = w_per_path / (mods_before_3.len() as f64);
+                let w_per_path = w
+                    / (mods_after_1.len()
+                        * mods_before_2.len()
+                        * mods_after_2.len()
+                        * mods_before_3.len()) as f64;
 
                 // Add each way to type the trigram to the results.
                 mods_after_1.iter().for_each(|mod_after_1| {

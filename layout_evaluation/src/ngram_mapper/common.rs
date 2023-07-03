@@ -426,12 +426,6 @@ impl<'a> TakeThreeLayerKey<'a> {
 //     res
 // }
 
-/// Calculates the factorial of a number.
-/// `factorial(5)` = `!5` = `5*4*3*2*1` = `120`
-pub fn factorial(num: usize) -> usize {
-    (1..=num).product()
-}
-
 pub trait NgramMap<Ngram: Eq + Hash> {
     /// Adds the ngram to the HashMap if it does not already exist.
     /// If it does exist, simply add its weight to the preexisting weight.

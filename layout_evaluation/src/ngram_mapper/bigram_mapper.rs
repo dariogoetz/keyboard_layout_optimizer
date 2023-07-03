@@ -234,16 +234,15 @@ impl OnDemandBigramMapper {
                                 .map(|(i, m)| {
                                     // If there are multiple mods used to type a single key, immediately add their permutations.
                                     mods.iter().skip(i + 1).for_each(|second_m| {
-                                        let w_per_mods_combination = w
-                                            / (factorial(mods.len()) / factorial(mods.len() - 2))
-                                                as f64;
+                                        let nr_combinations = 2 * (1..mods.len()).sum::<usize>();
+                                        let w_per_combination = w / nr_combinations as f64;
                                         bigram_w_map.insert_or_add_weight(
                                             (*m, *second_m),
-                                            w_per_mods_combination,
+                                            w_per_combination,
                                         );
                                         bigram_w_map.insert_or_add_weight(
                                             (*second_m, *m),
-                                            w_per_mods_combination,
+                                            w_per_combination,
                                         );
                                     });
 
@@ -266,16 +265,15 @@ impl OnDemandBigramMapper {
                                 .map(|(i, m)| {
                                     // If there are multiple mods used to type a single key, immediately add their permutations.
                                     mods.iter().skip(i + 1).for_each(|second_m| {
-                                        let w_per_mods_combination = w
-                                            / (factorial(mods.len()) / factorial(mods.len() - 2))
-                                                as f64;
+                                        let nr_combinations = 2 * (1..mods.len()).sum::<usize>();
+                                        let w_per_combination = w / nr_combinations as f64;
                                         bigram_w_map.insert_or_add_weight(
                                             (*m, *second_m),
-                                            w_per_mods_combination,
+                                            w_per_combination,
                                         );
                                         bigram_w_map.insert_or_add_weight(
                                             (*second_m, *m),
-                                            w_per_mods_combination,
+                                            w_per_combination,
                                         );
                                     });
 
@@ -290,9 +288,7 @@ impl OnDemandBigramMapper {
                 };
 
                 // If there's many ways to type a bigram, make sure to use a lower weight for each of those ways.
-                let mut w_per_path = w;
-                w_per_path = w_per_path / (mods1.len() as f64);
-                w_per_path = w_per_path / (mods2.len() as f64);
+                let w_per_path = w / (mods1.len() * mods2.len()) as f64;
 
                 // Add each way to type the bigram to the results.
                 mods1.iter().for_each(|mod1| {
