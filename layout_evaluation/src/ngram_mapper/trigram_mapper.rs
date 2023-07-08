@@ -99,12 +99,10 @@ impl OnDemandTrigramMapper {
             trigram_keys_vec.clone().into_iter().collect()
         };
 
-        trigram_keys = if layout.has_lock_layers() {
+        if layout.has_lock_layers() {
             // The `lock` modifier type needs to get processed last since it might host other modifiers.
-            self.process_lock_layers(trigram_keys, layout)
-        } else {
-            trigram_keys
-        };
+            trigram_keys = self.process_lock_layers(trigram_keys, layout)
+        }
 
         (trigram_keys, not_found_weight)
     }

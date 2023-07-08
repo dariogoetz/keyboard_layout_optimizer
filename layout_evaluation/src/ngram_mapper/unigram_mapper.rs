@@ -66,12 +66,10 @@ impl OnDemandUnigramMapper {
             unigram_keys_vec.into_iter().collect()
         };
 
-        unigram_keys = if layout.has_lock_layers() {
+        if layout.has_lock_layers() {
             // The `lock` modifier type needs to get processed first since it might host other modifiers.
-            self.process_lock_layers(unigram_keys, layout)
-        } else {
-            unigram_keys
-        };
+            unigram_keys = self.process_lock_layers(unigram_keys, layout)
+        }
 
         (unigram_keys, not_found_weight)
     }

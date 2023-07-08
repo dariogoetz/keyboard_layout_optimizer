@@ -92,12 +92,10 @@ impl OnDemandBigramMapper {
             bigram_keys_vec.clone().into_iter().collect()
         };
 
-        bigram_keys = if layout.has_lock_layers() {
+        if layout.has_lock_layers() {
             // The `lock` modifier type needs to get processed last since it might host other modifiers.
-            self.process_lock_layers(bigram_keys, layout)
-        } else {
-            bigram_keys
-        };
+            bigram_keys = self.process_lock_layers(bigram_keys, layout)
+        }
 
         // bigram_keys
         //     .iter()
