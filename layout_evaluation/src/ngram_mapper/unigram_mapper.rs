@@ -127,19 +127,20 @@ impl OnDemandUnigramMapper {
     /// contain no information about certain `lock`-layer-switches, this function transforms
     /// the `lock`-layer-keys to base-layer-keys.
     fn process_lock_layers(&self, unigrams: UnigramIndices, layout: &Layout) -> UnigramIndices {
-        unigrams
-            .into_iter()
-            .map(|(k, w)| {
-                let lk = layout.get_layerkey(&k);
+        let mut idx_w_map = AHashMap::with_capacity(unigrams.len());
 
-                if lk.modifiers.layer_modifier_type().is_lock() {
-                    let base = layout.get_base_layerkey_index(&k);
-                    (base, w)
-                } else {
-                    (k, w)
-                }
-            })
-            .collect()
+        unigrams.into_iter().for_each(|(k, w)| {
+            let lk = layout.get_layerkey(&k);
+
+            if lk.modifiers.layer_modifier_type().is_lock() {
+                let base = layout.get_base_layerkey_index(&k);
+                idx_w_map.insert_or_add_weight(base, w);
+            } else {
+                idx_w_map.insert_or_add_weight(k, w);
+            }
+        });
+
+        idx_w_map
     }
 
     fn process_one_shot_layers(
