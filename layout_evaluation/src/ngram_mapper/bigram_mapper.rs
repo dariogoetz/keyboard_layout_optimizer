@@ -89,7 +89,7 @@ impl OnDemandBigramMapper {
         let mut bigram_keys = if layout.has_hold_layers() && self.split_modifiers.enabled {
             self.process_hold_layers(bigram_keys_vec, layout)
         } else {
-            bigram_keys_vec.clone().into_iter().collect()
+            bigram_keys_vec.into_iter().collect()
         };
 
         if layout.has_lock_layers() {

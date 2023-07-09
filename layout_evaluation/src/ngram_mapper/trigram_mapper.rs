@@ -96,7 +96,7 @@ impl OnDemandTrigramMapper {
         let mut trigram_keys = if layout.has_hold_layers() && self.split_modifiers.enabled {
             self.process_hold_layers(trigram_keys_vec, layout)
         } else {
-            trigram_keys_vec.clone().into_iter().collect()
+            trigram_keys_vec.into_iter().collect()
         };
 
         if layout.has_lock_layers() {
