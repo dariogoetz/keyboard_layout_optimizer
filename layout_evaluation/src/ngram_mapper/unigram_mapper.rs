@@ -92,6 +92,7 @@ impl OnDemandUnigramMapper {
     /// for each modifier involved in accessing the higher layer.
     fn process_hold_modifiers(unigrams: UnigramIndicesVec, layout: &Layout) -> UnigramIndices {
         let mut idx_w_map = AHashMap::with_capacity(unigrams.len() / 3);
+
         unigrams.into_iter().for_each(|(k, w)| {
             let (base, mods) = layout.resolve_modifiers(&k);
 
@@ -148,7 +149,6 @@ impl OnDemandUnigramMapper {
         unigrams: UnigramIndicesVec,
         layout: &Layout,
     ) -> UnigramIndicesVec {
-        println!("\n{}", unigrams.len());
         let mut processed_unigrams = Vec::with_capacity(unigrams.len());
 
         unigrams.into_iter().for_each(|(k, w)| {
@@ -160,7 +160,7 @@ impl OnDemandUnigramMapper {
                 processed_unigrams.push((k, w));
             }
         });
-        println!("{}", processed_unigrams.len());
+
         processed_unigrams
     }
 }

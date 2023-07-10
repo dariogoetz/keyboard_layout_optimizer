@@ -147,6 +147,7 @@ impl OnDemandTrigramMapper {
     // this is one of the most intensive functions of the layout evaluation
     fn process_hold_layers(&self, trigrams: TrigramIndicesVec, layout: &Layout) -> TrigramIndices {
         let mut trigram_w_map = AHashMap::with_capacity(trigrams.len() / 3);
+
         trigrams.into_iter().for_each(|((k1, k2, k3), w)| {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
             let (base2, mods2) = layout.resolve_modifiers(&k2);

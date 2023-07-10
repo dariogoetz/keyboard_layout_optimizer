@@ -472,7 +472,6 @@ impl Layout {
             .layerkeys
             .iter()
             .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Hold(_)));
-        println!("has_hold_layers: {}", x);
         x
     }
     /// If the layout has at least one layer configured as `lock` layer
@@ -481,7 +480,6 @@ impl Layout {
             .layerkeys
             .iter()
             .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Lock(_)));
-        println!("has_lock_layers: {}", x);
         x
     }
     /// If the layout has at least one layer configured as `one_shot` layer
@@ -490,7 +488,6 @@ impl Layout {
             .layerkeys
             .iter()
             .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)));
-        println!("has_one_shot_layers: {}", x);
         x
     }
 

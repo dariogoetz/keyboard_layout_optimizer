@@ -305,11 +305,6 @@ impl OnDemandBigramMapper {
                         path.iter()
                             .zip(path.iter().skip(1))
                             .for_each(|(lki1, lki2)| {
-                                println!(
-                                    "{}{}",
-                                    layout.get_layerkey(&lki1).symbol,
-                                    layout.get_layerkey(&lki2).symbol,
-                                );
                                 bigram_w_map.insert_or_add_weight((*lki1, *lki2), w_per_path);
                             });
                     })
