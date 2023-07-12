@@ -302,7 +302,7 @@ impl Layout {
                         ModifierLocation::Symbol(c) => {
                             let base_key_idx = *char2layerkey_index
                                 .get(c)
-                                .ok_or(format!("Modifier char '{:?}' not a found", c))
+                                .ok_or(format!("Modifier char '{:?}' not found", c))
                                 .map_err(anyhow::Error::msg)?;
                             let mod_idx = *char2mod_index
                                 .entry((layer_modifier_type, *c))
