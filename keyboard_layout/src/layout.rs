@@ -361,12 +361,20 @@ impl Layout {
         // resolve each Single LayerKey's modifiers
         layerkeys.iter_mut().for_each(|k| {
             let mods = if k.layer > 0 && k.layer < (modifiers.len() + 1) as u8 {
+                // First try finding a modifier on the other hand
                 mod_map
                     .get((k.layer - 1) as usize)
                     .unwrap() // can not fail due to above check
                     .get(&k.key.hand.other())
                     .cloned()
-                    .unwrap_or_default()
+                    .unwrap_or_else(|| {
+                        mod_map // If there is no modifier on the other hand, ...
+                            .get((k.layer - 1) as usize)
+                            .unwrap()
+                            .get(&k.key.hand) // ...try finding one on the same hand.
+                            .cloned()
+                            .unwrap_or_default()
+                    })
             } else {
                 LayerModifiers::default()
             };
