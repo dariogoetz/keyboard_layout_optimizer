@@ -134,7 +134,7 @@ impl OnDemandUnigramMapper {
             let lk = layout.get_layerkey(&k);
 
             if lk.modifiers.layer_modifier_type().is_lock() {
-                let base = layout.get_base_layerkey_index(&k);
+                let base = layout.get_base_layerkey_index(&k, 0);
                 idx_w_map.insert_or_add_weight(base, w);
             } else {
                 idx_w_map.insert_or_add_weight(k, w);

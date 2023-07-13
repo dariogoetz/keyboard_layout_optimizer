@@ -460,17 +460,35 @@ impl Layout {
 
     /// Get the index of the "base" symbol (the one on the base layer, e.g. "A" -> "a") for a given [`LayerKeyIndex`]
     #[inline(always)]
-    pub fn get_base_layerkey_index(&self, layerkey_index: &LayerKeyIndex) -> LayerKeyIndex {
+    pub fn get_base_layerkey_index(
+        &self,
+        layerkey_index: &LayerKeyIndex,
+        from_layer: u8,
+    ) -> LayerKeyIndex {
         let key_index: usize = self.layerkey_to_key_index[*layerkey_index as usize] as usize;
-        self.key_layers[key_index][0]
+        self.key_layers[key_index][from_layer as usize]
     }
 
     /// Get a list of modifiers required to generate a given [`LayerKey`] as a Vec of [`LayerKey`]s
     #[inline(always)]
     pub fn resolve_modifiers(&self, k: &LayerKeyIndex) -> (LayerKeyIndex, LayerModifiers) {
         let lk = self.get_layerkey(k);
-        let base = self.get_base_layerkey_index(k);
         let mods = lk.modifiers.clone();
+        let base;
+
+        // A key modified by `Hold`-modifiers may be placed on a `Lock`-layer.
+        // Therefore, the correct layer needs to be used to retrieve the
+        // base key of keys using `OneShot` and `Hold`-modifiers.
+        if let LayerModifiers::Hold(hold_mods) = &mods {
+            if !hold_mods.is_empty() {
+                let mod_layer = self.get_layerkey(&hold_mods[0]).layer;
+                base = self.get_base_layerkey_index(k, mod_layer);
+
+                return (base, mods);
+            }
+        }
+        base = self.get_base_layerkey_index(k, 0);
+
         (base, mods)
     }
 

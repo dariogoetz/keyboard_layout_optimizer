@@ -209,8 +209,8 @@ impl OnDemandBigramMapper {
             {
                 bigram_w_map.insert_or_add_weight((k1, k2), w);
             } else {
-                let base1 = layout.get_base_layerkey_index(&k1);
-                let base2 = layout.get_base_layerkey_index(&k2);
+                let base1 = layout.get_base_layerkey_index(&k1, 0);
+                let base2 = layout.get_base_layerkey_index(&k2, 0);
 
                 // If all lock-keys are on the same layer, the resulting bigram is very simple.
                 if lk1.modifiers.layer_modifier_type().is_lock() && lk1.layer == lk2.layer {
