@@ -130,6 +130,8 @@ impl OnDemandUnigramMapper {
     fn process_lock_layers(&self, unigrams: UnigramIndices, layout: &Layout) -> UnigramIndices {
         let mut idx_w_map = AHashMap::with_capacity(unigrams.len());
 
+        // This must be a `for_each`-loop and cannot simply be `collect`ed because the weight
+        // of duplicates needs to be added up. Collecting overwrites duplicates without adding them up.
         unigrams.into_iter().for_each(|(k, w)| {
             let lk = layout.get_layerkey(&k);
 

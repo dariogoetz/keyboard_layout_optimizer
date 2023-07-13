@@ -494,27 +494,21 @@ impl Layout {
 
     /// If the layout has at least one layer configured as `hold` layer
     pub fn has_hold_layers(&self) -> bool {
-        let x = self
-            .layerkeys
+        self.layerkeys
             .iter()
-            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Hold(_)));
-        x
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Hold(_)))
     }
     /// If the layout has at least one layer configured as `lock` layer
     pub fn has_lock_layers(&self) -> bool {
-        let x = self
-            .layerkeys
+        self.layerkeys
             .iter()
-            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Lock(_)));
-        x
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Lock(_)))
     }
     /// If the layout has at least one layer configured as `one_shot` layer
     pub fn has_one_shot_layers(&self) -> bool {
-        let x = self
-            .layerkeys
+        self.layerkeys
             .iter()
-            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)));
-        x
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::OneShot(_)))
     }
 
     /// Plot a graphical representation of a layer

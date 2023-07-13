@@ -317,7 +317,7 @@ impl OnDemandTrigramMapper {
                     return;
                 }
 
-                // Decide what modifiers to use
+                // Decide what keys and modifiers to use
                 let (key1, mods_after_1) = match &lk1.modifiers {
                     LayerModifiers::Lock(mods) => {
                         // If there is whitespace, there is no certain switch -> don't add modifiers.
