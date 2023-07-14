@@ -477,8 +477,7 @@ impl Layout {
         let base;
 
         // A key modified by `Hold`-modifiers may be placed on a `Lock`-layer.
-        // Therefore, the correct layer needs to be used to retrieve the
-        // base key of keys using `OneShot` and `Hold`-modifiers.
+        // Therefore, the correct layer needs to be used to retrieve the base key of keys requiring `Hold`-modifiers.
         if let LayerModifiers::Hold(hold_mods) = &mods {
             if !hold_mods.is_empty() {
                 let mod_layer = self.get_layerkey(&hold_mods[0]).layer;
