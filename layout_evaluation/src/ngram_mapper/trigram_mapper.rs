@@ -136,8 +136,9 @@ impl OnDemandTrigramMapper {
         layerkeys
     }
 
-    /// Map all trigrams to base-layer trigrams, potentially generating multiple trigrams
-    /// with modifiers for those with higer-layer keys.
+    /// Process layers accessible via `hold` modifiers.
+    /// This maps all their trigrams to either base- or `lock`-layer trigrams, potentially generating multiple
+    /// trigrams with modifiers for those with higer-layer keys.
     ///
     /// Each trigram of higher-layer symbols will transform into a series of various trigrams with permutations
     /// of the involved base-keys and modifiers. Keys from the latter parts of the trigram will always be after
@@ -157,12 +158,10 @@ impl OnDemandTrigramMapper {
                 LayerModifiers::Hold(mods) => (base1, mods),
                 _ => (k1, Vec::new()),
             };
-
             let (key2, mods2) = match mods2 {
                 LayerModifiers::Hold(mods) => (base2, mods),
                 _ => (k2, Vec::new()),
             };
-
             let (key3, mods3) = match mods3 {
                 LayerModifiers::Hold(mods) => (base3, mods),
                 _ => (k3, Vec::new()),
@@ -290,6 +289,14 @@ impl OnDemandTrigramMapper {
         trigram_w_map
     }
 
+    /// Process layers accessible via `lock` modifiers.
+    /// This maps all their trigrams to base-layer trigrams, potentially generating multiple
+    /// trigrams with modifiers for those with higer-layer keys.
+    ///
+    /// Since we assume users typically stay on these layers for many words/sentences,
+    /// modifiers will only get added when it is _certain_ that a switch needs to be performed.
+    /// Therefore – for example – modifiers will not be added at the very start or the very end
+    /// of a letter-combination.    
     fn process_lock_layers(&self, trigrams: TrigramIndices, layout: &Layout) -> TrigramIndices {
         let mut trigram_w_map = AHashMap::with_capacity(trigrams.len());
 

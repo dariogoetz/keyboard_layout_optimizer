@@ -135,8 +135,9 @@ impl OnDemandBigramMapper {
         layerkeys
     }
 
-    /// Map all bigrams to base-layer bigrams, potentially generating multiple bigrams
-    /// with modifiers for those with higer-layer keys.
+    /// Process layers accessible via `hold` modifiers.
+    /// This maps all their bigrams to either base- or `lock`-layer bigrams, potentially generating multiple
+    /// bigrams with modifiers for those with higer-layer keys.
     ///
     /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
     /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
@@ -147,11 +148,11 @@ impl OnDemandBigramMapper {
             let (base1, mods1) = layout.resolve_modifiers(&k1);
             let (base2, mods2) = layout.resolve_modifiers(&k2);
 
+            // Only use the base-key if there actually is a hold-modifier getting used.
             let (key1, mods1) = match mods1 {
                 LayerModifiers::Hold(mods) => (base1, mods),
                 _ => (k1, Vec::new()),
             };
-
             let (key2, mods2) = match mods2 {
                 LayerModifiers::Hold(mods) => (base2, mods),
                 _ => (k2, Vec::new()),
@@ -197,6 +198,14 @@ impl OnDemandBigramMapper {
         bigram_w_map
     }
 
+    /// Process layers accessible via `lock` modifiers.
+    /// This maps all their bigrams to base-layer bigrams, potentially generating multiple
+    /// bigrams with modifiers for those with higer-layer keys.
+    ///
+    /// Since we assume users typically stay on these layers for many words/sentences,
+    /// modifiers will only get added when it is _certain_ that a switch needs to be performed.
+    /// Therefore – for example – modifiers will not be added at the very start or the very end
+    /// of a letter-combination.
     fn process_lock_layers(&self, bigrams: BigramIndices, layout: &Layout) -> BigramIndices {
         let mut bigram_w_map = AHashMap::with_capacity(bigrams.len() / 3);
 
@@ -204,6 +213,7 @@ impl OnDemandBigramMapper {
             let lk1 = layout.get_layerkey(&k1);
             let lk2 = layout.get_layerkey(&k2);
 
+            // If none of the keys is a `lock`-key, do not modify them.
             if !lk1.modifiers.layer_modifier_type().is_lock()
                 && !lk2.modifiers.layer_modifier_type().is_lock()
             {
@@ -220,9 +230,10 @@ impl OnDemandBigramMapper {
 
                 let found_whitespace = lk1.symbol.is_whitespace() || lk2.symbol.is_whitespace();
 
-                // Decide what modifiers to use
+                // Decide what keys and modifiers to use.
                 let (key1, mods1) = match &lk1.modifiers {
                     LayerModifiers::Lock(mods) => {
+                        // Decide what mods to use.
                         // If there is whitespace, there is no certain switch -> don't add modifiers.
                         let m = if found_whitespace {
                             vec![None]

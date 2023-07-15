@@ -67,7 +67,7 @@ impl OnDemandUnigramMapper {
         };
 
         if layout.has_lock_layers() {
-            // The `lock` modifier type needs to get processed first since it might host other modifiers.
+            // The `lock` modifier type needs to get processed last since it might host other modifiers.
             unigram_keys = self.process_lock_layers(unigram_keys, layout)
         }
 
@@ -85,8 +85,9 @@ impl OnDemandUnigramMapper {
             .collect()
     }
 
-    /// Map all unigrams to base-layer unigrams, potentially generating multiple unigrams
-    /// with modifiers for those with higer-layer keys.
+    /// Process layers accessible via `hold` modifiers.
+    /// This maps all their unigrams to either base- or `lock`-layer unigrams, potentially generating multiple
+    /// unigrams with modifiers for those with higer-layer keys.
     ///
     /// Each unigram of a higher-layer symbol will transform into a unigram with the base-layer key and one
     /// for each modifier involved in accessing the higher layer.
