@@ -1,5 +1,6 @@
 use super::TrigramMetric;
 
+use ahash::AHashSet;
 use keyboard_layout::{
     key::{Finger, Hand},
     layout::{LayerKey, Layout},
@@ -9,24 +10,28 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub exclude_thumbs: bool,
-    pub same_hand_double_finger_repeat: f64,
-    pub same_hand_single_finger_repeat: f64,
-    pub same_hand_roll: f64,
-    pub same_hand_redirect: f64,
-    pub same_hand_bad_redirect: f64,
-    pub roll_same_finger: f64,
-    pub roll_inwards: f64,
-    pub roll_outwards: f64,
-    pub roll_other: f64,
-    pub alternate_other_finger: f64,
-    pub alternate_same_key: f64,
-    pub alternate_finger_repeat: f64,
+    exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: Vec<char>,
+    same_hand_double_finger_repeat: f64,
+    same_hand_single_finger_repeat: f64,
+    same_hand_roll: f64,
+    same_hand_redirect: f64,
+    same_hand_bad_redirect: f64,
+    roll_same_finger: f64,
+    roll_inwards: f64,
+    roll_outwards: f64,
+    roll_other: f64,
+    alternate_other_finger: f64,
+    alternate_same_key: f64,
+    alternate_finger_repeat: f64,
 }
 
 #[derive(Clone, Debug)]
 pub struct OxeyCombinedTrigram {
     exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: AHashSet<char>,
     same_hand_double_finger_repeat: f64,
     same_hand_single_finger_repeat: f64,
     same_hand_roll: f64,
@@ -70,6 +75,8 @@ impl OxeyCombinedTrigram {
     pub fn new(params: &Parameters) -> Self {
         Self {
             exclude_thumbs: params.exclude_thumbs,
+            exclude_modifiers: params.exclude_modifiers,
+            exclude_chars: params.exclude_chars.iter().cloned().collect(),
             same_hand_double_finger_repeat: params.same_hand_double_finger_repeat,
             same_hand_single_finger_repeat: params.same_hand_single_finger_repeat,
             same_hand_roll: params.same_hand_roll,
@@ -190,6 +197,22 @@ impl TrigramMetric for OxeyCombinedTrigram {
                 && (k1.key.finger == Finger::Thumb
                     || k2.key.finger == Finger::Thumb
                     || k3.key.finger == Finger::Thumb)
+            {
+                return;
+            }
+
+            if self.exclude_modifiers
+                && (k1.is_modifier.is_some()
+                    || k2.is_modifier.is_some()
+                    || k3.is_modifier.is_some())
+            {
+                return;
+            }
+
+            if !self.exclude_chars.is_empty()
+                && (self.exclude_chars.contains(&k1.symbol)
+                    || self.exclude_chars.contains(&k2.symbol)
+                    || self.exclude_chars.contains(&k3.symbol))
             {
                 return;
             }

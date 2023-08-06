@@ -1,5 +1,6 @@
 use super::TrigramMetric;
 
+use ahash::AHashSet;
 use keyboard_layout::{
     key::Finger,
     layout::{LayerKey, Layout},
@@ -9,18 +10,24 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub exclude_thumbs: bool,
+    exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: Vec<char>,
 }
 
 #[derive(Clone, Debug)]
 pub struct OxeyDsfbs {
     exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: AHashSet<char>,
 }
 
 impl OxeyDsfbs {
     pub fn new(params: &Parameters) -> Self {
         Self {
             exclude_thumbs: params.exclude_thumbs,
+            exclude_modifiers: params.exclude_modifiers,
+            exclude_chars: params.exclude_chars.iter().cloned().collect(),
         }
     }
 }
@@ -40,6 +47,16 @@ impl TrigramMetric for OxeyDsfbs {
         _total_weight: f64,
         _layout: &Layout,
     ) -> Option<f64> {
+        if self.exclude_modifiers && (k1.is_modifier.is_some() || k3.is_modifier.is_some()) {
+            return Some(0.0);
+        }
+
+        if !self.exclude_chars.is_empty()
+            && (self.exclude_chars.contains(&k1.symbol) || self.exclude_chars.contains(&k3.symbol))
+        {
+            return Some(0.0);
+        }
+
         // no same-key sfbs
         if k1 == k3 {
             return Some(0.0);

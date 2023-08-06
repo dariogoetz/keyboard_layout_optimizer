@@ -8,6 +8,8 @@ metrics:
       value: 0.01  # bring to percent
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_lsbs:
     enabled: true
@@ -16,7 +18,9 @@ metrics:
       type: weight_all
       value: 0.01
     params:
-      null: null
+      exclude_thumbs: true
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_dsfbs:
     enabled: true
@@ -26,6 +30,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_inward_rolls:
     enabled: true
@@ -35,6 +41,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_outward_rolls:
     enabled: true
@@ -44,6 +52,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_onehands:
     enabled: true
@@ -53,6 +63,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_alternates:
     enabled: true
@@ -62,6 +74,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_alternates_sfs:
     enabled: true
@@ -71,6 +85,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_redirects:
     enabled: true
@@ -80,6 +96,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_bad_redirects:
     enabled: true
@@ -89,6 +107,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: true  # consider thumb an index finger
+      exclude_modifiers: false
+      exclude_chars: []
 
   oxey_combined_trigram:
     enabled: true
@@ -98,6 +118,8 @@ metrics:
       value: 0.01
     params:
       exclude_thumbs: false
+      exclude_modifiers: false
+      exclude_chars: []
       same_hand_double_finger_repeat: 0.0
       same_hand_single_finger_repeat: 0.0
       same_hand_roll: *same_hand_roll

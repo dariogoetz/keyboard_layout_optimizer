@@ -1,5 +1,6 @@
 use super::TrigramMetric;
 
+use ahash::AHashSet;
 use keyboard_layout::{
     key::{Finger, Hand},
     layout::{LayerKey, Layout},
@@ -9,18 +10,24 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub exclude_thumbs: bool,
+    exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: Vec<char>,
 }
 
 #[derive(Clone, Debug)]
 pub struct OxeyRedirects {
     exclude_thumbs: bool,
+    exclude_modifiers: bool,
+    exclude_chars: AHashSet<char>,
 }
 
 impl OxeyRedirects {
     pub fn new(params: &Parameters) -> Self {
         Self {
             exclude_thumbs: params.exclude_thumbs,
+            exclude_modifiers: params.exclude_modifiers,
+            exclude_chars: params.exclude_chars.iter().cloned().collect(),
         }
     }
 }
@@ -52,6 +59,20 @@ impl TrigramMetric for OxeyRedirects {
         let h1 = k1.key.hand;
         let h2 = k2.key.hand;
         let h3 = k3.key.hand;
+
+        if self.exclude_modifiers
+            && (k1.is_modifier.is_some() || k2.is_modifier.is_some() || k3.is_modifier.is_some())
+        {
+            return Some(0.0);
+        }
+
+        if !self.exclude_chars.is_empty()
+            && (self.exclude_chars.contains(&k1.symbol)
+                || self.exclude_chars.contains(&k2.symbol)
+                || self.exclude_chars.contains(&k3.symbol))
+        {
+            return Some(0.0);
+        }
 
         if !(h1 == h2 && h2 == h3) {
             return Some(0.0);
