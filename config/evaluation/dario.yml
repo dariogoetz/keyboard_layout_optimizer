@@ -3,14 +3,14 @@ metrics:
 
   # Specified symbols shall be located within the leftmost "n" columns of the left hand
   shortcut_keys:
-    enabled: false
+    enabled: true
     weight: 10
     normalization:
       type: fixed
       value: 1.0
     params:
       # symbols that shall be considered "shortcut keys"
-      shortcut_chars: cvx
+      shortcut_chars: cvxz
       cost: 1.0
       within_n_leftmost_cols: 5
 
@@ -93,7 +93,7 @@ metrics:
   # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
     enabled: true
-    weight: 780.0
+    weight: 1000.0
     normalization:
       type: weight_found
       value: 1.0
@@ -188,7 +188,8 @@ metrics:
 
       # If a movement involves a lateral stretch (the keys are more columns apart than the fingers),
       # (one plus) this factor is multiplied to the cost with the number of columns to stretch.
-      lateral_stretch_factor: 0.0
+      lateral_stretch_factor: 0.25
+
 
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.
