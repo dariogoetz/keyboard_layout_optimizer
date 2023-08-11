@@ -185,6 +185,11 @@ metrics:
       # If the movement involves unbalancing keys (horizontally or vertically), the corresponding
       # unbalancing values are weighted with this factor and multiplied to the result.
       unbalancing_factor: 0.5
+
+      # If a movement involves a lateral stretch (the keys are more columns apart than the fingers),
+      # (one plus) this factor is multiplied to the cost with the number of columns to stretch.
+      lateral_stretch_factor: 0.0
+
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.
   no_handswitch_after_unbalancing_key:

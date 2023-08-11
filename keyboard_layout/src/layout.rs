@@ -277,7 +277,7 @@ impl Layout {
                         ModifierLocation::Position(mp) => {
                             let base_key_idx = *pos2layerkey_index
                                 .get(mp)
-                                .ok_or(format!("Modifier position '{:?}' not a found", mp))
+                                .ok_or(format!("Modifier position '{:?}' not found", mp))
                                 .map_err(anyhow::Error::msg)?;
                             let mod_idx = *pos2mod_index
                                 .entry((layer_modifier_type, *mp))
