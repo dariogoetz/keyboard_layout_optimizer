@@ -59,7 +59,7 @@ Vue.component('evaluator-app', {
 
   <b-row>
 
-    <b-col xl="4" lg="6" style="height: 450px">
+    <b-col xl="4" lg="6">
       <h2>Layout</h2>
       <b-button class="mb-2" size="sm" @click="setInput('zyuaqpbmlfjßcsieodtnrhvxüäöwg,.k')">noted</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('zguaqwbdlyjßcsieomntrhvxüäöpf,.k')">miners</b-button>
@@ -105,7 +105,7 @@ Vue.component('evaluator-app', {
 
     <b-col xl="8" lg="6">
       <h2>Settings</h2>
-        <b-overlay :show="optStep >= 0" style="height: 420px">
+        <b-overlay :show="optStep >= 0">
           <b-tabs>
             <b-tab title="Evaluation">
               <config-file :initial-content="evalParamsStr" @saved="updateEvalParams">
