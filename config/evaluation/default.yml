@@ -146,7 +146,7 @@ metrics:
   # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
     enabled: true
-    weight: 100.0
+    weight: 500.0
     normalization:
       type: weight_found
       value: 1.0
