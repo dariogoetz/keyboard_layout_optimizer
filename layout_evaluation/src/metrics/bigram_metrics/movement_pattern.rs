@@ -28,6 +28,7 @@ pub struct Parameters {
     same_row_offset: f64,
     unbalancing_factor: f64,
     lateral_stretch_factor: f64,
+    key_cost_factor: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -38,6 +39,7 @@ pub struct MovementPattern {
     same_row_offset: f64,
     unbalancing_factor: f64,
     lateral_stretch_factor: f64,
+    key_cost_factor: f64,
 }
 
 impl MovementPattern {
@@ -58,6 +60,7 @@ impl MovementPattern {
             same_row_offset: params.same_row_offset,
             unbalancing_factor: params.unbalancing_factor,
             lateral_stretch_factor: params.lateral_stretch_factor,
+            key_cost_factor: params.key_cost_factor,
         }
     }
 }
@@ -116,7 +119,10 @@ impl BigramMetric for MovementPattern {
                 as f64
                 * self.lateral_stretch_factor;
 
+        let key_cost_factor = 1.0 + self.key_cost_factor * (k1.key.cost + k2.key.cost) / 2.0;
+
         let cost = (self.same_row_offset + num_rows * num_rows)
+            * key_cost_factor
             * finger_switch_factor
             * direction_factor
             * unbalancing_factor

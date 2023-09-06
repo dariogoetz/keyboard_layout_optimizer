@@ -146,7 +146,7 @@ metrics:
   # or curling the finger. Also accounted for is whether there is lateral or in-line movement.
   finger_repeats:
     enabled: true
-    weight: 780.0
+    weight: 100.0
     normalization:
       type: weight_found
       value: 1.0
@@ -168,6 +168,8 @@ metrics:
       lateral_factor: 1.5
       # Cost to apply if the finger repeat happens on the same key
       same_key_offset: 0.5
+      # To which extent the key costs of the involved keys shall be factored in
+      key_cost_factor: 0.1
 
   # Put costs on some key combinations that are hard to describe otherwise
   manual_bigram_penalty:
@@ -211,7 +213,7 @@ metrics:
   # counted.
   movement_pattern:
     enabled: true
-    weight: 100.0
+    weight: 40.0
     normalization:
       type: weight_found
       value: 1.0
@@ -279,6 +281,10 @@ metrics:
       # If a movement involves a lateral stretch (the keys are more columns apart than the fingers),
       # (one plus) this factor is multiplied to the cost with the number of columns to stretch.
       lateral_stretch_factor: 0.0
+
+      # To which extent the key costs of the involved keys shall be factored in
+      key_cost_factor: 0.1
+
 
   # If no handswitch occurs after hitting an "unbalancing" key (as defined in the keyboard's layout
   # config), a cost is counted depending on how far the unbalancing takes place.

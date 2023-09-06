@@ -16,11 +16,12 @@ use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct Parameters {
-    pub finger_factors: AHashMap<Finger, f64>,
-    pub stretch_factor: f64,
-    pub curl_factor: f64,
-    pub lateral_factor: f64,
-    pub same_key_offset: f64,
+    finger_factors: AHashMap<Finger, f64>,
+    stretch_factor: f64,
+    curl_factor: f64,
+    lateral_factor: f64,
+    same_key_offset: f64,
+    key_cost_factor: f64,
 }
 
 #[derive(Clone, Debug)]
@@ -30,6 +31,7 @@ pub struct FingerRepeats {
     curl_factor: f64,
     lateral_factor: f64,
     same_key_offset: f64,
+    key_cost_factor: f64,
 }
 
 impl FingerRepeats {
@@ -40,6 +42,7 @@ impl FingerRepeats {
             curl_factor: params.curl_factor,
             lateral_factor: params.lateral_factor,
             same_key_offset: params.same_key_offset,
+            key_cost_factor: params.key_cost_factor,
         }
     }
 }
@@ -103,7 +106,10 @@ impl BigramMetric for FingerRepeats {
 
         let finger_factor = self.finger_factors.get(&k1.key.finger);
 
+        let key_cost_factor = 1.0 + self.key_cost_factor * (k1.key.cost + k2.key.cost) / 2.0;
+
         let cost = finger_factor
+            * key_cost_factor
             * (self.same_key_offset
                 + direction_factor * dist_in_line
                 + self.lateral_factor * dist_lateral);
