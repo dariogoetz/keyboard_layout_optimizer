@@ -2,6 +2,7 @@ import config_standard_keyboard from '../../../config/keyboard/standard.yml'
 import config_ortho from '../../../config/keyboard/ortho.yml'
 import config_moonlander from '../../../config/keyboard/moonlander.yml'
 import config_crkbd from '../../../config/keyboard/crkbd.yml'
+import config_lily58 from '../../../config/keyboard/lily58.yml'
 
 import eval_params from '../../../config/evaluation/default.yml'
 import genevo_opt_params from '../../../config/optimization/genetic_web.yml'
@@ -14,6 +15,7 @@ const LAYOUT_CONFIGS = {
   ortho: config_ortho,
   moonlander: config_moonlander,
   crkbd: config_crkbd,
+  lily58: config_lily58,
 }
 
 const OPTIMIZATION_ALGORITHM_PARAMS = {
