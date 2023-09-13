@@ -50,17 +50,17 @@ keyboard:
 
   finger_resting_positions:
     Left:
-      Pinky: [50.5, 65.5]
-      Ring: [100.5, 65.5]
-      Middle: [150.5, 65.5]
-      Index: [200.5, 65.5]
-      Thumb: [230.5, 160.5]
+      Pinky: [50.5, 115.5]
+      Ring: [100.5, 105.5]
+      Middle: [150.5, 100.5]
+      Index: [200.5, 105.5]
+      Thumb: [250.5, 215.5]
     Right:
-      Pinky: [600.5, 65.5]
-      Ring: [550.5, 65.5]
-      Middle: [500.5, 65.5]
-      Index: [450.5, 65.5]
-      Thumb: [420.5, 160.5]
+      Pinky: [650.5, 115.5]
+      Ring: [600.5, 105.5]
+      Middle: [550.5, 100.5]
+      Index: [500.5, 105.5]
+      Thumb: [450.5, 215.5]
 
 
   plot_template: |2
