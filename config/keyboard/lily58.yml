@@ -75,8 +75,8 @@ keyboard:
     ├───┼───┤ {{38}} ├───┤ {{40}} │ {{41}} ├───┘      └───┤ {{44}} │ {{45}} ├───┤ {{47}} ├───┼───┤
     │ {{36}} │ {{37}} ├───┘   └───┴───┘              └───┴───┘   └───┤ {{48}} │ {{49}} │
     └───┴───┘ ┌───┬───┬───┐ ┌───┐      ┌───┐ ┌───┬───┬───┐ └───┴───┘
-              │ {{50}} │ {{51}} │ {{52}} │ │ {{53}} │      │ {{54}} │ │ {{55}} │ {{56}} │ {{57}} │            
-              └───┴───┴───┘ └───┘      └───┘ └───┴───┴───┘            
+              │ {{50}} │ {{51}} │ {{52}} │ │ {{53}} │      │ {{54}} │ │ {{55}} │ {{56}} │ {{57}} │
+              └───┴───┴───┘ └───┘      └───┘ └───┴───┴───┘
 
 
   plot_template_short: |2
@@ -149,14 +149,13 @@ base_layout:
       - ["♔"]
       - [" ", " ", " ", "0", " ", " "]
       - ["⇙"]
-     
-     
+
 
   fixed_keys:
     - [  true,  true,  true,  true,  true,  true,                true,  true,  true,  true,  true,  true]
     - [ false, false, false, false, false, false,               false, false, false, false, false, false]
     - [  true, false, false, false, false, false,               false, false, false, false, false,  true]
-    - [  true, false, false, false, false, false,  true,  true, false, false,  true,  true, false,  true]
+    - [  true, false, false, false, false, false,  true,  true, false, false, false, false, false,  true]
     - [                   true,  true,  true,    true,      true,   true,  true,  true                  ]
 
   # for NeoLayoutGenerator:
