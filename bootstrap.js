@@ -154,6 +154,9 @@
 /******/ 					"__wbg_getTimezoneOffset_8a39b51acb4f52c9": function(p0i32) {
 /******/ 						return installedModules["../pkg/layout_evaluation_wasm_bg.js"].exports["__wbg_getTimezoneOffset_8a39b51acb4f52c9"](p0i32);
 /******/ 					},
+/******/ 					"__wbg_new_54cbca578174a105": function(p0i32) {
+/******/ 						return installedModules["../pkg/layout_evaluation_wasm_bg.js"].exports["__wbg_new_54cbca578174a105"](p0i32);
+/******/ 					},
 /******/ 					"__wbg_new0_adda2d4bcb124f0a": function() {
 /******/ 						return installedModules["../pkg/layout_evaluation_wasm_bg.js"].exports["__wbg_new0_adda2d4bcb124f0a"]();
 /******/ 					},
@@ -285,7 +288,7 @@
 /******/ 				promises.push(installedWasmModuleData);
 /******/ 			else {
 /******/ 				var importObject = wasmImportObjects[wasmModuleId]();
-/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/layout_evaluation_wasm_bg.wasm":"e3513ff5ecc134a4a6c9"}[wasmModuleId] + ".module.wasm");
+/******/ 				var req = fetch(__webpack_require__.p + "" + {"../pkg/layout_evaluation_wasm_bg.wasm":"0bd5a9a013995dc19efd"}[wasmModuleId] + ".module.wasm");
 /******/ 				var promise;
 /******/ 				if(importObject instanceof Promise && typeof WebAssembly.compileStreaming === 'function') {
 /******/ 					promise = Promise.all([WebAssembly.compileStreaming(req), importObject]).then(function(items) {
