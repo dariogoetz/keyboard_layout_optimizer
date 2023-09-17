@@ -47,3 +47,13 @@ curl -X 'POST' -d "{\"layout\": \"jluaqwbdgyz crieomntshß vxüäöpf,.k\", \"la
 curl -X 'POST' -d "{\"layout\": \"zluaqwbdgyj crieomntshß vxüäöpf,.k\", \"layout_config\": \"moonlander\", \"published_by\": \"mine-B\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
 curl -X 'POST' -d "{\"layout\": \"kuü.ävgcljf hieaodtrnsß xyö,qbpwmz\", \"layout_config\": \"moonlander\", \"published_by\": \"AdNW\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
 curl -X 'POST' -d "{\"layout\": \"k.o,yvgclfz haeiudtrnsß xqäüöbpwmj\", \"layout_config\": \"moonlander\", \"published_by\": \"KOY\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+
+curl -X 'POST' -d "{\"layout\": \"ßqwertzuiopü asdfghjklö yxcvbnm,.ä\", \"layout_config\": \"lily58\", \"published_by\": \"qwertz\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßxvlcwkhgfqy uiaeosnrtd üöäpzbm,.j\", \"layout_config\": \"lily58\", \"published_by\": \"neo2\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßjduaxphlmwq ctieobnrsg fvüäöyz,.k\", \"layout_config\": \"lily58\", \"published_by\": \"bone\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßzluajwbdgyq crieomntsh vxüäöpf,.k\", \"layout_config\": \"lily58\", \"published_by\": \"mine\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßjluaqwbdgyz crieomntsh vxüäöpf,.k\", \"layout_config\": \"lily58\", \"published_by\": \"mine-A\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßzluaqwbdgyj crieomntsh vxüäöpf,.k\", \"layout_config\": \"lily58\", \"published_by\": \"mine-B\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßkuü.ävgcljf hieaodtrns xyö,qbpwmz\", \"layout_config\": \"lily58\", \"published_by\": \"AdNW\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+curl -X 'POST' -d "{\"layout\": \"ßk.o,yvgclfz haeiudtrns xqäüöbpwmj\", \"layout_config\": \"lily58\", \"published_by\": \"KOY\", \"highlight\": true, \"secret\":\"$SECRET\"}" $URL
+
