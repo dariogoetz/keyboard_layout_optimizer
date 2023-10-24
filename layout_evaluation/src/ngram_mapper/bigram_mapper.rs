@@ -162,10 +162,8 @@ impl OnDemandBigramMapper {
 
                 // mix mods of k1 and k2
                 mods2.iter().for_each(|mod2| {
-                    if mod1 != mod2 {
-                        bigram_w_map.insert_or_add_weight((*mod1, *mod2), w);
-                        // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&mod2).symbol);
-                    }
+                    bigram_w_map.insert_or_add_weight((*mod1, *mod2), w);
+                    // log::trace!("{:>3}{:<3} -> {:>3}{:<3}", layout.get_layerkey(&k1).symbol, layout.get_layerkey(&k2).symbol, layout.get_layerkey(&mod1).symbol, layout.get_layerkey(&mod2).symbol);
                 });
             });
 
