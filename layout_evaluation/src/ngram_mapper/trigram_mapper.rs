@@ -180,72 +180,62 @@ impl OnDemandTrigramMapper {
             k1_take_one.clone().for_each(|(e1, _)| {
                 k2_take_one.clone().for_each(|(e2, _)| {
                     k3_take_one.clone().for_each(|(e3, _)| {
-                        if (e1 != e2) && (e2 != e3) {
-                            // log::trace!(
-                            //     "one each:                    {}{}{}",
-                            //     layout.get_layerkey(&e1).symbol,
-                            //     layout.get_layerkey(&e2).symbol,
-                            //     layout.get_layerkey(&e3).symbol,
-                            // );
-                            trigram_w_map.insert_or_add_weight((e1, e2, e3), w);
-                        }
+                        // log::trace!(
+                        //     "one each:                    {}{}{}",
+                        //     layout.get_layerkey(&e1).symbol,
+                        //     layout.get_layerkey(&e2).symbol,
+                        //     layout.get_layerkey(&e3).symbol,
+                        // );
+                        trigram_w_map.insert_or_add_weight((e1, e2, e3), w);
                     });
                 });
             });
 
             k1_take_two.for_each(|((e1, e2), w1)| {
                 k2_take_one.clone().for_each(|(e3, _)| {
-                    if (e1 != e2) && (e2 != e3) {
-                        // log::trace!(
-                        //     "two of first, one of second: {}{}{}",
-                        //     layout.get_layerkey(&e1).symbol,
-                        //     layout.get_layerkey(&e2).symbol,
-                        //     layout.get_layerkey(&e3).symbol,
-                        // );
-                        trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
-                    }
+                    // log::trace!(
+                    //     "two of first, one of second: {}{}{}",
+                    //     layout.get_layerkey(&e1).symbol,
+                    //     layout.get_layerkey(&e2).symbol,
+                    //     layout.get_layerkey(&e3).symbol,
+                    // );
+                    trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                 });
             });
 
             k1_take_one.for_each(|(e1, _)| {
                 k2_take_two.clone().for_each(|((e2, e3), w1)| {
-                    if (e1 != e2) && (e2 != e3) {
-                        // log::trace!(
-                        //     "one of first, two of second: {}{}{}",
-                        //     layout.get_layerkey(&e1).symbol,
-                        //     layout.get_layerkey(&e2).symbol,
-                        //     layout.get_layerkey(&e3).symbol,
-                        // );
-                        trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
-                    }
+                    // log::trace!(
+                    //     "one of first, two of second: {}{}{}",
+                    //     layout.get_layerkey(&e1).symbol,
+                    //     layout.get_layerkey(&e2).symbol,
+                    //     layout.get_layerkey(&e3).symbol,
+                    // );
+                    trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                 });
             });
 
             k2_take_two.for_each(|((e1, e2), w1)| {
                 k3_take_one.clone().for_each(|(e3, _)| {
-                    if (e1 != e2) && (e2 != e3) {
-                        // log::trace!(
-                        //     "two of second, one of third: {}{}{}",
-                        //     layout.get_layerkey(&e1).symbol,
-                        //     layout.get_layerkey(&e2).symbol,
-                        //     layout.get_layerkey(&e3).symbol,
-                        // );
-                        trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
-                    }
+                    // log::trace!(
+                    //     "two of second, one of third: {}{}{}",
+                    //     layout.get_layerkey(&e1).symbol,
+                    //     layout.get_layerkey(&e2).symbol,
+                    //     layout.get_layerkey(&e3).symbol,
+                    // );
+                    trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                 });
             });
 
             k2_take_one.for_each(|(e1, _)| {
                 k3_take_two.clone().for_each(|((e2, e3), w1)| {
-                    if (e1 != e2) && (e2 != e3) {
-                        // log::trace!(
-                        //     "one of second, two of third: {}{}{}",
-                        //     layout.get_layerkey(&e1).symbol,
-                        //     layout.get_layerkey(&e2).symbol,
-                        //     layout.get_layerkey(&e3).symbol,
-                        // );
-                        trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
-                    }
+                    // log::trace!(
+                    //     "one of second, two of third: {}{}{}",
+                    //     layout.get_layerkey(&e1).symbol,
+                    //     layout.get_layerkey(&e2).symbol,
+                    //     layout.get_layerkey(&e3).symbol,
+                    // );
+                    trigram_w_map.insert_or_add_weight((e1, e2, e3), w1);
                 });
             });
 
