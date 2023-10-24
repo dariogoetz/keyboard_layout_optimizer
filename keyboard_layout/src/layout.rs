@@ -453,6 +453,13 @@ impl Layout {
         (base, mods)
     }
 
+    /// If the layout has at least one layer configured as hold layer
+    pub fn has_hold_layers(&self) -> bool {
+        self.layerkeys
+            .iter()
+            .any(|lk| std::matches!(lk.modifiers, LayerModifiers::Hold(_)))
+    }
+
     /// If the layout has at least one layer configured as one-shot layer
     pub fn has_one_shot_layers(&self) -> bool {
         self.layerkeys

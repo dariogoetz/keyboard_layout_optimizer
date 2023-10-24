@@ -90,11 +90,11 @@ impl OnDemandTrigramMapper {
             map_trigrams(trigrams, layout, exclude_line_breaks);
 
         if layout.has_one_shot_layers() {
-            trigram_keys_vec = self.process_one_shot_layers(trigram_keys_vec, layout);
+            trigram_keys_vec = self.process_one_shot_modifiers(trigram_keys_vec, layout);
         }
 
-        let trigram_keys = if self.split_modifiers.enabled {
-            self.split_trigram_modifiers(trigram_keys_vec, layout)
+        let trigram_keys = if self.split_modifiers.enabled && layout.has_hold_layers() {
+            self.process_hold_modifiers(trigram_keys_vec, layout)
         } else {
             trigram_keys_vec.into_iter().collect()
         };
@@ -140,7 +140,7 @@ impl OnDemandTrigramMapper {
     /// trigram can be large (tens of trigrams) if multiple symbols of the trigram are accessed using multiple modifiers.
 
     // this is one of the most intensive functions of the layout evaluation
-    fn split_trigram_modifiers(
+    fn process_hold_modifiers(
         &self,
         trigrams: TrigramIndicesVec,
         layout: &Layout,
@@ -276,7 +276,7 @@ impl OnDemandTrigramMapper {
         trigram_w_map
     }
 
-    fn process_one_shot_layers(
+    fn process_one_shot_modifiers(
         &self,
         trigrams: TrigramIndicesVec,
         layout: &Layout,

@@ -83,11 +83,11 @@ impl OnDemandBigramMapper {
             map_bigrams(bigrams, layout, exclude_line_breaks);
 
         if layout.has_one_shot_layers() {
-            bigram_keys_vec = self.process_one_shot_layers(bigram_keys_vec, layout);
+            bigram_keys_vec = self.process_one_shot_modifiers(bigram_keys_vec, layout);
         }
 
-        let bigram_keys = if self.split_modifiers.enabled {
-            self.split_bigram_modifiers(bigram_keys_vec, layout)
+        let bigram_keys = if self.split_modifiers.enabled && layout.has_hold_layers() {
+            self.process_hold_modifiers(bigram_keys_vec, layout)
         } else {
             bigram_keys_vec.into_iter().collect()
         };
@@ -135,7 +135,7 @@ impl OnDemandBigramMapper {
     ///
     /// Each bigram of higher-layer symbols will transform into a series of bigrams with permutations of
     /// the involved base-keys and modifers. However, the base-key will always be after its modifier.
-    fn split_bigram_modifiers(&self, bigrams: BigramIndicesVec, layout: &Layout) -> BigramIndices {
+    fn process_hold_modifiers(&self, bigrams: BigramIndicesVec, layout: &Layout) -> BigramIndices {
         let mut bigram_w_map = AHashMap::with_capacity(bigrams.len() / 3);
 
         bigrams.into_iter().for_each(|((k1, k2), w)| {
@@ -190,7 +190,7 @@ impl OnDemandBigramMapper {
         bigram_w_map
     }
 
-    fn process_one_shot_layers(
+    fn process_one_shot_modifiers(
         &self,
         bigrams: BigramIndicesVec,
         layout: &Layout,
