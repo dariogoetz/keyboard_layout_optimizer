@@ -118,7 +118,7 @@ struct BestObserver {
 impl Observe<SaIterState> for BestObserver {
     fn observe_iter(&mut self, state: &SaIterState, _kv: &KV) -> Result<(), Error> {
         let reason = match state.iter {
-            0 => "Starting layout:".blue(),
+            0 => "First tested layout:".blue(),
             _ => "New best:".green(),
         };
         let best_layout = self
