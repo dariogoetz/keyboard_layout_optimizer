@@ -3,6 +3,7 @@ import config_ortho from '../../../config/keyboard/ortho.yml'
 import config_moonlander from '../../../config/keyboard/moonlander.yml'
 import config_crkbd from '../../../config/keyboard/crkbd.yml'
 import config_lily58 from '../../../config/keyboard/lily58.yml'
+import config_ansi from '../../../config/keyboard/standard_qwerty_ansi.yml'
 
 import eval_params from '../../../config/evaluation/default.yml'
 import genevo_opt_params from '../../../config/optimization/genetic_web.yml'
@@ -16,6 +17,7 @@ const LAYOUT_CONFIGS = {
   moonlander: config_moonlander,
   crkbd: config_crkbd,
   lily58: config_lily58,
+  ansi: config_ansi,
 }
 
 const OPTIMIZATION_ALGORITHM_PARAMS = {
@@ -73,6 +75,7 @@ Vue.component('evaluator-app', {
       <b-button class="mb-2" size="sm" @click="setInput('qwertzuiopüßasdfghjklöyxcvbnm,.ä')">qwertz</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qwfpgjluyüößarstdhneiozxcvbkm,.ä')">colemak</b-button>
       <b-button class="mb-2" size="sm" @click="setInput('qdrwbjfupüößashtgyneoizxmcvkl,.ä')">workman</b-button>
+      <b-button class="mb-2" size="sm" @click="setInput('qwertyuiop[]asdfghjkl;\\\'zxcvbnm,./')">QWERTY (ANSI)</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(true)">random (std)</b-button>
       <b-button class="mb-2" size="sm" @click="randomInput(false)">random</b-button>
 

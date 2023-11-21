@@ -4,6 +4,7 @@ const LAYOUT_CONFIGS = [
   { key: 'moonlander', label: 'Moonlander', family: (s) => s.slice(11, 21), periodComma: (s) => s.slice(29, 31) },
   { key: 'crkbd', label: 'Corne (crkbd)', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
   { key: 'lily58', label: 'Lily58', family: (s) => s.slice(12, 22), periodComma: (s) => s.slice(29, 31) },
+  { key: 'ansi', label: 'ANSI', family: (s) => s.slice(12, 21), periodComma: (s) => s.slice(30, 32) },
 ]
 const DEFAULT_LAYOUT_CONFIG = 'standard'
 
