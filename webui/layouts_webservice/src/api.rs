@@ -83,7 +83,7 @@ async fn post(
     config: &State<Options>,
 ) -> Result<Created<Json<LayoutEvaluation>>> {
     // check if highlight wants to be set without permission
-    let is_admin = config.secret == layout.secret.clone().unwrap_or_else(|| "".to_string());
+    let is_admin = config.secret == layout.secret.clone().unwrap_or_default();
     let highlight = layout.highlight.unwrap_or(false);
     if highlight && !is_admin {
         return Err(Status::Forbidden);
@@ -113,7 +113,7 @@ async fn post(
     )
     .bind(&layout_str)
     .bind(&layout_config)
-    .fetch_one(&mut *db)
+    .fetch_one(&mut **db)
     .await
     .ok();
 
@@ -136,13 +136,13 @@ async fn post(
 
             sqlx::query("INSERT INTO layouts (layout, total_cost, published_by, details_json, printed, highlight, layout_config, created) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())")
                 .bind(&result.layout)
-                .bind(&result.total_cost)
+                .bind(result.total_cost)
                 .bind(&result.published_by)
                 .bind(&result.details_json)
                 .bind(&result.printed)
-                .bind(&result.highlight)
+                .bind(result.highlight)
                 .bind(&result.layout_config)
-                .execute(&mut *db)
+                .execute(&mut **db)
                 .await
                 .map_err(|_| Status::InternalServerError)?;
 
@@ -165,7 +165,7 @@ async fn list(
         "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight, layout_config FROM layouts WHERE layout_config = $1",
     )
     .bind(&layout_config)
-    .fetch_all(&mut *db)
+    .fetch_all(&mut **db)
     .await
     .map_err(|e| {
         eprintln!("Error while fetching all layouts from db: {:?}", e);
@@ -196,7 +196,7 @@ async fn get(
     )
     .bind(layout)
     .bind(&layout_config)
-    .fetch_one(&mut *db)
+    .fetch_one(&mut **db)
     .await
     .map_err(|e| {
         eprintln!("Error while fetching layout from db: {:?}", e);
@@ -231,7 +231,7 @@ async fn reeval(
     let results: Vec<LayoutEvaluationDB> = sqlx::query_as::<_, LayoutEvaluationDB>(
         "SELECT id, layout, total_cost, details_json, printed, published_by, highlight, layout_config FROM layouts",
     )
-    .fetch_all(&mut *db)
+    .fetch_all(&mut **db)
     .await
     .map_err(|_| Status::InternalServerError)?;
 
@@ -255,11 +255,11 @@ async fn reeval(
         sqlx::query(
             "UPDATE layouts SET total_cost = $1, details_json = $2 , printed = $3 WHERE id = $4",
         )
-        .bind(&total_cost)
+        .bind(total_cost)
         .bind(&details_json)
         .bind(&printed)
-        .bind(&result.id)
-        .execute(&mut *db)
+        .bind(result.id)
+        .execute(&mut **db)
         .await
         .map_err(|_| Status::InternalServerError)?;
     }
