@@ -63,7 +63,7 @@ Vue.component('layouts-app', {
             // fetch details for all selected items
             const res = items.map(layoutData => {
                 if (this.url === null) return null
-                return fetch(`${this.url}/${layoutData.layout}?layout_config=${this.layoutConfig}`)
+                return fetch(`${this.url}/${layoutData.layout.replace("/", "__")}?layout_config=${this.layoutConfig}`)
                     .then(response => response.json())
             })
 

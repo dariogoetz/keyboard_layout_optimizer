@@ -194,7 +194,7 @@ async fn get(
     sqlx::query_as::<_, LayoutEvaluationDB>(
         "SELECT NULL AS id, layout, total_cost, published_by, details_json, printed, highlight, layout_config FROM layouts WHERE layout = $1 AND layout_config = $2",
     )
-    .bind(layout)
+    .bind(layout.replace("__", "/"))
     .bind(&layout_config)
     .fetch_one(&mut **db)
     .await
