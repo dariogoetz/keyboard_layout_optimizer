@@ -24,7 +24,7 @@ layout_configs = [
     "../../config/keyboard/lily58.yml",
   ],
   [
-    "ANSI",
+    "ansi",
     "../../config/keyboard/standard_qwerty_ansi.yml",
   ],
 ]
