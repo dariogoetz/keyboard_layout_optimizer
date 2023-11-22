@@ -5,6 +5,7 @@ use priority_queue::DoublePriorityQueue;
 
 use std::{env, fmt};
 
+pub mod column_loads;
 pub mod finger_balance;
 pub mod hand_disbalance;
 pub mod key_costs;
