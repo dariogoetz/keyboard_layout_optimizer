@@ -1,0 +1,22 @@
+"use strict";
+/*
+ * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
+(self["webpackChunkcreate_wasm_app"] = self["webpackChunkcreate_wasm_app"] || []).push([["ngrams_eng_shai_1-grams_txt"],{
+
+/***/ "../../../ngrams/eng_shai/1-grams.txt":
+/*!********************************************!*\
+  !*** ../../../ngrams/eng_shai/1-grams.txt ***!
+  \********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (\"88658235  \\n50005448 e\\n36790579 t\\n33019248 a\\n32297422 o\\n28919525 i\\n28732495 n\\n26390704 s\\n25489219 r\\n19086980 h\\n17320331 l\\n15051005 d\\n12340475 c\\n12146735 u\\n9688790 m\\n8680634 f\\n8394523 g\\n8376625 p\\n8040780 y\\n7101143 w\\n5763963 b\\n4710498 .\\n4414876 v\\n4319271 ,\\n3255599 k\\n1851437 \\\\n\\n1695305 I\\n1548066 T\\n1201078 S\\n1181561 A\\n1127005 -\\n1121537 '\\n965625 C\\n885438 x\\n814361 \\\"\\n797263 0\\n749822 M\\n697734 1\\n663256 B\\n644937 P\\n636041 W\\n563461 H\\n556432 D\\n515486 2\\n497604 j\\n492074 E\\n490961 R\\n487966 F\\n470125 L\\n467539 O\\n461341 N\\n401258 G\\n401252 )\\n398914 q\\n395701 (\\n381647 z\\n314052 :\\n285790 5\\n268102 3\\n256065 U\\n252732 J\\n233842 9\\n230748 Y\\n228852 ?\\n226027 4\\n193503 !\\n192647 K\\n187678 6\\n185573 V\\n174594 8\\n166861 7\\n121496 /\\n106124 ;\\n59053 $\\n42430 %\\n41555 Q\\n40972 X\\n40349 &\\n33986 Z\\n30592 +\\n23911 *\\n18985 >\\n15291 =\\n11711 #\\n9651 @\\n4263 <\\n394  \\n123 ’\\n59 “\\n59 ”\\n12 —\\n10 ü\\n9 –\\n8 •\\n7 ¢\\n5 ´\\n4 é\\n4 ʼ\\n3 ®\\n3 ‐\\n3 §\\n3 ¤\\n2 ä\\n2 ⅓\\n1 ☺\\n1 ­\\n1 И\\n1 °\\n1 ć\\n1 →\\n1 ⅜\\n1 â\\n1 ¬\\n1 ›\\n1 ·\\n1 ′\\n1 ö\\n1 ⅔\\n1 ÷\\n1 ⅛\\n\");\n\n//# sourceURL=webpack://create-wasm-app/../../../ngrams/eng_shai/1-grams.txt?");
+
+/***/ })
+
+}]);
