@@ -39,5 +39,8 @@ module.exports = {
       //   use: 'raw-loader',
       // }
     ]
+  },
+  experiments: {
+    asyncWebAssembly: true
   }
 };

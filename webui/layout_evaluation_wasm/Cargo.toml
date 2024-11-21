@@ -20,10 +20,10 @@ layout_optimization_genetic = { path = "../../layout_optimization/layout_optimiz
 layout_optimization_sa = { path = "../../layout_optimization/layout_optimization_sa" }
 
 instant = { version = "0.1.12", features = ["wasm-bindgen"] }
-js-sys = "0.3.56"
+js-sys = "0.3.72"
 serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.8.23"
-wasm-bindgen = { version = "=0.2.82", features = ["serde-serialize"] }
+serde_yaml = "0.9.34"
+wasm-bindgen = { version = "=0.2.95", features = ["serde-serialize"] }
 
 argmin = "0.7.0"
 genevo = { version = "0.7.0", features = ["wasm-bindgen"] }
