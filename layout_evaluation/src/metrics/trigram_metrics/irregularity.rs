@@ -60,8 +60,8 @@ impl TrigramMetric for Irregularity {
         // taking the sqrt of a sum.
         // To not break Webapp - Result Exploration, ngrams are therefore normalized to total_weight
         // of the default ngrams deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4_norm
-        let total_weight_normalized = DEFAULT_NGRAM_TOTAL_WEIGHT;
-        let weight_normalized = weight / total_weight * DEFAULT_NGRAM_TOTAL_WEIGHT;
+        let normalization_factor = DEFAULT_NGRAM_TOTAL_WEIGHT / total_weight;
+        let weight_normalized = weight * normalization_factor;
 
         let costs: (f64, f64) = self
             .bigram_metrics
@@ -69,11 +69,23 @@ impl TrigramMetric for Irregularity {
             .map(|(metric_weight, _, metric)| {
                 let cost1 = metric_weight
                     * metric
-                        .individual_cost(k1, k2, weight_normalized, total_weight_normalized, layout)
+                        .individual_cost(
+                            k1,
+                            k2,
+                            weight_normalized,
+                            DEFAULT_NGRAM_TOTAL_WEIGHT,
+                            layout,
+                        )
                         .unwrap_or(0.0);
                 let cost2 = metric_weight
                     * metric
-                        .individual_cost(k2, k3, weight_normalized, total_weight_normalized, layout)
+                        .individual_cost(
+                            k2,
+                            k3,
+                            weight_normalized,
+                            DEFAULT_NGRAM_TOTAL_WEIGHT,
+                            layout,
+                        )
                         .unwrap_or(0.0);
 
                 (cost1, cost2)
@@ -81,11 +93,7 @@ impl TrigramMetric for Irregularity {
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
 
         let cost = (1.0 + costs.0) * (1.0 + costs.1) - 1.0;
-        Some(
-            cost.max(0.0) * total_weight * total_weight
-                / DEFAULT_NGRAM_TOTAL_WEIGHT
-                / DEFAULT_NGRAM_TOTAL_WEIGHT,
-        )
+        Some(cost.max(0.0) / normalization_factor / normalization_factor)
     }
 
     fn total_cost(
