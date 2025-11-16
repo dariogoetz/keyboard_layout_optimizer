@@ -5,6 +5,13 @@
 //!
 //! *Note:* ArneBab's irregularity does not include all bigram metrics (asymmetric bigrams is missing).
 
+// Const is related to workaround for issue #90. Note that the exact value of total_weight
+// slightly changed with each run before this workaround (due to float precisision?).
+// Therefore by fixing this constant for normalizing the total_weight, the behaviour
+// is not 100% identical compared to before. However the impact to behaviour and
+// total_cost is neglectable.
+const DEFAULT_NGRAM_TOTAL_WEIGHT: f64 = 163697606.220464646816253662109375;
+
 use super::TrigramMetric;
 use crate::metrics::bigram_metrics::BigramMetric;
 use crate::results::NormalizationType;
@@ -47,17 +54,26 @@ impl TrigramMetric for Irregularity {
         total_weight: f64,
         layout: &Layout,
     ) -> Option<f64> {
+        // Workaround for issue #90 (see https://github.com/dariogoetz/keyboard_layout_optimizer/issues/90)
+        // Current irregularity implementation is sensitive to ngram total_weight, that means
+        // ngram normalization leads to different calculated cost. Most likely due to
+        // taking the sqrt of a sum.
+        // To not break Webapp - Result Exploration, ngrams are therefore normalized to total_weight
+        // of the default ngrams deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4_norm
+        let total_weight_normalized = DEFAULT_NGRAM_TOTAL_WEIGHT;
+        let weight_normalized = weight / total_weight * DEFAULT_NGRAM_TOTAL_WEIGHT;
+
         let costs: (f64, f64) = self
             .bigram_metrics
             .iter()
             .map(|(metric_weight, _, metric)| {
                 let cost1 = metric_weight
                     * metric
-                        .individual_cost(k1, k2, weight, total_weight, layout)
+                        .individual_cost(k1, k2, weight_normalized, total_weight_normalized, layout)
                         .unwrap_or(0.0);
                 let cost2 = metric_weight
                     * metric
-                        .individual_cost(k2, k3, weight, total_weight, layout)
+                        .individual_cost(k2, k3, weight_normalized, total_weight_normalized, layout)
                         .unwrap_or(0.0);
 
                 (cost1, cost2)
@@ -65,7 +81,11 @@ impl TrigramMetric for Irregularity {
             .fold((0.0, 0.0), |(acc1, acc2), (c1, c2)| (acc1 + c1, acc2 + c2));
 
         let cost = (1.0 + costs.0) * (1.0 + costs.1) - 1.0;
-        Some(cost.max(0.0))
+        Some(
+            cost.max(0.0) * total_weight * total_weight
+                / DEFAULT_NGRAM_TOTAL_WEIGHT
+                / DEFAULT_NGRAM_TOTAL_WEIGHT,
+        )
     }
 
     fn total_cost(
