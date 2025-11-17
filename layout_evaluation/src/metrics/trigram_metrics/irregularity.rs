@@ -5,11 +5,8 @@
 //!
 //! *Note:* ArneBab's irregularity does not include all bigram metrics (asymmetric bigrams is missing).
 
-// Const is related to workaround for issue #90. Note that the exact value of total_weight
-// slightly changed with each run before this workaround (due to float precisision?).
-// Therefore by fixing this constant for normalizing the total_weight, the behaviour
-// is not 100% identical compared to before. However the impact to behaviour and
-// total_cost is neglectable.
+// Related to workaround (issue #90)
+// total_weight 2-grams of deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4_norm
 const DEFAULT_NGRAM_TOTAL_WEIGHT: f64 = 163697606.220464646816253662109375;
 
 use super::TrigramMetric;
@@ -55,11 +52,11 @@ impl TrigramMetric for Irregularity {
         layout: &Layout,
     ) -> Option<f64> {
         // Workaround for issue #90 (see https://github.com/dariogoetz/keyboard_layout_optimizer/issues/90)
-        // Current irregularity implementation is sensitive to ngram total_weight, that means
+        // Current irregularity implementation is affected by 2-grams total_weight, that means
         // ngram normalization leads to different calculated cost. Most likely due to
         // taking the sqrt of a sum.
-        // To not break Webapp - Result Exploration, ngrams are therefore normalized to total_weight
-        // of the default ngrams deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4_norm
+        // 2-grams are therefore normalized to the total_weight of the default ngrams
+        // deu_mixed_wiki_web_0.6_eng_news_typical_wiki_web_0.4_norm
         let normalization_factor = DEFAULT_NGRAM_TOTAL_WEIGHT / total_weight;
         let weight_normalized = weight * normalization_factor;
 
