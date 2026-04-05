@@ -66,7 +66,7 @@ impl<'a> FingerStates<'a> {
     }
 
     #[inline(always)]
-    pub fn iter(&self) -> slice::Iter<'_, KeyUsage> {
+    pub fn iter(&'a self) -> slice::Iter<'a, KeyUsage<'a>> {
         self.0.iter()
     }
 }
