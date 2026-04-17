@@ -207,4 +207,13 @@ impl LayoutGenerator for NeoLayoutGenerator {
 
         self.generate_unchecked(layout_keys)
     }
+
+    fn base_layout_string(&self) -> String {
+        self.base_layout_symbols
+            .iter()
+            .zip(self.fixed_keys.iter())
+            .filter(|(_key_layers, fixed)| !**fixed)
+            .filter_map(|(key_layers, _)| key_layers.first())
+            .collect()
+    }
 }

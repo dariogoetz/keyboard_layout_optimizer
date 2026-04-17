@@ -8,6 +8,9 @@ use anyhow::Result;
 
 pub trait LayoutGenerator: Send + Sync + LayoutGeneratorClone + fmt::Debug {
     fn generate(&self, layout_keys: &str) -> Result<Layout>;
+    
+    /// Returns the default string representation of the base layout (only non-fixed keys).
+    fn base_layout_string(&self) -> String;
 }
 
 impl Clone for Box<dyn LayoutGenerator> {
