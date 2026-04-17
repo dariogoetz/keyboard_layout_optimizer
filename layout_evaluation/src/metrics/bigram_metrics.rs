@@ -64,40 +64,69 @@ pub trait BigramMetric: Send + Sync + BigramMetricClone + fmt::Debug {
             });
 
         let (total_cost, msg) = if show_worst {
-            let (total_cost, worst, worst_nonfixed) = cost_iter.fold(
-                (0.0, DoublePriorityQueue::new(), DoublePriorityQueue::new()),
-                |(mut total_cost, mut worst, mut worst_nonfixed), (i, bigram, cost)| {
-                    total_cost += cost;
+            let mut total_cost: f64 = 0.0;
+            let mut grouped_costs: ahash::AHashMap<(usize, usize), (f64, (&LayerKey, &LayerKey))> =
+                ahash::AHashMap::new();
 
-                    worst.push(i, OrderedFloat(cost.abs()));
-                    if !bigram.0.is_fixed && !bigram.1.is_fixed {
-                        worst_nonfixed.push(i, OrderedFloat(cost.abs()));
-                    }
+            for (_, bigram, cost) in cost_iter {
+                total_cost += cost;
 
-                    if worst.len() > n_worst {
-                        worst.pop_min();
-                    }
-                    if worst_nonfixed.len() > n_worst {
-                        worst_nonfixed.pop_min();
-                    }
+                let ptr0 = bigram.0 as *const LayerKey as usize;
+                let ptr1 = bigram.1 as *const LayerKey as usize;
 
-                    (total_cost, worst, worst_nonfixed)
-                },
-            );
+                let (min_ptr, max_ptr) = if ptr0 < ptr1 {
+                    (ptr0, ptr1)
+                } else {
+                    (ptr1, ptr0)
+                };
 
-            let gen_msgs = |q: DoublePriorityQueue<usize, OrderedFloat<f64>>| {
+                let entry = grouped_costs
+                    .entry((min_ptr, max_ptr))
+                    .or_insert((0.0, *bigram));
+                entry.0 += cost;
+            }
+
+            let mut worst = DoublePriorityQueue::new();
+            let mut worst_nonfixed = DoublePriorityQueue::new();
+
+            for (&key, &(cost, bigram)) in grouped_costs.iter() {
+                worst.push(key, OrderedFloat(cost.abs()));
+                if !bigram.0.is_fixed && !bigram.1.is_fixed {
+                    worst_nonfixed.push(key, OrderedFloat(cost.abs()));
+                }
+
+                if worst.len() > n_worst {
+                    worst.pop_min();
+                }
+                if worst_nonfixed.len() > n_worst {
+                    worst_nonfixed.pop_min();
+                }
+            }
+
+            let gen_msgs = |q: DoublePriorityQueue<(usize, usize), OrderedFloat<f64>>| {
                 let worst_msgs: Vec<String> = q
                     .into_sorted_iter()
                     .rev()
                     .filter(|(_, cost)| cost.into_inner() > 0.0)
-                    .map(|(i, cost)| {
-                        let (gram, _) = bigrams[i];
-                        format!(
-                            "{}{} ({:>5.2}%)",
-                            gram.0,
-                            gram.1,
-                            100.0 * cost.into_inner() / total_cost,
-                        )
+                    .map(|(key, cost)| {
+                        let gram = grouped_costs.get(&key).unwrap().1;
+                        if gram.0 == gram.1 {
+                            format!(
+                                "{}{} ({:>5.2}%)",
+                                gram.0,
+                                gram.1,
+                                100.0 * cost.into_inner() / total_cost,
+                            )
+                        } else {
+                            format!(
+                                "{}{}/{}{} ({:>5.2}%)",
+                                gram.0,
+                                gram.1,
+                                gram.1,
+                                gram.0,
+                                100.0 * cost.into_inner() / total_cost,
+                            )
+                        }
                     })
                     .collect();
 
