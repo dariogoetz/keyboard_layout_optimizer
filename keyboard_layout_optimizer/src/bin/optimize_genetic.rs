@@ -17,8 +17,8 @@ struct Options {
     fix: Option<String>,
 
     /// Fix the keys from this layout (will be overwritten by --start-layout)
-    #[clap(long, default_value = "xvlcwkhgfqyßuiaeosnrtdüöäpzbm,.j")]
-    fix_from: String,
+    #[clap(long)]
+    fix_from: Option<String>,
 
     /// Filename of optimization configuration file
     #[clap(short, long, default_value = "config/optimization/genetic.yml")]
@@ -76,12 +76,6 @@ fn main() {
 
     let options = Options::parse();
 
-    let fix_from: String = options
-        .fix_from
-        .chars()
-        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
-        .collect();
-
     let start_layout = options.start_layout.as_ref().map(|s| {
         s.chars()
             .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
@@ -89,6 +83,13 @@ fn main() {
     });
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
+
+    let fix_from_str = options.fix_from.clone().unwrap_or_else(|| layout_generator.base_layout_string());
+
+    let fix_from_parsed: String = fix_from_str
+        .chars()
+        .filter(|c| options.do_not_remove_whitespace || !c.is_whitespace())
+        .collect();
 
     let mut optimization_params = optimization::Parameters::from_yaml(
         &options.optimization_parameters,
@@ -104,7 +105,7 @@ fn main() {
         optimization_params.generation_limit = generation_limit
     }
 
-    let fix_from = start_layout.as_ref().unwrap_or(&fix_from).to_string();
+    let fix_from = start_layout.clone().unwrap_or(fix_from_parsed);
 
     loop {
         let (layout_str, layout) = optimization::optimize(

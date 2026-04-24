@@ -21,7 +21,7 @@ fn main() {
 
     let (layout_generator, evaluator) = common::init(&options.evaluation_parameters);
 
-    let layout_str = "abcdefghijklmnopqrstuvwxyzäöüß,.";
+    let layout_str = layout_generator.base_layout_string();
     let mut best_cost: Option<f64> = None;
     let mut best_layout: String = "".into();
 

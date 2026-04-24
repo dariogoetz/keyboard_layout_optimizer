@@ -183,4 +183,26 @@ impl LayoutGenerator for GroupedLayoutGenerator {
 
         self.generate_unchecked(layout_keys)
     }
+
+    fn base_layout_string(&self) -> String {
+        let n_fixed = self.fixed_keys.iter().filter(|fixed| !**fixed).count();
+        if n_fixed == 0 {
+            return String::new();
+        }
+        let total_chars = self.permutable_key_map.len();
+        let n_iter = total_chars / n_fixed;
+        
+        let mut result = String::with_capacity(total_chars);
+        for iter in 0..n_iter {
+            for (key_layers, fixed) in self.base_layout_symbols.iter().zip(self.fixed_keys.iter()) {
+                if !*fixed {
+                    let layer_idx = iter * (self.grouped_layers as usize);
+                    if let Some(c) = key_layers.get(layer_idx) {
+                        result.push(*c);
+                    }
+                }
+            }
+        }
+        result
+    }
 }
